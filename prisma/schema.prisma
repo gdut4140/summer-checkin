@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  password      String?
+  bio           String?
+  theme         String    @default("system")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  plans        Plan[]
+  checkins     Checkin[]
+  studyRecords StudyRecord[]
+  userBadges   UserBadge[]
+  aiHistories  AIHistory[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id           String   @id @default(cuid())
+  userId       String
+  providerId   String
+  accountId    String
+  provider     String   @default("credential")
+  password     String?
+  accessToken  String?
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model Plan {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  goal        String?
+  targetHours Float     @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String    @default("active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkins Checkin[]
+}
+
+model Checkin {
+  id          String   @id @default(cuid())
+  userId      String
+  planId      String?
+  content     String
+  hours       Float    @default(0)
+  subject     String?
+  mood        String?
+  screenshot  String?
+  checkinDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan? @relation(fields: [planId], references: [id])
+
+  @@index([userId, checkinDate])
+}
+
+model StudyRecord {
+  id           String   @id @default(cuid())
+  userId       String
+  date         DateTime
+  totalMinutes Float    @default(0)
+  subject      String?
+  checkinId    String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  criteria    String
+  createdAt   DateTime @default(now())
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model AIHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  response  String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
