@@ -6,29 +6,49 @@ import type { ChatMessage } from "@/types";
 export default async function AIPage() {
   const user = await requireAuth();
 
-  const history = await prisma.aIHistory.findMany({
+  // 获取对话列表
+  const conversations = await prisma.conversation.findMany({
     where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-    take: 50,
+    orderBy: { updatedAt: "desc" },
+    include: {
+      messages: {
+        orderBy: { createdAt: "asc" },
+        take: 1,
+      },
+    },
   });
 
-  const initialMessages: ChatMessage[] = history.flatMap((h) => [
-    {
-      id: `${h.id}-user`,
-      role: "user" as const,
-      content: h.message,
-      createdAt: h.createdAt,
-    },
-    {
-      id: `${h.id}-ai`,
-      role: "assistant" as const,
-      content: h.response,
-      createdAt: h.createdAt,
-    },
-  ]);
+  // 自动选择最近更新的对话
+  const activeConversation = conversations[0] ?? null;
+
+  // 加载活跃对话的消息
+  let activeMessages: ChatMessage[] = [];
+  if (activeConversation) {
+    const fullMessages = await prisma.conversationMessage.findMany({
+      where: { conversationId: activeConversation.id },
+      orderBy: { createdAt: "asc" },
+    });
+    activeMessages = fullMessages.map((m) => ({
+      id: m.id,
+      role: m.role as "user" | "assistant",
+      content: m.content,
+      createdAt: m.createdAt,
+    }));
+  }
+
+  // 序列化对话列表数据给客户端组件
+  const serializedConversations = conversations.map((c) => ({
+    id: c.id,
+    title: c.title,
+    updatedAt: c.updatedAt.toISOString(),
+    messages: c.messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    })),
+  }));
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           AI 学习助手
@@ -38,7 +58,11 @@ export default async function AIPage() {
         </p>
       </div>
 
-      <ChatInterface initialMessages={initialMessages} />
+      <ChatInterface
+        initialMessages={activeMessages}
+        conversations={serializedConversations}
+        activeConversationId={activeConversation?.id ?? null}
+      />
     </div>
   );
 }

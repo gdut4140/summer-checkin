@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Lock, Circle, Flame, Fire, Clock, ClockAfternoon, BookOpen, SunHorizon, MoonStars, ListChecks, Trophy } from "@phosphor-icons/react";
 import { motion } from "motion/react";
-import type { Badge as BadgeType } from "@prisma/client";
+import type { Badge as BadgeType } from "@/lib/generated/prisma/client";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string; weight?: "fill" | "regular" }>> = {
   Circle, Flame, Fire, Clock, ClockAfternoon, BookOpen, SunHorizon, MoonStars, ListChecks, Trophy,
