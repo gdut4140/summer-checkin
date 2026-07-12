@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,14 +33,66 @@ export function ChatInterface({
   const [conversations, setConversations] =
     useState<Conversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(initialActiveId);
+
+  // 记录「进入对话时的消息数」，离开时对比这个数字判断是否有新消息
+  const initialMsgCountRef = useRef<number>(initialMessages.length);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // 当 activeId 变化（进入新对话）时，更新基准计数
+  useEffect(() => {
+    initialMsgCountRef.current = messages.length;
+  }, [activeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 切换到某个对话
+  /** 刷新对话列表 */
+  const refreshConversations = useCallback(async () => {
+    const res = await fetch("/api/conversations");
+    if (res.ok) {
+      const data = await res.json();
+      setConversations(data.conversations);
+    }
+  }, []);
+
+  /**
+   * 离开当前对话时调用
+   * 如果有新消息（消息数 > 进入时的消息数），则请求 AI 重新生成标题
+   */
+  async function beforeLeaveConversation() {
+    if (!activeId) return;
+
+    const currentCount = messages.length;
+    // 没有新消息 → 跳过，不浪费 API 调用
+    if (currentCount <= initialMsgCountRef.current) return;
+
+    // 后台静默更新标题，不阻塞切换
+    fetch(`/api/conversations/${activeId}/title`, {
+      method: "PATCH",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.skipped) return; // AI 认为不需要更新
+        // 更新侧边栏中的标题
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === activeId ? { ...c, title: data.title } : c
+          )
+        );
+      })
+      .catch(() => {
+        // 标题更新失败不影响主流程，静默处理
+      });
+  }
+
+  /** 切换到某个对话 */
   async function switchConversation(id: string) {
+    if (id === activeId) return; // 点击的是当前对话，不触发
+
+    // 离开当前对话前，检查是否需要更新标题
+    await beforeLeaveConversation();
+
     const res = await fetch(`/api/conversations/${id}`);
     if (!res.ok) return;
     const data = await res.json();
@@ -54,21 +106,20 @@ export function ChatInterface({
     );
     setMessages(msgs);
     setActiveId(id);
+    initialMsgCountRef.current = msgs.length;
   }
 
-  // 创建新对话
+  /** 创建新对话 */
   async function newConversation() {
+    await beforeLeaveConversation();
+
     setMessages([]);
     setActiveId(null);
-    // 刷新对话列表
-    const res = await fetch("/api/conversations");
-    if (res.ok) {
-      const data = await res.json();
-      setConversations(data.conversations);
-    }
+    initialMsgCountRef.current = 0;
+    await refreshConversations();
   }
 
-  // 删除对话
+  /** 删除对话 */
   async function deleteConversation(id: string) {
     const res = await fetch(`/api/conversations?id=${id}`, { method: "DELETE" });
     if (!res.ok) return;
@@ -76,6 +127,7 @@ export function ChatInterface({
     if (activeId === id) {
       setMessages([]);
       setActiveId(null);
+      initialMsgCountRef.current = 0;
     }
     toast.success("对话已删除");
   }
@@ -124,22 +176,12 @@ export function ChatInterface({
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // 新对话时更新 activeId 和列表
+      // 新对话时更新 activeId
       if (!activeId && data.conversationId) {
         setActiveId(data.conversationId);
-        const listRes = await fetch("/api/conversations");
-        if (listRes.ok) {
-          const listData = await listRes.json();
-          setConversations(listData.conversations);
-        }
-      } else {
-        // 刷新对话列表以更新排序
-        const listRes = await fetch("/api/conversations");
-        if (listRes.ok) {
-          const listData = await listRes.json();
-          setConversations(listData.conversations);
-        }
       }
+      // 刷新对话列表
+      await refreshConversations();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "AI 回复失败");
     } finally {
@@ -157,7 +199,7 @@ export function ChatInterface({
   return (
     <div className="flex gap-4 h-[calc(100dvh-12rem)]">
       {/* 对话列表侧边栏 */}
-      <div className="w-56 flex-shrink-0 hidden md:flex flex-col gap-1">
+      <div className="w-56 shrink-0 hidden md:flex flex-col gap-1">
         <Button
           variant="outline"
           size="sm"
@@ -224,14 +266,14 @@ export function ChatInterface({
                 onKeyDown={handleKeyDown}
                 placeholder="向 AI 助手提问..."
                 rows={2}
-                className="resize-none min-h-[44px]"
+                className="resize-none min-h-11"
                 disabled={loading}
               />
               <Button
                 onClick={handleSend}
                 disabled={loading || !input.trim()}
                 size="icon"
-                className="h-[44px] w-[44px] flex-shrink-0"
+                className="h-11 w-11 shrink-0"
               >
                 <PaperPlaneTilt className="h-5 w-5" weight="fill" />
               </Button>

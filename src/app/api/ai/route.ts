@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
-import { getAIResponse } from "@/lib/deepseek";
+import { getAIResponse, generateChatTitle } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     let activeConversationId = conversationId;
     if (!activeConversationId) {
       const lastMessage = messages[messages.length - 1];
-      const title =
-        lastMessage.content.slice(0, 30) + (lastMessage.content.length > 30 ? "..." : "");
+      // Day 2: 用 AI 自动生成有意义的标题，而不是机械截断
+      const title = await generateChatTitle(lastMessage.content);
 
       const conversation = await prisma.conversation.create({
         data: {
