@@ -1,8 +1,16 @@
+// ============================================================
+// Day 7 新增：
+// ① isStepCount       — 控制多步调用，Tool Calling 需要 ≥2 步
+// ② createStudyTools  — 工厂函数，为当前用户创建学习助手工具
+// ③ tools             — streamText 的 tools 参数，让 LLM 调用项目功能
+// ============================================================
+
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { getAIModel, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
-import { streamText, toTextStream, createTextStreamResponse } from "ai";
+import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
+import { createStudyTools } from "@/lib/tools";
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,11 +63,23 @@ export async function POST(request: NextRequest) {
     // ① streamText() 返回一个流式结果，AI 的每个 token 实时产出
     // ② onFinish 回调 — 流结束后触发，用于保存完整回复到 DB
     // ③ toTextStreamResponse() — 将流包装成 HTTP Response 返回给前端
+    //
+    // Day 7 新增：Tool Calling — 让 AI 操作项目已有功能
+    // ④ tools      — createStudyTools(userId) 为当前用户创建工具
+    //                 AI 可以：创建计划、查询计划、查询打卡记录
+    // ⑤ stopWhen   — isStepCount(5) 允许多步调用：
+    //                 Step 1: LLM 判断 → 调用 tool → execute 写入 DB
+    //                 Step 2: LLM 基于 tool 结果 → 生成自然语言回复
+    //                 （默认 isStepCount(1) 无法完成 Tool Calling 闭环）
     // ============================================================
     const result = streamText({
       model: getAIModel(),
       system: SYSTEM_PROMPT,
       messages: messages,
+      // Day 7: 为当前用户创建学习助手工具
+      tools: createStudyTools(user.id),
+      // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
+      stopWhen: isStepCount(5),
       onFinish: async ({ text }) => {
         // 流完成后保存 AI 回复到数据库
         await prisma.conversationMessage.create({
