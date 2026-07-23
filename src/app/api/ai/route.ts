@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     // ============================================================
     // Day 3 核心：streamText 替代 getAIResponse
     // ① streamText() 返回一个流式结果，AI 的每个 token 实时产出
-    // ② onFinish 回调 — 流结束后触发，用于保存完整回复到 DB
+    // ② onEnd 回调 — 流+工具全部完成后触发，保存 AI 回复到 DB
     // ③ toTextStreamResponse() — 将流包装成 HTTP Response 返回给前端
     //
     // Day 7 新增：Tool Calling — 让 AI 操作项目已有功能
@@ -80,30 +80,62 @@ export async function POST(request: NextRequest) {
       tools: createStudyTools(user.id),
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
       stopWhen: isStepCount(5),
-      onFinish: async ({ text }) => {
-        // 流完成后保存 AI 回复到数据库
-        await prisma.conversationMessage.create({
-          data: {
-            conversationId: activeConversationId!,
-            role: "assistant",
-            content: text,
-          },
-        });
+      // Day 7 调试：观察每一步的执行情况
+      onStepEnd: (step) => {
+        console.log(
+          `[AI] Step ${step.stepType} | finishReason=${step.finishReason} | ` +
+          `text=${step.text?.length ?? 0}chars | ` +
+          `toolCalls=${step.toolCalls?.length ?? 0} | ` +
+          `toolResults=${step.toolResults?.length ?? 0}`
+        );
+      },
+      // Day 7 修复：onEnd 替代废弃的 onFinish
+      // ① onEnd 确保所有 tool execution 完成后才回调
+      // ② text 为空时从 steps 兜底取最后一步的文本
+      // ③ try-catch 避免单个 DB 失败导致静默中断
+      onEnd: async ({ text, steps }) => {
+        // 兜底：text 可能为空（tool calling 场景），从 steps 获取
+        const finalText =
+          text || steps?.at(-1)?.text || "";
 
-        // 更新对话的 updatedAt
-        await prisma.conversation.update({
-          where: { id: activeConversationId! },
-          data: { updatedAt: new Date() },
-        });
+        if (!finalText || !activeConversationId) {
+          console.warn("[AI] onEnd: no text or no conversationId, 跳过保存", {
+            hasText: !!finalText,
+            hasConversationId: !!activeConversationId,
+          });
+          return;
+        }
 
-        // 兼容旧的 AIHistory
-        await prisma.aIHistory.create({
-          data: {
-            userId: user.id,
-            message: lastUserMsg.content,
-            response: text,
-          },
-        });
+        console.log(
+          `[AI] onEnd: 保存 AI 回复 (${finalText.length} 字符) → conversation:${activeConversationId}`
+        );
+
+        try {
+          await prisma.conversationMessage.create({
+            data: {
+              conversationId: activeConversationId,
+              role: "assistant",
+              content: finalText,
+            },
+          });
+
+          await prisma.conversation.update({
+            where: { id: activeConversationId },
+            data: { updatedAt: new Date() },
+          });
+
+          await prisma.aIHistory.create({
+            data: {
+              userId: user.id,
+              message: lastUserMsg.content,
+              response: finalText,
+            },
+          });
+
+          console.log("[AI] onEnd: 保存成功 ✅");
+        } catch (err) {
+          console.error("[AI] onEnd: 数据库写入失败", err);
+        }
       },
     });
 

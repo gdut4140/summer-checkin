@@ -8,7 +8,6 @@ import { MessageBubble } from "@/components/ai/message-bubble";
 import {
   PaperPlaneTilt,
   Spinner,
-  Trash,
   Stop,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -230,28 +229,6 @@ export function ChatInterface({
     }
   }
 
-  /** Day 4: 清空当前对话 */
-  async function clearChat() {
-    if (!activeId) {
-      // 新对话直接清空
-      setMessages([]);
-      return;
-    }
-
-    // 已有对话，调用 API 清空消息
-    const res = await fetch(`/api/conversations/${activeId}/messages`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
-      setMessages([]);
-      initialMsgCountRef.current = 0;
-      toast.success("对话已清空");
-    } else {
-      toast.error("清空失败");
-    }
-  }
-
   /** Day 4: 停止生成（AbortController） */
   function handleStop() {
     // TODO: Day 10+ 实现真正的中断
@@ -308,21 +285,12 @@ export function ChatInterface({
       {/* 聊天主区域 */}
       <Card className="flex flex-col flex-1 min-w-0">
         <CardContent className="flex-1 flex flex-col p-0 min-h-0">
-          {/* Day 4: 聊天头部 - 添加清空按钮 */}
+          {/* Day 4: 聊天头部 - 显示消息数 */}
           {messages.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-b border-border">
               <span className="text-sm text-muted-foreground">
                 {messages.length} 条消息
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearChat}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <Trash className="h-4 w-4 mr-1" />
-                清空对话
-              </Button>
             </div>
           )}
 

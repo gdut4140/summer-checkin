@@ -6,14 +6,8 @@
 // ③ execute        — 实际执行，操作数据库（Prisma）
 // ④ 工厂函数模式    — createStudyTools(userId) 闭包注入用户身份
 //
-// 流程示例：
-//   用户："帮我制定React学习计划"
-//     ↓
-//   LLM 判断 → 调用 createPlan({ name: "React学习", ... })
-//     ↓
-//   execute() → prisma.plan.create()
-//     ↓
-//   返回结果 → LLM 生成确认回复："已为你创建React学习计划 ✅"
+// ⚠️ 关键容错：
+//   所有 execute 必须 try-catch，tool 抛异常 → LLM 无法继续 → text 为空 → onEnd 不保存
 // ============================================================
 
 import { tool } from "ai";
@@ -22,16 +16,10 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * Day 7 核心：创建针对特定用户的学习助手工具集
- *
- * 为什么用工厂函数？
- * — tool 的 execute 中需要 userId 来操作数据库
- * — 工厂函数在 API Route 中调用，通过闭包注入当前登录用户
- * — 每个请求都会创建新的 tool 实例，用户之间不会串数据
  */
 export function createStudyTools(userId: string) {
   // ============================================================
   // Tool 1: 创建学习计划
-  // 示例触发："帮我制定一个React学习计划"
   // ============================================================
   const createPlan = tool({
     description:
@@ -40,187 +28,155 @@ export function createStudyTools(userId: string) {
 
     inputSchema: z.object({
       name: z.string().describe("计划名称，例如：'30天React学习计划'"),
-      description: z
-        .string()
-        .optional()
-        .describe("计划的详细描述，例如每天学什么"),
-      goal: z.string().optional().describe("最终目标，例如：'掌握React核心概念'"),
-      targetHours: z
-        .number()
-        .optional()
-        .describe("目标总时长（小时），例如：60"),
+      description: z.string().optional().describe("计划的详细描述"),
+      goal: z.string().optional().describe("最终目标"),
+      targetHours: z.number().optional().describe("目标总时长（小时）"),
     }),
 
     execute: async ({ name, description, goal, targetHours }) => {
-      console.log(`[createPlan] 为用户 ${userId} 创建计划: ${name}`);
+      console.log(`[createPlan] 用户 ${userId} 创建计划: ${name}`);
 
-      const plan = await prisma.plan.create({
-        data: {
-          userId,
-          name,
-          description: description ?? null,
-          goal: goal ?? null,
-          targetHours: targetHours ?? 0,
-          status: "active",
-        },
-      });
+      // ⚠️ 不能抛异常！必须 catch 后返回 { success: false, error }
+      try {
+        const plan = await prisma.plan.create({
+          data: {
+            userId,
+            name,
+            description: description ?? null,
+            goal: goal ?? null,
+            targetHours: targetHours ?? 0,
+            status: "active",
+          },
+        });
 
-      return {
-        success: true,
-        message: `学习计划「${name}」创建成功`,
-        plan: {
-          id: plan.id,
-          name: plan.name,
-          goal: plan.goal,
-          targetHours: plan.targetHours,
-        },
-      };
+        console.log(`[createPlan] ✅ 计划创建成功: ${plan.id}`);
+        return {
+          success: true,
+          message: `学习计划「${name}」创建成功`,
+          plan: { id: plan.id, name: plan.name, goal: plan.goal, targetHours: plan.targetHours },
+        };
+      } catch (error) {
+        console.error(`[createPlan] ❌ 创建失败:`, error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "数据库写入失败，请稍后重试",
+        };
+      }
     },
   });
 
   // ============================================================
   // Tool 2: 查询学习计划
-  // 示例触发："我有哪些学习计划？"
   // ============================================================
   const getMyPlans = tool({
     description:
       "查询用户的所有学习计划。当用户询问自己的学习计划、查看计划进度时使用。",
 
     inputSchema: z.object({
-      status: z
-        .string()
-        .optional()
-        .describe("筛选计划状态：'active'（进行中）、'completed'（已完成），不传则查全部"),
+      status: z.string().optional().describe("筛选：'active'、'completed'，不传查全部"),
     }),
 
     execute: async ({ status }) => {
       console.log(`[getMyPlans] 查询用户 ${userId} 的计划`);
 
-      const where: Record<string, unknown> = { userId };
-      if (status) where.status = status;
+      try {
+        const where: Record<string, unknown> = { userId };
+        if (status) where.status = status;
 
-      const plans = await prisma.plan.findMany({
-        where,
-        orderBy: { updatedAt: "desc" },
-        include: {
-          checkins: {
-            select: { hours: true },
-          },
-        },
-      });
+        const plans = await prisma.plan.findMany({
+          where,
+          orderBy: { updatedAt: "desc" },
+          include: { checkins: { select: { hours: true } } },
+        });
 
-      if (plans.length === 0) {
-        return {
-          success: true,
-          count: 0,
-          message: "你还没有学习计划，需要我帮你创建一个吗？",
-          plans: [],
-        };
-      }
+        if (plans.length === 0) {
+          return { success: true, count: 0, plans: [], message: "还没有学习计划" };
+        }
 
-      // 计算每个计划的完成进度
-      const plansWithProgress = plans.map((plan) => {
-        const completedHours = plan.checkins.reduce(
-          (sum, c) => sum + c.hours,
-          0
-        );
-        const progress =
-          plan.targetHours > 0
+        const plansWithProgress = plans.map((plan) => {
+          const completedHours = plan.checkins.reduce((sum, c) => sum + c.hours, 0);
+          const progress = plan.targetHours > 0
             ? Math.round((completedHours / plan.targetHours) * 100)
             : 0;
+          return {
+            id: plan.id,
+            name: plan.name,
+            goal: plan.goal,
+            targetHours: plan.targetHours,
+            completedHours: Math.round(completedHours * 10) / 10,
+            progress,
+            status: plan.status,
+          };
+        });
 
+        console.log(`[getMyPlans] ✅ 查询成功: ${plansWithProgress.length} 个计划`);
+        return { success: true, count: plansWithProgress.length, plans: plansWithProgress };
+      } catch (error) {
+        console.error(`[getMyPlans] ❌ 查询失败:`, error);
         return {
-          id: plan.id,
-          name: plan.name,
-          goal: plan.goal,
-          targetHours: plan.targetHours,
-          completedHours: Math.round(completedHours * 10) / 10,
-          progress,
-          status: plan.status,
-          createdAt: plan.createdAt.toISOString(),
+          success: false,
+          error: error instanceof Error ? error.message : "数据库查询失败",
         };
-      });
-
-      return {
-        success: true,
-        count: plansWithProgress.length,
-        plans: plansWithProgress,
-      };
+      }
     },
   });
 
   // ============================================================
   // Tool 3: 查询近期打卡记录
-  // 示例触发："我今天学完了吗？"、"最近学了什么？"
   // ============================================================
   const getRecentCheckins = tool({
     description:
-      "查询用户最近的打卡记录。当用户询问今天/最近的学习情况、是否打卡时使用。" +
-      "可以查询指定天数的记录，默认查询最近 7 天。",
+      "查询用户最近的打卡记录。当用户询问今天/最近的学习情况、是否打卡时使用。",
 
     inputSchema: z.object({
-      days: z
-        .number()
-        .optional()
-        .describe("查询最近多少天的记录，默认 7 天，最大 30 天"),
+      days: z.number().optional().describe("查询最近多少天，默认 7，最大 30"),
     }),
 
     execute: async ({ days = 7 }) => {
       const limit = Math.min(days ?? 7, 30);
-      console.log(`[getRecentCheckins] 查询用户 ${userId} 最近 ${limit} 天打卡`);
+      console.log(`[getRecentCheckins] 查询用户 ${userId} 最近 ${limit} 天`);
 
-      const since = new Date();
-      since.setDate(since.getDate() - limit);
+      try {
+        const since = new Date();
+        since.setDate(since.getDate() - limit);
 
-      const checkins = await prisma.checkin.findMany({
-        where: {
-          userId,
-          checkinDate: { gte: since },
-        },
-        orderBy: { checkinDate: "desc" },
-        include: {
-          plan: { select: { name: true } },
-        },
-      });
+        const checkins = await prisma.checkin.findMany({
+          where: { userId, checkinDate: { gte: since } },
+          orderBy: { checkinDate: "desc" },
+          include: { plan: { select: { name: true } } },
+        });
 
-      if (checkins.length === 0) {
+        if (checkins.length === 0) {
+          return { success: true, count: 0, checkins: [], totalHours: 0 };
+        }
+
+        const totalHours = checkins.reduce((sum, c) => sum + c.hours, 0);
+        const subjects = [...new Set(checkins.map((c) => c.subject).filter(Boolean))];
+
+        console.log(`[getRecentCheckins] ✅ ${checkins.length} 条记录, ${totalHours}h`);
         return {
           success: true,
-          count: 0,
-          message: `最近 ${limit} 天还没有打卡记录，今天记得打卡哦 💪`,
-          checkins: [],
+          count: checkins.length,
+          totalHours: Math.round(totalHours * 10) / 10,
+          subjects,
+          checkins: checkins.map((c) => ({
+            content: c.content,
+            hours: c.hours,
+            subject: c.subject,
+            mood: c.mood,
+            planName: c.plan?.name ?? null,
+            date: c.checkinDate.toISOString(),
+          })),
+        };
+      } catch (error) {
+        console.error(`[getRecentCheckins] ❌ 查询失败:`, error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "数据库查询失败",
         };
       }
-
-      const totalHours = checkins.reduce((sum, c) => sum + c.hours, 0);
-      const subjects = [
-        ...new Set(checkins.map((c) => c.subject).filter(Boolean)),
-      ];
-
-      return {
-        success: true,
-        count: checkins.length,
-        totalHours: Math.round(totalHours * 10) / 10,
-        subjects,
-        checkins: checkins.map((c) => ({
-          id: c.id,
-          content: c.content,
-          hours: c.hours,
-          subject: c.subject,
-          mood: c.mood,
-          planName: c.plan?.name ?? null,
-          date: c.checkinDate.toISOString(),
-        })),
-      };
     },
   });
 
-  // ============================================================
-  // 返回工具集 — 传给 streamText({ tools: {...} })
-  // ============================================================
-  return {
-    createPlan,
-    getMyPlans,
-    getRecentCheckins,
-  };
+  return { createPlan, getMyPlans, getRecentCheckins };
 }
