@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { MarkdownRenderer } from "@/components/ai/markdown-renderer";
 import type { ChatMessage } from "@/types";
 
 export function MessageBubble({ message }: { message: ChatMessage }) {
@@ -17,7 +18,12 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
             : "bg-muted text-foreground rounded-bl-md"
         )}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        {/* Day 4: 使用 Markdown 渲染器替代纯文本 */}
+        {isUser ? (
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <MarkdownRenderer content={message.content} />
+        )}
         <p
           className={cn(
             "text-[10px] mt-1",

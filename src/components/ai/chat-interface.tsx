@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageBubble } from "@/components/ai/message-bubble";
-import { PaperPlaneTilt, Spinner } from "@phosphor-icons/react";
+import {
+  PaperPlaneTilt,
+  Spinner,
+  Trash,
+  Stop,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import type { ChatMessage } from "@/types";
 
@@ -225,6 +230,35 @@ export function ChatInterface({
     }
   }
 
+  /** Day 4: 清空当前对话 */
+  async function clearChat() {
+    if (!activeId) {
+      // 新对话直接清空
+      setMessages([]);
+      return;
+    }
+
+    // 已有对话，调用 API 清空消息
+    const res = await fetch(`/api/conversations/${activeId}/messages`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setMessages([]);
+      initialMsgCountRef.current = 0;
+      toast.success("对话已清空");
+    } else {
+      toast.error("清空失败");
+    }
+  }
+
+  /** Day 4: 停止生成（AbortController） */
+  function handleStop() {
+    // TODO: Day 10+ 实现真正的中断
+    setLoading(false);
+    toast.info("已停止生成");
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -274,6 +308,24 @@ export function ChatInterface({
       {/* 聊天主区域 */}
       <Card className="flex flex-col flex-1 min-w-0">
         <CardContent className="flex-1 flex flex-col p-0 min-h-0">
+          {/* Day 4: 聊天头部 - 添加清空按钮 */}
+          {messages.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+              <span className="text-sm text-muted-foreground">
+                {messages.length} 条消息
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChat}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash className="h-4 w-4 mr-1" />
+                清空对话
+              </Button>
+            </div>
+          )}
+
           <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && (
               <div className="text-center py-12">
@@ -308,14 +360,26 @@ export function ChatInterface({
                 className="resize-none min-h-11"
                 disabled={loading}
               />
-              <Button
-                onClick={handleSend}
-                disabled={loading || !input.trim()}
-                size="icon"
-                className="h-11 w-11 shrink-0"
-              >
-                <PaperPlaneTilt className="h-5 w-5" weight="fill" />
-              </Button>
+              {/* Day 4: 根据状态显示发送或停止按钮 */}
+              {loading ? (
+                <Button
+                  onClick={handleStop}
+                  variant="destructive"
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                >
+                  <Stop className="h-5 w-5" weight="fill" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                >
+                  <PaperPlaneTilt className="h-5 w-5" weight="fill" />
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>

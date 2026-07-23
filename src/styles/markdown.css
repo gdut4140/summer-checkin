@@ -1,0 +1,100 @@
+/* Markdown 渲染样式 */
+.markdown-body {
+  /* 确保 highlight.js 样式不被覆盖 */
+}
+
+/* 代码块样式 */
+.markdown-body pre.code-block {
+  background-color: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* 行内代码样式 */
+.markdown-body code.inline-code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+/* highlight.js 代码块样式 - 确保优先级 */
+.markdown-body pre code.hljs {
+  background: transparent !important;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* 暗色主题下的代码块 */
+.markdown-body pre.code-block .hljs-keyword,
+.markdown-body pre.code-block .hljs-selector-tag,
+.markdown-body pre.code-block .hljs-title,
+.markdown-body pre.code-block .hljs-section,
+.markdown-body pre.code-block .hljs-doctag,
+.markdown-body pre.code-block .hljs-name,
+.markdown-body pre.code-block .hljs-strong {
+  font-weight: bold;
+}
+
+.markdown-body pre.code-block .hljs-comment {
+  color: #6a9955;
+}
+
+.markdown-body pre.code-block .hljs-keyword,
+.markdown-body pre.code-block .hljs-selector-tag,
+.markdown-body pre.code-block .hljs-title,
+.markdown-body pre.code-block .hljs-section,
+.markdown-body pre.code-block .hljs-doctag,
+.markdown-body pre.code-block .hljs-name {
+  color: #569cd6;
+}
+
+.markdown-body pre.code-block .hljs-string,
+.markdown-body pre.code-block .hljs-title.class_,
+.markdown-body pre.code-block .hljs-template-variable,
+.markdown-body pre.code-block .hljs-addition {
+  color: #ce9178;
+}
+
+.markdown-body pre.code-block .hljs-attr,
+.markdown-body pre.code-block .hljs-variable,
+.markdown-body pre.code-block .hljs-template-tag,
+.markdown-body pre.code-block .hljs-symbol,
+.markdown-body pre.code-block .hljs-bullet,
+.markdown-body pre.code-block .hljs-deletion {
+  color: #9cdcfe;
+}
+
+.markdown-body pre.code-block .hljs-number,
+.markdown-body pre.code-block .hljs-literal,
+.markdown-body pre.code-block .hljs-type,
+.markdown-body pre.code-block .hljs-params,
+.markdown-body pre.code-block .hljs-meta,
+.markdown-body pre.code-block .hljs-link {
+  color: #b5cea8;
+}
+
+.markdown-body pre.code-block .hljs-built_in,
+.markdown-body pre.code-block .hljs-attribute {
+  color: #4ec9b0;
+}
+
+.markdown-body pre.code-block .hljs-selector-class,
+.markdown-body pre.code-block .hljs-selector-attr,
+.markdown-body pre.code-block .hljs-selector-pseudo,
+.markdown-body pre.code-block .hljs-title.function_,
+.markdown-body pre.code-block .hljs-subst {
+  color: #dcdcaa;
+}
+
+/* 暗色主题下的行内代码 */
+.dark .markdown-body code.inline-code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e06c75;
+}
