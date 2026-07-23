@@ -1,20 +1,35 @@
 import OpenAI from "openai";
+import { createOpenAI } from "@ai-sdk/openai";
 
 // ============================================================
-// Day 2 学习要点：
-// ① OpenAI SDK  — new OpenAI({ apiKey, baseURL }) 创建客户端
-// ② API Key    — 从 process.env 读取，只在服务端可用
-// ③ Model      — 通过 model 参数选择，不同厂商有不同模型名
-// ④ Prompt     — system prompt 定义 AI 人设和行为边界
+// Day 3 学习要点：
+// ① AI SDK      — streamText() 替代手动 OpenAI SDK 调用，内置流式支持
+// ② Provider    — createOpenAI({ apiKey, baseURL }) 连接任何 OpenAI 兼容 API
+// ③ Streaming   — toTextStreamResponse() 将 AI 输出转为 HTTP 流式响应
+// ④ onFinish    — 流完成后回调，用于保存 DB 记录
 // ============================================================
 
 /**
- * 创建 AI 客户端
- * baseURL 决定调用哪个厂商的 API：
- *   DeepSeek:  https://api.deepseek.com/v1
- *   OpenAI:    https://api.openai.com/v1
- *   Groq:      https://api.groq.com/openai/v1
- *   通义千问:   https://dashscope.aliyuncs.com/compatible-mode/v1
+ * 创建 AI SDK Provider（用于 streamText）
+ * baseURL 指向 DeepSeek，兼容 OpenAI 协议
+ */
+const aiProvider = createOpenAI({
+  apiKey: process.env.DASHSCOPE_API_KEY,
+  baseURL: process.env.DASHSCOPE_BASE_URL ?? "https://api.deepseek.com/v1",
+});
+
+/**
+ * 获取语言模型实例
+ * 可直接传入 streamText({ model: getAIModel() })
+ */
+export function getAIModel() {
+  // .chat() 使用 /chat/completions 端点（DeepSeek 兼容）
+  // 直接 aiProvider("model") 会用 /responses 端点（DeepSeek 不支持）
+  return aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "deepseek-chat");
+}
+
+/**
+ * 创建原始 OpenAI SDK 客户端（用于 generateChatTitle 等非流式场景）
  */
 function createClient(): OpenAI {
   const apiKey = process.env.DASHSCOPE_API_KEY ?? "";
@@ -31,10 +46,9 @@ function createClient(): OpenAI {
 /**
  * 系统提示词 — 定义 AI 的角色、能力和行为约束
  * Day 2 重点：好的 Prompt = 角色设定 + 能力边界 + 输出格式
+ * Day 3：导出为纯字符串，streamText 的 system 参数直接接收 string
  */
-const SYSTEM_PROMPT: OpenAI.Chat.Completions.ChatCompletionMessageParam = {
-  role: "system",
-  content: `你是 Summer AI 学习助手，一个专注于帮助学生高效学习的 AI 伙伴。
+export const SYSTEM_PROMPT = `你是 Summer AI 学习助手，一个专注于帮助学生高效学习的 AI 伙伴。
 
 ## 你的能力
 - 制定个性化学习计划（按天/周拆分目标）
@@ -48,49 +62,7 @@ const SYSTEM_PROMPT: OpenAI.Chat.Completions.ChatCompletionMessageParam = {
 - 主动追问用户的具体情况，而不是给泛泛的建议
 - 如果用户问了超出学习范围的问题，礼貌引导回学习主题
 - 回答要有结构性，善用标题和列表，但不要冗长
-- 遇到不确定的知识点，诚实说明，不要编造`,
-};
-
-interface ChatOptions {
-  /** 模型名称，默认从环境变量读取 */
-  model?: string;
-  /** 温度 0-2，越高越有创造性，默认 0.7 */
-  temperature?: number;
-  /** 最大输出 token 数，默认 2000 */
-  maxTokens?: number;
-}
-
-/**
- * 核心函数：发送消息给 AI 并获取回复
- *
- * @param messages - 对话历史 [{ role: "user", content: "..." }]
- * @param options - 可选配置
- * @returns AI 的回复文本
- */
-export async function getAIResponse(
-  messages: { role: "user" | "assistant" | "system"; content: string }[],
-  options: ChatOptions = {}
-): Promise<string> {
-  const client = createClient();
-
-  const {
-    model = process.env.DASHSCOPE_MODEL ?? "deepseek-chat",
-    temperature = 0.7,
-    maxTokens = 2000,
-  } = options;
-
-  const response = await client.chat.completions.create({
-    model,
-    messages: [SYSTEM_PROMPT, ...messages],
-    temperature,
-    max_tokens: maxTokens,
-  });
-
-  return (
-    response.choices[0]?.message?.content ??
-    "抱歉，我暂时无法生成回复，请稍后重试。"
-  );
-}
+- 遇到不确定的知识点，诚实说明，不要编造`;
 
 /**
  * 用 AI 根据首条消息自动生成对话标题

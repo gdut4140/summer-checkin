@@ -142,7 +142,16 @@ export function ChatInterface({
       createdAt: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    // 先添加用户消息 + AI 占位消息（流式更新内容）
+    const aiMessageId = `ai-${Date.now()}`;
+    const aiPlaceholder: ChatMessage = {
+      id: aiMessageId,
+      role: "assistant",
+      content: "",
+      createdAt: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage, aiPlaceholder]);
     setInput("");
     setLoading(true);
 
@@ -152,6 +161,13 @@ export function ChatInterface({
         content: m.content,
       }));
 
+      // ============================================================
+      // Day 3 核心：前端流式读取
+      // ① res.body.getReader() 获取 ReadableStream reader
+      // ② 循环 read() 拿到 Uint8Array chunks
+      // ③ TextDecoder 解码，逐步追加到 AI 消息 content
+      // ④ 流结束后从 header 取 conversationId
+      // ============================================================
       const res = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -161,28 +177,48 @@ export function ChatInterface({
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
+        // 非流式错误响应（如 401, 400）
+        const data = await res.json();
         throw new Error(data.error || "获取回复失败");
       }
 
-      const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        role: "assistant",
-        content: data.response,
-        createdAt: new Date(),
-      };
+      // 从响应 header 获取 conversationId（新对话时返回）
+      const newConversationId = res.headers.get("X-Conversation-Id");
 
-      setMessages((prev) => [...prev, aiMessage]);
+      // 读取流式响应体
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("浏览器不支持流式读取");
 
-      // 新对话时更新 activeId
-      if (!activeId && data.conversationId) {
-        setActiveId(data.conversationId);
+      const decoder = new TextDecoder();
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // 解码当前 chunk 并追加到累积文本
+        const chunk = decoder.decode(value, { stream: true });
+        accumulated += chunk;
+
+        // 实时更新 AI 消息内容
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiMessageId ? { ...m, content: accumulated } : m
+          )
+        );
       }
-      // 刷新对话列表
+
+      // 流结束后处理 conversationId
+      if (!activeId && newConversationId) {
+        setActiveId(newConversationId);
+      }
+
+      // 刷新对话列表（新对话出现、标题更新等）
       await refreshConversations();
     } catch (e) {
+      // 流式读取中途失败，移除空的 AI 占位消息
+      setMessages((prev) => prev.filter((m) => m.id !== aiMessageId));
       toast.error(e instanceof Error ? e.message : "AI 回复失败");
     } finally {
       setLoading(false);
@@ -249,12 +285,15 @@ export function ChatInterface({
             {messages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
-            {loading && (
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Spinner className="h-4 w-4 animate-spin" />
-                思考中...
-              </div>
-            )}
+            {loading &&
+              messages.length > 0 &&
+              messages[messages.length - 1].role === "assistant" &&
+              messages[messages.length - 1].content === "" && (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <Spinner className="h-4 w-4 animate-spin" />
+                  思考中...
+                </div>
+              )}
             <div ref={bottomRef} />
           </div>
 
