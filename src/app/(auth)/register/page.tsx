@@ -30,11 +30,11 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const result = await authClient.signUp.email({
-        name,
-        email,
-        password,
-      });
+      let result = await authClient.signUp.email({ name, email, password });
+      if (result.error) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        result = await authClient.signUp.email({ name, email, password });
+      }
       if (result.error) {
         toast.error(result.error.message || "注册失败");
       } else {

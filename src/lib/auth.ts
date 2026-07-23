@@ -12,7 +12,13 @@ export const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: 5 * 60, // 5分钟，避免跨标签页缓存不一致
     },
   },
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    // 生产环境添加你的域名
+  ],
 });

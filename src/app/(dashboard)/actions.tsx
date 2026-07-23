@@ -9,7 +9,11 @@ export function LogoutButton({ label }: { label?: string }) {
   const router = useRouter();
 
   async function handleLogout() {
-    await authClient.signOut();
+    try {
+      await authClient.signOut();
+    } catch {
+      // session 可能已被其他标签页销毁，忽略错误
+    }
     router.push("/login");
   }
 

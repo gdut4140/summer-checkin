@@ -21,10 +21,14 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const result = await authClient.signIn.email({
-        email,
-        password,
-      });
+      // 多标签页场景下，cookie 可能被另一标签页覆盖导致 CSRF 校验失败，
+      // 重试一次让 better-auth 自动刷新 token
+      let result = await authClient.signIn.email({ email, password });
+      if (result.error) {
+        // 等待短暂时间后重试一次（让 cookie 状态稳定）
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        result = await authClient.signIn.email({ email, password });
+      }
       if (result.error) {
         toast.error(result.error.message || "登录失败");
       } else {
