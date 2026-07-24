@@ -16,16 +16,16 @@ export function PasswordForm() {
       toast.error("两次输入的密码不一致");
       return { success: false };
     }
-    try {
-      await changePassword(formData);
-      toast.success("密码修改成功");
-      const form = document.getElementById("password-form") as HTMLFormElement;
-      form?.reset();
-      return { success: true };
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "密码修改失败");
+    // Day 10: Server Action 不再 throw，改为返回值判断
+    const result = await changePassword(formData);
+    if (!result.success) {
+      toast.error(result.error);
       return { success: false };
     }
+    toast.success("密码修改成功");
+    const form = document.getElementById("password-form") as HTMLFormElement;
+    form?.reset();
+    return { success: true };
   }
 
   const [, formAction, pending] = useActionState(handleAction, null);

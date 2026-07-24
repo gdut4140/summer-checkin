@@ -61,6 +61,7 @@ export const ModelName = {
   UserBadge: 'UserBadge',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
+  UserMemory: 'UserMemory',
   AIHistory: 'AIHistory'
 } as const
 
@@ -217,6 +218,17 @@ export const ConversationMessageScalarFieldEnum = {
 export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
 
 
+export const UserMemoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  category: 'category',
+  createdAt: 'createdAt'
+} as const
+
+export type UserMemoryScalarFieldEnum = (typeof UserMemoryScalarFieldEnum)[keyof typeof UserMemoryScalarFieldEnum]
+
+
 export const AIHistoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -354,6 +366,16 @@ export const ConversationMessageOrderByRelevanceFieldEnum = {
 } as const
 
 export type ConversationMessageOrderByRelevanceFieldEnum = (typeof ConversationMessageOrderByRelevanceFieldEnum)[keyof typeof ConversationMessageOrderByRelevanceFieldEnum]
+
+
+export const UserMemoryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  category: 'category'
+} as const
+
+export type UserMemoryOrderByRelevanceFieldEnum = (typeof UserMemoryOrderByRelevanceFieldEnum)[keyof typeof UserMemoryOrderByRelevanceFieldEnum]
 
 
 export const AIHistoryOrderByRelevanceFieldEnum = {

@@ -42,7 +42,7 @@ interface TopNavProps {
     name: string;
     email: string;
     image?: string | null;
-  } | null;
+  };
 }
 
 // 主要导航（顶部居中显示），次要项收入用户菜单
@@ -133,19 +133,19 @@ export function TopNav({ user }: TopNavProps) {
               <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border/50 bg-background/50 py-1 pl-1 pr-2 backdrop-blur-sm transition-all hover:shadow-md hover:border-border">
                 <List className="h-4 w-4 text-foreground" />
                 <Avatar className="h-7 w-7">
-                  <AvatarImage src={user?.image ?? undefined} alt={user?.name} />
+                  <AvatarImage src={user.image ?? undefined} alt={user.name} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                    {user?.name?.charAt(0).toUpperCase() ?? "U"}
+                    {user.name?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 backdrop-blur-xl bg-background/95">
                 <div className="flex flex-col gap-0.5 px-2 py-2">
                   <span className="text-sm font-medium text-foreground">
-                    {user?.name ?? "用户"}
+                    {user.name ?? "用户"}
                   </span>
                   <span className="text-xs text-muted-foreground truncate">
-                    {user?.email ?? ""}
+                    {user.email ?? ""}
                   </span>
                 </div>
                 <DropdownMenuSeparator />
@@ -172,9 +172,9 @@ export function TopNav({ user }: TopNavProps) {
             <SheetTrigger className="flex items-center gap-2 rounded-full border border-border p-1.5 pr-3">
               <List className="h-4 w-4" />
               <Avatar className="h-6 w-6">
-                <AvatarImage src={user?.image ?? undefined} alt={user?.name} />
+                <AvatarImage src={user.image ?? undefined} alt={user.name} />
                 <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
-                  {user?.name?.charAt(0).toUpperCase() ?? "U"}
+                  {user.name?.charAt(0).toUpperCase() ?? "U"}
                 </AvatarFallback>
               </Avatar>
             </SheetTrigger>
@@ -215,10 +215,10 @@ export function TopNav({ user }: TopNavProps) {
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {user?.name ?? "用户"}
+                      {user.name ?? "用户"}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {user?.email ?? ""}
+                      {user.email ?? ""}
                     </p>
                   </div>
                   <LogoutButton />

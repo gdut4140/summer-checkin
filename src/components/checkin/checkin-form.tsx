@@ -50,16 +50,15 @@ export function CheckinForm({ existingCheckin, plans }: CheckinFormProps) {
       if (mood) formData.set("mood", mood);
       if (planId) formData.set("planId", planId);
       if (subject) formData.set("subject", subject);
-      try {
-        await createCheckin(formData);
-        toast.success("打卡成功！继续加油！");
-        router.push("/dashboard");
-        return { success: true, error: null };
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : "打卡失败，请重试";
-        toast.error(msg);
-        return { success: false, error: msg };
+      // Day 10: Server Action 不再 throw，改为返回值判断
+      const result = await createCheckin(formData);
+      if (!result.success) {
+        toast.error(result.error);
+        return { success: false, error: result.error };
       }
+      toast.success("打卡成功！继续加油！");
+      router.push("/dashboard");
+      return { success: true, error: null };
     },
     initialState
   );

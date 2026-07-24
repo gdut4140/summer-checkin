@@ -26,6 +26,7 @@ model User {
   studyRecords StudyRecord[]
   userBadges   UserBadge[]
   aiHistories   AIHistory[]
+  memories      UserMemory[]
   conversations Conversation[]
 }
 
@@ -149,7 +150,7 @@ model ConversationMessage {
   id             String   @id @default(cuid())
   conversationId String
   role           String   // "user" | "assistant"
-  content        String
+  content        String   @db.Text
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -157,11 +158,23 @@ model ConversationMessage {
   @@index([conversationId, createdAt])
 }
 
+model UserMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String   @db.Text
+  category  String   @default("fact") // preference | goal | skill | fact
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
 model AIHistory {
   id        String   @id @default(cuid())
   userId    String
-  message   String
-  response  String
+  message   String   @db.Text
+  response  String   @db.Text
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

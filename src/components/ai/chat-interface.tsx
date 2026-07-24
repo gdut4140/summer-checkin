@@ -160,10 +160,27 @@ export function ChatInterface({
     setLoading(true);
 
     try {
-      const apiMessages = [...messages, userMessage].map((m) => ({
+      // ============================================================
+      // Day 12: 短期记忆 — 限制上下文窗口
+      // 只发送最近 20 轮（40 条消息），避免 token 爆炸
+      // ============================================================
+      const MAX_CONTEXT_ROUNDS = 20;
+      const MAX_CONTEXT_MESSAGES = MAX_CONTEXT_ROUNDS * 2;
+
+      const allMessages = [...messages, userMessage];
+      const recentMessages = allMessages.slice(-MAX_CONTEXT_MESSAGES);
+
+      const apiMessages = recentMessages.map((m) => ({
         role: m.role,
         content: m.content,
       }));
+
+      const truncated = allMessages.length - recentMessages.length;
+      if (truncated > 0) {
+        console.log(
+          `[Chat] 上下文窗口截断: ${allMessages.length} → ${recentMessages.length} 条 (${truncated} 条旧消息省略)`
+        );
+      }
 
       // ============================================================
       // Day 3 核心：前端流式读取

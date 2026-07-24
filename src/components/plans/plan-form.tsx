@@ -28,21 +28,20 @@ export function PlanForm({ plan }: PlanFormProps) {
   const isEditing = !!plan;
 
   async function handleAction(_prev: unknown, formData: FormData) {
-    try {
-      if (isEditing) {
-        await updatePlan(plan!.id, formData);
-        toast.success("计划已更新");
-      } else {
-        await createPlan(formData);
-        toast.success("计划已创建");
-      }
-      router.push("/plans");
-      router.refresh();
-      return { success: true };
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "操作失败");
+    // Day 10: Server Action 不再 throw，改为返回值判断
+    const result = isEditing
+      ? await updatePlan(plan!.id, formData)
+      : await createPlan(formData);
+
+    if (!result.success) {
+      toast.error(result.error);
       return { success: false };
     }
+
+    toast.success(isEditing ? "计划已更新" : "计划已创建");
+    router.push("/plans");
+    router.refresh();
+    return { success: true };
   }
 
   const [, formAction, pending] = useActionState(handleAction, null);

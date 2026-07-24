@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
-import OpenAI from "openai";
+import { createAIClient } from "@/lib/deepseek";
 
 // PATCH /api/conversations/[id]/title — 根据完整对话历史重新生成标题
 export async function PATCH(
@@ -40,10 +40,7 @@ export async function PATCH(
       .map((m) => `${m.role === "user" ? "用户" : "AI"}：${m.content}`)
       .join("\n");
 
-    const client = new OpenAI({
-      apiKey: process.env.DASHSCOPE_API_KEY ?? "",
-      baseURL: process.env.DASHSCOPE_BASE_URL ?? "https://api.deepseek.com/v1",
-    });
+    const client = createAIClient();
 
     const response = await client.chat.completions.create({
       model: process.env.DASHSCOPE_MODEL ?? "deepseek-chat",

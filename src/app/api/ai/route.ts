@@ -3,6 +3,10 @@
 // ① isStepCount       — 控制多步调用，Tool Calling 需要 ≥2 步
 // ② createStudyTools  — 工厂函数，为当前用户创建学习助手工具
 // ③ tools             — streamText 的 tools 参数，让 LLM 调用项目功能
+//
+// Day 13 新增：长期记忆
+// ④ 注入记忆          — streamText 前查询 UserMemory 拼入 system prompt
+// ⑤ 提取记忆          — onEnd 中 fire-and-forget 用 AI 提取新记忆
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,6 +15,11 @@ import { getAIModel, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
 import { createStudyTools } from "@/lib/tools";
+import {
+  getRelevantMemories,
+  formatMemoriesForPrompt,
+  extractAndSaveMemories,
+} from "@/lib/memory";
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,6 +68,33 @@ export async function POST(request: NextRequest) {
     });
 
     // ============================================================
+    // Day 12 新增：短期记忆 — 后端兜底截断
+    // 只取最近 20 轮（40 条消息），超出部分被省略
+    // （前端已做截断，后端再做一层保险）
+    // ============================================================
+    const MAX_CONTEXT_ROUNDS = 20;
+    const MAX_CONTEXT_MESSAGES = MAX_CONTEXT_ROUNDS * 2;
+    const truncatedMessages =
+      messages.length > MAX_CONTEXT_MESSAGES
+        ? messages.slice(-MAX_CONTEXT_MESSAGES)
+        : messages;
+
+    if (messages.length > MAX_CONTEXT_MESSAGES) {
+      console.log(
+        `[AI] 后端截断: ${messages.length} → ${MAX_CONTEXT_MESSAGES} 条消息`
+      );
+    }
+
+    // ============================================================
+    // Day 13 新增：注入长期记忆到 system prompt
+    // ============================================================
+    const memories = await getRelevantMemories(user.id);
+    const memoryPrompt = formatMemoriesForPrompt(memories);
+    const fullSystem = memoryPrompt
+      ? `${SYSTEM_PROMPT}\n\n${memoryPrompt}`
+      : SYSTEM_PROMPT;
+
+    // ============================================================
     // Day 3 核心：streamText 替代 getAIResponse
     // ① streamText() 返回一个流式结果，AI 的每个 token 实时产出
     // ② onEnd 回调 — 流+工具全部完成后触发，保存 AI 回复到 DB
@@ -74,8 +110,8 @@ export async function POST(request: NextRequest) {
     // ============================================================
     const result = streamText({
       model: getAIModel(),
-      system: SYSTEM_PROMPT,
-      messages: messages,
+      system: fullSystem,
+      messages: truncatedMessages,
       // Day 7: 为当前用户创建学习助手工具
       tools: createStudyTools(user.id),
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
@@ -133,6 +169,17 @@ export async function POST(request: NextRequest) {
           });
 
           console.log("[AI] onEnd: 保存成功 ✅");
+
+          // ============================================================
+          // Day 13: fire-and-forget 提取长期记忆
+          // ============================================================
+          extractAndSaveMemories(
+            user.id,
+            lastUserMsg.content,
+            finalText
+          ).catch((err) =>
+            console.error("[Memory] 后台提取失败:", err)
+          );
         } catch (err) {
           console.error("[AI] onEnd: 数据库写入失败", err);
         }

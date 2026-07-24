@@ -34,16 +34,16 @@ export function PlanCard({ plan }: { plan: PlanWithProgress }) {
 
   async function handleDelete() {
     setDeleting(true);
-    try {
-      await deletePlan(plan.id);
+    // Day 10: Server Action 不再 throw，改为返回值判断
+    const result = await deletePlan(plan.id);
+    if (!result.success) {
+      toast.error(result.error);
+    } else {
       toast.success("计划已删除");
       router.refresh();
-    } catch {
-      toast.error("删除失败");
-    } finally {
-      setDeleting(false);
-      setDeleteOpen(false);
     }
+    setDeleting(false);
+    setDeleteOpen(false);
   }
 
   return (

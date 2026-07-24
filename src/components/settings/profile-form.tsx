@@ -11,14 +11,14 @@ import { toast } from "sonner";
 
 export function ProfileForm({ user }: { user: { name: string; bio: string | null } }) {
   async function handleAction(_prev: unknown, formData: FormData) {
-    try {
-      await updateProfile(formData);
-      toast.success("资料已更新");
-      return { success: true };
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "更新失败");
+    // Day 10: Server Action 不再 throw，改为返回值判断
+    const result = await updateProfile(formData);
+    if (!result.success) {
+      toast.error(result.error);
       return { success: false };
     }
+    toast.success("资料已更新");
+    return { success: true };
   }
 
   const [, formAction, pending] = useActionState(handleAction, null);

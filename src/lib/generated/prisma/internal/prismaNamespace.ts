@@ -394,6 +394,7 @@ export const ModelName = {
   UserBadge: 'UserBadge',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
+  UserMemory: 'UserMemory',
   AIHistory: 'AIHistory'
 } as const
 
@@ -410,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "aIHistory"
+    modelProps: "user" | "session" | "account" | "plan" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "userMemory" | "aIHistory"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1074,6 +1075,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserMemory: {
+      payload: Prisma.$UserMemoryPayload<ExtArgs>
+      fields: Prisma.UserMemoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserMemoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserMemoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        findFirst: {
+          args: Prisma.UserMemoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserMemoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        findMany: {
+          args: Prisma.UserMemoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>[]
+        }
+        create: {
+          args: Prisma.UserMemoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        createMany: {
+          args: Prisma.UserMemoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.UserMemoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        update: {
+          args: Prisma.UserMemoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserMemoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserMemoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.UserMemoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        aggregate: {
+          args: Prisma.UserMemoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserMemory>
+        }
+        groupBy: {
+          args: Prisma.UserMemoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserMemoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserMemoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserMemoryCountAggregateOutputType> | number
+        }
+      }
+    }
     AIHistory: {
       payload: Prisma.$AIHistoryPayload<ExtArgs>
       fields: Prisma.AIHistoryFieldRefs
@@ -1316,6 +1383,17 @@ export const ConversationMessageScalarFieldEnum = {
 export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
 
 
+export const UserMemoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  category: 'category',
+  createdAt: 'createdAt'
+} as const
+
+export type UserMemoryScalarFieldEnum = (typeof UserMemoryScalarFieldEnum)[keyof typeof UserMemoryScalarFieldEnum]
+
+
 export const AIHistoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1453,6 +1531,16 @@ export const ConversationMessageOrderByRelevanceFieldEnum = {
 } as const
 
 export type ConversationMessageOrderByRelevanceFieldEnum = (typeof ConversationMessageOrderByRelevanceFieldEnum)[keyof typeof ConversationMessageOrderByRelevanceFieldEnum]
+
+
+export const UserMemoryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  content: 'content',
+  category: 'category'
+} as const
+
+export type UserMemoryOrderByRelevanceFieldEnum = (typeof UserMemoryOrderByRelevanceFieldEnum)[keyof typeof UserMemoryOrderByRelevanceFieldEnum]
 
 
 export const AIHistoryOrderByRelevanceFieldEnum = {
@@ -1625,6 +1713,7 @@ export type GlobalOmitConfig = {
   userBadge?: Prisma.UserBadgeOmit
   conversation?: Prisma.ConversationOmit
   conversationMessage?: Prisma.ConversationMessageOmit
+  userMemory?: Prisma.UserMemoryOmit
   aIHistory?: Prisma.AIHistoryOmit
 }
 

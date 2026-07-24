@@ -1,4 +1,7 @@
-import { getCurrentUser } from "@/lib/auth-utils";
+// ============================================================
+// Day 11: requireAuth() 强制鉴权 — 未登录用户自动跳转 /login
+// ============================================================
+import { requireAuth } from "@/lib/auth-utils";
 import { TopNav } from "@/components/layout/top-nav";
 
 export default async function DashboardLayout({
@@ -6,7 +9,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
+  // Day 11: requireAuth() 内部调用 getCurrentUser() + 鉴权重定向
+  // 未登录 → redirect("/login")，已登录 → 返回 user
+  const user = await requireAuth();
 
   return (
     <div className="min-h-[100dvh] flex flex-col relative">

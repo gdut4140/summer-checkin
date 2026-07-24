@@ -92,6 +92,11 @@ export type Conversation = Prisma.ConversationModel
  */
 export type ConversationMessage = Prisma.ConversationMessageModel
 /**
+ * Model UserMemory
+ * 
+ */
+export type UserMemory = Prisma.UserMemoryModel
+/**
  * Model AIHistory
  * 
  */
