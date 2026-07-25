@@ -134,7 +134,7 @@ async function extractMemoriesWithAI(
   const client = createAIClient();
 
   const response = await client.chat.completions.create({
-    model: process.env.DASHSCOPE_MODEL ?? "deepseek-chat",
+    model: process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash",
     messages: [
       { role: "system", content: EXTRACTION_PROMPT },
       {

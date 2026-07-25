@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
-import { getAIModel, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
+import { getAIModel, getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
 import { createStudyTools } from "@/lib/tools";
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       content: string;
     }[];
     const conversationId = body.conversationId as string | undefined;
+    const deepThink = body.deepThink as boolean | undefined;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
     const result = streamText({
       model: getAIModel(),
       system: fullSystem,
+      providerOptions: getDeepThinkOptions(deepThink ?? false),
       messages: truncatedMessages,
       // Day 7: 为当前用户创建学习助手工具
       tools: createStudyTools(user.id),

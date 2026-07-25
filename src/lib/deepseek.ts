@@ -20,12 +20,22 @@ const aiProvider = createOpenAI({
 
 /**
  * 获取语言模型实例
- * 可直接传入 streamText({ model: getAIModel() })
  */
 export function getAIModel() {
-  // .chat() 使用 /chat/completions 端点（DeepSeek 兼容）
-  // 直接 aiProvider("model") 会用 /responses 端点（DeepSeek 不支持）
-  return aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "deepseek-chat");
+  return aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash");
+}
+
+/**
+ * 获取深度思考 provider options
+ * 同模型 deepseek-v4-flash，通过 thinking_mode 切换推理开关
+ */
+export function getDeepThinkOptions(deepThink: boolean) {
+  if (!deepThink) return undefined;
+  return {
+    openai: {
+      thinking_mode: "enabled",
+    },
+  } as Record<string, Record<string, string>>;
 }
 
 /**
@@ -116,7 +126,7 @@ export async function generateChatTitle(firstMessage: string): Promise<string> {
   const client = createAIClient();
 
   const response = await client.chat.completions.create({
-    model: process.env.DASHSCOPE_MODEL ?? "deepseek-chat",
+    model: process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash",
     messages: [
       {
         role: "system",

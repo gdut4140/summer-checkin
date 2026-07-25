@@ -9,6 +9,7 @@ import {
   PaperPlaneTilt,
   Spinner,
   Stop,
+  Brain,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import type { ChatMessage } from "@/types";
@@ -34,6 +35,7 @@ export function ChatInterface({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deepThink, setDeepThink] = useState(false);
   const [conversations, setConversations] =
     useState<Conversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(initialActiveId);
@@ -195,6 +197,7 @@ export function ChatInterface({
         body: JSON.stringify({
           messages: apiMessages,
           conversationId: activeId,
+          deepThink,
         }),
       });
 
@@ -345,6 +348,20 @@ export function ChatInterface({
                 className="resize-none min-h-11"
                 disabled={loading}
               />
+              {/* 深度思考开关 */}
+              <Button
+                variant={deepThink ? "default" : "outline"}
+                size="icon"
+                className="h-11 w-11 shrink-0"
+                onClick={() => setDeepThink(!deepThink)}
+                disabled={loading}
+                title={deepThink ? "深度思考已开启" : "开启深度思考"}
+              >
+                <Brain
+                  className={`h-5 w-5 ${deepThink ? "animate-pulse" : ""}`}
+                  weight={deepThink ? "fill" : "regular"}
+                />
+              </Button>
               {/* Day 4: 根据状态显示发送或停止按钮 */}
               {loading ? (
                 <Button
