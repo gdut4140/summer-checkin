@@ -1,0 +1,17 @@
+知识库更新指南
+==============
+
+1. 将新文档放入 knowledge/ 目录
+
+2. PDF 需提取文本（.txt/.md 跳过此步）
+   python scripts/extract_pdf.py knowledge/xxx.pdf
+
+3. 启动 Embedding 服务
+   python src/lib/rag/embedding_service/server.py
+
+4. 入库
+   python scripts/ingest.py
+
+5. 关闭 Embedding 服务（可选，Ctrl+C）
+
+不需要重启 Next.js，不需要 prisma generate。

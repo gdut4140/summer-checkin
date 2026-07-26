@@ -1,0 +1,23 @@
+Summer Checkin 启动指南
+========================
+
+启动顺序：
+
+1. 启动 Embedding 服务（RAG 知识库检索）
+   python src/lib/rag/embedding_service/server.py
+   首次启动会自动下载模型（24MB）到 models/ 目录
+
+2. 启动 Next.js 开发服务器
+   npm run dev
+
+3. 访问
+   http://localhost:3000
+
+如需更新知识库文档：
+   - 将新文档放入 knowledge/ 目录
+   - PDF 需先提取文本: python scripts/extract_pdf.py knowledge/xxx.pdf
+   - 入库: python scripts/ingest.py
+   （知识库文档为所有用户共享，无需指定用户ID）
+
+Embedding 服务端口: 8765
+模型: bge-small-zh-v1.5 (24MB, 512维, 中文优化)

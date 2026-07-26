@@ -62,7 +62,8 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
   UserMemory: 'UserMemory',
-  AIHistory: 'AIHistory'
+  AIHistory: 'AIHistory',
+  DocumentChunk: 'DocumentChunk'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -240,12 +241,32 @@ export const AIHistoryScalarFieldEnum = {
 export type AIHistoryScalarFieldEnum = (typeof AIHistoryScalarFieldEnum)[keyof typeof AIHistoryScalarFieldEnum]
 
 
+export const DocumentChunkScalarFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  sourceType: 'sourceType',
+  chunkIndex: 'chunkIndex',
+  content: 'content',
+  embedding: 'embedding',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentChunkScalarFieldEnum = (typeof DocumentChunkScalarFieldEnum)[keyof typeof DocumentChunkScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const NullsOrder = {
@@ -386,4 +407,31 @@ export const AIHistoryOrderByRelevanceFieldEnum = {
 } as const
 
 export type AIHistoryOrderByRelevanceFieldEnum = (typeof AIHistoryOrderByRelevanceFieldEnum)[keyof typeof AIHistoryOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const DocumentChunkOrderByRelevanceFieldEnum = {
+  id: 'id',
+  sourceName: 'sourceName',
+  sourceType: 'sourceType',
+  content: 'content'
+} as const
+
+export type DocumentChunkOrderByRelevanceFieldEnum = (typeof DocumentChunkOrderByRelevanceFieldEnum)[keyof typeof DocumentChunkOrderByRelevanceFieldEnum]
 

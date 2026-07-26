@@ -181,3 +181,20 @@ model AIHistory {
 
   @@index([userId, createdAt])
 }
+
+// ============================================================
+// Day 16 RAG: 文档分块 + 向量存储
+// embedding 用 MySQL JSON 存储（数据量 < 1000 时可行）
+// 检索和重排在 src/lib/rag/ 中
+// ============================================================
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  sourceName String   // 来源文件名
+  sourceType String   @default("text") // pdf | markdown | text | conversation
+  chunkIndex Int      // 分片序号，从 0 开始
+  content    String   @db.Text
+  embedding  Json     // bge-small-zh-v1.5 512 维向量，存为 JSON 数组
+  createdAt  DateTime @default(now())
+
+  @@index([sourceName])
+}

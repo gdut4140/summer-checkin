@@ -1,0 +1,9 @@
+# RAG Embedding Service
+# bge-small-zh-v1.5 通过 sentence-transformers 加载
+# Python 3.10+
+
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+sentence-transformers>=3.0.0
+torch>=2.0.0
+numpy>=1.24.0

@@ -7,6 +7,10 @@
 // Day 13 新增：长期记忆
 // ④ 注入记忆          — streamText 前查询 UserMemory 拼入 system prompt
 // ⑤ 提取记忆          — onEnd 中 fire-and-forget 用 AI 提取新记忆
+//
+// Day 16 新增：RAG 知识库
+// ⑥ RAG 工具          — searchKnowledgeBase 搜索知识库文档
+// ⑦ RAG 注入          — 主动检索知识库，结果拼入 system prompt
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -14,12 +18,16 @@ import { getAuthUser } from "@/lib/auth-utils";
 import { getAIModel, getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
-import { createStudyTools } from "@/lib/tools";
+import { createStudyTools, createRAGTool } from "@/lib/tools";
 import {
   getRelevantMemories,
   formatMemoriesForPrompt,
   extractAndSaveMemories,
 } from "@/lib/memory";
+import {
+  searchKnowledge,
+  formatKnowledgeForPrompt,
+} from "@/lib/rag";
 
 export async function POST(request: NextRequest) {
   try {
@@ -91,9 +99,23 @@ export async function POST(request: NextRequest) {
     // ============================================================
     const memories = await getRelevantMemories(user.id);
     const memoryPrompt = formatMemoriesForPrompt(memories);
-    const fullSystem = memoryPrompt
-      ? `${SYSTEM_PROMPT}\n\n${memoryPrompt}`
-      : SYSTEM_PROMPT;
+
+    // ============================================================
+    // Day 16 新增：主动检索知识库
+    // 对用户的最后一条消息做知识库搜索，结果注入 system prompt
+    // ============================================================
+    let ragPrompt = "";
+    try {
+      const ragResult = await searchKnowledge(lastUserMsg.content);
+      ragPrompt = formatKnowledgeForPrompt(ragResult);
+    } catch (err) {
+      // RAG 检索失败不阻塞对话（Python 服务可能没启动）
+      console.warn("[AI] RAG 检索跳过（服务不可用）:", err);
+    }
+
+    const fullSystem = [SYSTEM_PROMPT, ragPrompt, memoryPrompt]
+      .filter(Boolean)
+      .join("\n\n");
 
     // ============================================================
     // Day 3 核心：streamText 替代 getAIResponse
@@ -114,8 +136,11 @@ export async function POST(request: NextRequest) {
       system: fullSystem,
       providerOptions: getDeepThinkOptions(deepThink ?? false),
       messages: truncatedMessages,
-      // Day 7: 为当前用户创建学习助手工具
-      tools: createStudyTools(user.id),
+      // Day 7: 学习工具 + Day 16: RAG 知识库工具
+      tools: {
+        ...createStudyTools(user.id),
+        ...createRAGTool(),
+      },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
       stopWhen: isStepCount(5),
       // Day 7 调试：观察每一步的执行情况

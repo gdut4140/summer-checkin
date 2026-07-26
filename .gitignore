@@ -61,3 +61,6 @@ next-env.d.ts
 
 # REST client test files
 *.http
+
+# AI models (downloaded at runtime)
+/models/

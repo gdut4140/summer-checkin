@@ -1,9 +1,9 @@
 // ============================================================
-// Day 7 学习要点：
-// 工具统一导出 — 便于后续 Day 9 添加多个 Tool 时集中管理
-//
-// Day 10 优化：新增 safeExecute 导出
+// Tools 统一导出
+// Day 7: Study tools (createPlan, getMyPlans, etc.)
+// Day 16: RAG tools (searchKnowledgeBase)
 // ============================================================
 
 export { createStudyTools } from "./study-tools";
+export { createRAGTool } from "./rag-tools";
 export { safeExecute } from "./utils";
