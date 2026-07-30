@@ -28,6 +28,7 @@ model User {
   aiHistories   AIHistory[]
   memories      UserMemory[]
   conversations Conversation[]
+  planTasks     PlanTask[]
 }
 
 model Session {
@@ -75,6 +76,34 @@ model Plan {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   checkins Checkin[]
+  tasks    PlanTask[]
+}
+
+// ============================================================
+// Day 22 Agent Workflow: 计划任务拆分
+// 每个 Plan 可拆分为多个 Task（按天/周组织）
+// ============================================================
+model PlanTask {
+  id          String    @id @default(cuid())
+  planId      String
+  userId      String
+  title       String                                    // 任务标题
+  description String?    @db.Text                       // 任务详细描述
+  dayNumber   Int?                                      // 第几天（如 Day 1, Day 2...）
+  weekNumber  Int?                                      // 第几周
+  category    String     @default("study")              // study | project | review | exercise
+  status      String     @default("pending")            // pending | in_progress | done | skipped
+  priority    String     @default("normal")             // high | normal | low
+  completedAt DateTime?                                 // 完成时间
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([userId, status])
+  @@index([userId, dayNumber])
 }
 
 model Checkin {

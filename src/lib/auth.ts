@@ -19,6 +19,7 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:3002",
-    // 生产环境添加你的域名
-  ],
+    // 生产环境: 通过环境变量动态注入
+    process.env.BETTER_AUTH_URL ?? "",
+  ].filter(Boolean),
 });

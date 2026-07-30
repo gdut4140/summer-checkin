@@ -38,6 +38,11 @@ export type Account = Prisma.AccountModel
  */
 export type Plan = Prisma.PlanModel
 /**
+ * Model PlanTask
+ * 
+ */
+export type PlanTask = Prisma.PlanTaskModel
+/**
  * Model Checkin
  * 
  */

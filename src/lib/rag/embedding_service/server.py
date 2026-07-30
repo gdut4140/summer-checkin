@@ -20,11 +20,21 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 # ---- 配置 ----
-# 模型下载到项目内（而非 ~/.cache/huggingface）
+# 模型下载目录: 优先用环境变量，没有则自动检测
+# - 本地开发: src/lib/rag/embedding_service/server.py → 往上 4 级到项目根
+# - Docker:    /app/server.py → HF_HOME 由 Dockerfile 设置为 /app/models
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-# 往上 4 级到项目根: embedding_service → rag → lib → src → 项目根
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(PROJECT_ROOT))))
-MODELS_DIR = os.path.join(ROOT, "models")
+
+# 检测是否在 Docker 中（server.py 直接在 /app/ 下）
+# 还是本地开发（在 embedding_service/ 子目录中）
+if os.path.basename(PROJECT_ROOT) == "embedding_service":
+    # 本地开发: embedding_service → rag → lib → src → 项目根
+    ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(PROJECT_ROOT))))
+else:
+    # Docker: server.py 直接在 /app/ 下
+    ROOT = PROJECT_ROOT
+
+MODELS_DIR = os.environ.get("HF_HOME", os.path.join(ROOT, "models"))
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.environ["HF_HOME"] = MODELS_DIR
 os.environ["TRANSFORMERS_CACHE"] = os.path.join(MODELS_DIR, "transformers")
@@ -63,10 +73,33 @@ async def lifespan(app: FastAPI):
     """启动时加载模型，关闭时释放"""
     global embedding_model
 
+    # 限制线程数，避免华为云 ECS cgroup pids 限制导致 "can't start new thread"
+    import os as _os
+    _os.environ["OMP_NUM_THREADS"] = "1"
+    _os.environ["MKL_NUM_THREADS"] = "1"
+    _os.environ["NUMEXPR_NUM_THREADS"] = "1"
+    _os.environ["TQDM_DISABLE"] = "1"  # 禁用 tqdm 进度条（会创建监控线程）
+    _os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    _os.environ["POLARS_MAX_THREADS"] = "1"
+
+    # transformers safetensors 加载使用 ThreadPoolExecutor 创建线程，
+    # 华为云 ECS 的 pids 限制会导致 "can't start new thread"。
+    # 永久 patch spawn_materialize 为同步模式，不恢复。
+    from transformers import core_model_loading as _cml
+    _orig_spawn2 = _cml.spawn_materialize
+    def _sync_spawn(thread_pool, tensor, device=None, dtype=None, sharding_op=None, tensor_idx=None, **kwargs):
+        """强制同步加载：传 thread_pool=None 避免创建线程，并立即执行返回 tensor"""
+        result = _orig_spawn2(None, tensor, device=device, dtype=dtype, sharding_op=sharding_op, tensor_idx=tensor_idx, **kwargs)
+        if callable(result):
+            return result()  # 执行 job，返回真正的 tensor
+        return result
+    _cml.spawn_materialize = _sync_spawn
+
     logger.info(f"模型缓存目录: {MODELS_DIR}")
     logger.info(f"正在加载 Embedding 模型: {EMBEDDING_MODEL} (约 24MB)...")
     from sentence_transformers import SentenceTransformer
-    embedding_model = SentenceTransformer(EMBEDDING_MODEL)
+    embedding_model = SentenceTransformer(EMBEDDING_MODEL, device="cpu")
+
     dim = embedding_model.get_sentence_embedding_dimension()
     logger.info(f"✅ Embedding 模型加载完成 ({dim} 维)")
     logger.info(f"   模型大小: ~24MB | 适合 CPU 运行")

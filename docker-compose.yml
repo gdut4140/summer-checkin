@@ -1,0 +1,89 @@
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: summer-checkin-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-summer_checkin}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
+  embedding:
+    image: summer-checkin-embedding:latest
+    container_name: summer-checkin-embedding
+    restart: unless-stopped
+    environment:
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      HF_HOME: /app/models
+      TRANSFORMERS_CACHE: /app/models/transformers
+    volumes:
+      - embedding_models:/app/models
+    ports:
+      - "127.0.0.1:8765:8765"
+    networks:
+      - app-network
+
+  app:
+    image: summer-checkin-app:latest
+    container_name: summer-checkin-app
+    restart: unless-stopped
+    entrypoint: ["node", "server.js"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://${MYSQL_USER:-appuser}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE:-summer_checkin}
+      EMBEDDING_SERVICE_URL: http://embedding:8765
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
+      DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-deepseek-v4-flash}
+      DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://api.deepseek.com/v1}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
+      HOSTNAME: "0.0.0.0"
+    volumes:
+      - knowledge_data:/app/knowledge
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: summer-checkin-nginx
+    restart: unless-stopped
+    depends_on:
+      - app
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+  embedding_models:
+  knowledge_data:
+
+networks:
+  app-network:
+    driver: bridge

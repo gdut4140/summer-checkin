@@ -388,6 +388,7 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Plan: 'Plan',
+  PlanTask: 'PlanTask',
   Checkin: 'Checkin',
   StudyRecord: 'StudyRecord',
   Badge: 'Badge',
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "userMemory" | "aIHistory" | "documentChunk"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "userMemory" | "aIHistory" | "documentChunk"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -677,6 +678,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PlanCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PlanCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlanTask: {
+      payload: Prisma.$PlanTaskPayload<ExtArgs>
+      fields: Prisma.PlanTaskFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlanTaskFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlanTaskFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>
+        }
+        findFirst: {
+          args: Prisma.PlanTaskFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlanTaskFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>
+        }
+        findMany: {
+          args: Prisma.PlanTaskFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>[]
+        }
+        create: {
+          args: Prisma.PlanTaskCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>
+        }
+        createMany: {
+          args: Prisma.PlanTaskCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PlanTaskDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>
+        }
+        update: {
+          args: Prisma.PlanTaskUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlanTaskDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlanTaskUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PlanTaskUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanTaskPayload>
+        }
+        aggregate: {
+          args: Prisma.PlanTaskAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlanTask>
+        }
+        groupBy: {
+          args: Prisma.PlanTaskGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanTaskGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlanTaskCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanTaskCountAggregateOutputType> | number
         }
       }
     }
@@ -1376,6 +1443,25 @@ export const PlanScalarFieldEnum = {
 export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
 
 
+export const PlanTaskScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  userId: 'userId',
+  title: 'title',
+  description: 'description',
+  dayNumber: 'dayNumber',
+  weekNumber: 'weekNumber',
+  category: 'category',
+  status: 'status',
+  priority: 'priority',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanTaskScalarFieldEnum = (typeof PlanTaskScalarFieldEnum)[keyof typeof PlanTaskScalarFieldEnum]
+
+
 export const CheckinScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1556,6 +1642,20 @@ export const PlanOrderByRelevanceFieldEnum = {
 } as const
 
 export type PlanOrderByRelevanceFieldEnum = (typeof PlanOrderByRelevanceFieldEnum)[keyof typeof PlanOrderByRelevanceFieldEnum]
+
+
+export const PlanTaskOrderByRelevanceFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  userId: 'userId',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  status: 'status',
+  priority: 'priority'
+} as const
+
+export type PlanTaskOrderByRelevanceFieldEnum = (typeof PlanTaskOrderByRelevanceFieldEnum)[keyof typeof PlanTaskOrderByRelevanceFieldEnum]
 
 
 export const CheckinOrderByRelevanceFieldEnum = {
@@ -1835,6 +1935,7 @@ export type GlobalOmitConfig = {
   session?: Prisma.SessionOmit
   account?: Prisma.AccountOmit
   plan?: Prisma.PlanOmit
+  planTask?: Prisma.PlanTaskOmit
   checkin?: Prisma.CheckinOmit
   studyRecord?: Prisma.StudyRecordOmit
   badge?: Prisma.BadgeOmit

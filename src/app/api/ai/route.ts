@@ -11,6 +11,10 @@
 // Day 16 新增：RAG 知识库
 // ⑥ RAG 工具          — searchKnowledgeBase 搜索知识库文档
 // ⑦ RAG 注入          — 主动检索知识库，结果拼入 system prompt
+//
+// Day 22 新增：Agent Workflow
+// ⑧ Agent 工具        — breakdownPlanTasks, getPlanTasks, updateTaskStatus, getTodayTasks
+// ⑨ 增至 10 步        — Agent 工作流需要更多 LLM 步骤
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -18,7 +22,7 @@ import { getAuthUser } from "@/lib/auth-utils";
 import { getAIModel, getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
-import { createStudyTools, createRAGTool } from "@/lib/tools";
+import { createStudyTools, createRAGTool, createAgentTools } from "@/lib/tools";
 import {
   getRelevantMemories,
   formatMemoriesForPrompt,
@@ -136,17 +140,19 @@ export async function POST(request: NextRequest) {
       system: fullSystem,
       providerOptions: getDeepThinkOptions(deepThink ?? false),
       messages: truncatedMessages,
-      // Day 7: 学习工具 + Day 16: RAG 知识库工具
+      // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
       tools: {
         ...createStudyTools(user.id),
         ...createRAGTool(),
+        ...createAgentTools(user.id),
       },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
-      stopWhen: isStepCount(5),
+      // Day 22: 增至 10 步 — Agent Workflow 需要更多步骤（规划→拆分→检查）
+      stopWhen: isStepCount(10),
       // Day 7 调试：观察每一步的执行情况
       onStepEnd: (step) => {
         console.log(
-          `[AI] Step ${step.stepType} | finishReason=${step.finishReason} | ` +
+          `[AI] Step | finishReason=${step.finishReason} | ` +
           `text=${step.text?.length ?? 0}chars | ` +
           `toolCalls=${step.toolCalls?.length ?? 0} | ` +
           `toolResults=${step.toolResults?.length ?? 0}`

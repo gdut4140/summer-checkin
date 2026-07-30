@@ -122,3 +122,54 @@ export interface ChatMessage {
   content: string;
   createdAt: Date;
 }
+
+// ============================================================
+// Day 22 Agent Workflow: PlanTask 类型定义
+// ============================================================
+export type TaskStatus = "pending" | "in_progress" | "done" | "skipped";
+export type TaskPriority = "high" | "normal" | "low";
+export type TaskCategory = "study" | "project" | "review" | "exercise";
+
+export interface PlanTaskInfo {
+  id: string;
+  planId: string;
+  title: string;
+  description: string | null;
+  dayNumber: number | null;
+  weekNumber: number | null;
+  category: TaskCategory;
+  status: TaskStatus;
+  priority: TaskPriority;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface PlanTasksListData {
+  success: true;
+  planId: string;
+  planName: string;
+  tasks: PlanTaskInfo[];
+  stats: {
+    total: number;
+    done: number;
+    inProgress: number;
+    pending: number;
+    skipped: number;
+    progress: number; // 0-100
+  };
+}
+
+export interface TodayTasksData {
+  success: true;
+  tasks: PlanTaskInfo[];
+  activePlans: { planId: string; planName: string; taskCount: number }[];
+}
+
+export interface BreakdownTasksResult {
+  success: true;
+  planId: string;
+  planName: string;
+  tasksCreated: number;
+  message: string;
+  tasks: PlanTaskInfo[];
+}

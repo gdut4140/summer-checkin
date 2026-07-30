@@ -55,6 +55,7 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Plan: 'Plan',
+  PlanTask: 'PlanTask',
   Checkin: 'Checkin',
   StudyRecord: 'StudyRecord',
   Badge: 'Badge',
@@ -143,6 +144,25 @@ export const PlanScalarFieldEnum = {
 } as const
 
 export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+
+
+export const PlanTaskScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  userId: 'userId',
+  title: 'title',
+  description: 'description',
+  dayNumber: 'dayNumber',
+  weekNumber: 'weekNumber',
+  category: 'category',
+  status: 'status',
+  priority: 'priority',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanTaskScalarFieldEnum = (typeof PlanTaskScalarFieldEnum)[keyof typeof PlanTaskScalarFieldEnum]
 
 
 export const CheckinScalarFieldEnum = {
@@ -325,6 +345,20 @@ export const PlanOrderByRelevanceFieldEnum = {
 } as const
 
 export type PlanOrderByRelevanceFieldEnum = (typeof PlanOrderByRelevanceFieldEnum)[keyof typeof PlanOrderByRelevanceFieldEnum]
+
+
+export const PlanTaskOrderByRelevanceFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  userId: 'userId',
+  title: 'title',
+  description: 'description',
+  category: 'category',
+  status: 'status',
+  priority: 'priority'
+} as const
+
+export type PlanTaskOrderByRelevanceFieldEnum = (typeof PlanTaskOrderByRelevanceFieldEnum)[keyof typeof PlanTaskOrderByRelevanceFieldEnum]
 
 
 export const CheckinOrderByRelevanceFieldEnum = {

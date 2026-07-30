@@ -4,7 +4,7 @@
 // searchKnowledge(userId, query)
 //   1. query → Embedding
 //   2. 召回: 向量相似度 Top-K (默认 20)
-//   3. 重排: bge-reranker-v2-m3 精排 → Top-N (默认 5)
+//   3. 重排: bge-small-zh-v1.5 余弦相似度精排 → Top-N (默认 5)
 //   4. 返回格式化结果
 // ============================================================
 
@@ -57,7 +57,7 @@ export async function searchKnowledge(
     return { query, results: [], searchedChunks: 0 };
   }
 
-  // 3. 重排：bge-reranker-v2-m3
+  // 3. 重排：embedding 模型余弦相似度
   // 先查有多少 chunks
   const { prisma } = await import("@/lib/prisma");
   const totalChunks = await prisma.documentChunk.count();

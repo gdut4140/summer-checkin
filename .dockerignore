@@ -1,0 +1,60 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.*
+
+# Next.js build artifacts
+.next
+out
+
+# Build / dev artifacts
+build
+.turbo
+
+# Database (SQLite dev only)
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Local env files (contains secrets, never in image)
+.env
+.env.local
+.env*.local
+.env.production
+
+# Git
+.git
+.gitignore
+
+# Docs (not needed at runtime)
+README.md
+*.md
+
+# REST client test files
+*.http
+
+# Python cache
+__pycache__
+*.pyc
+.venv
+venv
+
+# AI models (downloaded at runtime in embedding container)
+models
+models/
+
+# Docker files themselves
+Dockerfile
+Dockerfile.*
+docker-compose*
+.dockerignore
+deploy*
+
+# Test / misc
+test.http
