@@ -6,7 +6,7 @@ import { Footer } from "@/components/landing/footer";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col">
+    <div className="scenic-shell flex min-h-[100dvh] flex-col">
       <Hero />
       <FeaturesGrid />
       <HowItWorks />

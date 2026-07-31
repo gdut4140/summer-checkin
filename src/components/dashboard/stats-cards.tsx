@@ -65,7 +65,7 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
             ease: [0.16, 1, 0.3, 1],
           }}
         >
-          <Card className="hover:shadow-sm transition-shadow duration-200">
+          <Card className="glass-panel hover:-translate-y-0.5 transition-transform duration-200">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-muted-foreground">

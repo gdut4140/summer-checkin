@@ -49,9 +49,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="shadow-sm">
+    <Card className="glass-panel border-white/60 shadow-2xl">
       <CardHeader>
-        <CardTitle className="text-2xl">注册账号</CardTitle>
+        <CardTitle className="text-2xl font-semibold">注册账号</CardTitle>
         <CardDescription>开始记录你的暑假学习之旅</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>

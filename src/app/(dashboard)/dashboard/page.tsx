@@ -108,11 +108,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+      <div className="py-3 text-white drop-shadow-sm">
+        <p className="mb-2 text-sm font-medium text-white/68">今日学习概览</p>
+        <h1 className="text-2xl font-semibold md:text-3xl">
           欢迎回来，{user.name}
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="mt-2 text-sm text-white/72">
           {now.toLocaleDateString("zh-CN", {
             weekday: "long",
             year: "numeric",

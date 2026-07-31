@@ -18,6 +18,7 @@ import {
   X,
   SignOut,
   MagnifyingGlass,
+  Leaf,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -78,14 +79,14 @@ export function TopNav({ user }: TopNavProps) {
   return (
     <>
       <SearchDialog />
-      <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/70 backdrop-blur-xl backdrop-saturate-150">
+      <header className="sticky top-0 z-40 w-full border-b border-white/20 bg-[#092d26]/72 text-white backdrop-blur-2xl backdrop-saturate-150">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
           {/* Logo */}
           <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm shadow-sm">
-              SC
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/30 bg-white/14 text-white shadow-sm">
+              <Leaf className="h-4 w-4" weight="fill" />
             </div>
-            <span className="hidden font-semibold text-foreground sm:inline">
+            <span className="hidden font-semibold text-white sm:inline">
               Summer Checkin
             </span>
           </Link>
@@ -97,10 +98,10 @@ export function TopNav({ user }: TopNavProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+                  "rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
                   isActive(item.href)
-                    ? "bg-accent/80 text-accent-foreground backdrop-blur-sm"
-                    : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+                    ? "bg-[#f3c969] text-[#17352d]"
+                    : "text-white/68 hover:bg-white/12 hover:text-white"
                 )}
               >
                 {item.label}
@@ -115,7 +116,7 @@ export function TopNav({ user }: TopNavProps) {
                 const event = new KeyboardEvent("keydown", { key: "k", metaKey: true })
                 document.dispatchEvent(event)
               }}
-              className="flex items-center gap-2 rounded-full border border-border/50 bg-background/50 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur-sm transition-all hover:bg-accent/30 hover:text-foreground hover:shadow-sm"
+              className="flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white/70 backdrop-blur-sm transition-all hover:bg-white/18 hover:text-white"
             >
               <MagnifyingGlass className="h-4 w-4" />
               <span>搜索</span>
@@ -124,14 +125,14 @@ export function TopNav({ user }: TopNavProps) {
               </kbd>
             </button>
             <Link href="/ai">
-              <Button variant="ghost" size="sm" className="gap-2 rounded-full backdrop-blur-sm hover:bg-accent/30">
+              <Button variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/14 hover:text-white">
                 <Robot className="h-4 w-4" weight="fill" />
                 AI 助手
               </Button>
             </Link>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border/50 bg-background/50 py-1 pl-1 pr-2 backdrop-blur-sm transition-all hover:shadow-md hover:border-border">
-                <List className="h-4 w-4 text-foreground" />
+              <DropdownMenuTrigger className="flex items-center gap-2 rounded-md border border-white/20 bg-white/10 py-1 pl-1 pr-2 backdrop-blur-sm transition-all hover:bg-white/16">
+                <List className="h-4 w-4 text-white" />
                 <Avatar className="h-7 w-7">
                   <AvatarImage src={user.image ?? undefined} alt={user.name} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
@@ -169,7 +170,7 @@ export function TopNav({ user }: TopNavProps) {
         {/* 移动端：汉堡菜单 */}
         <div className="lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className="flex items-center gap-2 rounded-full border border-border p-1.5 pr-3">
+          <SheetTrigger className="flex items-center gap-2 rounded-md border border-white/25 bg-white/10 p-1.5 pr-3 text-white">
               <List className="h-4 w-4" />
               <Avatar className="h-6 w-6">
                 <AvatarImage src={user.image ?? undefined} alt={user.name} />

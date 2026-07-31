@@ -44,9 +44,9 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="shadow-sm">
+    <Card className="glass-panel border-white/60 shadow-2xl">
       <CardHeader>
-        <CardTitle className="text-2xl">登录</CardTitle>
+        <CardTitle className="text-2xl font-semibold">登录</CardTitle>
         <CardDescription>欢迎回到你的学习之旅</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
