@@ -12,9 +12,9 @@ interface Props {
 
 export function ProfileStats({ totalHours, totalCheckins, streak }: Props) {
   const stats = [
-    { label: "总学习时长", value: `${totalHours}h`, icon: Clock, color: "text-amber-700" },
-    { label: "总打卡次数", value: totalCheckins.toString(), icon: CheckCircle, color: "text-orange-600" },
-    { label: "当前连续", value: `${streak} 天`, icon: Fire, color: "text-rose-500" },
+    { label: "总学习时长", value: `${totalHours}h`, icon: Clock, color: "text-emerald-400" },
+    { label: "总打卡次数", value: totalCheckins.toString(), icon: CheckCircle, color: "text-emerald-300" },
+    { label: "当前连续", value: `${streak} 天`, icon: Fire, color: "text-emerald-300" },
   ];
 
   return (

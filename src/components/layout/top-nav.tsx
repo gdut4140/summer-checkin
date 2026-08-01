@@ -58,6 +58,7 @@ const mainNav = [
 
 // 移动端抽屉的完整导航（带图标）
 const fullNav = [
+  { href: "/agent", label: "Agent 工作台", icon: Robot },
   { href: "/dashboard", label: "首页", icon: House },
   { href: "/checkin", label: "今日打卡", icon: CheckCircle },
   { href: "/plans", label: "学习计划", icon: ListChecks },
@@ -79,7 +80,7 @@ export function TopNav({ user }: TopNavProps) {
   return (
     <>
       <SearchDialog />
-      <header className="sticky top-0 z-40 w-full border-b border-white/20 bg-[#092d26]/72 text-white backdrop-blur-2xl backdrop-saturate-150">
+      <header className="sticky top-0 z-40 w-full border-b border-white/[0.12] bg-[#0a1e18]/80 text-white backdrop-blur-2xl backdrop-saturate-150">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
           {/* Logo */}
           <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
@@ -100,7 +101,7 @@ export function TopNav({ user }: TopNavProps) {
                 className={cn(
                   "rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
                   isActive(item.href)
-                    ? "bg-[#f3c969] text-[#17352d]"
+                    ? "bg-white/[0.15] text-white shadow-sm"
                     : "text-white/68 hover:bg-white/12 hover:text-white"
                 )}
               >
@@ -124,6 +125,12 @@ export function TopNav({ user }: TopNavProps) {
                 ⌘K
               </kbd>
             </button>
+            <Link href="/agent">
+              <Button variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/14 hover:text-white">
+                <Robot className="h-4 w-4" />
+                Agent 工作台
+              </Button>
+            </Link>
             <Link href="/ai">
               <Button variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/14 hover:text-white">
                 <Robot className="h-4 w-4" weight="fill" />

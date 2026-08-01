@@ -38,6 +38,7 @@ export type CheckinMinAggregateOutputType = {
   id: string | null
   userId: string | null
   planId: string | null
+  sourceTaskId: string | null
   content: string | null
   hours: number | null
   subject: string | null
@@ -52,6 +53,7 @@ export type CheckinMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   planId: string | null
+  sourceTaskId: string | null
   content: string | null
   hours: number | null
   subject: string | null
@@ -66,6 +68,7 @@ export type CheckinCountAggregateOutputType = {
   id: number
   userId: number
   planId: number
+  sourceTaskId: number
   content: number
   hours: number
   subject: number
@@ -90,6 +93,7 @@ export type CheckinMinAggregateInputType = {
   id?: true
   userId?: true
   planId?: true
+  sourceTaskId?: true
   content?: true
   hours?: true
   subject?: true
@@ -104,6 +108,7 @@ export type CheckinMaxAggregateInputType = {
   id?: true
   userId?: true
   planId?: true
+  sourceTaskId?: true
   content?: true
   hours?: true
   subject?: true
@@ -118,6 +123,7 @@ export type CheckinCountAggregateInputType = {
   id?: true
   userId?: true
   planId?: true
+  sourceTaskId?: true
   content?: true
   hours?: true
   subject?: true
@@ -219,6 +225,7 @@ export type CheckinGroupByOutputType = {
   id: string
   userId: string
   planId: string | null
+  sourceTaskId: string | null
   content: string
   hours: number
   subject: string | null
@@ -256,6 +263,7 @@ export type CheckinWhereInput = {
   id?: Prisma.StringFilter<"Checkin"> | string
   userId?: Prisma.StringFilter<"Checkin"> | string
   planId?: Prisma.StringNullableFilter<"Checkin"> | string | null
+  sourceTaskId?: Prisma.StringNullableFilter<"Checkin"> | string | null
   content?: Prisma.StringFilter<"Checkin"> | string
   hours?: Prisma.FloatFilter<"Checkin"> | number
   subject?: Prisma.StringNullableFilter<"Checkin"> | string | null
@@ -272,6 +280,7 @@ export type CheckinOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -292,6 +301,7 @@ export type CheckinWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CheckinWhereInput | Prisma.CheckinWhereInput[]
   userId?: Prisma.StringFilter<"Checkin"> | string
   planId?: Prisma.StringNullableFilter<"Checkin"> | string | null
+  sourceTaskId?: Prisma.StringNullableFilter<"Checkin"> | string | null
   content?: Prisma.StringFilter<"Checkin"> | string
   hours?: Prisma.FloatFilter<"Checkin"> | number
   subject?: Prisma.StringNullableFilter<"Checkin"> | string | null
@@ -308,6 +318,7 @@ export type CheckinOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -330,6 +341,7 @@ export type CheckinScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Checkin"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Checkin"> | string
   planId?: Prisma.StringNullableWithAggregatesFilter<"Checkin"> | string | null
+  sourceTaskId?: Prisma.StringNullableWithAggregatesFilter<"Checkin"> | string | null
   content?: Prisma.StringWithAggregatesFilter<"Checkin"> | string
   hours?: Prisma.FloatWithAggregatesFilter<"Checkin"> | number
   subject?: Prisma.StringNullableWithAggregatesFilter<"Checkin"> | string | null
@@ -342,6 +354,7 @@ export type CheckinScalarWhereWithAggregatesInput = {
 
 export type CheckinCreateInput = {
   id?: string
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -358,6 +371,7 @@ export type CheckinUncheckedCreateInput = {
   id?: string
   userId: string
   planId?: string | null
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -370,6 +384,7 @@ export type CheckinUncheckedCreateInput = {
 
 export type CheckinUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -386,6 +401,7 @@ export type CheckinUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -400,6 +416,7 @@ export type CheckinCreateManyInput = {
   id?: string
   userId: string
   planId?: string | null
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -412,6 +429,7 @@ export type CheckinCreateManyInput = {
 
 export type CheckinUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -426,6 +444,7 @@ export type CheckinUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -456,6 +475,7 @@ export type CheckinCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
+  sourceTaskId?: Prisma.SortOrder
   content?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrder
@@ -474,6 +494,7 @@ export type CheckinMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
+  sourceTaskId?: Prisma.SortOrder
   content?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrder
@@ -488,6 +509,7 @@ export type CheckinMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
+  sourceTaskId?: Prisma.SortOrder
   content?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrder
@@ -588,6 +610,7 @@ export type CheckinUncheckedUpdateManyWithoutPlanNestedInput = {
 
 export type CheckinCreateWithoutUserInput = {
   id?: string
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -602,6 +625,7 @@ export type CheckinCreateWithoutUserInput = {
 export type CheckinUncheckedCreateWithoutUserInput = {
   id?: string
   planId?: string | null
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -645,6 +669,7 @@ export type CheckinScalarWhereInput = {
   id?: Prisma.StringFilter<"Checkin"> | string
   userId?: Prisma.StringFilter<"Checkin"> | string
   planId?: Prisma.StringNullableFilter<"Checkin"> | string | null
+  sourceTaskId?: Prisma.StringNullableFilter<"Checkin"> | string | null
   content?: Prisma.StringFilter<"Checkin"> | string
   hours?: Prisma.FloatFilter<"Checkin"> | number
   subject?: Prisma.StringNullableFilter<"Checkin"> | string | null
@@ -657,6 +682,7 @@ export type CheckinScalarWhereInput = {
 
 export type CheckinCreateWithoutPlanInput = {
   id?: string
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -671,6 +697,7 @@ export type CheckinCreateWithoutPlanInput = {
 export type CheckinUncheckedCreateWithoutPlanInput = {
   id?: string
   userId: string
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -710,6 +737,7 @@ export type CheckinUpdateManyWithWhereWithoutPlanInput = {
 export type CheckinCreateManyUserInput = {
   id?: string
   planId?: string | null
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -722,6 +750,7 @@ export type CheckinCreateManyUserInput = {
 
 export type CheckinUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -736,6 +765,7 @@ export type CheckinUpdateWithoutUserInput = {
 export type CheckinUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -749,6 +779,7 @@ export type CheckinUncheckedUpdateWithoutUserInput = {
 export type CheckinUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -762,6 +793,7 @@ export type CheckinUncheckedUpdateManyWithoutUserInput = {
 export type CheckinCreateManyPlanInput = {
   id?: string
   userId: string
+  sourceTaskId?: string | null
   content: string
   hours?: number
   subject?: string | null
@@ -774,6 +806,7 @@ export type CheckinCreateManyPlanInput = {
 
 export type CheckinUpdateWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -788,6 +821,7 @@ export type CheckinUpdateWithoutPlanInput = {
 export type CheckinUncheckedUpdateWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -801,6 +835,7 @@ export type CheckinUncheckedUpdateWithoutPlanInput = {
 export type CheckinUncheckedUpdateManyWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.StringFieldUpdateOperationsInput | string
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -817,6 +852,7 @@ export type CheckinSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id?: boolean
   userId?: boolean
   planId?: boolean
+  sourceTaskId?: boolean
   content?: boolean
   hours?: boolean
   subject?: boolean
@@ -835,6 +871,7 @@ export type CheckinSelectScalar = {
   id?: boolean
   userId?: boolean
   planId?: boolean
+  sourceTaskId?: boolean
   content?: boolean
   hours?: boolean
   subject?: boolean
@@ -845,7 +882,7 @@ export type CheckinSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CheckinOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "planId" | "content" | "hours" | "subject" | "mood" | "screenshot" | "checkinDate" | "createdAt" | "updatedAt", ExtArgs["result"]["checkin"]>
+export type CheckinOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "planId" | "sourceTaskId" | "content" | "hours" | "subject" | "mood" | "screenshot" | "checkinDate" | "createdAt" | "updatedAt", ExtArgs["result"]["checkin"]>
 export type CheckinInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   plan?: boolean | Prisma.Checkin$planArgs<ExtArgs>
@@ -861,6 +898,7 @@ export type $CheckinPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     userId: string
     planId: string | null
+    sourceTaskId: string | null
     content: string
     hours: number
     subject: string | null
@@ -1243,6 +1281,7 @@ export interface CheckinFieldRefs {
   readonly id: Prisma.FieldRef<"Checkin", 'String'>
   readonly userId: Prisma.FieldRef<"Checkin", 'String'>
   readonly planId: Prisma.FieldRef<"Checkin", 'String'>
+  readonly sourceTaskId: Prisma.FieldRef<"Checkin", 'String'>
   readonly content: Prisma.FieldRef<"Checkin", 'String'>
   readonly hours: Prisma.FieldRef<"Checkin", 'Float'>
   readonly subject: Prisma.FieldRef<"Checkin", 'String'>

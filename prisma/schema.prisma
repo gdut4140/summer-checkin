@@ -8,27 +8,28 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
   password      String?
   bio           String?
-  theme         String    @default("system")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  theme         String   @default("system")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  sessions     Session[]
-  accounts     Account[]
-  plans        Plan[]
-  checkins     Checkin[]
-  studyRecords StudyRecord[]
-  userBadges   UserBadge[]
+  sessions      Session[]
+  accounts      Account[]
+  plans         Plan[]
+  checkins      Checkin[]
+  studyRecords  StudyRecord[]
+  userBadges    UserBadge[]
   aiHistories   AIHistory[]
   memories      UserMemory[]
   conversations Conversation[]
   planTasks     PlanTask[]
+  agentRuns     AgentRun[]
 }
 
 model Session {
@@ -74,7 +75,7 @@ model Plan {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   checkins Checkin[]
   tasks    PlanTask[]
 }
@@ -87,16 +88,16 @@ model PlanTask {
   id          String    @id @default(cuid())
   planId      String
   userId      String
-  title       String                                    // 任务标题
-  description String?    @db.Text                       // 任务详细描述
-  dayNumber   Int?                                      // 第几天（如 Day 1, Day 2...）
-  weekNumber  Int?                                      // 第几周
-  category    String     @default("study")              // study | project | review | exercise
-  status      String     @default("pending")            // pending | in_progress | done | skipped
-  priority    String     @default("normal")             // high | normal | low
-  completedAt DateTime?                                 // 完成时间
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  title       String // 任务标题
+  description String?   @db.Text // 任务详细描述
+  dayNumber   Int? // 第几天（如 Day 1, Day 2...）
+  weekNumber  Int? // 第几周
+  category    String    @default("study") // study | project | review | exercise
+  status      String    @default("pending") // pending | in_progress | done | skipped
+  priority    String    @default("normal") // high | normal | low
+  completedAt DateTime? // 完成时间
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
@@ -107,22 +108,24 @@ model PlanTask {
 }
 
 model Checkin {
-  id          String   @id @default(cuid())
-  userId      String
-  planId      String?
-  content     String
-  hours       Float    @default(0)
-  subject     String?
-  mood        String?
-  screenshot  String?
-  checkinDate DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String
+  planId       String?
+  sourceTaskId String?
+  content      String
+  hours        Float    @default(0)
+  subject      String?
+  mood         String?
+  screenshot   String?
+  checkinDate  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan Plan? @relation(fields: [planId], references: [id])
 
   @@index([userId, checkinDate])
+  @@index([sourceTaskId])
 }
 
 model StudyRecord {
@@ -169,7 +172,7 @@ model Conversation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages ConversationMessage[]
 
   @@index([userId, updatedAt])
@@ -178,13 +181,101 @@ model Conversation {
 model ConversationMessage {
   id             String   @id @default(cuid())
   conversationId String
-  role           String   // "user" | "assistant"
+  role           String // "user" | "assistant"
   content        String   @db.Text
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
+}
+
+// ============================================================
+// Agent productization: explicit runs, steps, approvals and tool traces
+// ============================================================
+model AgentRun {
+  id          String    @id @default(cuid())
+  userId      String
+  mode        String    @default("planner")
+  goal        String    @db.Text
+  status      String    @default("queued")
+  currentStep Int       @default(0)
+  maxSteps    Int       @default(12)
+  summary     String?   @db.Text
+  error       String?   @db.Text
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps     AgentStep[]
+  approvals AgentApproval[]
+  toolCalls AgentToolCall[]
+
+  @@index([userId, updatedAt])
+  @@index([userId, status])
+}
+
+model AgentStep {
+  id          String    @id @default(cuid())
+  runId       String
+  stepNumber  Int
+  kind        String
+  status      String    @default("pending")
+  title       String
+  detail      String?   @db.Text
+  input       Json?
+  output      Json?
+  error       String?   @db.Text
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  run       AgentRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
+  approvals AgentApproval[]
+  toolCalls AgentToolCall[]
+
+  @@unique([runId, stepNumber])
+  @@index([runId, status])
+}
+
+model AgentApproval {
+  id             String    @id @default(cuid())
+  runId          String
+  stepId         String?
+  action         String
+  status         String    @default("pending")
+  payload        Json?
+  decisionReason String?   @db.Text
+  decidedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  run  AgentRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  step AgentStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  @@index([runId, status])
+}
+
+model AgentToolCall {
+  id             String    @id @default(cuid())
+  runId          String
+  stepId         String?
+  toolName       String
+  status         String    @default("pending")
+  idempotencyKey String?   @unique
+  input          Json?
+  output         Json?
+  error          String?   @db.Text
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  run  AgentRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  step AgentStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  @@index([runId, status])
+  @@index([runId, toolName])
 }
 
 model UserMemory {
@@ -218,11 +309,11 @@ model AIHistory {
 // ============================================================
 model DocumentChunk {
   id         String   @id @default(cuid())
-  sourceName String   // 来源文件名
+  sourceName String // 来源文件名
   sourceType String   @default("text") // pdf | markdown | text | conversation
-  chunkIndex Int      // 分片序号，从 0 开始
+  chunkIndex Int // 分片序号，从 0 开始
   content    String   @db.Text
-  embedding  Json     // bge-small-zh-v1.5 512 维向量，存为 JSON 数组
+  embedding  Json // bge-small-zh-v1.5 512 维向量，存为 JSON 数组
   createdAt  DateTime @default(now())
 
   @@index([sourceName])

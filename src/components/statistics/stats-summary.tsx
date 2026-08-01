@@ -12,10 +12,10 @@ interface StatsSummaryProps {
 
 export function StatsSummary({ totalHours, totalDays, avgPerDay, bestSubject }: StatsSummaryProps) {
   const items = [
-    { label: "总时长", value: `${totalHours}h`, icon: Clock, color: "text-orange-600", bg: "bg-orange-500/10" },
-    { label: "学习天数", value: totalDays.toString(), icon: CalendarCheck, color: "text-amber-700", bg: "bg-amber-500/10" },
-    { label: "日均学习", value: `${avgPerDay}h`, icon: Target, color: "text-rose-600", bg: "bg-rose-500/10" },
-    { label: "最佳科目", value: bestSubject, icon: Star, color: "text-yellow-600", bg: "bg-yellow-500/10" },
+    { label: "总时长", value: `${totalHours}h`, icon: Clock, color: "text-emerald-300", bg: "bg-emerald-400/10" },
+    { label: "学习天数", value: totalDays.toString(), icon: CalendarCheck, color: "text-emerald-400", bg: "bg-emerald-400/10" },
+    { label: "日均学习", value: `${avgPerDay}h`, icon: Target, color: "text-emerald-300", bg: "bg-emerald-400/10" },
+    { label: "最佳科目", value: bestSubject, icon: Star, color: "text-emerald-200", bg: "bg-emerald-400/10" },
   ];
 
   return (

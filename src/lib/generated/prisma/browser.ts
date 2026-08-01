@@ -73,6 +73,26 @@ export type Conversation = Prisma.ConversationModel
  */
 export type ConversationMessage = Prisma.ConversationMessageModel
 /**
+ * Model AgentRun
+ * 
+ */
+export type AgentRun = Prisma.AgentRunModel
+/**
+ * Model AgentStep
+ * 
+ */
+export type AgentStep = Prisma.AgentStepModel
+/**
+ * Model AgentApproval
+ * 
+ */
+export type AgentApproval = Prisma.AgentApprovalModel
+/**
+ * Model AgentToolCall
+ * 
+ */
+export type AgentToolCall = Prisma.AgentToolCallModel
+/**
  * Model UserMemory
  * 
  */

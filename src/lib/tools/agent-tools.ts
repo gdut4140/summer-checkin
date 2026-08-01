@@ -270,18 +270,36 @@ export function createAgentTools(userId: string) {
         let checkinCreated = false;
         if (status === "done") {
           try {
-            await prisma.checkin.create({
-              data: {
-                userId,
-                planId: existing.planId,
-                content: hours
-                  ? `完成任务：${existing.title}（${hours}小时）`
-                  : `完成任务：${existing.title}`,
-                hours: hours ?? 0,
-                subject: existing.category,
-                checkinDate: new Date(),
-              },
+            const existingTaskCheckin = await prisma.checkin.findFirst({
+              where: { sourceTaskId: existing.id },
             });
+            if (existingTaskCheckin) {
+              await prisma.checkin.update({
+                where: { id: existingTaskCheckin.id },
+                data: {
+                  content: hours
+                    ? `完成任务：${existing.title}（${hours}小时）`
+                    : `完成任务：${existing.title}`,
+                  hours: hours ?? 0,
+                  subject: existing.category,
+                  checkinDate: new Date(),
+                },
+              });
+            } else {
+              await prisma.checkin.create({
+                data: {
+                  userId,
+                  sourceTaskId: existing.id,
+                  planId: existing.planId,
+                  content: hours
+                    ? `完成任务：${existing.title}（${hours}小时）`
+                    : `完成任务：${existing.title}`,
+                  hours: hours ?? 0,
+                  subject: existing.category,
+                  checkinDate: new Date(),
+                },
+              });
+            }
             checkinCreated = true;
             console.log(`[updateTaskStatus] ✅ 自动创建打卡记录`);
           } catch (err) {

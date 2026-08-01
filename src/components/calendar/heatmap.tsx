@@ -10,11 +10,11 @@ import {
 
 function getColor(hours: number): string {
   if (hours === 0) return "bg-muted";
-  if (hours <= 0.5) return "bg-amber-200 dark:bg-amber-950";
-  if (hours <= 1.5) return "bg-amber-400 dark:bg-amber-800";
-  if (hours <= 3) return "bg-amber-500 dark:bg-amber-600";
-  if (hours <= 5) return "bg-amber-600 dark:bg-amber-400";
-  return "bg-amber-700 dark:bg-amber-300";
+  if (hours <= 0.5) return "bg-emerald-200/70 dark:bg-emerald-950";
+  if (hours <= 1.5) return "bg-emerald-400/70 dark:bg-emerald-800";
+  if (hours <= 3) return "bg-emerald-500/80 dark:bg-emerald-600";
+  if (hours <= 5) return "bg-emerald-600 dark:bg-emerald-400";
+  return "bg-emerald-700 dark:bg-emerald-300";
 }
 
 interface HeatmapProps {
@@ -118,11 +118,11 @@ export function Heatmap({ data, year }: HeatmapProps) {
       <div className="flex items-center gap-2 mt-3 justify-end text-xs text-muted-foreground">
         <span>少</span>
         <div className="w-[11px] h-[11px] rounded-sm bg-muted" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-amber-200 dark:bg-amber-950" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-amber-400 dark:bg-amber-800" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-amber-500 dark:bg-amber-600" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-amber-600 dark:bg-amber-400" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-amber-700 dark:bg-amber-300" />
+        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-200/70 dark:bg-emerald-950" />
+        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-400/70 dark:bg-emerald-800" />
+        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-500/80 dark:bg-emerald-600" />
+        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-600 dark:bg-emerald-400" />
+        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-700 dark:bg-emerald-300" />
         <span>多</span>
       </div>
     </div>

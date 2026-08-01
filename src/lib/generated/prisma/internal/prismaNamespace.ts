@@ -395,6 +395,10 @@ export const ModelName = {
   UserBadge: 'UserBadge',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
+  AgentRun: 'AgentRun',
+  AgentStep: 'AgentStep',
+  AgentApproval: 'AgentApproval',
+  AgentToolCall: 'AgentToolCall',
   UserMemory: 'UserMemory',
   AIHistory: 'AIHistory',
   DocumentChunk: 'DocumentChunk'
@@ -413,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "userMemory" | "aIHistory" | "documentChunk"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentToolCall" | "userMemory" | "aIHistory" | "documentChunk"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1143,6 +1147,270 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AgentRun: {
+      payload: Prisma.$AgentRunPayload<ExtArgs>
+      fields: Prisma.AgentRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>
+        }
+        findMany: {
+          args: Prisma.AgentRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>[]
+        }
+        create: {
+          args: Prisma.AgentRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>
+        }
+        createMany: {
+          args: Prisma.AgentRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AgentRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>
+        }
+        update: {
+          args: Prisma.AgentRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AgentRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentRunPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentRun>
+        }
+        groupBy: {
+          args: Prisma.AgentRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentRunCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentStep: {
+      payload: Prisma.$AgentStepPayload<ExtArgs>
+      fields: Prisma.AgentStepFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentStepFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentStepFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentStepFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentStepFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>
+        }
+        findMany: {
+          args: Prisma.AgentStepFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>[]
+        }
+        create: {
+          args: Prisma.AgentStepCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>
+        }
+        createMany: {
+          args: Prisma.AgentStepCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AgentStepDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>
+        }
+        update: {
+          args: Prisma.AgentStepUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentStepDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentStepUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AgentStepUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStepPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentStepAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentStep>
+        }
+        groupBy: {
+          args: Prisma.AgentStepGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentStepGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentStepCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentStepCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentApproval: {
+      payload: Prisma.$AgentApprovalPayload<ExtArgs>
+      fields: Prisma.AgentApprovalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentApprovalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentApprovalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentApprovalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentApprovalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
+        }
+        findMany: {
+          args: Prisma.AgentApprovalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>[]
+        }
+        create: {
+          args: Prisma.AgentApprovalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
+        }
+        createMany: {
+          args: Prisma.AgentApprovalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AgentApprovalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
+        }
+        update: {
+          args: Prisma.AgentApprovalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentApprovalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentApprovalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AgentApprovalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentApprovalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentApproval>
+        }
+        groupBy: {
+          args: Prisma.AgentApprovalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentApprovalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentApprovalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentApprovalCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentToolCall: {
+      payload: Prisma.$AgentToolCallPayload<ExtArgs>
+      fields: Prisma.AgentToolCallFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentToolCallFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentToolCallFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentToolCallFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentToolCallFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
+        }
+        findMany: {
+          args: Prisma.AgentToolCallFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>[]
+        }
+        create: {
+          args: Prisma.AgentToolCallCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
+        }
+        createMany: {
+          args: Prisma.AgentToolCallCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AgentToolCallDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
+        }
+        update: {
+          args: Prisma.AgentToolCallUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentToolCallDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentToolCallUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AgentToolCallUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentToolCallAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentToolCall>
+        }
+        groupBy: {
+          args: Prisma.AgentToolCallGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentToolCallGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentToolCallCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentToolCallCountAggregateOutputType> | number
+        }
+      }
+    }
     UserMemory: {
       payload: Prisma.$UserMemoryPayload<ExtArgs>
       fields: Prisma.UserMemoryFieldRefs
@@ -1466,6 +1734,7 @@ export const CheckinScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   planId: 'planId',
+  sourceTaskId: 'sourceTaskId',
   content: 'content',
   hours: 'hours',
   subject: 'subject',
@@ -1536,6 +1805,77 @@ export const ConversationMessageScalarFieldEnum = {
 export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
 
 
+export const AgentRunScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  mode: 'mode',
+  goal: 'goal',
+  status: 'status',
+  currentStep: 'currentStep',
+  maxSteps: 'maxSteps',
+  summary: 'summary',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentRunScalarFieldEnum = (typeof AgentRunScalarFieldEnum)[keyof typeof AgentRunScalarFieldEnum]
+
+
+export const AgentStepScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepNumber: 'stepNumber',
+  kind: 'kind',
+  status: 'status',
+  title: 'title',
+  detail: 'detail',
+  input: 'input',
+  output: 'output',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentStepScalarFieldEnum = (typeof AgentStepScalarFieldEnum)[keyof typeof AgentStepScalarFieldEnum]
+
+
+export const AgentApprovalScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  action: 'action',
+  status: 'status',
+  payload: 'payload',
+  decisionReason: 'decisionReason',
+  decidedAt: 'decidedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentApprovalScalarFieldEnum = (typeof AgentApprovalScalarFieldEnum)[keyof typeof AgentApprovalScalarFieldEnum]
+
+
+export const AgentToolCallScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  toolName: 'toolName',
+  status: 'status',
+  idempotencyKey: 'idempotencyKey',
+  input: 'input',
+  output: 'output',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentToolCallScalarFieldEnum = (typeof AgentToolCallScalarFieldEnum)[keyof typeof AgentToolCallScalarFieldEnum]
+
+
 export const UserMemoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1577,6 +1917,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const JsonNullValueInput = {
@@ -1662,6 +2010,7 @@ export const CheckinOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
   planId: 'planId',
+  sourceTaskId: 'sourceTaskId',
   content: 'content',
   subject: 'subject',
   mood: 'mood',
@@ -1720,6 +2069,74 @@ export const ConversationMessageOrderByRelevanceFieldEnum = {
 export type ConversationMessageOrderByRelevanceFieldEnum = (typeof ConversationMessageOrderByRelevanceFieldEnum)[keyof typeof ConversationMessageOrderByRelevanceFieldEnum]
 
 
+export const AgentRunOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  mode: 'mode',
+  goal: 'goal',
+  status: 'status',
+  summary: 'summary',
+  error: 'error'
+} as const
+
+export type AgentRunOrderByRelevanceFieldEnum = (typeof AgentRunOrderByRelevanceFieldEnum)[keyof typeof AgentRunOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const AgentStepOrderByRelevanceFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  kind: 'kind',
+  status: 'status',
+  title: 'title',
+  detail: 'detail',
+  error: 'error'
+} as const
+
+export type AgentStepOrderByRelevanceFieldEnum = (typeof AgentStepOrderByRelevanceFieldEnum)[keyof typeof AgentStepOrderByRelevanceFieldEnum]
+
+
+export const AgentApprovalOrderByRelevanceFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  action: 'action',
+  status: 'status',
+  decisionReason: 'decisionReason'
+} as const
+
+export type AgentApprovalOrderByRelevanceFieldEnum = (typeof AgentApprovalOrderByRelevanceFieldEnum)[keyof typeof AgentApprovalOrderByRelevanceFieldEnum]
+
+
+export const AgentToolCallOrderByRelevanceFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  toolName: 'toolName',
+  status: 'status',
+  idempotencyKey: 'idempotencyKey',
+  error: 'error'
+} as const
+
+export type AgentToolCallOrderByRelevanceFieldEnum = (typeof AgentToolCallOrderByRelevanceFieldEnum)[keyof typeof AgentToolCallOrderByRelevanceFieldEnum]
+
+
 export const UserMemoryOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1738,23 +2155,6 @@ export const AIHistoryOrderByRelevanceFieldEnum = {
 } as const
 
 export type AIHistoryOrderByRelevanceFieldEnum = (typeof AIHistoryOrderByRelevanceFieldEnum)[keyof typeof AIHistoryOrderByRelevanceFieldEnum]
-
-
-export const JsonNullValueFilter = {
-  DbNull: DbNull,
-  JsonNull: JsonNull,
-  AnyNull: AnyNull
-} as const
-
-export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
 export const DocumentChunkOrderByRelevanceFieldEnum = {
@@ -1942,6 +2342,10 @@ export type GlobalOmitConfig = {
   userBadge?: Prisma.UserBadgeOmit
   conversation?: Prisma.ConversationOmit
   conversationMessage?: Prisma.ConversationMessageOmit
+  agentRun?: Prisma.AgentRunOmit
+  agentStep?: Prisma.AgentStepOmit
+  agentApproval?: Prisma.AgentApprovalOmit
+  agentToolCall?: Prisma.AgentToolCallOmit
   userMemory?: Prisma.UserMemoryOmit
   aIHistory?: Prisma.AIHistoryOmit
   documentChunk?: Prisma.DocumentChunkOmit

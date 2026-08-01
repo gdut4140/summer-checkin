@@ -20,9 +20,23 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        {/* 视频背景 */}
+        <video
+          className="bg-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+        >
+          <source src="/rain.mp4" type="video/mp4" />
+        </video>
+        {/* 墨绿蒙层 */}
+        <div className="bg-video-overlay" />
+
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

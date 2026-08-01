@@ -1,10 +1,10 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, startOfWeek, subDays } from "date-fns";
-import { StatsCards } from "@/components/dashboard/stats-cards";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { QuickActions } from "@/components/dashboard/quick-actions";
+import { LearningIsland } from "@/components/landing/learning-island";
+
 import type { DashboardStats } from "@/types";
 
 export default async function DashboardPage() {
@@ -51,6 +51,10 @@ export default async function DashboardPage() {
     _sum: { hours: true },
   });
   const userTotalHours = totalHours._sum.hours ?? 0;
+
+  const totalCheckins = await prisma.checkin.count({
+    where: { userId: user.id },
+  });
 
   const totalUsers = await prisma.user.count();
 
@@ -108,23 +112,54 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="py-3 text-white drop-shadow-sm">
-        <p className="mb-2 text-sm font-medium text-white/68">今日学习概览</p>
-        <h1 className="text-2xl font-semibold md:text-3xl">
-          欢迎回来，{user.name}
-        </h1>
-        <p className="mt-2 text-sm text-white/72">
-          {now.toLocaleDateString("zh-CN", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
-      </div>
+      <section className="relative min-h-[500px] overflow-hidden rounded-lg border border-white/14 bg-[#071f1a]/72 text-white shadow-2xl shadow-black/15 backdrop-blur-xl lg:min-h-[540px]">
+        <div className="pointer-events-none absolute inset-0 bg-grid opacity-30" />
+        <div className="relative z-10 grid min-h-[500px] lg:min-h-[540px] lg:grid-cols-[0.72fr_1.28fr]">
+          <div className="flex flex-col justify-between px-6 py-8 md:px-9 md:py-10">
+            <div>
+              <p className="text-sm font-medium text-[#9cc8b8]">今日学习概览</p>
+              <h1 className="mt-3 text-3xl font-semibold md:text-4xl">
+                欢迎回来，{user.name}
+              </h1>
+              <p className="mt-3 text-sm text-white/60">
+                {now.toLocaleDateString("zh-CN", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <p className="mt-7 max-w-md text-base leading-7 text-white/68">
+                每一次打卡都会积累今天的学习进度，也让这座学习岛继续生长。
+              </p>
+            </div>
 
-      <StatsCards stats={stats} />
-      <QuickActions />
+            <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-white/12 pt-6 sm:grid-cols-4 lg:grid-cols-2">
+              <div>
+                <dt className="text-xs text-white/48">连续打卡</dt>
+                <dd className="mt-1 text-xl font-semibold">{stats.streak}<span className="ml-1 text-xs font-normal text-white/45">天</span></dd>
+              </div>
+              <div>
+                <dt className="text-xs text-white/48">今日学习</dt>
+                <dd className="mt-1 text-xl font-semibold">{stats.todayHours}<span className="ml-1 text-xs font-normal text-white/45">小时</span></dd>
+              </div>
+              <div>
+                <dt className="text-xs text-white/48">本周完成率</dt>
+                <dd className="mt-1 text-xl font-semibold">{stats.weekCompletion}<span className="ml-1 text-xs font-normal text-white/45">%</span></dd>
+              </div>
+              <div>
+                <dt className="text-xs text-white/48">当前排名</dt>
+                <dd className="mt-1 text-xl font-semibold">#{stats.userRank}<span className="ml-1 text-xs font-normal text-white/45">/ {stats.totalUsers}</span></dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="relative min-h-[390px] lg:min-h-0">
+            <div className="pointer-events-none absolute inset-x-[10%] bottom-[9%] h-[22%] rounded-[50%] bg-black/30 blur-3xl" />
+            <LearningIsland totalCheckins={totalCheckins} streak={streak} totalHours={userTotalHours} />
+          </div>
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">

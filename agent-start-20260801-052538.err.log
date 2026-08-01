@@ -1,0 +1,10 @@
+⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+⨯ Error: ENOENT: no such file or directory, open 'D:\项目\summer-checkin\.next\required-server-files.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'D:\\项目\\summer-checkin\\.next\\required-server-files.json'
+}
+⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open 'D:\项目\summer-checkin\.next\server\pages\500.html'
+    at ignore-listed frames

@@ -19,8 +19,8 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
       value: `${stats.streak}`,
       unit: "天",
       icon: Fire,
-      color: "text-orange-500",
-      bg: "bg-orange-500/10",
+      color: "text-emerald-300",
+      bg: "bg-emerald-400/10",
       trend: stats.streak >= 7 ? "up" : "neutral",
     },
     {
@@ -28,8 +28,8 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
       value: `${stats.todayHours}`,
       unit: "小时",
       icon: Clock,
-      color: "text-amber-600",
-      bg: "bg-amber-600/10",
+      color: "text-emerald-400",
+      bg: "bg-emerald-400/10",
       trend: stats.todayHours > 0 ? "up" : "neutral",
     },
     {
@@ -37,8 +37,8 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
       value: `${stats.weekCompletion}`,
       unit: "%",
       icon: Target,
-      color: "text-rose-600",
-      bg: "bg-rose-600/10",
+      color: "text-emerald-300",
+      bg: "bg-emerald-400/10",
       trend: stats.weekCompletion >= 70 ? "up" : stats.weekCompletion > 0 ? "down" : "neutral",
     },
     {
@@ -46,8 +46,8 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
       value: `#${stats.userRank}`,
       unit: `/ ${stats.totalUsers}`,
       icon: Trophy,
-      color: "text-yellow-500",
-      bg: "bg-yellow-500/10",
+      color: "text-emerald-200",
+      bg: "bg-emerald-400/10",
       trend: "neutral",
     },
   ];
@@ -83,7 +83,7 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
               </div>
               <div className="flex items-center gap-1 mt-2">
                 {card.trend === "up" && (
-                  <ArrowUp className="h-3 w-3 text-amber-700" weight="fill" />
+                  <ArrowUp className="h-3 w-3 text-emerald-400" weight="fill" />
                 )}
                 {card.trend === "down" && (
                   <ArrowDown className="h-3 w-3 text-red-500" weight="fill" />

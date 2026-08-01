@@ -8,72 +8,85 @@
 :root {
   --app-font-sans: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
   --app-font-mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-  --background: #e8f0ea;
-  --foreground: #102a25;
-  --card: rgba(248, 252, 249, 0.82);
-  --card-foreground: #102a25;
-  --popover: rgba(250, 253, 251, 0.96);
-  --popover-foreground: #102a25;
-  --primary: #0b6b59;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(222, 237, 230, 0.86);
-  --secondary-foreground: #173f36;
-  --muted: rgba(231, 239, 234, 0.84);
-  --muted-foreground: #5d716b;
-  --accent: rgba(255, 217, 112, 0.72);
-  --accent-foreground: #3a321a;
-  --destructive: #d34e4e;
-  --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.58);
-  --input: rgba(255, 255, 255, 0.68);
-  --ring: #0b6b59;
-  --radius: 0.75rem;
-  --chart-1: #0b6b59;
-  --chart-2: #e2aa3b;
-  --chart-3: #3687a2;
-  --chart-4: #d97858;
-  --chart-5: #6d8b4d;
-  --sidebar-background: rgba(248, 252, 249, 0.9);
-  --sidebar-foreground: #173f36;
-  --sidebar-primary: #0b6b59;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 217, 112, 0.58);
-  --sidebar-accent-foreground: #3a321a;
-  --sidebar-border: rgba(255, 255, 255, 0.58);
-  --sidebar-ring: #0b6b59;
-  --sidebar: rgba(248, 252, 249, 0.9);
-  --scenic-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=88");
-}
 
-.dark {
-  --background: #0b1714;
-  --foreground: #eef6f1;
-  --card: rgba(15, 35, 30, 0.84);
-  --card-foreground: #eef6f1;
-  --popover: rgba(12, 29, 25, 0.97);
-  --popover-foreground: #eef6f1;
-  --primary: #63c5a8;
-  --primary-foreground: #09231c;
-  --secondary: rgba(31, 60, 52, 0.88);
-  --secondary-foreground: #eef6f1;
-  --muted: rgba(29, 53, 47, 0.88);
-  --muted-foreground: #b5c8c0;
-  --accent: rgba(244, 193, 72, 0.32);
-  --accent-foreground: #fff3cc;
-  --destructive: #ef6868;
+  /* ── 墨绿主色 ── */
+  --green-950: #051612;
+  --green-900: #0a241e;
+  --green-800: #0d3027;
+  --green-700: #134236;
+  --green-600: #1a5c4b;
+  --green-500: #1f735e;
+  --green-400: #3b9078;
+  --green-300: #5aaa90;
+  --green-200: #88ccb5;
+  --green-100: #b8e6d5;
+
+  /* ── 主题色映射 ── */
+  --background: #0c1f19;
+  --foreground: #f2f8f4;
+  --card: rgba(255, 255, 255, 0.12);
+  --card-foreground: #f2f8f4;
+  --popover: rgba(255, 255, 255, 0.16);
+  --popover-foreground: #f2f8f4;
+  --primary: #3b9078;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.1);
+  --secondary-foreground: #dceddf;
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: #a0bdb2;
+  --accent: rgba(180, 210, 190, 0.18);
+  --accent-foreground: #d0ede0;
+  --destructive: #e85555;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.14);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: #63c5a8;
-  --sidebar-background: rgba(12, 29, 25, 0.9);
-  --sidebar-foreground: #eef6f1;
-  --sidebar-primary: #63c5a8;
-  --sidebar-primary-foreground: #09231c;
-  --sidebar-accent: rgba(244, 193, 72, 0.24);
-  --sidebar-accent-foreground: #fff3cc;
-  --sidebar-border: rgba(255, 255, 255, 0.14);
-  --sidebar-ring: #63c5a8;
-  --sidebar: rgba(12, 29, 25, 0.9);
+  --ring: #3b9078;
+  --radius: 0.75rem;
+  --chart-1: #3b9078;
+  --chart-2: #c8b45a;
+  --chart-3: #67b4c9;
+  --chart-4: #e0886a;
+  --chart-5: #88b85a;
+  --sidebar-background: rgba(12, 31, 25, 0.9);
+  --sidebar-foreground: #f2f8f4;
+  --sidebar-primary: #3b9078;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(180, 210, 190, 0.16);
+  --sidebar-accent-foreground: #d0ede0;
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --sidebar-ring: #3b9078;
+  --sidebar: rgba(12, 31, 25, 0.9);
+}
+
+.dark {
+  --background: #081713;
+  --foreground: #f2f8f4;
+  --card: rgba(255, 255, 255, 0.1);
+  --card-foreground: #f2f8f4;
+  --popover: rgba(255, 255, 255, 0.14);
+  --popover-foreground: #f2f8f4;
+  --primary: #5aaa90;
+  --primary-foreground: #051612;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #dceddf;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #8ca89c;
+  --accent: rgba(180, 210, 190, 0.14);
+  --accent-foreground: #cbe8d9;
+  --destructive: #e85555;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #5aaa90;
+  --sidebar-background: rgba(8, 23, 19, 0.9);
+  --sidebar-foreground: #f2f8f4;
+  --sidebar-primary: #5aaa90;
+  --sidebar-primary-foreground: #051612;
+  --sidebar-accent: rgba(180, 210, 190, 0.12);
+  --sidebar-accent-foreground: #cbe8d9;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #5aaa90;
+  --sidebar: rgba(8, 23, 19, 0.9);
 }
 
 @theme inline {
@@ -132,98 +145,111 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-transparent text-foreground;
     min-height: 100dvh;
-    background-image:
-      linear-gradient(180deg, rgba(8, 35, 29, 0.18), rgba(8, 35, 29, 0.34)),
-      var(--scenic-image);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    @apply bg-primary/25 text-foreground;
+    @apply bg-primary/30 text-foreground;
   }
 }
 
+/* ── 视频背景层 ── */
+.bg-video {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 视频上的墨绿暗色蒙层 */
+.bg-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 22, 18, 0.55) 0%,
+    rgba(8, 30, 24, 0.4) 40%,
+    rgba(4, 18, 14, 0.65) 100%
+  );
+}
+
 @layer components {
+  /* ── 玻璃白卡片 ── */
   [data-slot="card"] {
-    box-shadow: 0 14px 42px rgba(8, 39, 31, 0.11);
-    backdrop-filter: blur(22px) saturate(125%);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(20px) saturate(120%);
   }
 
   [data-slot="input"],
   [data-slot="textarea"],
   [data-slot="select-trigger"] {
-    background: rgba(255, 255, 255, 0.58);
-    backdrop-filter: blur(14px);
-  }
-
-  .dark [data-slot="input"],
-  .dark [data-slot="textarea"],
-  .dark [data-slot="select-trigger"] {
-    background: rgba(9, 27, 22, 0.62);
-  }
-
-  .scenic-shell {
-    position: relative;
-    isolation: isolate;
-  }
-
-  .scenic-shell::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(6, 30, 24, 0.08) 0%, rgba(8, 34, 28, 0.18) 38%, rgba(6, 27, 22, 0.5) 100%);
-  }
-
-  .glass-panel {
-    border: 1px solid rgba(255, 255, 255, 0.58);
-    background: rgba(248, 252, 249, 0.76);
-    box-shadow: 0 18px 60px rgba(8, 39, 31, 0.15);
-    backdrop-filter: blur(24px) saturate(130%);
-  }
-
-  .dark .glass-panel {
+    background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.14);
-    background: rgba(11, 29, 24, 0.76);
+    backdrop-filter: blur(14px);
+    color: var(--foreground);
+  }
+
+  [data-slot="input"]::placeholder,
+  [data-slot="textarea"]::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  /* ── 通用玻璃面板 ── */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(24px) saturate(120%);
   }
 
   .page-surface {
-    border: 1px solid rgba(255, 255, 255, 0.48);
-    background: rgba(238, 246, 241, 0.62);
-    box-shadow: 0 22px 70px rgba(8, 39, 31, 0.16);
-    backdrop-filter: blur(26px) saturate(125%);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(28px) saturate(120%);
   }
 
-  .dark .page-surface {
-    border-color: rgba(255, 255, 255, 0.1);
-    background: rgba(8, 23, 19, 0.7);
+  /* ── 墨绿半透明面板 ── */
+  .dark-glass {
+    background: rgba(8, 28, 22, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(24px) saturate(120%);
   }
 }
 
 @layer utilities {
   .bg-grid {
     background-image:
-      linear-gradient(to right, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
+      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 56px 56px;
   }
 }
 
 @media (max-width: 768px) {
-  body {
-    background-attachment: scroll;
+  .bg-video,
+  .bg-video-overlay {
+    position: fixed;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bg-video {
+    display: none;
+  }
+
   *,
   *::before,
   *::after {

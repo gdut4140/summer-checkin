@@ -62,6 +62,10 @@ export const ModelName = {
   UserBadge: 'UserBadge',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
+  AgentRun: 'AgentRun',
+  AgentStep: 'AgentStep',
+  AgentApproval: 'AgentApproval',
+  AgentToolCall: 'AgentToolCall',
   UserMemory: 'UserMemory',
   AIHistory: 'AIHistory',
   DocumentChunk: 'DocumentChunk'
@@ -169,6 +173,7 @@ export const CheckinScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   planId: 'planId',
+  sourceTaskId: 'sourceTaskId',
   content: 'content',
   hours: 'hours',
   subject: 'subject',
@@ -239,6 +244,77 @@ export const ConversationMessageScalarFieldEnum = {
 export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
 
 
+export const AgentRunScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  mode: 'mode',
+  goal: 'goal',
+  status: 'status',
+  currentStep: 'currentStep',
+  maxSteps: 'maxSteps',
+  summary: 'summary',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentRunScalarFieldEnum = (typeof AgentRunScalarFieldEnum)[keyof typeof AgentRunScalarFieldEnum]
+
+
+export const AgentStepScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepNumber: 'stepNumber',
+  kind: 'kind',
+  status: 'status',
+  title: 'title',
+  detail: 'detail',
+  input: 'input',
+  output: 'output',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentStepScalarFieldEnum = (typeof AgentStepScalarFieldEnum)[keyof typeof AgentStepScalarFieldEnum]
+
+
+export const AgentApprovalScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  action: 'action',
+  status: 'status',
+  payload: 'payload',
+  decisionReason: 'decisionReason',
+  decidedAt: 'decidedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentApprovalScalarFieldEnum = (typeof AgentApprovalScalarFieldEnum)[keyof typeof AgentApprovalScalarFieldEnum]
+
+
+export const AgentToolCallScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  toolName: 'toolName',
+  status: 'status',
+  idempotencyKey: 'idempotencyKey',
+  input: 'input',
+  output: 'output',
+  error: 'error',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentToolCallScalarFieldEnum = (typeof AgentToolCallScalarFieldEnum)[keyof typeof AgentToolCallScalarFieldEnum]
+
+
 export const UserMemoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -280,6 +356,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const JsonNullValueInput = {
@@ -365,6 +449,7 @@ export const CheckinOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
   planId: 'planId',
+  sourceTaskId: 'sourceTaskId',
   content: 'content',
   subject: 'subject',
   mood: 'mood',
@@ -423,6 +508,74 @@ export const ConversationMessageOrderByRelevanceFieldEnum = {
 export type ConversationMessageOrderByRelevanceFieldEnum = (typeof ConversationMessageOrderByRelevanceFieldEnum)[keyof typeof ConversationMessageOrderByRelevanceFieldEnum]
 
 
+export const AgentRunOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  mode: 'mode',
+  goal: 'goal',
+  status: 'status',
+  summary: 'summary',
+  error: 'error'
+} as const
+
+export type AgentRunOrderByRelevanceFieldEnum = (typeof AgentRunOrderByRelevanceFieldEnum)[keyof typeof AgentRunOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const AgentStepOrderByRelevanceFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  kind: 'kind',
+  status: 'status',
+  title: 'title',
+  detail: 'detail',
+  error: 'error'
+} as const
+
+export type AgentStepOrderByRelevanceFieldEnum = (typeof AgentStepOrderByRelevanceFieldEnum)[keyof typeof AgentStepOrderByRelevanceFieldEnum]
+
+
+export const AgentApprovalOrderByRelevanceFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  action: 'action',
+  status: 'status',
+  decisionReason: 'decisionReason'
+} as const
+
+export type AgentApprovalOrderByRelevanceFieldEnum = (typeof AgentApprovalOrderByRelevanceFieldEnum)[keyof typeof AgentApprovalOrderByRelevanceFieldEnum]
+
+
+export const AgentToolCallOrderByRelevanceFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  stepId: 'stepId',
+  toolName: 'toolName',
+  status: 'status',
+  idempotencyKey: 'idempotencyKey',
+  error: 'error'
+} as const
+
+export type AgentToolCallOrderByRelevanceFieldEnum = (typeof AgentToolCallOrderByRelevanceFieldEnum)[keyof typeof AgentToolCallOrderByRelevanceFieldEnum]
+
+
 export const UserMemoryOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -441,23 +594,6 @@ export const AIHistoryOrderByRelevanceFieldEnum = {
 } as const
 
 export type AIHistoryOrderByRelevanceFieldEnum = (typeof AIHistoryOrderByRelevanceFieldEnum)[keyof typeof AIHistoryOrderByRelevanceFieldEnum]
-
-
-export const JsonNullValueFilter = {
-  DbNull: DbNull,
-  JsonNull: JsonNull,
-  AnyNull: AnyNull
-} as const
-
-export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
 export const DocumentChunkOrderByRelevanceFieldEnum = {
