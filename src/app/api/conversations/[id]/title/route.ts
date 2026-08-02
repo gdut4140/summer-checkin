@@ -47,19 +47,16 @@ export async function PATCH(
       messages: [
         {
           role: "system",
-          content: `你是一个标题生成助手。根据用户与AI的完整对话历史，生成一个简洁的对话标题（不超过20个字）。标题应概括对话的核心主题。只返回标题文本，不要加引号、标点或额外解释。
-
-如果对话涉及多个主题，以最新讨论的主题为准。`,
+          content: `根据对话历史生成标题，不超过20字，只输出标题本身。`,
         },
         { role: "user", content: `请为以下对话生成标题：\n\n${messagesSummary}` },
       ],
       temperature: 0.5,
-      max_tokens: 50,
     });
 
-    const newTitle =
-      response.choices[0]?.message?.content?.trim() ||
-      conversation.title;
+    const rawContent = response.choices[0]?.message?.content;
+    console.log(`[Title PATCH] API返回: "${rawContent}"`);
+    const newTitle = rawContent?.trim() || conversation.title || "未命名对话";
 
     // 只有标题确实变化了才更新数据库
     if (newTitle !== conversation.title) {

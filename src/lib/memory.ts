@@ -40,8 +40,9 @@ export interface UserMemory {
 export interface MemoryExtraction {
   content: string;
   type: MemoryType;
-  importance: number;   // 0-1
-  confidence: number;   // 0-1
+  importance: number;
+  confidence: number;
+  matchExistingId: string | null; // AI 判断匹配到的已有记忆 ID，null = 全新
 }
 
 // ---- 查询 ----
@@ -192,7 +193,6 @@ export async function extractAndSaveMemories(
   aiResponse: string
 ): Promise<void> {
   try {
-    // 先查询已有记忆，传给 AI 做语义去重
     const existing = await prisma.userMemory.findMany({
       where: { userId },
       select: { id: true, content: true, type: true },
@@ -203,63 +203,57 @@ export async function extractAndSaveMemories(
     const extracted = await extractMemoriesWithAI(
       userMessage,
       aiResponse,
-      existing.map((m) => ({ content: m.content, type: m.type }))
+      existing.map((m) => ({ id: m.id, content: m.content }))
     );
-    if (extracted.length === 0) return;
-
-    // 构建去重索引（精确匹配兜底）
-    const normalizeContent = (s: string) =>
-      s.replace(/^用户[是为的]?/, "").replace(/\s+/g, "").trim();
-    const existingIndex = new Map<string, { id: string; type: string }>();
-    for (const m of existing) {
-      existingIndex.set(normalizeContent(m.content), { id: m.id, type: m.type });
+    if (extracted.length === 0) {
+      console.log("[Memory] AI 未提取到信息，跳过");
+      return;
     }
 
-    let saved = 0;
-    for (const item of extracted) {
-      const normContent = normalizeContent(item.content);
-      const match = existingIndex.get(normContent);
+    const existingById = new Map(existing.map((m) => [m.id, m]));
 
-      if (match) {
-        // 已存在 → 更新（含 type 纠正：旧 fact → 新 preference 等）
+    let saved = 0;
+    let updated = 0;
+    for (const item of extracted) {
+      // AI 标注了匹配的已有记忆 ID → 直接更新
+      if (item.matchExistingId && existingById.has(item.matchExistingId)) {
+        const old = existingById.get(item.matchExistingId)!;
         try {
+          const typeChanged = old.type !== item.type;
           await prisma.userMemory.update({
-            where: { id: match.id },
+            where: { id: item.matchExistingId },
             data: {
-              type: item.type,        // 纠正旧 type
+              type: item.type,
+              content: item.content,
               importance: item.importance,
               confidence: item.confidence,
               lastUsed: new Date(),
             },
           });
-          // 更新索引中的 type，避免后续重复再纠正
-          match.type = item.type;
-        } catch {
-          // 静默跳过
-        }
+          updated++;
+          console.log(`[Memory] 🔄 语义匹配更新: [${old.type}→${item.type}] "${old.content}" → "${item.content}"`);
+        } catch {}
         continue;
       }
 
-      // 新记忆 → 创建
+      // AI 没匹配 → 全新创建
       try {
         await prisma.userMemory.create({
           data: {
             userId,
             type: item.type,
-            content: normContent,
+            content: item.content,
             importance: item.importance,
             confidence: item.confidence,
           },
         });
-        existingIndex.set(normContent, { id: "", type: item.type });
         saved++;
-      } catch {
-        // 并发写入冲突，跳过
-      }
+        console.log(`[Memory] ✨ 新建: [${item.type}] "${item.content}"`);
+      } catch {}
     }
 
-    if (saved > 0) {
-      console.log(`[Memory] 为用户 ${userId} 保存了 ${saved} 条新记忆`);
+    if (saved > 0 || updated > 0) {
+      console.log(`[Memory] 用户 ${userId}: 新建 ${saved} 条, 更新 ${updated} 条`);
     }
   } catch (error) {
     console.error("[Memory] 提取记忆失败:", error);
@@ -285,9 +279,9 @@ const EXTRACTION_PROMPT = `你是信息提取助手。根据以下对话，提�
 
 ## 提取规则
 1. 只提取用户**明确说出**的信息，不要推测
-2. 每条用简短中文表述，不超过 30 字
-3. 如果对话中没有任何新的用户信息，返回空数组
-4. **重要**：如果对话中提到的信息与「已有记忆」语义重复（意思相同但措辞不同），不要重复提取。例如已有"喜欢学前端React"，对话说"我在学React"，则跳过
+2. 每条用简短中文表述，不超过 30 字，不要加括号注释
+3. 如果对话中没有任何用户信息，返回空数组
+4. **语义匹配**：参考下方「已有记忆」列表，如果对话信息与某条已有记忆**意思相同**（措辞可以不同），在 matchExistingId 填那条记忆的 ID；如果是新信息填 null
 
 ## type 分类
 - goal: 学习/职业目标（"准备字节前端面试"、"3个月学完Next.js"）
@@ -311,19 +305,18 @@ const EXTRACTION_PROMPT = `你是信息提取助手。根据以下对话，提�
 - 0.3: 不太确定
 
 返回严格 JSON 格式：
-[{"content": "...", "type": "goal", "importance": 0.9, "confidence": 1.0}]`;
+[{"content": "...", "type": "goal", "importance": 0.9, "confidence": 1.0, "matchExistingId": "cuid123" | null}]`;
 
 async function extractMemoriesWithAI(
   userMessage: string,
   aiResponse: string,
-  existingMemories: { content: string; type: string }[] = []
+  existingMemories: { id: string; content: string }[] = []
 ): Promise<MemoryExtraction[]> {
   const client = createAIClient();
 
-  // 构建已有记忆列表（只取最近10条，控制 prompt 长度）
-  const existingText = existingMemories.slice(0, 10)
-    .map((m) => `- [${m.type}] ${m.content}`)
-    .join("\n");
+  const existingList = existingMemories.length > 0
+    ? `\n## 已有记忆（用于语义匹配）\n${existingMemories.map((m) => `- id:${m.id} | ${m.content}`).join("\n")}`
+    : "";
 
   const response = await client.chat.completions.create({
     model: process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash",
@@ -331,7 +324,7 @@ async function extractMemoriesWithAI(
       { role: "system", content: EXTRACTION_PROMPT },
       {
         role: "user",
-        content: `已有记忆：\n${existingText || "（暂无）"}\n\n用户说：${userMessage}\n\nAI 回复：${aiResponse}`,
+        content: `用户说：${userMessage}\n\nAI 回复：${aiResponse}${existingList}`,
       },
     ],
     temperature: 0.3,
@@ -346,13 +339,14 @@ async function extractMemoriesWithAI(
     const parsed = JSON.parse(text);
     const items = Array.isArray(parsed) ? parsed : parsed.items ?? [];
     return items.filter(
-      (item: { content?: string; type?: string; importance?: number; confidence?: number }) =>
+      (item: { content?: string; type?: string }) =>
         item.content && item.type
-    ).map((item: { content: string; type: string; importance?: number; confidence?: number }) => ({
+    ).map((item: { content: string; type: string; importance?: number; confidence?: number; matchExistingId?: string | null }) => ({
       content: item.content,
       type: (item.type ?? "fact") as MemoryType,
       importance: clampScore(item.importance ?? 0.5),
       confidence: clampScore(item.confidence ?? 0.5),
+      matchExistingId: item.matchExistingId ?? null,
     }));
   } catch {
     console.warn("[Memory] AI 提取结果解析失败:", text.slice(0, 100));

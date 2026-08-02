@@ -70,6 +70,7 @@ export function ChatInterface({
     if (!activeId) return;
 
     const currentCount = messages.length;
+    console.log(`[Title] 离开对话 activeId=${activeId} currentCount=${currentCount} initialCount=${initialMsgCountRef.current} shouldUpdate=${currentCount > initialMsgCountRef.current}`);
     // 没有新消息 → 跳过，不浪费 API 调用
     if (currentCount <= initialMsgCountRef.current) return;
 

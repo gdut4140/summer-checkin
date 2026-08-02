@@ -578,7 +578,7 @@ export async function runLearningAgent(
       data: {
         userId,
         mode,
-        goal: `Autonomous ${mode} loop`,
+        goal: mode === "daily" ? "每日学习状态自动分析" : `自主${mode}分析`,
         status: "running",
         startedAt,
         currentStep: 1,
@@ -767,9 +767,10 @@ export async function runLearningAgent(
       await prisma.agentRun.update({
         where: { id: run.id },
         data: {
-          status: "awaiting_approval", // 等用户查看确认
+          status: "completed",
           currentStep: executeStepNum,
           summary: analysis.summary,
+          completedAt,
         },
       });
     }

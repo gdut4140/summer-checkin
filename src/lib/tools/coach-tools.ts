@@ -91,7 +91,7 @@ export function createCoachTools(userId: string) {
               select: { id: true, name: true, goal: true },
             }),
             prisma.userMemory.findMany({
-              where: { userId, category: "goal" },
+              where: { userId, type: "goal" },
               select: { content: true },
             }),
           ]);

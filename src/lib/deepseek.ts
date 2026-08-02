@@ -187,16 +187,15 @@ export async function generateChatTitle(firstMessage: string): Promise<string> {
       {
         role: "system",
         content:
-          "你是一个标题生成助手。根据用户的第一条消息，生成一个简短的对话标题（不超过20个字）。只返回标题文本，不要加引号、标点或额外解释。",
+          "根据用户消息生成对话标题，不超过20字，只输出标题本身。",
       },
       { role: "user", content: firstMessage },
     ],
     temperature: 0.5,
-    max_tokens: 50,
   });
 
-  return (
-    response.choices[0]?.message?.content?.trim() ??
-    firstMessage.slice(0, 20)
-  );
+  const title = response.choices[0]?.message?.content?.trim();
+  const finalTitle = title || firstMessage.slice(0, 20);
+  console.log(`[generateChatTitle] API="${response.choices[0]?.message?.content}" → "${finalTitle}"`);
+  return finalTitle;
 }

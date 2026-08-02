@@ -216,6 +216,7 @@ export function AgentWorkspace({ initialRuns }: Props) {
     }
   }
 
+
   async function cancelRun() {
     if (!selectedRun) return;
     setDetailLoading(true);
@@ -292,10 +293,31 @@ export function AgentWorkspace({ initialRuns }: Props) {
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="line-clamp-2 text-sm font-medium">{run.goal}</span>
-                    <Badge variant={statusVariants[run.status] ?? "outline"}>
-                      {statusLabels[run.status] ?? run.status}
-                    </Badge>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        {run.mode !== "planner" && (
+                          <Badge variant="secondary" className="shrink-0 text-[10px] px-1.5 py-0">
+                            {run.mode === "daily" ? "每日" : run.mode === "coach" ? "教练" : run.mode}
+                          </Badge>
+                        )}
+                        <span className="line-clamp-1 text-sm font-medium">
+                          {run.mode !== "planner"
+                            ? run.summary ?? formatTime(run.updatedAt)
+                            : run.goal}
+                        </span>
+                      </div>
+                    </div>
+                    {(() => {
+                      const isDailyDone = run.mode !== "planner" && run.status === "completed";
+                      return (
+                        <Badge
+                          variant={isDailyDone || run.status === "rejected" || run.status === "failed" ? "default" : (statusVariants[run.status] ?? "outline")}
+                          className={`shrink-0 ${isDailyDone ? "bg-[#f3c969] text-[#17352d] hover:bg-[#f3c969]/90 border-0" : run.status === "rejected" || run.status === "failed" ? "bg-destructive text-destructive-foreground border-0" : ""}`}
+                        >
+                          {isDailyDone ? "小建议" : (statusLabels[run.status] ?? run.status)}
+                        </Badge>
+                      );
+                    })()}
                   </div>
                   <p className="mt-2 truncate text-xs text-muted-foreground">
                     {run.latestStep?.title ?? run.summary ?? "等待处理"} · {formatTime(run.updatedAt)}
@@ -321,61 +343,69 @@ export function AgentWorkspace({ initialRuns }: Props) {
                 <div className="min-w-0">
                   <CardTitle className="flex items-center gap-2">
                     <ListChecks className="h-5 w-5 text-primary" />
-                    Agent 运行详情
+                    {selectedRun.mode === "daily" ? "每日自动分析" : selectedRun.mode === "coach" ? "教练分析" : "Agent 运行详情"}
+                    {selectedRun.mode !== "planner" && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">系统自动</Badge>
+                    )}
                   </CardTitle>
-                  <CardDescription className="mt-1 break-words">{selectedRun.goal}</CardDescription>
+                  <CardDescription className="mt-1 break-words">{selectedRun.summary || selectedRun.goal}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={statusVariants[selectedRun.status] ?? "outline"}>
-                    {statusLabels[selectedRun.status] ?? selectedRun.status}
-                  </Badge>
-                  {["running", "awaiting_approval"].includes(selectedRun.status) && (
-                    <Button variant="outline" size="sm" onClick={cancelRun} disabled={detailLoading}>
-                      <Stop className="h-4 w-4" />
-                      取消
-                    </Button>
-                  )}
+                  {(() => {
+                    const isDailyDone = selectedRun.mode !== "planner" && selectedRun.status === "completed";
+                    const isRejected = selectedRun.status === "rejected" || selectedRun.status === "failed";
+                    return (
+                      <Badge
+                        variant={isDailyDone || isRejected ? "default" : (statusVariants[selectedRun.status] ?? "outline")}
+                        className={`${isDailyDone ? "bg-[#f3c969] text-[#17352d] border-0" : isRejected ? "bg-destructive text-destructive-foreground border-0" : ""}`}
+                      >
+                        {isDailyDone ? "小建议" : (statusLabels[selectedRun.status] ?? selectedRun.status)}
+                      </Badge>
+                    );
+                  })()}
                 </div>
               </div>
               {selectedRun.summary && <p className="text-sm text-foreground/80">{selectedRun.summary}</p>}
               {selectedRun.error && <p className="text-sm text-destructive">{selectedRun.error}</p>}
             </CardHeader>
             <CardContent className="space-y-6 py-6">
-              <section>
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">执行轨迹</h3>
-                  <span className="text-xs text-muted-foreground">第 {selectedRun.currentStep} 步</span>
+              {selectedRun.approvals.length > 0 && (
+                <div className="mb-3">
+                  <Badge className={`text-xs font-semibold border-0 ${selectedRun.mode !== "planner" ? "bg-[#f3c969] text-[#17352d]" : "bg-primary text-primary-foreground"}`}>
+                    {selectedRun.mode !== "planner" ? "系统自动总结" : "计划草案"}
+                  </Badge>
                 </div>
-                <div className="space-y-3">
-                  {selectedRun.steps.map((step) => (
-                    <div key={step.id} className="flex gap-3">
-                      <div className="flex w-5 shrink-0 justify-center pt-0.5">
-                        <StepIcon status={step.status} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-sm font-medium">{step.stepNumber}. {step.title}</p>
-                          <span className="text-xs text-muted-foreground">{statusLabels[step.status] ?? step.status}</span>
-                        </div>
-                        {step.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{step.detail}</p>}
-                        {step.error && <p className="mt-1 text-xs text-destructive">{step.error}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
+              )}
               {selectedRun.approvals.map((approval) => {
                 const draft = isPlanDraft(approval.payload) ? approval.payload : null;
+                const payload = approval.payload as Record<string, unknown> | null;
+
+                // daily_analysis / daily_action → 系统自动总结
+                if (approval.action === "daily_analysis" || approval.action === "daily_action") {
+                  const isFinding = approval.action === "daily_analysis";
+                  const severity = (payload?.severity as string) ?? "info";
+                  const severityColor: Record<string, string> = {
+                    critical: "border-[#e8aaaa] bg-[#fef0f0] text-[#b84040]",
+                    warning: "border-[#f3d878] bg-[#fef9e7] text-[#2d5a3d]",
+                    info: "border-[#b8d8c0] bg-[#eaf6ef] text-[#2d5a3d]",
+                  };
+                  return (
+                    <div key={approval.id} className={`rounded-lg border px-3 py-3 mb-3 ${severityColor[severity] ?? severityColor.info}`}>
+                      <p className="text-xs font-medium uppercase tracking-wide opacity-70">
+                        {isFinding ? "分析发现" : "建议行动"} · {severity}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold">{payload?.detail as string ?? payload?.reason as string ?? "—"}</p>
+                    </div>
+                  );
+                }
+
+                // create_plan / 默认 → 计划草案
                 return (
-                  <section key={approval.id} className="border-t border-border pt-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <h3 className="text-sm font-semibold">计划草案</h3>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {approval.status === "pending" ? "确认后才会创建真实计划和任务" : `审批状态：${approval.status}`}
-                        </p>
-                      </div>
+                  <div key={approval.id} className="mb-3 rounded-lg border border-[#b8d8c0] bg-[#eaf6ef] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <p className="text-xs font-medium text-[#2d5a3d]">
+                        {approval.status === "pending" ? "确认后将会创建真实计划和任务" : `审批状态：${approval.status}`}
+                      </p>
                       {approval.status === "pending" && (
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={() => decide("reject")} disabled={detailLoading}>
@@ -390,12 +420,12 @@ export function AgentWorkspace({ initialRuns }: Props) {
                       )}
                     </div>
                     {draft && (
-                      <div className="mt-4 space-y-4 rounded-lg border border-border bg-muted/20 p-4">
+                      <div className="space-y-3 rounded-lg border border-[#e2d6b8] bg-white/60 p-4">
                         <div>
-                          <p className="font-medium">{draft.name}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">{draft.description ?? draft.goal}</p>
+                          <p className="text-base font-semibold text-[#1e4a2d]">{draft.name}</p>
+                          <p className="mt-1 text-sm text-[#2d5a3d] font-medium">{draft.description ?? draft.goal}</p>
                         </div>
-                        <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-[#3a6b4a]">
                           <span>目标时长：{draft.targetHours} 小时</span>
                           <span>任务数：{draft.tasks.length}</span>
                         </div>
@@ -403,20 +433,20 @@ export function AgentWorkspace({ initialRuns }: Props) {
                         <div className="space-y-2">
                           {draft.tasks.map((task, index) => (
                             <div key={`${task.title}-${index}`} className="flex gap-3 text-sm">
-                              <span className="w-5 shrink-0 text-right text-xs text-muted-foreground">{index + 1}</span>
+                              <span className="w-5 shrink-0 text-right text-xs font-semibold text-[#3a6b4a]">{index + 1}</span>
                               <div className="min-w-0">
-                                <p className="font-medium">{task.title}</p>
-                                {task.description && <p className="mt-0.5 text-xs text-muted-foreground">{task.description}</p>}
+                                <p className="font-semibold text-[#1e4a2d]">{task.title}</p>
+                                {task.description && <p className="mt-0.5 text-xs text-[#3a6b4a] font-medium">{task.description}</p>}
                               </div>
                             </div>
                           ))}
                         </div>
                         {draft.assumptions && draft.assumptions.length > 0 && (
-                          <p className="text-xs text-muted-foreground">前提：{draft.assumptions.join("；")}</p>
+                          <p className="text-xs text-[#3a6b4a] font-medium">前提：{draft.assumptions.join("；")}</p>
                         )}
                       </div>
                     )}
-                  </section>
+                  </div>
                 );
               })}
             </CardContent>
