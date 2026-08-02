@@ -12,6 +12,8 @@ import {
   Sparkle,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import SplitText from "./SplitText";
+import ShinyText from "./ShinyText";
 
 const pulseItems = [
   { icon: CalendarCheck, value: "12 天", label: "连续打卡" },
@@ -48,11 +50,29 @@ export function Hero() {
         >
           <div className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-white/86">
             <Sparkle className="h-4 w-4 text-[#f3c969]" weight="fill" />
-            AI 驱动的学习节奏管理
+            <ShinyText
+              text="AI 驱动的学习节奏管理"
+              speed={3}
+              color="#ffffff"
+              shineColor="#f3c969"
+              spread={120}
+              direction="left"
+            />
           </div>
-          <h1 className="text-5xl font-semibold leading-[1.03] md:text-7xl lg:text-8xl">
-            Summer Checkin
-          </h1>
+          <SplitText
+            text="Summer Checkin"
+            tag="h1"
+            className="text-5xl font-semibold leading-[1.03] md:text-7xl lg:text-8xl"
+            delay={80}
+            duration={0.8}
+            ease="power3.out"
+            splitType="chars"
+            from={{ opacity: 0, y: 60 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.1}
+            rootMargin="-50px"
+            textAlign="center"
+          />
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/84 md:text-xl">
             把每一次专注留在风景里。制定计划、完成打卡、观察成长，让 AI 帮你把这个夏天变成一段清晰可见的进步。
           </p>

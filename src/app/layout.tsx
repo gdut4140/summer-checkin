@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import ClickSpark from "@/components/landing/ClickSpark";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,8 +41,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster richColors closeButton />
+          <ClickSpark sparkColor="#f3c969" sparkCount={8} sparkSize={10} sparkRadius={18} duration={450}>
+            {children}
+            <Toaster richColors closeButton />
+          </ClickSpark>
         </ThemeProvider>
       </body>
     </html>
