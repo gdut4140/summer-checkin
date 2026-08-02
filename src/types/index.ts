@@ -173,3 +173,49 @@ export interface BreakdownTasksResult {
   message: string;
   tasks: PlanTaskInfo[];
 }
+
+// ============================================================
+// Phase 2: Memory + AgentDecision 类型
+// ============================================================
+
+/** 记忆类型 */
+export type MemoryType =
+  | "goal"
+  | "habit"
+  | "preference"
+  | "skill"
+  | "weakness"
+  | "fact";
+
+export interface MemoryInfo {
+  id: string;
+  content: string;
+  type: MemoryType;
+  importance: number;
+  confidence: number;
+  lastUsed: string | null;
+  createdAt: string;
+}
+
+/** Agent 决策类型 */
+export type DecisionType = "PLAN_ADJUST" | "REMINDER" | "ANALYSIS" | "TASK_CREATE";
+export type DecisionStatus = "executed" | "pending" | "rejected" | "failed";
+
+export interface DecisionInfo {
+  id: string;
+  userId: string;
+  runId: string | null;
+  type: DecisionType;
+  reason: string;
+  action: Record<string, unknown>;
+  status: DecisionStatus;
+  feedback: string | null;
+  createdAt: string;
+}
+
+export interface DecisionStats {
+  total: number;
+  byType: Record<string, number>;
+  byStatus: Record<string, number>;
+  recentRate: number;
+}

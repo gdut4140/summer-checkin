@@ -233,6 +233,7 @@ export type UserWhereInput = {
   conversations?: Prisma.ConversationListRelationFilter
   planTasks?: Prisma.PlanTaskListRelationFilter
   agentRuns?: Prisma.AgentRunListRelationFilter
+  decisions?: Prisma.AgentDecisionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -257,6 +258,7 @@ export type UserOrderByWithRelationInput = {
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   planTasks?: Prisma.PlanTaskOrderByRelationAggregateInput
   agentRuns?: Prisma.AgentRunOrderByRelationAggregateInput
+  decisions?: Prisma.AgentDecisionOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
 
@@ -285,6 +287,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   conversations?: Prisma.ConversationListRelationFilter
   planTasks?: Prisma.PlanTaskListRelationFilter
   agentRuns?: Prisma.AgentRunListRelationFilter
+  decisions?: Prisma.AgentDecisionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -341,6 +344,7 @@ export type UserCreateInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -365,6 +369,7 @@ export type UserUncheckedCreateInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -389,6 +394,7 @@ export type UserUpdateInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -413,6 +419,7 @@ export type UserUncheckedUpdateInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -646,6 +653,20 @@ export type UserUpdateOneRequiredWithoutAgentRunsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAgentRunsInput, Prisma.UserUpdateWithoutAgentRunsInput>, Prisma.UserUncheckedUpdateWithoutAgentRunsInput>
 }
 
+export type UserCreateNestedOneWithoutDecisionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDecisionsInput, Prisma.UserUncheckedCreateWithoutDecisionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDecisionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDecisionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDecisionsInput, Prisma.UserUncheckedCreateWithoutDecisionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDecisionsInput
+  upsert?: Prisma.UserUpsertWithoutDecisionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDecisionsInput, Prisma.UserUpdateWithoutDecisionsInput>, Prisma.UserUncheckedUpdateWithoutDecisionsInput>
+}
+
 export type UserCreateNestedOneWithoutMemoriesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutMemoriesInput, Prisma.UserUncheckedCreateWithoutMemoriesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutMemoriesInput
@@ -695,6 +716,7 @@ export type UserCreateWithoutSessionsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -718,6 +740,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -757,6 +780,7 @@ export type UserUpdateWithoutSessionsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -780,6 +804,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -803,6 +828,7 @@ export type UserCreateWithoutAccountsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -826,6 +852,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -865,6 +892,7 @@ export type UserUpdateWithoutAccountsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -888,6 +916,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlansInput = {
@@ -911,6 +940,7 @@ export type UserCreateWithoutPlansInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlansInput = {
@@ -934,6 +964,7 @@ export type UserUncheckedCreateWithoutPlansInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlansInput = {
@@ -973,6 +1004,7 @@ export type UserUpdateWithoutPlansInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlansInput = {
@@ -996,6 +1028,7 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlanTasksInput = {
@@ -1019,6 +1052,7 @@ export type UserCreateWithoutPlanTasksInput = {
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlanTasksInput = {
@@ -1042,6 +1076,7 @@ export type UserUncheckedCreateWithoutPlanTasksInput = {
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlanTasksInput = {
@@ -1081,6 +1116,7 @@ export type UserUpdateWithoutPlanTasksInput = {
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlanTasksInput = {
@@ -1104,6 +1140,7 @@ export type UserUncheckedUpdateWithoutPlanTasksInput = {
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCheckinsInput = {
@@ -1127,6 +1164,7 @@ export type UserCreateWithoutCheckinsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckinsInput = {
@@ -1150,6 +1188,7 @@ export type UserUncheckedCreateWithoutCheckinsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckinsInput = {
@@ -1189,6 +1228,7 @@ export type UserUpdateWithoutCheckinsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckinsInput = {
@@ -1212,6 +1252,7 @@ export type UserUncheckedUpdateWithoutCheckinsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStudyRecordsInput = {
@@ -1235,6 +1276,7 @@ export type UserCreateWithoutStudyRecordsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudyRecordsInput = {
@@ -1258,6 +1300,7 @@ export type UserUncheckedCreateWithoutStudyRecordsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudyRecordsInput = {
@@ -1297,6 +1340,7 @@ export type UserUpdateWithoutStudyRecordsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudyRecordsInput = {
@@ -1320,6 +1364,7 @@ export type UserUncheckedUpdateWithoutStudyRecordsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserBadgesInput = {
@@ -1343,6 +1388,7 @@ export type UserCreateWithoutUserBadgesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserBadgesInput = {
@@ -1366,6 +1412,7 @@ export type UserUncheckedCreateWithoutUserBadgesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserBadgesInput = {
@@ -1405,6 +1452,7 @@ export type UserUpdateWithoutUserBadgesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserBadgesInput = {
@@ -1428,6 +1476,7 @@ export type UserUncheckedUpdateWithoutUserBadgesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutConversationsInput = {
@@ -1451,6 +1500,7 @@ export type UserCreateWithoutConversationsInput = {
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsInput = {
@@ -1474,6 +1524,7 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsInput = {
@@ -1513,6 +1564,7 @@ export type UserUpdateWithoutConversationsInput = {
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsInput = {
@@ -1536,6 +1588,7 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAgentRunsInput = {
@@ -1559,6 +1612,7 @@ export type UserCreateWithoutAgentRunsInput = {
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAgentRunsInput = {
@@ -1582,6 +1636,7 @@ export type UserUncheckedCreateWithoutAgentRunsInput = {
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAgentRunsInput = {
@@ -1621,6 +1676,7 @@ export type UserUpdateWithoutAgentRunsInput = {
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAgentRunsInput = {
@@ -1644,6 +1700,119 @@ export type UserUncheckedUpdateWithoutAgentRunsInput = {
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDecisionsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDecisionsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDecisionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDecisionsInput, Prisma.UserUncheckedCreateWithoutDecisionsInput>
+}
+
+export type UserUpsertWithoutDecisionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDecisionsInput, Prisma.UserUncheckedUpdateWithoutDecisionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDecisionsInput, Prisma.UserUncheckedCreateWithoutDecisionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDecisionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDecisionsInput, Prisma.UserUncheckedUpdateWithoutDecisionsInput>
+}
+
+export type UserUpdateWithoutDecisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDecisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMemoriesInput = {
@@ -1667,6 +1836,7 @@ export type UserCreateWithoutMemoriesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMemoriesInput = {
@@ -1690,6 +1860,7 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMemoriesInput = {
@@ -1729,6 +1900,7 @@ export type UserUpdateWithoutMemoriesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMemoriesInput = {
@@ -1752,6 +1924,7 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiHistoriesInput = {
@@ -1775,6 +1948,7 @@ export type UserCreateWithoutAiHistoriesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiHistoriesInput = {
@@ -1798,6 +1972,7 @@ export type UserUncheckedCreateWithoutAiHistoriesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiHistoriesInput = {
@@ -1837,6 +2012,7 @@ export type UserUpdateWithoutAiHistoriesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiHistoriesInput = {
@@ -1860,6 +2036,7 @@ export type UserUncheckedUpdateWithoutAiHistoriesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1879,6 +2056,7 @@ export type UserCountOutputType = {
   conversations: number
   planTasks: number
   agentRuns: number
+  decisions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1893,6 +2071,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   conversations?: boolean | UserCountOutputTypeCountConversationsArgs
   planTasks?: boolean | UserCountOutputTypeCountPlanTasksArgs
   agentRuns?: boolean | UserCountOutputTypeCountAgentRunsArgs
+  decisions?: boolean | UserCountOutputTypeCountDecisionsArgs
 }
 
 /**
@@ -1982,6 +2161,13 @@ export type UserCountOutputTypeCountAgentRunsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.AgentRunWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDecisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AgentDecisionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2005,6 +2191,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
   planTasks?: boolean | Prisma.User$planTasksArgs<ExtArgs>
   agentRuns?: boolean | Prisma.User$agentRunsArgs<ExtArgs>
+  decisions?: boolean | Prisma.User$decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2036,6 +2223,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
   planTasks?: boolean | Prisma.User$planTasksArgs<ExtArgs>
   agentRuns?: boolean | Prisma.User$agentRunsArgs<ExtArgs>
+  decisions?: boolean | Prisma.User$decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -2053,6 +2241,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
     planTasks: Prisma.$PlanTaskPayload<ExtArgs>[]
     agentRuns: Prisma.$AgentRunPayload<ExtArgs>[]
+    decisions: Prisma.$AgentDecisionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2416,6 +2605,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   conversations<T extends Prisma.User$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   planTasks<T extends Prisma.User$planTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$planTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlanTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   agentRuns<T extends Prisma.User$agentRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$agentRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  decisions<T extends Prisma.User$decisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$decisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentDecisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3064,6 +3254,30 @@ export type User$agentRunsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AgentRunScalarFieldEnum | Prisma.AgentRunScalarFieldEnum[]
+}
+
+/**
+ * User.decisions
+ */
+export type User$decisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentDecision
+   */
+  select?: Prisma.AgentDecisionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentDecision
+   */
+  omit?: Prisma.AgentDecisionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentDecisionInclude<ExtArgs> | null
+  where?: Prisma.AgentDecisionWhereInput
+  orderBy?: Prisma.AgentDecisionOrderByWithRelationInput | Prisma.AgentDecisionOrderByWithRelationInput[]
+  cursor?: Prisma.AgentDecisionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AgentDecisionScalarFieldEnum | Prisma.AgentDecisionScalarFieldEnum[]
 }
 
 /**

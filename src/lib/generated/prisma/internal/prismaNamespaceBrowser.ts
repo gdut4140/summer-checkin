@@ -66,6 +66,7 @@ export const ModelName = {
   AgentStep: 'AgentStep',
   AgentApproval: 'AgentApproval',
   AgentToolCall: 'AgentToolCall',
+  AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
   AIHistory: 'AIHistory',
   DocumentChunk: 'DocumentChunk'
@@ -315,11 +316,29 @@ export const AgentToolCallScalarFieldEnum = {
 export type AgentToolCallScalarFieldEnum = (typeof AgentToolCallScalarFieldEnum)[keyof typeof AgentToolCallScalarFieldEnum]
 
 
+export const AgentDecisionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  runId: 'runId',
+  type: 'type',
+  reason: 'reason',
+  action: 'action',
+  status: 'status',
+  feedback: 'feedback',
+  createdAt: 'createdAt'
+} as const
+
+export type AgentDecisionScalarFieldEnum = (typeof AgentDecisionScalarFieldEnum)[keyof typeof AgentDecisionScalarFieldEnum]
+
+
 export const UserMemoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  type: 'type',
   content: 'content',
-  category: 'category',
+  importance: 'importance',
+  confidence: 'confidence',
+  lastUsed: 'lastUsed',
   createdAt: 'createdAt'
 } as const
 
@@ -576,11 +595,24 @@ export const AgentToolCallOrderByRelevanceFieldEnum = {
 export type AgentToolCallOrderByRelevanceFieldEnum = (typeof AgentToolCallOrderByRelevanceFieldEnum)[keyof typeof AgentToolCallOrderByRelevanceFieldEnum]
 
 
+export const AgentDecisionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  runId: 'runId',
+  type: 'type',
+  reason: 'reason',
+  status: 'status',
+  feedback: 'feedback'
+} as const
+
+export type AgentDecisionOrderByRelevanceFieldEnum = (typeof AgentDecisionOrderByRelevanceFieldEnum)[keyof typeof AgentDecisionOrderByRelevanceFieldEnum]
+
+
 export const UserMemoryOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
-  content: 'content',
-  category: 'category'
+  type: 'type',
+  content: 'content'
 } as const
 
 export type UserMemoryOrderByRelevanceFieldEnum = (typeof UserMemoryOrderByRelevanceFieldEnum)[keyof typeof UserMemoryOrderByRelevanceFieldEnum]

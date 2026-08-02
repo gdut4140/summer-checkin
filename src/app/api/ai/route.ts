@@ -22,7 +22,7 @@ import { getAuthUser } from "@/lib/auth-utils";
 import { getAIModel, getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
-import { createStudyTools, createRAGTool, createAgentTools } from "@/lib/tools";
+import { createStudyTools, createRAGTool, createAgentTools, createCoachTools } from "@/lib/tools";
 import {
   getRelevantMemories,
   formatMemoriesForPrompt,
@@ -141,10 +141,12 @@ export async function POST(request: NextRequest) {
       providerOptions: getDeepThinkOptions(deepThink ?? false),
       messages: truncatedMessages,
       // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
+      // Phase 1: Coach 工具（学习分析 + 计划调整）
       tools: {
         ...createStudyTools(user.id),
         ...createRAGTool(),
         ...createAgentTools(user.id),
+        ...createCoachTools(user.id),
       },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
       // Day 22: 增至 10 步 — Agent Workflow 需要更多步骤（规划→拆分→检查）

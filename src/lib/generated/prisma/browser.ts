@@ -93,6 +93,11 @@ export type AgentApproval = Prisma.AgentApprovalModel
  */
 export type AgentToolCall = Prisma.AgentToolCallModel
 /**
+ * Model AgentDecision
+ * 
+ */
+export type AgentDecision = Prisma.AgentDecisionModel
+/**
  * Model UserMemory
  * 
  */

@@ -30,6 +30,9 @@ model User {
   conversations Conversation[]
   planTasks     PlanTask[]
   agentRuns     AgentRun[]
+  decisions     AgentDecision[]
+
+  @@map("user")
 }
 
 model Session {
@@ -43,6 +46,8 @@ model Session {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
 }
 
 model Account {
@@ -60,6 +65,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
+  @@map("account")
 }
 
 model Plan {
@@ -75,27 +81,25 @@ model Plan {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   checkins Checkin[]
   tasks    PlanTask[]
+
+  @@map("plan")
 }
 
-// ============================================================
-// Day 22 Agent Workflow: 计划任务拆分
-// 每个 Plan 可拆分为多个 Task（按天/周组织）
-// ============================================================
 model PlanTask {
   id          String    @id @default(cuid())
   planId      String
   userId      String
-  title       String // 任务标题
-  description String?   @db.Text // 任务详细描述
-  dayNumber   Int? // 第几天（如 Day 1, Day 2...）
-  weekNumber  Int? // 第几周
-  category    String    @default("study") // study | project | review | exercise
-  status      String    @default("pending") // pending | in_progress | done | skipped
-  priority    String    @default("normal") // high | normal | low
-  completedAt DateTime? // 完成时间
+  title       String
+  description String?   @db.Text
+  dayNumber   Int?
+  weekNumber  Int?
+  category    String    @default("study")
+  status      String    @default("pending")
+  priority    String    @default("normal")
+  completedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -105,6 +109,7 @@ model PlanTask {
   @@index([planId])
   @@index([userId, status])
   @@index([userId, dayNumber])
+  @@map("plantask")
 }
 
 model Checkin {
@@ -126,6 +131,7 @@ model Checkin {
 
   @@index([userId, checkinDate])
   @@index([sourceTaskId])
+  @@map("checkin")
 }
 
 model StudyRecord {
@@ -140,6 +146,7 @@ model StudyRecord {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, date])
+  @@map("studyrecord")
 }
 
 model Badge {
@@ -151,6 +158,8 @@ model Badge {
   createdAt   DateTime @default(now())
 
   userBadges UserBadge[]
+
+  @@map("badge")
 }
 
 model UserBadge {
@@ -163,6 +172,7 @@ model UserBadge {
   badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, badgeId])
+  @@map("userbadge")
 }
 
 model Conversation {
@@ -176,23 +186,22 @@ model Conversation {
   messages ConversationMessage[]
 
   @@index([userId, updatedAt])
+  @@map("conversation")
 }
 
 model ConversationMessage {
   id             String   @id @default(cuid())
   conversationId String
-  role           String // "user" | "assistant"
+  role           String
   content        String   @db.Text
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
+  @@map("conversationmessage")
 }
 
-// ============================================================
-// Agent productization: explicit runs, steps, approvals and tool traces
-// ============================================================
 model AgentRun {
   id          String    @id @default(cuid())
   userId      String
@@ -212,9 +221,11 @@ model AgentRun {
   steps     AgentStep[]
   approvals AgentApproval[]
   toolCalls AgentToolCall[]
+  decisions AgentDecision[]
 
   @@index([userId, updatedAt])
   @@index([userId, status])
+  @@map("agentrun")
 }
 
 model AgentStep {
@@ -238,6 +249,7 @@ model AgentStep {
 
   @@unique([runId, stepNumber])
   @@index([runId, status])
+  @@map("agentstep")
 }
 
 model AgentApproval {
@@ -252,9 +264,10 @@ model AgentApproval {
   createdAt      DateTime  @default(now())
 
   run  AgentRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
-  step AgentStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+  step AgentStep? @relation(fields: [stepId], references: [id])
 
   @@index([runId, status])
+  @@map("agentapproval")
 }
 
 model AgentToolCall {
@@ -272,22 +285,49 @@ model AgentToolCall {
   createdAt      DateTime  @default(now())
 
   run  AgentRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
-  step AgentStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+  step AgentStep? @relation(fields: [stepId], references: [id])
 
   @@index([runId, status])
   @@index([runId, toolName])
+  @@map("agenttoolcall")
+}
+
+model AgentDecision {
+  id        String   @id @default(cuid())
+  userId    String
+  runId     String?
+  type      String
+  reason    String   @db.Text
+  action    Json
+  status    String   @default("executed")
+  feedback  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  run  AgentRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([userId, type])
+  @@index([runId])
+  @@map("agentdecision")
 }
 
 model UserMemory {
-  id        String   @id @default(cuid())
-  userId    String
-  content   String   @db.Text
-  category  String   @default("fact") // preference | goal | skill | fact
-  createdAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  userId     String
+  type       String    @default("fact")
+  content    String    @db.Text
+  importance Float     @default(0.5)
+  confidence Float     @default(0.5)
+  lastUsed   DateTime?
+  createdAt  DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, createdAt])
+  @@index([userId, type])
+  @@index([userId, importance])
+  @@index([userId, lastUsed])
+  @@map("usermemory")
 }
 
 model AIHistory {
@@ -300,21 +340,18 @@ model AIHistory {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@map("aihistory")
 }
 
-// ============================================================
-// Day 16 RAG: 文档分块 + 向量存储
-// embedding 用 MySQL JSON 存储（数据量 < 1000 时可行）
-// 检索和重排在 src/lib/rag/ 中
-// ============================================================
 model DocumentChunk {
   id         String   @id @default(cuid())
-  sourceName String // 来源文件名
-  sourceType String   @default("text") // pdf | markdown | text | conversation
-  chunkIndex Int // 分片序号，从 0 开始
+  sourceName String
+  sourceType String   @default("text")
+  chunkIndex Int
   content    String   @db.Text
-  embedding  Json // bge-small-zh-v1.5 512 维向量，存为 JSON 数组
+  embedding  Json
   createdAt  DateTime @default(now())
 
   @@index([sourceName])
+  @@map("documentchunk")
 }

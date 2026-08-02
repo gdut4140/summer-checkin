@@ -20,57 +20,97 @@ export type UserMemoryModel = runtime.Types.Result.DefaultSelection<Prisma.$User
 
 export type AggregateUserMemory = {
   _count: UserMemoryCountAggregateOutputType | null
+  _avg: UserMemoryAvgAggregateOutputType | null
+  _sum: UserMemorySumAggregateOutputType | null
   _min: UserMemoryMinAggregateOutputType | null
   _max: UserMemoryMaxAggregateOutputType | null
+}
+
+export type UserMemoryAvgAggregateOutputType = {
+  importance: number | null
+  confidence: number | null
+}
+
+export type UserMemorySumAggregateOutputType = {
+  importance: number | null
+  confidence: number | null
 }
 
 export type UserMemoryMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  type: string | null
   content: string | null
-  category: string | null
+  importance: number | null
+  confidence: number | null
+  lastUsed: Date | null
   createdAt: Date | null
 }
 
 export type UserMemoryMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  type: string | null
   content: string | null
-  category: string | null
+  importance: number | null
+  confidence: number | null
+  lastUsed: Date | null
   createdAt: Date | null
 }
 
 export type UserMemoryCountAggregateOutputType = {
   id: number
   userId: number
+  type: number
   content: number
-  category: number
+  importance: number
+  confidence: number
+  lastUsed: number
   createdAt: number
   _all: number
 }
 
 
+export type UserMemoryAvgAggregateInputType = {
+  importance?: true
+  confidence?: true
+}
+
+export type UserMemorySumAggregateInputType = {
+  importance?: true
+  confidence?: true
+}
+
 export type UserMemoryMinAggregateInputType = {
   id?: true
   userId?: true
+  type?: true
   content?: true
-  category?: true
+  importance?: true
+  confidence?: true
+  lastUsed?: true
   createdAt?: true
 }
 
 export type UserMemoryMaxAggregateInputType = {
   id?: true
   userId?: true
+  type?: true
   content?: true
-  category?: true
+  importance?: true
+  confidence?: true
+  lastUsed?: true
   createdAt?: true
 }
 
 export type UserMemoryCountAggregateInputType = {
   id?: true
   userId?: true
+  type?: true
   content?: true
-  category?: true
+  importance?: true
+  confidence?: true
+  lastUsed?: true
   createdAt?: true
   _all?: true
 }
@@ -113,6 +153,18 @@ export type UserMemoryAggregateArgs<ExtArgs extends runtime.Types.Extensions.Int
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserMemoryAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserMemorySumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMemoryMinAggregateInputType
@@ -143,6 +195,8 @@ export type UserMemoryGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   _count?: UserMemoryCountAggregateInputType | true
+  _avg?: UserMemoryAvgAggregateInputType
+  _sum?: UserMemorySumAggregateInputType
   _min?: UserMemoryMinAggregateInputType
   _max?: UserMemoryMaxAggregateInputType
 }
@@ -150,10 +204,15 @@ export type UserMemoryGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type UserMemoryGroupByOutputType = {
   id: string
   userId: string
+  type: string
   content: string
-  category: string
+  importance: number
+  confidence: number
+  lastUsed: Date | null
   createdAt: Date
   _count: UserMemoryCountAggregateOutputType | null
+  _avg: UserMemoryAvgAggregateOutputType | null
+  _sum: UserMemorySumAggregateOutputType | null
   _min: UserMemoryMinAggregateOutputType | null
   _max: UserMemoryMaxAggregateOutputType | null
 }
@@ -179,8 +238,11 @@ export type UserMemoryWhereInput = {
   NOT?: Prisma.UserMemoryWhereInput | Prisma.UserMemoryWhereInput[]
   id?: Prisma.StringFilter<"UserMemory"> | string
   userId?: Prisma.StringFilter<"UserMemory"> | string
+  type?: Prisma.StringFilter<"UserMemory"> | string
   content?: Prisma.StringFilter<"UserMemory"> | string
-  category?: Prisma.StringFilter<"UserMemory"> | string
+  importance?: Prisma.FloatFilter<"UserMemory"> | number
+  confidence?: Prisma.FloatFilter<"UserMemory"> | number
+  lastUsed?: Prisma.DateTimeNullableFilter<"UserMemory"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserMemory"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -188,8 +250,11 @@ export type UserMemoryWhereInput = {
 export type UserMemoryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  category?: Prisma.SortOrder
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  lastUsed?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.UserMemoryOrderByRelevanceInput
@@ -201,8 +266,11 @@ export type UserMemoryWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.UserMemoryWhereInput[]
   NOT?: Prisma.UserMemoryWhereInput | Prisma.UserMemoryWhereInput[]
   userId?: Prisma.StringFilter<"UserMemory"> | string
+  type?: Prisma.StringFilter<"UserMemory"> | string
   content?: Prisma.StringFilter<"UserMemory"> | string
-  category?: Prisma.StringFilter<"UserMemory"> | string
+  importance?: Prisma.FloatFilter<"UserMemory"> | number
+  confidence?: Prisma.FloatFilter<"UserMemory"> | number
+  lastUsed?: Prisma.DateTimeNullableFilter<"UserMemory"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserMemory"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
@@ -210,12 +278,17 @@ export type UserMemoryWhereUniqueInput = Prisma.AtLeast<{
 export type UserMemoryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  category?: Prisma.SortOrder
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  lastUsed?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserMemoryCountOrderByAggregateInput
+  _avg?: Prisma.UserMemoryAvgOrderByAggregateInput
   _max?: Prisma.UserMemoryMaxOrderByAggregateInput
   _min?: Prisma.UserMemoryMinOrderByAggregateInput
+  _sum?: Prisma.UserMemorySumOrderByAggregateInput
 }
 
 export type UserMemoryScalarWhereWithAggregatesInput = {
@@ -224,15 +297,21 @@ export type UserMemoryScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserMemoryScalarWhereWithAggregatesInput | Prisma.UserMemoryScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"UserMemory"> | string
   userId?: Prisma.StringWithAggregatesFilter<"UserMemory"> | string
+  type?: Prisma.StringWithAggregatesFilter<"UserMemory"> | string
   content?: Prisma.StringWithAggregatesFilter<"UserMemory"> | string
-  category?: Prisma.StringWithAggregatesFilter<"UserMemory"> | string
+  importance?: Prisma.FloatWithAggregatesFilter<"UserMemory"> | number
+  confidence?: Prisma.FloatWithAggregatesFilter<"UserMemory"> | number
+  lastUsed?: Prisma.DateTimeNullableWithAggregatesFilter<"UserMemory"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserMemory"> | Date | string
 }
 
 export type UserMemoryCreateInput = {
   id?: string
+  type?: string
   content: string
-  category?: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMemoriesInput
 }
@@ -240,15 +319,21 @@ export type UserMemoryCreateInput = {
 export type UserMemoryUncheckedCreateInput = {
   id?: string
   userId: string
+  type?: string
   content: string
-  category?: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
   createdAt?: Date | string
 }
 
 export type UserMemoryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMemoriesNestedInput
 }
@@ -256,31 +341,43 @@ export type UserMemoryUpdateInput = {
 export type UserMemoryUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserMemoryCreateManyInput = {
   id?: string
   userId: string
+  type?: string
   content: string
-  category?: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
   createdAt?: Date | string
 }
 
 export type UserMemoryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserMemoryUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -303,25 +400,44 @@ export type UserMemoryOrderByRelevanceInput = {
 export type UserMemoryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  category?: Prisma.SortOrder
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  lastUsed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type UserMemoryAvgOrderByAggregateInput = {
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
 }
 
 export type UserMemoryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  category?: Prisma.SortOrder
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  lastUsed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type UserMemoryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  category?: Prisma.SortOrder
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  lastUsed?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type UserMemorySumOrderByAggregateInput = {
+  importance?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
 }
 
 export type UserMemoryCreateNestedManyWithoutUserInput = {
@@ -368,15 +484,21 @@ export type UserMemoryUncheckedUpdateManyWithoutUserNestedInput = {
 
 export type UserMemoryCreateWithoutUserInput = {
   id?: string
+  type?: string
   content: string
-  category?: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
   createdAt?: Date | string
 }
 
 export type UserMemoryUncheckedCreateWithoutUserInput = {
   id?: string
+  type?: string
   content: string
-  category?: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -412,36 +534,51 @@ export type UserMemoryScalarWhereInput = {
   NOT?: Prisma.UserMemoryScalarWhereInput | Prisma.UserMemoryScalarWhereInput[]
   id?: Prisma.StringFilter<"UserMemory"> | string
   userId?: Prisma.StringFilter<"UserMemory"> | string
+  type?: Prisma.StringFilter<"UserMemory"> | string
   content?: Prisma.StringFilter<"UserMemory"> | string
-  category?: Prisma.StringFilter<"UserMemory"> | string
+  importance?: Prisma.FloatFilter<"UserMemory"> | number
+  confidence?: Prisma.FloatFilter<"UserMemory"> | number
+  lastUsed?: Prisma.DateTimeNullableFilter<"UserMemory"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserMemory"> | Date | string
 }
 
 export type UserMemoryCreateManyUserInput = {
   id?: string
+  type?: string
   content: string
-  category?: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
   createdAt?: Date | string
 }
 
 export type UserMemoryUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserMemoryUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserMemoryUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
+  importance?: Prisma.FloatFieldUpdateOperationsInput | number
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -450,8 +587,11 @@ export type UserMemoryUncheckedUpdateManyWithoutUserInput = {
 export type UserMemorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  type?: boolean
   content?: boolean
-  category?: boolean
+  importance?: boolean
+  confidence?: boolean
+  lastUsed?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userMemory"]>
@@ -461,12 +601,15 @@ export type UserMemorySelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type UserMemorySelectScalar = {
   id?: boolean
   userId?: boolean
+  type?: boolean
   content?: boolean
-  category?: boolean
+  importance?: boolean
+  confidence?: boolean
+  lastUsed?: boolean
   createdAt?: boolean
 }
 
-export type UserMemoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "content" | "category" | "createdAt", ExtArgs["result"]["userMemory"]>
+export type UserMemoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "content" | "importance" | "confidence" | "lastUsed" | "createdAt", ExtArgs["result"]["userMemory"]>
 export type UserMemoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -479,8 +622,11 @@ export type $UserMemoryPayload<ExtArgs extends runtime.Types.Extensions.Internal
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    type: string
     content: string
-    category: string
+    importance: number
+    confidence: number
+    lastUsed: Date | null
     createdAt: Date
   }, ExtArgs["result"]["userMemory"]>
   composites: {}
@@ -854,8 +1000,11 @@ export interface Prisma__UserMemoryClient<T, Null = never, ExtArgs extends runti
 export interface UserMemoryFieldRefs {
   readonly id: Prisma.FieldRef<"UserMemory", 'String'>
   readonly userId: Prisma.FieldRef<"UserMemory", 'String'>
+  readonly type: Prisma.FieldRef<"UserMemory", 'String'>
   readonly content: Prisma.FieldRef<"UserMemory", 'String'>
-  readonly category: Prisma.FieldRef<"UserMemory", 'String'>
+  readonly importance: Prisma.FieldRef<"UserMemory", 'Float'>
+  readonly confidence: Prisma.FieldRef<"UserMemory", 'Float'>
+  readonly lastUsed: Prisma.FieldRef<"UserMemory", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"UserMemory", 'DateTime'>
 }
     
