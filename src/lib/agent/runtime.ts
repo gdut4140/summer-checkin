@@ -28,7 +28,9 @@ import { prisma } from "@/lib/prisma";
 import { createAIClient } from "@/lib/deepseek";
 import { AGENT_COACH_PROMPT } from "./prompts";
 import { createDecision } from "./decisions";
-import { getRelevantMemories, formatMemoriesForPrompt } from "@/lib/memory";
+import { getRelevantMemories, formatMemoriesForPrompt, touchMemories } from "@/lib/memory";
+import { createNotification } from "@/lib/notification";
+import { generateDailyReport, formatReportAsMarkdown } from "./report";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
 // ---- 类型定义 ----
@@ -385,14 +387,14 @@ function fallbackAnalysis(context: LearningContext): AgentAnalysis {
     findings.push({
       category: "progress",
       severity: "warning",
-      detail: "还没有活跃的学习计划",
+      detail: "你还没有创建学习计划哦，有个明确的学习路线会让效率高很多",
       evidence: {},
     });
     actions.push({
       type: "ENCOURAGE",
       priority: "high",
-      reason: "缺少计划",
-      detail: "建议创建一个学习计划来系统化学习",
+      reason: "还没有学习计划",
+      detail: "要不要创建一个学习计划？我可以帮你把大目标拆成每天的小任务",
     });
   }
 
@@ -402,7 +404,7 @@ function fallbackAnalysis(context: LearningContext): AgentAnalysis {
       findings.push({
         category: "progress",
         severity: "warning",
-        detail: `计划「${plan.name}」进度仅 ${plan.progress}%，可能需要调整`,
+        detail: `「${plan.name}」完成了 ${plan.progress}%，进度有点慢，不过没关系，我们一起看看怎么调整`,
         evidence: { progress: plan.progress, taskTotal: plan.taskStats.total },
       });
     }
@@ -410,8 +412,8 @@ function fallbackAnalysis(context: LearningContext): AgentAnalysis {
       actions.push({
         type: "ADJUST_PLAN",
         priority: "normal",
-        reason: `计划「${plan.name}」有 ${plan.taskStats.pending} 个待办积压`,
-        detail: `建议清理或重新规划「${plan.name}」的任务优先级`,
+        reason: `「${plan.name}」堆了 ${plan.taskStats.pending} 个待办`,
+        detail: `「${plan.name}」攒了不少任务，要不要筛一下哪些是真正重要的，先做那些？`,
       });
     }
   }
@@ -421,7 +423,7 @@ function fallbackAnalysis(context: LearningContext): AgentAnalysis {
     findings.push({
       category: "streak",
       severity: "info",
-      detail: "今天还没有打卡，别忘了记录学习成果",
+      detail: "今天还没打卡呢，别忘了记录你今天学了什么～",
       evidence: { streak: 0 },
     });
   }
@@ -431,7 +433,7 @@ function fallbackAnalysis(context: LearningContext): AgentAnalysis {
     findings.push({
       category: "habit",
       severity: "info",
-      detail: `日均学习 ${context.stats.dailyAvg}h，建议增加到至少每天 1 小时`,
+      detail: `最近每天平均只学了 ${context.stats.dailyAvg} 小时，要不要试试每天至少挤出 1 小时的整块时间？`,
       evidence: { dailyAvg: context.stats.dailyAvg },
     });
   }
@@ -447,8 +449,8 @@ function fallbackAnalysis(context: LearningContext): AgentAnalysis {
         ? "need_attention"
         : "on_track",
     summary: context.plans.length > 0
-      ? `当前 ${context.plans.length} 个活跃计划，${context.stats.streak} 天连续打卡`
-      : "暂无活跃计划，建议制定学习目标",
+      ? `今天已经连续打卡 ${context.stats.streak} 天了，${context.plans.length} 个计划在进行中，继续保持！`
+      : "还没有学习计划，要不要我帮你定一个？",
     findings,
     actions,
   };
@@ -483,18 +485,30 @@ export interface ExecutionResult {
 /**
  * 执行一条 Agent 行动
  *
- * 当前支持的 action 类型：
- * - ENCOURAGE：无需数据库操作，直接返回鼓励信息
- * - 其他类型（ADJUST_PLAN / CREATE_TASK / SEND_REMINDER / GENERATE_REPORT）
- *   需要通过 Tool Calling 层调用对应工具
+ * Phase 3 升级：
+ * - SEND_REMINDER → 创建真实的 Notification 记录
+ * - GENERATE_REPORT → 生成结构化日报并保存为 Notification
+ * - CREATE_TASK → 尝试自动创建任务（查找活跃计划）
+ * - ADJUST_PLAN → 创建通知提醒用户确认调整
  */
 export async function executeAction(
   userId: string,
-  action: AgentAction
+  action: AgentAction,
+  context?: LearningContext,
+  analysis?: AgentAnalysis
 ): Promise<ExecutionResult> {
   switch (action.type) {
     case "ENCOURAGE":
-      // 鼓励不需要数据库操作
+      try {
+        await createNotification({
+          userId,
+          type: "encouragement",
+          title: "想跟你说",
+          content: action.detail,
+        });
+      } catch {
+        // 通知失败不影响主流程
+      }
       return {
         type: action.type,
         success: true,
@@ -502,30 +516,87 @@ export async function executeAction(
       };
 
     case "CREATE_TASK":
-      // 尝试创建任务（需要 planId，从 detail 中提取或在调用方指定）
-      // 这里返回一个待处理的标记，提示需要更多信息
-      return {
-        type: action.type,
-        success: false,
-        message: `无法自动创建任务（需要指定 planId）：${action.detail}`,
-      };
-
-    case "ADJUST_PLAN":
-      return {
-        type: action.type,
-        success: false,
-        message: `计划调整需用户确认：${action.detail}`,
-      };
-
-    case "SEND_REMINDER":
-      // 提醒生成：记录为通知
+      // 尝试自动创建任务：查找用户的活跃计划，添加到第一个计划
       try {
-        // 创建一个简单的通知（用 AgentApproval 存储，等 Phase 3 升级为 Notification 模型）
-        console.log(`[Agent Runtime] 生成提醒: ${action.detail}`);
+        const activePlan = await prisma.plan.findFirst({
+          where: { userId, status: "active" },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (!activePlan) {
+          return {
+            type: action.type,
+            success: false,
+            message: `无法自动创建任务（用户无活跃计划）：${action.detail}`,
+          };
+        }
+
+        const task = await prisma.planTask.create({
+          data: {
+            planId: activePlan.id,
+            userId,
+            title: action.detail.slice(0, 160),
+            description: `系统自动创建 — ${action.reason}`,
+            category: "study",
+            priority: action.priority,
+          },
+        });
+
         return {
           type: action.type,
           success: true,
-          message: `已生成提醒：${action.detail}`,
+          message: `已在计划「${activePlan.name}」中自动创建任务「${task.title}」`,
+        };
+      } catch (error) {
+        return {
+          type: action.type,
+          success: false,
+          message: `创建任务失败：${error instanceof Error ? error.message : "未知错误"}`,
+        };
+      }
+
+    case "ADJUST_PLAN":
+      try {
+        await createNotification({
+          userId,
+          type: "analysis",
+          title: "关于你的学习计划",
+          content: action.detail,
+          actionUrl: "/agent",
+        });
+        return {
+          type: action.type,
+          success: true,
+          message: `已生成计划调整通知：${action.detail}`,
+        };
+      } catch {
+        return {
+          type: action.type,
+          success: false,
+          message: `计划调整通知生成失败：${action.detail}`,
+        };
+      }
+
+    case "SEND_REMINDER":
+      try {
+        const notification = await createNotification({
+          userId,
+          type: "reminder",
+          title: "别忘了哦",
+          content: action.detail,
+          actionUrl: "/checkin",
+        });
+        if (notification) {
+          return {
+            type: action.type,
+            success: true,
+            message: `已生成提醒通知：${action.detail}`,
+          };
+        }
+        return {
+          type: action.type,
+          success: false,
+          message: `提醒生成失败：通知创建返回空`,
         };
       } catch {
         return {
@@ -536,11 +607,55 @@ export async function executeAction(
       }
 
     case "GENERATE_REPORT":
-      return {
-        type: action.type,
-        success: true,
-        message: action.detail,
-      };
+      // Phase 3: 生成结构化的每日学习报告
+      try {
+        if (context && analysis) {
+          const report = generateDailyReport({
+            userId,
+            context,
+            analysis,
+          });
+
+          // 将报告保存为通知
+          const markdown = formatReportAsMarkdown(report);
+          await createNotification({
+            userId,
+            type: "report",
+            title: `${report.date} 学习小结`,
+            content: markdown,
+            actionUrl: "/agent",
+          });
+
+          console.log(
+            `[Agent Runtime] 已生成学习报告: status=${report.status}, summary=${report.summary.slice(0, 60)}`
+          );
+
+          return {
+            type: action.type,
+            success: true,
+            message: `学习报告已生成：${report.summary}`,
+          };
+        }
+        // 无 context/analysis 时降级为简单通知
+        await createNotification({
+          userId,
+          type: "report",
+          title: "学习小结",
+          content: action.detail,
+          actionUrl: "/agent",
+        });
+        return {
+          type: action.type,
+          success: true,
+          message: `学习报告摘要：${action.detail}`,
+        };
+      } catch {
+        return {
+          type: action.type,
+          success: false,
+          message: `报告生成失败：${action.detail}`,
+        };
+      }
 
     default:
       return {
@@ -603,6 +718,9 @@ export async function runLearningAgent(
 
     // 获取长期记忆
     const memories = await getRelevantMemories(userId, 20);
+
+    // 标记记忆被检索使用（用于冷淘汰）
+    touchMemories(memories.map((m) => m.id)).catch(() => {});
 
     // 更新 Step 1
     if (run) {
@@ -715,7 +833,7 @@ export async function runLearningAgent(
     }
 
     for (const action of analysis.actions) {
-      const result = await executeAction(userId, action);
+      const result = await executeAction(userId, action, context, analysis);
       executedActions.push(result);
       console.log(
         `[Agent Runtime]   action=${result.type} success=${result.success}: ${result.message.slice(0, 80)}`

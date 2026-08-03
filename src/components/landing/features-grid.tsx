@@ -15,7 +15,7 @@ const features = [
   { icon: ListChecks, title: "学习计划", description: "拆解假期目标，管理科目与阶段任务，进度始终清晰。" },
   { icon: CalendarCheck, title: "成长日历", description: "用热力图回看每一天，在连续行动中看见自己的节奏。" },
   { icon: ChartLine, title: "数据洞察", description: "从趋势、时长和科目分布理解学习模式，及时调整方向。" },
-  { icon: Trophy, title: "持续激励", description: "连续打卡、成长徽章和排行榜，让长期坚持更有反馈。" },
+  { icon: Trophy, title: "持续激励", description: "连续打卡和成长徽章，让长期坚持更有反馈。" },
   { icon: Robot, title: "AI 学习助手", description: "结合你的计划和记录，获得个性化总结、建议与答疑。" },
 ];
 

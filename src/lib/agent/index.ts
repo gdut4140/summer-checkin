@@ -36,6 +36,15 @@ export type {
   ExecutionResult,
 } from "./runtime";
 
+// Phase 3: Report generation
+export {
+  generateDailyReport,
+  generateWeeklyReport,
+  formatReportAsMarkdown,
+} from "./report";
+export type {
+} from "./report";
+
 // Phase 2: AgentDecision
 export {
   createDecision,

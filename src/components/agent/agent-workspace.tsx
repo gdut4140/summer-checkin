@@ -371,7 +371,11 @@ export function AgentWorkspace({ initialRuns }: Props) {
             <CardContent className="space-y-6 py-6">
               {selectedRun.approvals.length > 0 && (
                 <div className="mb-3">
-                  <Badge className={`text-xs font-semibold border-0 ${selectedRun.mode !== "planner" ? "bg-[#f3c969] text-[#17352d]" : "bg-primary text-primary-foreground"}`}>
+                  <Badge className={`text-xs font-semibold border-0 ${
+                    selectedRun.mode !== "planner"
+                      ? "bg-amber-500/20 text-amber-300"
+                      : "bg-primary/20 text-primary-foreground"
+                  }`}>
                     {selectedRun.mode !== "planner" ? "系统自动总结" : "计划草案"}
                   </Badge>
                 </div>
@@ -385,25 +389,25 @@ export function AgentWorkspace({ initialRuns }: Props) {
                   const isFinding = approval.action === "daily_analysis";
                   const severity = (payload?.severity as string) ?? "info";
                   const severityColor: Record<string, string> = {
-                    critical: "border-[#e8aaaa] bg-[#fef0f0] text-[#b84040]",
-                    warning: "border-[#f3d878] bg-[#fef9e7] text-[#2d5a3d]",
-                    info: "border-[#b8d8c0] bg-[#eaf6ef] text-[#2d5a3d]",
+                    critical: "border-red-500/20 bg-red-500/10 text-red-300",
+                    warning: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+                    info: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
                   };
                   return (
-                    <div key={approval.id} className={`rounded-lg border px-3 py-3 mb-3 ${severityColor[severity] ?? severityColor.info}`}>
-                      <p className="text-xs font-medium uppercase tracking-wide opacity-70">
+                    <div key={approval.id} className={`rounded-lg border px-3 py-3 mb-3 backdrop-blur-sm ${severityColor[severity] ?? severityColor.info}`}>
+                      <p className="text-xs font-medium uppercase tracking-wide opacity-60">
                         {isFinding ? "分析发现" : "建议行动"} · {severity}
                       </p>
-                      <p className="mt-1 text-sm font-semibold">{payload?.detail as string ?? payload?.reason as string ?? "—"}</p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">{payload?.detail as string ?? payload?.reason as string ?? "—"}</p>
                     </div>
                   );
                 }
 
                 // create_plan / 默认 → 计划草案
                 return (
-                  <div key={approval.id} className="mb-3 rounded-lg border border-[#b8d8c0] bg-[#eaf6ef] p-4">
+                  <div key={approval.id} className="mb-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 backdrop-blur-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <p className="text-xs font-medium text-[#2d5a3d]">
+                      <p className="text-xs font-medium text-emerald-400">
                         {approval.status === "pending" ? "确认后将会创建真实计划和任务" : `审批状态：${approval.status}`}
                       </p>
                       {approval.status === "pending" && (
@@ -420,12 +424,12 @@ export function AgentWorkspace({ initialRuns }: Props) {
                       )}
                     </div>
                     {draft && (
-                      <div className="space-y-3 rounded-lg border border-[#e2d6b8] bg-white/60 p-4">
+                      <div className="space-y-3 rounded-lg border border-border/40 bg-background/60 p-4">
                         <div>
-                          <p className="text-base font-semibold text-[#1e4a2d]">{draft.name}</p>
-                          <p className="mt-1 text-sm text-[#2d5a3d] font-medium">{draft.description ?? draft.goal}</p>
+                          <p className="text-base font-semibold text-foreground">{draft.name}</p>
+                          <p className="mt-1 text-sm text-muted-foreground font-medium">{draft.description ?? draft.goal}</p>
                         </div>
-                        <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-[#3a6b4a]">
+                        <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-emerald-400">
                           <span>目标时长：{draft.targetHours} 小时</span>
                           <span>任务数：{draft.tasks.length}</span>
                         </div>
@@ -433,16 +437,16 @@ export function AgentWorkspace({ initialRuns }: Props) {
                         <div className="space-y-2">
                           {draft.tasks.map((task, index) => (
                             <div key={`${task.title}-${index}`} className="flex gap-3 text-sm">
-                              <span className="w-5 shrink-0 text-right text-xs font-semibold text-[#3a6b4a]">{index + 1}</span>
+                              <span className="w-5 shrink-0 text-right text-xs font-semibold text-emerald-500/60">{index + 1}</span>
                               <div className="min-w-0">
-                                <p className="font-semibold text-[#1e4a2d]">{task.title}</p>
-                                {task.description && <p className="mt-0.5 text-xs text-[#3a6b4a] font-medium">{task.description}</p>}
+                                <p className="font-semibold text-foreground">{task.title}</p>
+                                {task.description && <p className="mt-0.5 text-xs text-muted-foreground font-medium">{task.description}</p>}
                               </div>
                             </div>
                           ))}
                         </div>
                         {draft.assumptions && draft.assumptions.length > 0 && (
-                          <p className="text-xs text-[#3a6b4a] font-medium">前提：{draft.assumptions.join("；")}</p>
+                          <p className="text-xs text-muted-foreground font-medium">前提：{draft.assumptions.join("；")}</p>
                         )}
                       </div>
                     )}

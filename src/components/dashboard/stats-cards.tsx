@@ -6,7 +6,6 @@ import {
   Fire,
   Clock,
   Target,
-  Trophy,
   ArrowUp,
   ArrowDown,
 } from "@phosphor-icons/react";
@@ -41,19 +40,10 @@ export function StatsCards({ stats }: { stats: DashboardStats }) {
       bg: "bg-emerald-400/10",
       trend: stats.weekCompletion >= 70 ? "up" : stats.weekCompletion > 0 ? "down" : "neutral",
     },
-    {
-      label: "排名",
-      value: `#${stats.userRank}`,
-      unit: `/ ${stats.totalUsers}`,
-      icon: Trophy,
-      color: "text-emerald-200",
-      bg: "bg-emerald-400/10",
-      trend: "neutral",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {cards.map((card, i) => (
         <motion.div
           key={card.label}

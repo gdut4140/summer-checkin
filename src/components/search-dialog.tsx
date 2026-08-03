@@ -16,7 +16,6 @@ import {
   ListChecks,
   CalendarCheck,
   ChartLine,
-  Trophy,
   User,
   Robot,
   Gear,
@@ -79,12 +78,6 @@ export function SearchDialog() {
           >
             <ChartLine className="mr-2 h-4 w-4" />
             数据统计
-          </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/ranking"))}
-          >
-            <Trophy className="mr-2 h-4 w-4" />
-            排行榜
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />

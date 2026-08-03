@@ -31,6 +31,8 @@ model User {
   planTasks     PlanTask[]
   agentRuns     AgentRun[]
   decisions     AgentDecision[]
+  notifications Notification[]
+  schedules     AgentSchedule[]
 
   @@map("user")
 }
@@ -354,4 +356,39 @@ model DocumentChunk {
 
   @@index([sourceName])
   @@map("documentchunk")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("reminder")
+  title     String
+  content   String   @db.Text
+  read      Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@index([userId, type])
+  @@map("notification")
+}
+
+model AgentSchedule {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("daily_review")
+  cron      String   @default("0 9 * * *")
+  enabled   Boolean  @default(true)
+  lastRunAt DateTime?
+  nextRunAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([enabled, nextRunAt])
+  @@map("agentschedule")
 }

@@ -27,6 +27,7 @@ import {
   getRelevantMemories,
   formatMemoriesForPrompt,
   extractAndSaveMemories,
+  touchMemories,
 } from "@/lib/memory";
 import {
   searchKnowledge,
@@ -103,6 +104,9 @@ export async function POST(request: NextRequest) {
     // ============================================================
     const memories = await getRelevantMemories(user.id);
     const memoryPrompt = formatMemoriesForPrompt(memories);
+
+    // 标记记忆被检索使用（用于冷淘汰：不用的记忆会被清理）
+    touchMemories(memories.map((m) => m.id)).catch(() => {});
 
     // ============================================================
     // Day 16 新增：主动检索知识库

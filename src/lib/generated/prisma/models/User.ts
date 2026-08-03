@@ -234,6 +234,8 @@ export type UserWhereInput = {
   planTasks?: Prisma.PlanTaskListRelationFilter
   agentRuns?: Prisma.AgentRunListRelationFilter
   decisions?: Prisma.AgentDecisionListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  schedules?: Prisma.AgentScheduleListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -259,6 +261,8 @@ export type UserOrderByWithRelationInput = {
   planTasks?: Prisma.PlanTaskOrderByRelationAggregateInput
   agentRuns?: Prisma.AgentRunOrderByRelationAggregateInput
   decisions?: Prisma.AgentDecisionOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  schedules?: Prisma.AgentScheduleOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
 
@@ -288,6 +292,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   planTasks?: Prisma.PlanTaskListRelationFilter
   agentRuns?: Prisma.AgentRunListRelationFilter
   decisions?: Prisma.AgentDecisionListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  schedules?: Prisma.AgentScheduleListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -345,6 +351,8 @@ export type UserCreateInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -370,6 +378,8 @@ export type UserUncheckedCreateInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -395,6 +405,8 @@ export type UserUpdateInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -420,6 +432,8 @@ export type UserUncheckedUpdateInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -695,6 +709,34 @@ export type UserUpdateOneRequiredWithoutAiHistoriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiHistoriesInput, Prisma.UserUpdateWithoutAiHistoriesInput>, Prisma.UserUncheckedUpdateWithoutAiHistoriesInput>
 }
 
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserCreateNestedOneWithoutSchedulesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSchedulesInput, Prisma.UserUncheckedCreateWithoutSchedulesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSchedulesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSchedulesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSchedulesInput, Prisma.UserUncheckedCreateWithoutSchedulesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSchedulesInput
+  upsert?: Prisma.UserUpsertWithoutSchedulesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSchedulesInput, Prisma.UserUpdateWithoutSchedulesInput>, Prisma.UserUncheckedUpdateWithoutSchedulesInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   name: string
@@ -717,6 +759,8 @@ export type UserCreateWithoutSessionsInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -741,6 +785,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -781,6 +827,8 @@ export type UserUpdateWithoutSessionsInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -805,6 +853,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -829,6 +879,8 @@ export type UserCreateWithoutAccountsInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -853,6 +905,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -893,6 +947,8 @@ export type UserUpdateWithoutAccountsInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -917,6 +973,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlansInput = {
@@ -941,6 +999,8 @@ export type UserCreateWithoutPlansInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlansInput = {
@@ -965,6 +1025,8 @@ export type UserUncheckedCreateWithoutPlansInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlansInput = {
@@ -1005,6 +1067,8 @@ export type UserUpdateWithoutPlansInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlansInput = {
@@ -1029,6 +1093,8 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlanTasksInput = {
@@ -1053,6 +1119,8 @@ export type UserCreateWithoutPlanTasksInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlanTasksInput = {
@@ -1077,6 +1145,8 @@ export type UserUncheckedCreateWithoutPlanTasksInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlanTasksInput = {
@@ -1117,6 +1187,8 @@ export type UserUpdateWithoutPlanTasksInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlanTasksInput = {
@@ -1141,6 +1213,8 @@ export type UserUncheckedUpdateWithoutPlanTasksInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCheckinsInput = {
@@ -1165,6 +1239,8 @@ export type UserCreateWithoutCheckinsInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckinsInput = {
@@ -1189,6 +1265,8 @@ export type UserUncheckedCreateWithoutCheckinsInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckinsInput = {
@@ -1229,6 +1307,8 @@ export type UserUpdateWithoutCheckinsInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckinsInput = {
@@ -1253,6 +1333,8 @@ export type UserUncheckedUpdateWithoutCheckinsInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStudyRecordsInput = {
@@ -1277,6 +1359,8 @@ export type UserCreateWithoutStudyRecordsInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudyRecordsInput = {
@@ -1301,6 +1385,8 @@ export type UserUncheckedCreateWithoutStudyRecordsInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudyRecordsInput = {
@@ -1341,6 +1427,8 @@ export type UserUpdateWithoutStudyRecordsInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudyRecordsInput = {
@@ -1365,6 +1453,8 @@ export type UserUncheckedUpdateWithoutStudyRecordsInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserBadgesInput = {
@@ -1389,6 +1479,8 @@ export type UserCreateWithoutUserBadgesInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserBadgesInput = {
@@ -1413,6 +1505,8 @@ export type UserUncheckedCreateWithoutUserBadgesInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserBadgesInput = {
@@ -1453,6 +1547,8 @@ export type UserUpdateWithoutUserBadgesInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserBadgesInput = {
@@ -1477,6 +1573,8 @@ export type UserUncheckedUpdateWithoutUserBadgesInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutConversationsInput = {
@@ -1501,6 +1599,8 @@ export type UserCreateWithoutConversationsInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsInput = {
@@ -1525,6 +1625,8 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsInput = {
@@ -1565,6 +1667,8 @@ export type UserUpdateWithoutConversationsInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsInput = {
@@ -1589,6 +1693,8 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAgentRunsInput = {
@@ -1613,6 +1719,8 @@ export type UserCreateWithoutAgentRunsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAgentRunsInput = {
@@ -1637,6 +1745,8 @@ export type UserUncheckedCreateWithoutAgentRunsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAgentRunsInput = {
@@ -1677,6 +1787,8 @@ export type UserUpdateWithoutAgentRunsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAgentRunsInput = {
@@ -1701,6 +1813,8 @@ export type UserUncheckedUpdateWithoutAgentRunsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDecisionsInput = {
@@ -1725,6 +1839,8 @@ export type UserCreateWithoutDecisionsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDecisionsInput = {
@@ -1749,6 +1865,8 @@ export type UserUncheckedCreateWithoutDecisionsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDecisionsInput = {
@@ -1789,6 +1907,8 @@ export type UserUpdateWithoutDecisionsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDecisionsInput = {
@@ -1813,6 +1933,8 @@ export type UserUncheckedUpdateWithoutDecisionsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMemoriesInput = {
@@ -1837,6 +1959,8 @@ export type UserCreateWithoutMemoriesInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMemoriesInput = {
@@ -1861,6 +1985,8 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMemoriesInput = {
@@ -1901,6 +2027,8 @@ export type UserUpdateWithoutMemoriesInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMemoriesInput = {
@@ -1925,6 +2053,8 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiHistoriesInput = {
@@ -1949,6 +2079,8 @@ export type UserCreateWithoutAiHistoriesInput = {
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiHistoriesInput = {
@@ -1973,6 +2105,8 @@ export type UserUncheckedCreateWithoutAiHistoriesInput = {
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
   agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiHistoriesInput = {
@@ -2013,6 +2147,8 @@ export type UserUpdateWithoutAiHistoriesInput = {
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiHistoriesInput = {
@@ -2037,6 +2173,248 @@ export type UserUncheckedUpdateWithoutAiHistoriesInput = {
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
   agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotificationsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSchedulesInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSchedulesInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSchedulesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSchedulesInput, Prisma.UserUncheckedCreateWithoutSchedulesInput>
+}
+
+export type UserUpsertWithoutSchedulesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSchedulesInput, Prisma.UserUncheckedUpdateWithoutSchedulesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSchedulesInput, Prisma.UserUncheckedCreateWithoutSchedulesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSchedulesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSchedulesInput, Prisma.UserUncheckedUpdateWithoutSchedulesInput>
+}
+
+export type UserUpdateWithoutSchedulesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSchedulesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -2057,6 +2435,8 @@ export type UserCountOutputType = {
   planTasks: number
   agentRuns: number
   decisions: number
+  notifications: number
+  schedules: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2072,6 +2452,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   planTasks?: boolean | UserCountOutputTypeCountPlanTasksArgs
   agentRuns?: boolean | UserCountOutputTypeCountAgentRunsArgs
   decisions?: boolean | UserCountOutputTypeCountDecisionsArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  schedules?: boolean | UserCountOutputTypeCountSchedulesArgs
 }
 
 /**
@@ -2168,6 +2550,20 @@ export type UserCountOutputTypeCountDecisionsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.AgentDecisionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSchedulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AgentScheduleWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2192,6 +2588,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   planTasks?: boolean | Prisma.User$planTasksArgs<ExtArgs>
   agentRuns?: boolean | Prisma.User$agentRunsArgs<ExtArgs>
   decisions?: boolean | Prisma.User$decisionsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  schedules?: boolean | Prisma.User$schedulesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2224,6 +2622,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   planTasks?: boolean | Prisma.User$planTasksArgs<ExtArgs>
   agentRuns?: boolean | Prisma.User$agentRunsArgs<ExtArgs>
   decisions?: boolean | Prisma.User$decisionsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  schedules?: boolean | Prisma.User$schedulesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -2242,6 +2642,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     planTasks: Prisma.$PlanTaskPayload<ExtArgs>[]
     agentRuns: Prisma.$AgentRunPayload<ExtArgs>[]
     decisions: Prisma.$AgentDecisionPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    schedules: Prisma.$AgentSchedulePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2606,6 +3008,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   planTasks<T extends Prisma.User$planTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$planTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlanTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   agentRuns<T extends Prisma.User$agentRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$agentRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   decisions<T extends Prisma.User$decisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$decisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentDecisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  schedules<T extends Prisma.User$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3278,6 +3682,54 @@ export type User$decisionsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AgentDecisionScalarFieldEnum | Prisma.AgentDecisionScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.schedules
+ */
+export type User$schedulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentSchedule
+   */
+  select?: Prisma.AgentScheduleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentSchedule
+   */
+  omit?: Prisma.AgentScheduleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentScheduleInclude<ExtArgs> | null
+  where?: Prisma.AgentScheduleWhereInput
+  orderBy?: Prisma.AgentScheduleOrderByWithRelationInput | Prisma.AgentScheduleOrderByWithRelationInput[]
+  cursor?: Prisma.AgentScheduleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AgentScheduleScalarFieldEnum | Prisma.AgentScheduleScalarFieldEnum[]
 }
 
 /**

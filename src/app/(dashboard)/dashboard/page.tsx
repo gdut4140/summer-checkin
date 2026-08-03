@@ -4,6 +4,7 @@ import { startOfDay, endOfDay, startOfWeek, subDays } from "date-fns";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { LearningIsland } from "@/components/landing/learning-island";
+import { CoachCard } from "@/components/dashboard/coach-card";
 
 import type { DashboardStats } from "@/types";
 
@@ -56,17 +57,6 @@ export default async function DashboardPage() {
     where: { userId: user.id },
   });
 
-  const totalUsers = await prisma.user.count();
-
-  const betterUsers = await prisma.checkin.groupBy({
-    by: ["userId"],
-    _sum: { hours: true },
-    having: {
-      hours: { _sum: { gt: userTotalHours } },
-    },
-  });
-  const userRank = betterUsers.length + 1;
-
   const recentCheckins = await prisma.checkin.findMany({
     where: { userId: user.id },
     orderBy: { checkinDate: "desc" },
@@ -96,8 +86,6 @@ export default async function DashboardPage() {
     streak,
     todayHours: Math.round(todayHours * 10) / 10,
     weekCompletion,
-    userRank,
-    totalUsers,
     recentCheckins: recentCheckins.map((c) => ({
       id: c.id,
       content: c.content,
@@ -134,7 +122,7 @@ export default async function DashboardPage() {
               </p>
             </div>
 
-            <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-white/12 pt-6 sm:grid-cols-4 lg:grid-cols-2">
+            <dl className="mt-10 grid grid-cols-1 gap-x-6 gap-y-6 border-t border-white/12 pt-6 sm:grid-cols-3">
               <div>
                 <dt className="text-xs text-white/48">连续打卡</dt>
                 <dd className="mt-1 text-xl font-semibold">{stats.streak}<span className="ml-1 text-xs font-normal text-white/45">天</span></dd>
@@ -147,19 +135,17 @@ export default async function DashboardPage() {
                 <dt className="text-xs text-white/48">本周完成率</dt>
                 <dd className="mt-1 text-xl font-semibold">{stats.weekCompletion}<span className="ml-1 text-xs font-normal text-white/45">%</span></dd>
               </div>
-              <div>
-                <dt className="text-xs text-white/48">当前排名</dt>
-                <dd className="mt-1 text-xl font-semibold">#{stats.userRank}<span className="ml-1 text-xs font-normal text-white/45">/ {stats.totalUsers}</span></dd>
-              </div>
             </dl>
           </div>
 
           <div className="relative min-h-[390px] lg:min-h-0">
             <div className="pointer-events-none absolute inset-x-[10%] bottom-[9%] h-[22%] rounded-[50%] bg-black/30 blur-3xl" />
-            <LearningIsland totalCheckins={totalCheckins} streak={streak} totalHours={userTotalHours} />
+            <LearningIsland totalCheckins={totalCheckins} streak={streak} totalHours={userTotalHours} todayCheckins={todayCheckins.length} />
           </div>
         </div>
       </section>
+
+      <CoachCard userId={user.id} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">

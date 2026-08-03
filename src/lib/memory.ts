@@ -48,25 +48,59 @@ export interface MemoryExtraction {
 // ---- 查询 ----
 
 /**
- * 获取用户最近的记忆，按时间倒序
+ * 混合检索：重要性 + 时间衰减 + 去重
+ *
+ * 拉取候选池（近期+重要），计算综合得分后返回 top N。
+ * 确保「准备字节前端」（importance=0.9，创建于30天前）不会
+ * 被「今天午饭吃了面」（importance=0.2）挤出上下文窗口。
+ *
+ * 评分公式：score = importance * 0.6 + recencyScore * 0.4
  */
 export async function getRelevantMemories(
   userId: string,
   limit = 20
 ): Promise<UserMemory[]> {
-  const memories = await prisma.userMemory.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
-  return memories as unknown as UserMemory[];
+  // 并行拉两个候选池
+  const [recent, important] = await Promise.all([
+    prisma.userMemory.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 40,
+    }),
+    prisma.userMemory.findMany({
+      where: { userId },
+      orderBy: { importance: "desc" },
+      take: 10,
+    }),
+  ]);
+
+  // 去重（按 id）
+  const seen = new Set<string>();
+  const pool: Array<{ m: (typeof recent)[number]; score: number }> = [];
+
+  for (const m of [...important, ...recent]) {
+    if (seen.has(m.id)) continue;
+    seen.add(m.id);
+
+    // 时间衰减：0天前=1.0，30天前及更早=0.0
+    const ageDays =
+      (Date.now() - m.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const recencyScore = Math.max(0, 1 - ageDays / 30);
+
+    // 综合得分
+    const score = (m.importance ?? 0.5) * 0.6 + recencyScore * 0.4;
+
+    pool.push({ m, score });
+  }
+
+  // 按得分降序，取 top N
+  pool.sort((a, b) => b.score - a.score);
+
+  return pool.slice(0, limit).map(({ m }) => m) as unknown as UserMemory[];
 }
 
 /**
- * Phase 2 新增：按重要性排序获取记忆
- *
- * 用于 Agent Runtime — Agent 分析时优先获取最重要的记忆，
- * 而不是最近的所有记忆。重要性高的记忆（如学习目标）对决策更关键。
+ * 按重要性排序获取记忆（保留，给特定场景用）
  */
 export async function getImportantMemories(
   userId: string,
@@ -356,6 +390,84 @@ async function extractMemoriesWithAI(
 
 function clampScore(value: number): number {
   return Math.max(0, Math.min(1, value));
+}
+
+// ---- 冷记忆淘汰 ----
+
+/**
+ * 淘汰规则（按优先级从高到低匹配）：
+ *
+ * ① importance < 0.3 且 lastUsed 超过 30 天  → 删除（不重要且长期未使用）
+ * ② confidence < 0.3 且 importance < 0.5     → 删除（AI 自己都不确定的低价值信息）
+ * ③ importance < 0.5 且 lastUsed 超过 60 天  → 删除（中低重要性且长期闲置）
+ * ④ importance ≥ 0.8                         → 保留（核心目标/关键弱点不淘汰）
+ *
+ * 返回值：{ deleted: number, kept: number, examined: number }
+ */
+export async function cleanupColdMemories(
+  userId: string,
+  options?: { dryRun?: boolean }
+): Promise<{ deleted: number; kept: number; examined: number }> {
+  const dryRun = options?.dryRun ?? false;
+  const now = new Date();
+
+  // 获取所有记忆（不做筛选，在应用层判断）
+  const all = await prisma.userMemory.findMany({
+    where: { userId },
+    select: { id: true, type: true, importance: true, confidence: true, lastUsed: true, createdAt: true },
+  });
+
+  const toDelete: string[] = [];
+  const reasons: string[] = [];
+
+  for (const m of all) {
+    const daysSinceUsed = m.lastUsed
+      ? Math.floor((now.getTime() - m.lastUsed.getTime()) / 86400000)
+      : Math.floor((now.getTime() - m.createdAt.getTime()) / 86400000); // 从未用过，按创建时间算
+
+    // 规则④：核心目标永远不删
+    if (m.importance >= 0.8) continue;
+
+    // 规则②：AI 自己都不确定的低价值信息
+    if (m.confidence < 0.3 && m.importance < 0.5) {
+      toDelete.push(m.id);
+      reasons.push(`低置信度(${m.confidence})+低重要性(${m.importance}): ${m.type}`);
+      continue;
+    }
+
+    // 规则①：不重要 + 30天未使用
+    if (m.importance < 0.3 && daysSinceUsed > 30) {
+      toDelete.push(m.id);
+      reasons.push(`低重要性(${m.importance})+${daysSinceUsed}天未使用: ${m.type}`);
+      continue;
+    }
+
+    // 规则③：中低重要性 + 60天未使用
+    if (m.importance < 0.5 && daysSinceUsed > 60) {
+      toDelete.push(m.id);
+      reasons.push(`中低重要性(${m.importance})+${daysSinceUsed}天未使用: ${m.type}`);
+      continue;
+    }
+  }
+
+  if (!dryRun && toDelete.length > 0) {
+    await prisma.userMemory.deleteMany({
+      where: { id: { in: toDelete } },
+    });
+  }
+
+  if (toDelete.length > 0) {
+    console.log(
+      `[Memory] ${dryRun ? "[DRY RUN] " : ""}淘汰 ${toDelete.length}/${all.length} 条记忆:\n` +
+        reasons.map((r) => `  - ${r}`).join("\n")
+    );
+  }
+
+  return {
+    deleted: toDelete.length,
+    kept: all.length - toDelete.length,
+    examined: all.length,
+  };
 }
 
 // ---- 删除 ----

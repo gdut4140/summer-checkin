@@ -10,7 +10,6 @@ import {
   CalendarCheck,
   ChartLine,
   ListChecks,
-  Trophy,
   User,
   Robot,
   Gear,
@@ -36,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SearchDialog } from "@/components/search-dialog";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 interface TopNavProps {
   user: {
@@ -53,7 +53,6 @@ const mainNav = [
   { href: "/plans", label: "学习计划" },
   { href: "/calendar", label: "打卡日历" },
   { href: "/statistics", label: "数据统计" },
-  { href: "/ranking", label: "排行榜" },
 ];
 
 // 移动端抽屉的完整导航（带图标）
@@ -64,7 +63,6 @@ const fullNav = [
   { href: "/plans", label: "学习计划", icon: ListChecks },
   { href: "/calendar", label: "打卡日历", icon: CalendarCheck },
   { href: "/statistics", label: "数据统计", icon: ChartLine },
-  { href: "/ranking", label: "排行榜", icon: Trophy },
   { href: "/ai", label: "AI 助手", icon: Robot },
   { href: "/profile", label: "个人主页", icon: User },
   { href: "/settings", label: "设置", icon: Gear },
@@ -110,8 +108,9 @@ export function TopNav({ user }: TopNavProps) {
             ))}
           </nav>
 
-          {/* 右侧：搜索 + AI 助手 + 用户菜单（桌面） */}
+          {/* 右侧：通知 + 搜索 + AI 助手 + 用户菜单（桌面） */}
           <div className="hidden items-center gap-2 lg:flex">
+            <NotificationBell />
             <button
               onClick={() => {
                 const event = new KeyboardEvent("keydown", { key: "k", metaKey: true })

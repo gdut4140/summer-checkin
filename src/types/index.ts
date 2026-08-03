@@ -101,19 +101,8 @@ export interface DashboardStats {
   streak: number;
   todayHours: number;
   weekCompletion: number;
-  userRank: number;
-  totalUsers: number;
   recentCheckins: CheckinWithPlan[];
   weeklyData: { date: string; hours: number }[];
-}
-
-export interface LeaderboardEntry {
-  rank: number;
-  userId: string;
-  name: string;
-  image: string | null;
-  totalHours: number;
-  streak: number;
 }
 
 export interface ChatMessage {
@@ -218,4 +207,56 @@ export interface DecisionStats {
   byType: Record<string, number>;
   byStatus: Record<string, number>;
   recentRate: number;
+}
+
+// ============================================================
+// Phase 3: Notification + Report + Schedule 类型
+// ============================================================
+
+export type NotificationType =
+  | "reminder"
+  | "analysis"
+  | "report"
+  | "encouragement"
+  | "system";
+
+export interface NotificationInfo {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  content: string;
+  read: boolean;
+  actionUrl: string | null;
+  createdAt: string;
+}
+
+export interface DailyReport {
+  userId: string;
+  date: string;
+  status: "on_track" | "need_attention" | "need_adjustment" | "at_risk";
+  summary: string;
+  stats: {
+    todayHours: number;
+    weekHours: number;
+    streak: number;
+    completionRate: number;
+  };
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+  generatedBy: string | null; // AgentRun ID
+}
+
+export type ScheduleType = "daily_review" | "weekly_analysis" | "plan_adjust";
+
+export interface ScheduleInfo {
+  id: string;
+  userId: string;
+  type: ScheduleType;
+  cron: string;
+  enabled: boolean;
+  lastRunAt: string | null;
+  nextRunAt: string | null;
+  createdAt: string;
 }

@@ -402,7 +402,9 @@ export const ModelName = {
   AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
   AIHistory: 'AIHistory',
-  DocumentChunk: 'DocumentChunk'
+  DocumentChunk: 'DocumentChunk',
+  Notification: 'Notification',
+  AgentSchedule: 'AgentSchedule'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -418,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentToolCall" | "agentDecision" | "userMemory" | "aIHistory" | "documentChunk"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentToolCall" | "agentDecision" | "userMemory" | "aIHistory" | "documentChunk" | "notification" | "agentSchedule"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1676,6 +1678,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Notification: {
+      payload: Prisma.$NotificationPayload<ExtArgs>
+      fields: Prisma.NotificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NotificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NotificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        findFirst: {
+          args: Prisma.NotificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NotificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        findMany: {
+          args: Prisma.NotificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>[]
+        }
+        create: {
+          args: Prisma.NotificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        createMany: {
+          args: Prisma.NotificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.NotificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        update: {
+          args: Prisma.NotificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.NotificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NotificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.NotificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        aggregate: {
+          args: Prisma.NotificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNotification>
+        }
+        groupBy: {
+          args: Prisma.NotificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NotificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotificationCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentSchedule: {
+      payload: Prisma.$AgentSchedulePayload<ExtArgs>
+      fields: Prisma.AgentScheduleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentScheduleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentScheduleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
+        }
+        findFirst: {
+          args: Prisma.AgentScheduleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentScheduleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
+        }
+        findMany: {
+          args: Prisma.AgentScheduleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>[]
+        }
+        create: {
+          args: Prisma.AgentScheduleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
+        }
+        createMany: {
+          args: Prisma.AgentScheduleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AgentScheduleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
+        }
+        update: {
+          args: Prisma.AgentScheduleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentScheduleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentScheduleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AgentScheduleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
+        }
+        aggregate: {
+          args: Prisma.AgentScheduleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentSchedule>
+        }
+        groupBy: {
+          args: Prisma.AgentScheduleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentScheduleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentScheduleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentScheduleCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1996,6 +2130,35 @@ export const DocumentChunkScalarFieldEnum = {
 export type DocumentChunkScalarFieldEnum = (typeof DocumentChunkScalarFieldEnum)[keyof typeof DocumentChunkScalarFieldEnum]
 
 
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  content: 'content',
+  read: 'read',
+  actionUrl: 'actionUrl',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const AgentScheduleScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  cron: 'cron',
+  enabled: 'enabled',
+  lastRunAt: 'lastRunAt',
+  nextRunAt: 'nextRunAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentScheduleScalarFieldEnum = (typeof AgentScheduleScalarFieldEnum)[keyof typeof AgentScheduleScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2265,6 +2428,28 @@ export const DocumentChunkOrderByRelevanceFieldEnum = {
 export type DocumentChunkOrderByRelevanceFieldEnum = (typeof DocumentChunkOrderByRelevanceFieldEnum)[keyof typeof DocumentChunkOrderByRelevanceFieldEnum]
 
 
+export const NotificationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  content: 'content',
+  actionUrl: 'actionUrl'
+} as const
+
+export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum]
+
+
+export const AgentScheduleOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  cron: 'cron'
+} as const
+
+export type AgentScheduleOrderByRelevanceFieldEnum = (typeof AgentScheduleOrderByRelevanceFieldEnum)[keyof typeof AgentScheduleOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -2448,6 +2633,8 @@ export type GlobalOmitConfig = {
   userMemory?: Prisma.UserMemoryOmit
   aIHistory?: Prisma.AIHistoryOmit
   documentChunk?: Prisma.DocumentChunkOmit
+  notification?: Prisma.NotificationOmit
+  agentSchedule?: Prisma.AgentScheduleOmit
 }
 
 /* Types for Logging */

@@ -136,3 +136,13 @@ export type AIHistory = Prisma.AIHistoryModel
  * 
  */
 export type DocumentChunk = Prisma.DocumentChunkModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model AgentSchedule
+ * 
+ */
+export type AgentSchedule = Prisma.AgentScheduleModel

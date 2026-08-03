@@ -1,24 +1,24 @@
 // ============================================================
-// Phase 1: Daily Agent Cron — 每天自动运行 Agent 循环
+// Phase 3: Daily Agent Cron — 完整调度系统
+//
+// 升级内容：
+// ① 支持 AgentSchedule — 按用户配置决定是否运行（Phase 3）
+// ② 通知投递 — Agent 运行后自动生成 Notification（Phase 3）
+// ③ 周度报告 — 每周日生成学习周报（Phase 3）
+// ④ 通知清理 — 自动清理 30 天前的已读通知（Phase 3）
 //
 // 触发方式：GET /api/agent/cron/daily
-// 安全机制：通过 CRON_SECRET 验证调用来源
-//           （生产环境由 Vercel Cron Jobs 或外部 cron 服务触发）
-//
-// 流程：
-//   for each 活跃用户:
-//     runLearningAgent(userId, { mode: "daily" })
-//
-// Phase 1 简化：只处理有活跃计划的用户
-// Phase 3 升级：完整调度系统 + 用户级别 cron 配置
+// 安全机制：CRON_SECRET Bearer Token
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runLearningAgent } from "@/lib/agent";
+import { createNotification, cleanupOldNotifications } from "@/lib/notification";
+import { cleanupColdMemories } from "@/lib/memory";
 
 export async function GET(request: NextRequest) {
-  // 安全校验：cron secret
+  // 安全校验
   const authHeader = request.headers.get("authorization");
   const expectedSecret = process.env.CRON_SECRET;
 
@@ -26,62 +26,198 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  console.log("[Cron] ====== 每日 Agent 运行开始 ======");
+  const now = new Date();
+  const isSunday = now.getDay() === 0; // 周日生成周报
+  console.log(`[Cron] ====== 每日 Agent 运行开始 (${now.toISOString()}) ======`);
+
+  // 汇总统计
+  let totalUsers = 0;
+  let agentSucceeded = 0;
+  let agentFailed = 0;
+  let notificationsCreated = 0;
+  let reportsGenerated = 0;
+  let oldNotifsCleaned = 0;
+  let coldMemoriesCleaned = 0;
 
   try {
-    // 找有活跃计划的用户（Phase 1 简化策略）
-    const activeUsers = await prisma.plan.findMany({
-      where: { status: "active" },
-      select: { userId: true },
-      distinct: ["userId"],
+    // ============================================================
+    // 1. 查找需要运行的用户（Phase 3：AgentSchedule 优先）
+    // ============================================================
+
+    // 1a. 查找今天有调度配置的用户
+    const todayHour = now.getHours().toString().padStart(2, "0");
+    const todayMinute = now.getMinutes().toString().padStart(2, "0");
+    const timePattern = `${todayMinute} ${todayHour} * * *`;
+
+    const scheduledUsers = await prisma.agentSchedule.findMany({
+      where: {
+        enabled: true,
+        OR: [
+          { cron: timePattern },
+          // 宽松匹配：cron 分钟字段为 *（每小时）且小时字段匹配
+          { cron: { startsWith: `* ${todayHour}` } },
+        ],
+      },
+      select: { userId: true, type: true, id: true },
     });
 
-    console.log(`[Cron] 找到 ${activeUsers.length} 个活跃用户`);
+    console.log(
+      `[Cron] 调度匹配: ${scheduledUsers.length} 个用户 (time: ${timePattern})`
+    );
 
-    const results: { userId: string; status: string; error?: string }[] = [];
+    // 1b. 回退：如果没有调度配置，使用活跃计划用户（Phase 1 策略）
+    let userIds: string[] = scheduledUsers.map((s) => s.userId);
 
-    for (const { userId } of activeUsers) {
+    if (userIds.length === 0) {
+      console.log("[Cron] 无调度匹配用户，回退为活跃计划用户策略");
+      const activePlanUsers = await prisma.plan.findMany({
+        where: { status: "active" },
+        select: { userId: true },
+        distinct: ["userId"],
+      });
+      userIds = activePlanUsers.map((p) => p.userId);
+    }
+
+    // 去重
+    userIds = [...new Set(userIds)];
+    totalUsers = userIds.length;
+
+    console.log(`[Cron] 共 ${totalUsers} 个用户需要处理`);
+
+    // ============================================================
+    // 2. 为每个用户运行 Agent
+    // ============================================================
+    for (const userId of userIds) {
       try {
         const result = await runLearningAgent(userId, {
-          mode: "daily",
+          mode: isSunday ? "review" : "daily",
           persist: true,
         });
-        results.push({
-          userId,
-          status: result.status,
-        });
-        console.log(`[Cron] 用户 ${userId}: ${result.status}`);
+
+        if (result.status !== "at_risk" || result.error === undefined) {
+          agentSucceeded++;
+        } else {
+          agentFailed++;
+        }
+
+        // 统计通知数（由 executeAction 自动生成）
+        notificationsCreated += result.executedActions.filter(
+          (a) => a.success && (a.type === "SEND_REMINDER" || a.type === "ENCOURAGE")
+        ).length;
+
+        // 统计报告数
+        reportsGenerated += result.executedActions.filter(
+          (a) => a.success && a.type === "GENERATE_REPORT"
+        ).length;
+
+        console.log(
+          `[Cron] 用户 ${userId.slice(0, 8)}: status=${result.status}, actions=${result.executedActions.length}`
+        );
       } catch (error) {
+        agentFailed++;
         const message = error instanceof Error ? error.message : "运行异常";
-        results.push({ userId, status: "error", error: message });
-        console.error(`[Cron] 用户 ${userId} 失败:`, message);
+        console.error(`[Cron] 用户 ${userId.slice(0, 8)} 失败:`, message);
       }
     }
 
-    const succeeded = results.filter((r) => r.status !== "error").length;
+    // ============================================================
+    // 3. 更新 AgentSchedule.lastRunAt / nextRunAt
+    // ============================================================
+    if (scheduledUsers.length > 0) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9, 0, 0, 0); // 默认下次运行：明天 9:00
 
+      for (const schedule of scheduledUsers) {
+        await prisma.agentSchedule
+          .update({
+            where: { id: schedule.id },
+            data: {
+              lastRunAt: now,
+              nextRunAt: tomorrow,
+            },
+          })
+          .catch(() => {});
+      }
+    }
+
+    // ============================================================
+    // 4. 周日：生成周度总结报告（给所有活跃用户）
+    // ============================================================
+    if (isSunday) {
+      console.log("[Cron] 周日：生成周度学习报告");
+      for (const userId of userIds.slice(0, 50)) {
+        // 限制 50 个用户，防止超时
+        try {
+          await createNotification({
+            userId,
+            type: "report",
+            title: "这周的学习总结来了",
+            content: `嘿，这周的学习周报已经整理好了，去 Agent Center 看看吧～`,
+            actionUrl: "/agent",
+          });
+          reportsGenerated++;
+        } catch {
+          // 跳过失败的用户
+        }
+      }
+    }
+
+    // ============================================================
+    // 5. 清理旧通知（30 天前的已读通知）
+    // ============================================================
+    for (const userId of userIds.slice(0, 50)) {
+      try {
+        const cleaned = await cleanupOldNotifications(userId, 30);
+        oldNotifsCleaned += cleaned;
+      } catch {
+        // 跳过失败的用户
+      }
+    }
+
+    // ============================================================
+    // 6. 冷记忆淘汰（长期未使用 + 低重要性的记忆）
+    // ============================================================
+    for (const userId of userIds.slice(0, 50)) {
+      try {
+        const result = await cleanupColdMemories(userId);
+        coldMemoriesCleaned += result.deleted;
+      } catch {
+        // 跳过失败的用户
+      }
+    }
+
+    // ============================================================
+    // 完成
+    // ============================================================
     console.log(
-      `[Cron] ====== 每日 Agent 运行结束: ${succeeded}/${results.length} 成功 ======`
+      `[Cron] ====== 结束: ${agentSucceeded}成功/${agentFailed}失败 | ` +
+      `通知${notificationsCreated}条 | 报告${reportsGenerated}份 | ` +
+      `清理${oldNotifsCleaned}条旧通知 | 淘汰${coldMemoriesCleaned}条冷记忆 ======`
     );
 
     return NextResponse.json({
       success: true,
-      processed: results.length,
-      succeeded,
-      failed: results.length - succeeded,
-      results: results.slice(0, 50), // 限制响应大小
+      timestamp: now.toISOString(),
+      isSunday,
+      stats: {
+        totalUsers,
+        agentSucceeded,
+        agentFailed,
+        notificationsCreated,
+        reportsGenerated,
+        oldNotifsCleaned,
+        coldMemoriesCleaned,
+      },
     });
   } catch (error) {
-    console.error("[Cron] 每日 Agent 运行异常:", error);
+    console.error("[Cron] 整体异常:", error);
     return NextResponse.json(
-      { error: "Cron job failed" },
+      {
+        error: "Cron job failed",
+        detail: error instanceof Error ? error.message : "未知错误",
+      },
       { status: 500 }
     );
   }
 }
-
-// 生产环境建议：
-// 1. Vercel Cron Jobs: vercel.json 中配置 cron
-//    { "crons": [{ "path": "/api/agent/cron/daily", "schedule": "0 9 * * *" }] }
-// 2. 设置环境变量 CRON_SECRET 保护接口
-// 3. Phase 3 升级为按用户配置的时间运行（AgentSchedule 模型）

@@ -69,7 +69,9 @@ export const ModelName = {
   AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
   AIHistory: 'AIHistory',
-  DocumentChunk: 'DocumentChunk'
+  DocumentChunk: 'DocumentChunk',
+  Notification: 'Notification',
+  AgentSchedule: 'AgentSchedule'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -369,6 +371,35 @@ export const DocumentChunkScalarFieldEnum = {
 export type DocumentChunkScalarFieldEnum = (typeof DocumentChunkScalarFieldEnum)[keyof typeof DocumentChunkScalarFieldEnum]
 
 
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  content: 'content',
+  read: 'read',
+  actionUrl: 'actionUrl',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const AgentScheduleScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  cron: 'cron',
+  enabled: 'enabled',
+  lastRunAt: 'lastRunAt',
+  nextRunAt: 'nextRunAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentScheduleScalarFieldEnum = (typeof AgentScheduleScalarFieldEnum)[keyof typeof AgentScheduleScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -636,4 +667,26 @@ export const DocumentChunkOrderByRelevanceFieldEnum = {
 } as const
 
 export type DocumentChunkOrderByRelevanceFieldEnum = (typeof DocumentChunkOrderByRelevanceFieldEnum)[keyof typeof DocumentChunkOrderByRelevanceFieldEnum]
+
+
+export const NotificationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  content: 'content',
+  actionUrl: 'actionUrl'
+} as const
+
+export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum]
+
+
+export const AgentScheduleOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  cron: 'cron'
+} as const
+
+export type AgentScheduleOrderByRelevanceFieldEnum = (typeof AgentScheduleOrderByRelevanceFieldEnum)[keyof typeof AgentScheduleOrderByRelevanceFieldEnum]
 
