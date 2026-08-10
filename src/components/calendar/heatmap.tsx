@@ -8,24 +8,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-function getColor(hours: number): string {
-  if (hours === 0) return "bg-muted";
-  if (hours <= 0.5) return "bg-emerald-200/70 dark:bg-emerald-950";
-  if (hours <= 1.5) return "bg-emerald-400/70 dark:bg-emerald-800";
-  if (hours <= 3) return "bg-emerald-500/80 dark:bg-emerald-600";
-  if (hours <= 5) return "bg-emerald-600 dark:bg-emerald-400";
-  return "bg-emerald-700 dark:bg-emerald-300";
+function checkedColor(checked: boolean): string {
+  if (!checked) return "bg-white/5";
+  return "bg-emerald-500/70";
 }
 
 interface HeatmapProps {
-  data: { date: string; hours: number }[];
+  data: { date: string; checked: boolean }[];
   year: number;
+  compact?: boolean;
 }
 
-export function Heatmap({ data, year }: HeatmapProps) {
+export function Heatmap({ data, year, compact = false }: HeatmapProps) {
   const weeks = useMemo(() => {
-    const result: { date: string; hours: number; dayOfWeek: number }[][] = [];
-    let currentWeek: { date: string; hours: number; dayOfWeek: number }[] = [];
+    const result: { date: string; checked: boolean; dayOfWeek: number }[][] = [];
+    let currentWeek: { date: string; checked: boolean; dayOfWeek: number }[] = [];
 
     for (const day of data) {
       const d = new Date(day.date + "T00:00:00");
@@ -40,7 +37,8 @@ export function Heatmap({ data, year }: HeatmapProps) {
     return result;
   }, [data]);
 
-  const dayLabels = ["日", "一", "二", "三", "四", "五", "六"];
+  const cellSize = compact ? 12 : 13;
+  const gap = compact ? 3 : 3;
 
   const months = useMemo(() => {
     const m: { label: string; index: number }[] = [];
@@ -57,55 +55,63 @@ export function Heatmap({ data, year }: HeatmapProps) {
     return m;
   }, [weeks]);
 
-  return (
-    <div className="overflow-x-auto">
-      <div className="flex mb-1 ml-8">
-        {months.map((m, i) => (
-          <div
-            key={`${m.label}-${i}`}
-            className="text-xs text-muted-foreground"
-            style={{ marginLeft: i === 0 ? m.index * 13 : (m.index - months[i - 1].index) * 13 }}
-          >
-            {m.label}
-          </div>
-        ))}
-      </div>
+  const step = cellSize + gap;
 
-      <div className="flex gap-[3px]">
-        <div className="flex flex-col gap-[3px] pr-2 justify-start pt-[2px]">
-          {dayLabels.map((label, i) => (
+  return (
+    <div>
+      {/* 月份标签 */}
+      {!compact && (
+        <div className="mb-1 flex" style={{ marginLeft: 28 }}>
+          {months.map((m, i) => (
             <div
-              key={label}
-              className="text-[10px] text-muted-foreground h-[11px] leading-[11px]"
+              key={`${m.label}-${i}`}
+              className="text-[10px] text-muted-foreground"
+              style={{ marginLeft: i === 0 ? m.index * step : (m.index - months[i - 1].index) * step }}
             >
-              {i % 2 === 0 ? label : ""}
+              {m.label}
             </div>
           ))}
         </div>
+      )}
+
+      <div className="flex gap-[2px]" style={{ gap }}>
+        {/* 星期标签 */}
+        {!compact && (
+          <div className="mr-1 flex flex-col" style={{ gap, paddingTop: 2 }}>
+            {["日", "", "二", "", "四", "", "六"].map((label, i) => (
+              <div
+                key={i}
+                className="text-[9px] leading-none text-muted-foreground"
+                style={{ width: cellSize, height: cellSize, lineHeight: `${cellSize}px` }}
+              >
+                {label}
+              </div>
+            ))}
+          </div>
+        )}
 
         <TooltipProvider>
-          <div className="flex gap-[3px]">
+          <div className="flex" style={{ gap }}>
             {weeks.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-[3px]">
+              <div key={wi} className="flex flex-col" style={{ gap }}>
                 {Array.from({ length: 7 }).map((_, di) => {
-                  const day = week.find((d) => d.dayOfWeek === di) ?? {
-                    date: "",
-                    hours: 0,
-                  };
+                  const day = week.find((d) => d.dayOfWeek === di);
+                  if (!day || !day.date) {
+                    return <div key={`${wi}-${di}`} style={{ width: cellSize, height: cellSize }} />;
+                  }
 
                   return (
                     <Tooltip key={`${wi}-${di}`}>
                       <TooltipTrigger>
                         <div
-                          className={`w-[11px] h-[11px] rounded-sm ${getColor(day.hours)}`}
+                          className={`rounded-sm ${checkedColor(day.checked)}`}
+                          style={{ width: cellSize, height: cellSize }}
                         />
                       </TooltipTrigger>
-                      {day.date && (
-                        <TooltipContent side="top" className="text-xs">
-                          <p>{day.date}</p>
-                          <p>{day.hours.toFixed(1)} 小时</p>
-                        </TooltipContent>
-                      )}
+                      <TooltipContent side="top" className="text-xs">
+                        <p>{day.date}</p>
+                        <p>{day.checked ? "已来访 ✓" : "未来访"}</p>
+                      </TooltipContent>
                     </Tooltip>
                   );
                 })}
@@ -115,16 +121,17 @@ export function Heatmap({ data, year }: HeatmapProps) {
         </TooltipProvider>
       </div>
 
-      <div className="flex items-center gap-2 mt-3 justify-end text-xs text-muted-foreground">
-        <span>少</span>
-        <div className="w-[11px] h-[11px] rounded-sm bg-muted" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-200/70 dark:bg-emerald-950" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-400/70 dark:bg-emerald-800" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-500/80 dark:bg-emerald-600" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-600 dark:bg-emerald-400" />
-        <div className="w-[11px] h-[11px] rounded-sm bg-emerald-700 dark:bg-emerald-300" />
-        <span>多</span>
-      </div>
+      {/* 图例 */}
+      {!compact && (
+        <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground">
+          <span>少</span>
+          <div className="h-3 w-3 rounded-sm bg-white/5" />
+          <div className="h-3 w-3 rounded-sm bg-emerald-500/30" />
+          <div className="h-3 w-3 rounded-sm bg-emerald-500/50" />
+          <div className="h-3 w-3 rounded-sm bg-emerald-500/70" />
+          <span>多</span>
+        </div>
+      )}
     </div>
   );
 }

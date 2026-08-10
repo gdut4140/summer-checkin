@@ -21,14 +21,14 @@ const features = [
 
 export function FeaturesGrid() {
   return (
-    <section id="features" className="border-y border-white/22 bg-[#eaf2ed]/88 px-4 py-20 text-[#102a25] backdrop-blur-2xl md:px-8 md:py-28">
+    <section id="features" className="border-y border-white/10 bg-[#071710]/76 px-4 py-20 text-white backdrop-blur-2xl md:px-8 md:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-end">
           <div>
-            <p className="text-sm font-semibold text-[#0b6b59]">完整学习闭环</p>
+            <p className="text-sm font-semibold text-[#d7ef83]">完整学习闭环</p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight md:text-5xl">从今天开始，<br />看见每一步成长</h2>
           </div>
-          <p className="max-w-2xl text-base leading-relaxed text-[#526b64] md:text-lg">
+          <p className="max-w-2xl text-base leading-relaxed text-white/58 md:text-lg">
             不堆叠复杂功能，只保留真正帮助你行动的工具。从计划到复盘，每个环节都自然衔接。
           </p>
         </div>
@@ -41,11 +41,11 @@ export function FeaturesGrid() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.45, delay: index * 0.05 }}
-              className="group min-h-56 rounded-lg border border-white/70 bg-white/58 p-6 shadow-[0_14px_40px_rgba(14,59,47,0.08)] backdrop-blur-xl transition-transform duration-300 hover:-translate-y-1"
+              className="group min-h-56 rounded-lg border border-white/10 bg-white/[0.045] p-6 shadow-[0_14px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/18 hover:bg-white/[0.065]"
             >
-              <feature.icon className="h-8 w-8 text-[#0b6b59]" weight="duotone" />
+              <feature.icon className="h-8 w-8 text-[#d7ef83]" weight="duotone" />
               <h3 className="mt-8 text-lg font-semibold">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-[#5b706a]">{feature.description}</p>
+              <p className="mt-2 text-sm leading-6 text-white/52">{feature.description}</p>
             </motion.article>
           ))}
         </div>

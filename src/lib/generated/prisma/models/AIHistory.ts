@@ -192,7 +192,6 @@ export type AIHistoryOrderByWithRelationInput = {
   response?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.AIHistoryOrderByRelevanceInput
 }
 
 export type AIHistoryWhereUniqueInput = Prisma.AtLeast<{
@@ -292,12 +291,6 @@ export type AIHistoryListRelationFilter = {
 
 export type AIHistoryOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AIHistoryOrderByRelevanceInput = {
-  fields: Prisma.AIHistoryOrderByRelevanceFieldEnum | Prisma.AIHistoryOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AIHistoryCountOrderByAggregateInput = {
@@ -456,7 +449,23 @@ export type AIHistorySelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["aIHistory"]>
 
+export type AIHistorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  message?: boolean
+  response?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["aIHistory"]>
 
+export type AIHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  message?: boolean
+  response?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["aIHistory"]>
 
 export type AIHistorySelectScalar = {
   id?: boolean
@@ -468,6 +477,12 @@ export type AIHistorySelectScalar = {
 
 export type AIHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "message" | "response" | "createdAt", ExtArgs["result"]["aIHistory"]>
 export type AIHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AIHistoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AIHistoryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -600,6 +615,30 @@ export interface AIHistoryDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   createMany<T extends AIHistoryCreateManyArgs>(args?: Prisma.SelectSubset<T, AIHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AIHistories and returns the data saved in the database.
+   * @param {AIHistoryCreateManyAndReturnArgs} args - Arguments to create many AIHistories.
+   * @example
+   * // Create many AIHistories
+   * const aIHistory = await prisma.aIHistory.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AIHistories and only return the `id`
+   * const aIHistoryWithIdOnly = await prisma.aIHistory.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AIHistoryCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AIHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AIHistory.
    * @param {AIHistoryDeleteArgs} args - Arguments to delete one AIHistory.
    * @example
@@ -662,6 +701,36 @@ export interface AIHistoryDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * 
    */
   updateMany<T extends AIHistoryUpdateManyArgs>(args: Prisma.SelectSubset<T, AIHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AIHistories and returns the data updated in the database.
+   * @param {AIHistoryUpdateManyAndReturnArgs} args - Arguments to update many AIHistories.
+   * @example
+   * // Update many AIHistories
+   * const aIHistory = await prisma.aIHistory.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AIHistories and only return the `id`
+   * const aIHistoryWithIdOnly = await prisma.aIHistory.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AIHistoryUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AIHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AIHistory.
@@ -1095,6 +1164,29 @@ export type AIHistoryCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * AIHistory createManyAndReturn
+ */
+export type AIHistoryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AIHistory
+   */
+  select?: Prisma.AIHistorySelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AIHistory
+   */
+  omit?: Prisma.AIHistoryOmit<ExtArgs> | null
+  /**
+   * The data used to create many AIHistories.
+   */
+  data: Prisma.AIHistoryCreateManyInput | Prisma.AIHistoryCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AIHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AIHistory update
  */
 export type AIHistoryUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1136,6 +1228,36 @@ export type AIHistoryUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many AIHistories to update.
    */
   limit?: number
+}
+
+/**
+ * AIHistory updateManyAndReturn
+ */
+export type AIHistoryUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AIHistory
+   */
+  select?: Prisma.AIHistorySelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AIHistory
+   */
+  omit?: Prisma.AIHistoryOmit<ExtArgs> | null
+  /**
+   * The data used to update AIHistories.
+   */
+  data: Prisma.XOR<Prisma.AIHistoryUpdateManyMutationInput, Prisma.AIHistoryUncheckedUpdateManyInput>
+  /**
+   * Filter which AIHistories to update
+   */
+  where?: Prisma.AIHistoryWhereInput
+  /**
+   * Limit how many AIHistories to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AIHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

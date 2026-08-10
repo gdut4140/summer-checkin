@@ -201,7 +201,6 @@ export type BadgeOrderByWithRelationInput = {
   criteria?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userBadges?: Prisma.UserBadgeOrderByRelationAggregateInput
-  _relevance?: Prisma.BadgeOrderByRelevanceInput
 }
 
 export type BadgeWhereUniqueInput = Prisma.AtLeast<{
@@ -306,12 +305,6 @@ export type BadgeUncheckedUpdateManyInput = {
   icon?: Prisma.StringFieldUpdateOperationsInput | string
   criteria?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type BadgeOrderByRelevanceInput = {
-  fields: Prisma.BadgeOrderByRelevanceFieldEnum | Prisma.BadgeOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type BadgeCountOrderByAggregateInput = {
@@ -454,7 +447,23 @@ export type BadgeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   _count?: boolean | Prisma.BadgeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["badge"]>
 
+export type BadgeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  description?: boolean
+  icon?: boolean
+  criteria?: boolean
+  createdAt?: boolean
+}, ExtArgs["result"]["badge"]>
 
+export type BadgeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  name?: boolean
+  description?: boolean
+  icon?: boolean
+  criteria?: boolean
+  createdAt?: boolean
+}, ExtArgs["result"]["badge"]>
 
 export type BadgeSelectScalar = {
   id?: boolean
@@ -470,6 +479,8 @@ export type BadgeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   userBadges?: boolean | Prisma.Badge$userBadgesArgs<ExtArgs>
   _count?: boolean | Prisma.BadgeCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type BadgeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type BadgeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $BadgePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Badge"
@@ -601,6 +612,30 @@ export interface BadgeDelegate<ExtArgs extends runtime.Types.Extensions.Internal
   createMany<T extends BadgeCreateManyArgs>(args?: Prisma.SelectSubset<T, BadgeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Badges and returns the data saved in the database.
+   * @param {BadgeCreateManyAndReturnArgs} args - Arguments to create many Badges.
+   * @example
+   * // Create many Badges
+   * const badge = await prisma.badge.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Badges and only return the `id`
+   * const badgeWithIdOnly = await prisma.badge.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends BadgeCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, BadgeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BadgePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Badge.
    * @param {BadgeDeleteArgs} args - Arguments to delete one Badge.
    * @example
@@ -663,6 +698,36 @@ export interface BadgeDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    * 
    */
   updateMany<T extends BadgeUpdateManyArgs>(args: Prisma.SelectSubset<T, BadgeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Badges and returns the data updated in the database.
+   * @param {BadgeUpdateManyAndReturnArgs} args - Arguments to update many Badges.
+   * @example
+   * // Update many Badges
+   * const badge = await prisma.badge.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Badges and only return the `id`
+   * const badgeWithIdOnly = await prisma.badge.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends BadgeUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, BadgeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BadgePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Badge.
@@ -1097,6 +1162,25 @@ export type BadgeCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Badge createManyAndReturn
+ */
+export type BadgeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Badge
+   */
+  select?: Prisma.BadgeSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Badge
+   */
+  omit?: Prisma.BadgeOmit<ExtArgs> | null
+  /**
+   * The data used to create many Badges.
+   */
+  data: Prisma.BadgeCreateManyInput | Prisma.BadgeCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Badge update
  */
 export type BadgeUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1126,6 +1210,32 @@ export type BadgeUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
  * Badge updateMany
  */
 export type BadgeUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Badges.
+   */
+  data: Prisma.XOR<Prisma.BadgeUpdateManyMutationInput, Prisma.BadgeUncheckedUpdateManyInput>
+  /**
+   * Filter which Badges to update
+   */
+  where?: Prisma.BadgeWhereInput
+  /**
+   * Limit how many Badges to update.
+   */
+  limit?: number
+}
+
+/**
+ * Badge updateManyAndReturn
+ */
+export type BadgeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Badge
+   */
+  select?: Prisma.BadgeSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Badge
+   */
+  omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
    * The data used to update Badges.
    */

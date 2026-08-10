@@ -4,7 +4,7 @@
 
 export { embedTexts, embedText, rerank } from "./client";
 export { splitText, splitMarkdown } from "./chunk";
-export { searchSimilarChunks, cosineSimilarity } from "./retriever";
+export { searchSimilarChunks, cosineSimilarity, parseEmbedding } from "./retriever";
 export type { DocChunk } from "./retriever";
 export {
   searchKnowledge,

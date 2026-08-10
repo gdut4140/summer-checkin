@@ -1,42 +1,22 @@
 services:
-  mysql:
-    image: mysql:5.7
-    container_name: summer-checkin-mysql
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: postgresServer
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-summer_checkin}
-      MYSQL_USER: ${MYSQL_USER:-appuser}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: REDACTED
+      POSTGRES_DB: summer_checkin
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:3306:3306"
-    command: >
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
+      - "127.0.0.1:5432:5432"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d summer_checkin"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    networks:
-      - app-network
-
-  embedding:
-    image: summer-checkin-embedding:latest
-    container_name: summer-checkin-embedding
-    restart: unless-stopped
-    environment:
-      OPENBLAS_NUM_THREADS: "1"
-      OMP_NUM_THREADS: "1"
-      HF_HOME: /app/models
-      TRANSFORMERS_CACHE: /app/models/transformers
-    volumes:
-      - embedding_models:/app/models
-    ports:
-      - "127.0.0.1:8765:8765"
+      start_period: 10s
     networks:
       - app-network
 
@@ -46,15 +26,17 @@ services:
     restart: unless-stopped
     entrypoint: ["node", "server.js"]
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      DATABASE_URL: mysql://${MYSQL_USER:-appuser}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE:-summer_checkin}
-      EMBEDDING_SERVICE_URL: http://embedding:8765
+      DATABASE_URL: postgresql://postgres:REDACTED@postgres:5432/summer_checkin
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
-      DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-deepseek-v4-flash}
-      DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://api.deepseek.com/v1}
+      DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-agnes-2.5-flash}
+      DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://apihub.agnes-ai.com/v1}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v2}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
@@ -80,8 +62,7 @@ services:
       - app-network
 
 volumes:
-  mysql_data:
-  embedding_models:
+  postgres_data:
   knowledge_data:
 
 networks:

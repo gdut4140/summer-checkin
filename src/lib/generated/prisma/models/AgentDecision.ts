@@ -226,7 +226,6 @@ export type AgentDecisionOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   run?: Prisma.AgentRunOrderByWithRelationInput
-  _relevance?: Prisma.AgentDecisionOrderByRelevanceInput
 }
 
 export type AgentDecisionWhereUniqueInput = Prisma.AtLeast<{
@@ -366,12 +365,6 @@ export type AgentDecisionListRelationFilter = {
 
 export type AgentDecisionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AgentDecisionOrderByRelevanceInput = {
-  fields: Prisma.AgentDecisionOrderByRelevanceFieldEnum | Prisma.AgentDecisionOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AgentDecisionCountOrderByAggregateInput = {
@@ -707,7 +700,33 @@ export type AgentDecisionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   run?: boolean | Prisma.AgentDecision$runArgs<ExtArgs>
 }, ExtArgs["result"]["agentDecision"]>
 
+export type AgentDecisionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  runId?: boolean
+  type?: boolean
+  reason?: boolean
+  action?: boolean
+  status?: boolean
+  feedback?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  run?: boolean | Prisma.AgentDecision$runArgs<ExtArgs>
+}, ExtArgs["result"]["agentDecision"]>
 
+export type AgentDecisionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  runId?: boolean
+  type?: boolean
+  reason?: boolean
+  action?: boolean
+  status?: boolean
+  feedback?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  run?: boolean | Prisma.AgentDecision$runArgs<ExtArgs>
+}, ExtArgs["result"]["agentDecision"]>
 
 export type AgentDecisionSelectScalar = {
   id?: boolean
@@ -723,6 +742,14 @@ export type AgentDecisionSelectScalar = {
 
 export type AgentDecisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "runId" | "type" | "reason" | "action" | "status" | "feedback" | "createdAt", ExtArgs["result"]["agentDecision"]>
 export type AgentDecisionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  run?: boolean | Prisma.AgentDecision$runArgs<ExtArgs>
+}
+export type AgentDecisionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  run?: boolean | Prisma.AgentDecision$runArgs<ExtArgs>
+}
+export type AgentDecisionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   run?: boolean | Prisma.AgentDecision$runArgs<ExtArgs>
 }
@@ -861,6 +888,30 @@ export interface AgentDecisionDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends AgentDecisionCreateManyArgs>(args?: Prisma.SelectSubset<T, AgentDecisionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AgentDecisions and returns the data saved in the database.
+   * @param {AgentDecisionCreateManyAndReturnArgs} args - Arguments to create many AgentDecisions.
+   * @example
+   * // Create many AgentDecisions
+   * const agentDecision = await prisma.agentDecision.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AgentDecisions and only return the `id`
+   * const agentDecisionWithIdOnly = await prisma.agentDecision.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AgentDecisionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AgentDecisionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentDecisionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AgentDecision.
    * @param {AgentDecisionDeleteArgs} args - Arguments to delete one AgentDecision.
    * @example
@@ -923,6 +974,36 @@ export interface AgentDecisionDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends AgentDecisionUpdateManyArgs>(args: Prisma.SelectSubset<T, AgentDecisionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AgentDecisions and returns the data updated in the database.
+   * @param {AgentDecisionUpdateManyAndReturnArgs} args - Arguments to update many AgentDecisions.
+   * @example
+   * // Update many AgentDecisions
+   * const agentDecision = await prisma.agentDecision.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AgentDecisions and only return the `id`
+   * const agentDecisionWithIdOnly = await prisma.agentDecision.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AgentDecisionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AgentDecisionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentDecisionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AgentDecision.
@@ -1361,6 +1442,29 @@ export type AgentDecisionCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * AgentDecision createManyAndReturn
+ */
+export type AgentDecisionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentDecision
+   */
+  select?: Prisma.AgentDecisionSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentDecision
+   */
+  omit?: Prisma.AgentDecisionOmit<ExtArgs> | null
+  /**
+   * The data used to create many AgentDecisions.
+   */
+  data: Prisma.AgentDecisionCreateManyInput | Prisma.AgentDecisionCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentDecisionIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AgentDecision update
  */
 export type AgentDecisionUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1402,6 +1506,36 @@ export type AgentDecisionUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many AgentDecisions to update.
    */
   limit?: number
+}
+
+/**
+ * AgentDecision updateManyAndReturn
+ */
+export type AgentDecisionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentDecision
+   */
+  select?: Prisma.AgentDecisionSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentDecision
+   */
+  omit?: Prisma.AgentDecisionOmit<ExtArgs> | null
+  /**
+   * The data used to update AgentDecisions.
+   */
+  data: Prisma.XOR<Prisma.AgentDecisionUpdateManyMutationInput, Prisma.AgentDecisionUncheckedUpdateManyInput>
+  /**
+   * Filter which AgentDecisions to update
+   */
+  where?: Prisma.AgentDecisionWhereInput
+  /**
+   * Limit how many AgentDecisions to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentDecisionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

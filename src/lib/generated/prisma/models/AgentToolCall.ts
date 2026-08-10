@@ -249,7 +249,6 @@ export type AgentToolCallOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   run?: Prisma.AgentRunOrderByWithRelationInput
   step?: Prisma.AgentStepOrderByWithRelationInput
-  _relevance?: Prisma.AgentToolCallOrderByRelevanceInput
 }
 
 export type AgentToolCallWhereUniqueInput = Prisma.AtLeast<{
@@ -419,12 +418,6 @@ export type AgentToolCallListRelationFilter = {
 
 export type AgentToolCallOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AgentToolCallOrderByRelevanceInput = {
-  fields: Prisma.AgentToolCallOrderByRelevanceFieldEnum | Prisma.AgentToolCallOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AgentToolCallCountOrderByAggregateInput = {
@@ -809,7 +802,39 @@ export type AgentToolCallSelect<ExtArgs extends runtime.Types.Extensions.Interna
   step?: boolean | Prisma.AgentToolCall$stepArgs<ExtArgs>
 }, ExtArgs["result"]["agentToolCall"]>
 
+export type AgentToolCallSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  runId?: boolean
+  stepId?: boolean
+  toolName?: boolean
+  status?: boolean
+  idempotencyKey?: boolean
+  input?: boolean
+  output?: boolean
+  error?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentToolCall$stepArgs<ExtArgs>
+}, ExtArgs["result"]["agentToolCall"]>
 
+export type AgentToolCallSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  runId?: boolean
+  stepId?: boolean
+  toolName?: boolean
+  status?: boolean
+  idempotencyKey?: boolean
+  input?: boolean
+  output?: boolean
+  error?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentToolCall$stepArgs<ExtArgs>
+}, ExtArgs["result"]["agentToolCall"]>
 
 export type AgentToolCallSelectScalar = {
   id?: boolean
@@ -828,6 +853,14 @@ export type AgentToolCallSelectScalar = {
 
 export type AgentToolCallOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "runId" | "stepId" | "toolName" | "status" | "idempotencyKey" | "input" | "output" | "error" | "startedAt" | "completedAt" | "createdAt", ExtArgs["result"]["agentToolCall"]>
 export type AgentToolCallInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentToolCall$stepArgs<ExtArgs>
+}
+export type AgentToolCallIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentToolCall$stepArgs<ExtArgs>
+}
+export type AgentToolCallIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
   step?: boolean | Prisma.AgentToolCall$stepArgs<ExtArgs>
 }
@@ -969,6 +1002,30 @@ export interface AgentToolCallDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends AgentToolCallCreateManyArgs>(args?: Prisma.SelectSubset<T, AgentToolCallCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AgentToolCalls and returns the data saved in the database.
+   * @param {AgentToolCallCreateManyAndReturnArgs} args - Arguments to create many AgentToolCalls.
+   * @example
+   * // Create many AgentToolCalls
+   * const agentToolCall = await prisma.agentToolCall.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AgentToolCalls and only return the `id`
+   * const agentToolCallWithIdOnly = await prisma.agentToolCall.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AgentToolCallCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AgentToolCallCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentToolCallPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AgentToolCall.
    * @param {AgentToolCallDeleteArgs} args - Arguments to delete one AgentToolCall.
    * @example
@@ -1031,6 +1088,36 @@ export interface AgentToolCallDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends AgentToolCallUpdateManyArgs>(args: Prisma.SelectSubset<T, AgentToolCallUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AgentToolCalls and returns the data updated in the database.
+   * @param {AgentToolCallUpdateManyAndReturnArgs} args - Arguments to update many AgentToolCalls.
+   * @example
+   * // Update many AgentToolCalls
+   * const agentToolCall = await prisma.agentToolCall.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AgentToolCalls and only return the `id`
+   * const agentToolCallWithIdOnly = await prisma.agentToolCall.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AgentToolCallUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AgentToolCallUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentToolCallPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AgentToolCall.
@@ -1472,6 +1559,29 @@ export type AgentToolCallCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * AgentToolCall createManyAndReturn
+ */
+export type AgentToolCallCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentToolCall
+   */
+  select?: Prisma.AgentToolCallSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentToolCall
+   */
+  omit?: Prisma.AgentToolCallOmit<ExtArgs> | null
+  /**
+   * The data used to create many AgentToolCalls.
+   */
+  data: Prisma.AgentToolCallCreateManyInput | Prisma.AgentToolCallCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentToolCallIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AgentToolCall update
  */
 export type AgentToolCallUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1513,6 +1623,36 @@ export type AgentToolCallUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many AgentToolCalls to update.
    */
   limit?: number
+}
+
+/**
+ * AgentToolCall updateManyAndReturn
+ */
+export type AgentToolCallUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentToolCall
+   */
+  select?: Prisma.AgentToolCallSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentToolCall
+   */
+  omit?: Prisma.AgentToolCallOmit<ExtArgs> | null
+  /**
+   * The data used to update AgentToolCalls.
+   */
+  data: Prisma.XOR<Prisma.AgentToolCallUpdateManyMutationInput, Prisma.AgentToolCallUncheckedUpdateManyInput>
+  /**
+   * Filter which AgentToolCalls to update
+   */
+  where?: Prisma.AgentToolCallWhereInput
+  /**
+   * Limit how many AgentToolCalls to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentToolCallIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

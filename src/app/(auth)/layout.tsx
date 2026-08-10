@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
-
-function IconLeaf({ className }: { className?: string }) {
-  return <svg className={className} viewBox="0 0 256 256" fill="currentColor"><path d="M223.45 40.07a8 8 0 0 0-7.52-7.52C139.77 27.18 78.38 66.13 64.47 145.1c-5.84 32.38-15.75 57.71-24.47 74.42a8 8 0 0 0 2.37 8.86c28.21 23.37 61.44 27.18 98.82 11.33 41-18 71.33-62 81.27-117.06a8 8 0 0 0-4.64-8.7c-19.36-8.11-42.84-12.22-69.82-12.22-27.33 0-54.19 5.58-78.22 16.25C109 91.02 157.61 54.85 223.45 40.07Z"/></svg>;
-}
+import { Leaf, ShieldCheck, TrendUp } from "@phosphor-icons/react/dist/ssr";
 
 export default async function AuthLayout({
   children,
@@ -15,21 +12,25 @@ export default async function AuthLayout({
   if (user) redirect("/dashboard");
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center text-white">
-          <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-semibold">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-white/10 backdrop-blur-xl">
-              <IconLeaf className="h-5 w-5" />
-            </span>
-            Summer Checkin
+    <div className="relative flex min-h-[100dvh] items-center px-4 py-8 md:px-8">
+      <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-lg border border-white/10 bg-[#06150f]/82 shadow-2xl backdrop-blur-2xl lg:grid-cols-[minmax(0,1fr)_460px]">
+        <section className="hidden min-h-[640px] flex-col justify-between border-r border-white/8 p-10 lg:flex">
+          <Link href="/" className="inline-flex items-center gap-2.5 text-base font-semibold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#d7ef83]/30 bg-[#d7ef83]/10 text-[#d7ef83]"><Leaf className="h-5 w-5" weight="fill" /></span>
+            Summer <span className="-ml-1.5 text-[#d7ef83]">Checkin</span>
           </Link>
-          <p className="mt-3 text-sm text-white/60">回到你的学习节奏</p>
-        </div>
-        <div className="glass-panel rounded-2xl p-6">
+          <div className="max-w-lg">
+            <p className="product-eyebrow">Your learning habitat</p>
+            <h1 className="mt-4 text-4xl font-semibold leading-tight text-white">让每一次专注，<br />都留下可以看见的生长。</h1>
+            <p className="mt-5 max-w-md text-sm leading-7 text-white/44">计划、专注、打卡与智能体协作在同一个安静空间里完成。</p>
+          </div>
+          <div className="flex gap-8 text-xs text-white/38"><span className="flex items-center gap-2"><ShieldCheck className="size-4 text-[#d7ef83]" />数据只属于你</span><span className="flex items-center gap-2"><TrendUp className="size-4 text-[#67b4c9]" />持续看见进步</span></div>
+        </section>
+        <section className="flex min-h-[640px] flex-col justify-center p-5 sm:p-9">
+          <Link href="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-white lg:hidden"><Leaf className="size-5 text-[#d7ef83]" weight="fill" />Summer Checkin</Link>
           {children}
+        </section>
         </div>
-      </div>
     </div>
   );
 }

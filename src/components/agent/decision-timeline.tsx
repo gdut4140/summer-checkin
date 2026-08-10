@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  ArrowUpRight,
+  CaretDown,
+  CaretUp,
   ClockCounterClockwise,
   GitBranch,
   Lightning,
@@ -19,10 +22,10 @@ const typeConfig: Record<
   DecisionType,
   { icon: typeof GitBranch; label: string; color: string }
 > = {
-  PLAN_ADJUST: { icon: GitBranch, label: "计划调整", color: "text-violet-400" },
-  REMINDER: { icon: Timer, label: "提醒", color: "text-amber-400" },
-  ANALYSIS: { icon: Lightning, label: "分析", color: "text-blue-400" },
-  TASK_CREATE: { icon: Target, label: "新建任务", color: "text-emerald-400" },
+  PLAN_ADJUST: { icon: GitBranch, label: "计划调整", color: "text-[#d7ef83]" },
+  REMINDER: { icon: Timer, label: "提醒", color: "text-[#d7ef83]/60" },
+  ANALYSIS: { icon: Lightning, label: "分析", color: "text-[#d7ef83]/80" },
+  TASK_CREATE: { icon: Target, label: "新建任务", color: "text-[#d7ef83]" },
 };
 
 const filterTypes: { key: DecisionType | "all"; label: string }[] = [
@@ -39,6 +42,15 @@ export function DecisionTimeline() {
   const [decisions, setDecisions] = useState<DecisionInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<DecisionType | "all">("all");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  function toggleExpand(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
 
   const fetchDecisions = useCallback(async () => {
     setLoading(true);
@@ -153,55 +165,74 @@ export function DecisionTimeline() {
                     typeConfig[decision.type] ?? typeConfig.ANALYSIS;
                   const TypeIcon = tConfig.icon;
 
+                  const isExpanded = expanded.has(decision.id);
+                  const action = decision.action as Record<string, unknown> | null;
+                  const actionKeys = action ? Object.keys(action).filter((k) => k !== "planId" && k !== "planName") : [];
+                  const hasDetails = actionKeys.length > 0;
+                  const planId = (action?.planId as string) || (action?.plan_id as string);
+
                   return (
                     <div
                       key={decision.id}
-                      className="glass-panel rounded-xl px-4 py-3 transition-all hover:scale-[1.005]"
+                      onClick={() => toggleExpand(decision.id)}
+                      className="glass-panel cursor-pointer rounded-xl px-4 py-3 transition-all hover:border-white/15 hover:bg-white/[0.03]"
                     >
                       <div className="flex items-start gap-3">
-                        {/* 类型图标 */}
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                          <TypeIcon
-                            className={`h-4 w-4 ${tConfig.color}`}
-                            weight="fill"
-                          />
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#d7ef83]/10">
+                          <TypeIcon className={`h-4 w-4 ${tConfig.color}`} weight="fill" />
                         </div>
 
-                        {/* 内容 */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] px-1.5 py-0 ${tConfig.color} border-current/20`}
-                            >
+                            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${tConfig.color} border-current/20`}>
                               {tConfig.label}
                             </Badge>
                           </div>
-                          <p className="text-sm font-medium">
-                            {decision.reason}
-                          </p>
-                          {(() => {
-                            const action = decision.action as Record<string, string> | null;
-                            const detail = action?.detail ?? action?.message;
-                            if (!detail || Object.keys(decision.action).length === 0) return null;
-                            return (
-                              <div className="mt-2 rounded-lg bg-muted/50 px-3 py-2">
-                                <p className="text-xs text-muted-foreground">{detail}</p>
-                              </div>
-                            );
-                          })()}
-                          <p className="mt-1.5 text-[10px] text-muted-foreground">
-                            {new Date(decision.createdAt).toLocaleString(
-                              "zh-CN",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
+                          <p className="text-sm font-medium text-white/90">{decision.reason}</p>
+
+                          {/* 展开详情 */}
+                          {isExpanded && (
+                            <div className="mt-3 space-y-2 animate-in fade-in duration-200">
+                              {planId && (
+                                <a
+                                  href={`/plans?id=${planId}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-1 rounded-md bg-[#d7ef83]/10 px-2.5 py-1.5 text-xs text-[#d7ef83] hover:bg-[#d7ef83]/20 transition"
+                                >
+                                  查看计划 <ArrowUpRight className="h-3 w-3" />
+                                </a>
+                              )}
+                              {actionKeys.map((key) => {
+                                const val = action?.[key];
+                                if (val == null || val === "") return null;
+                                if (typeof val === "object") {
+                                  return (
+                                    <div key={key} className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                      <p className="text-[10px] text-white/25 mb-1">{key}</p>
+                                      <pre className="text-[11px] text-white/60 whitespace-pre-wrap font-sans">{JSON.stringify(val, null, 2)}</pre>
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <div key={key} className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                    <p className="text-[10px] text-white/25 mb-0.5">{key}</p>
+                                    <p className="text-xs text-white/60">{String(val)}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          <p className="mt-1.5 text-[10px] text-white/25">
+                            {new Date(decision.createdAt).toLocaleString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
+
+                        {hasDetails && (
+                          <div className="shrink-0 text-white/20 mt-1">
+                            {isExpanded ? <CaretUp className="h-4 w-4" /> : <CaretDown className="h-4 w-4" />}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

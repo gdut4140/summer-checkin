@@ -19,28 +19,22 @@ export default async function EditPlanPage({
   if (!plan || plan.userId !== user.id) notFound();
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="product-page max-w-4xl">
       <Link
         href={`/plans/${plan.id}`}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="mb-5 inline-flex items-center gap-1 text-xs text-white/44 transition-colors hover:text-white"
       >
         <IconArrowLeft className="h-4 w-4" />
         返回计划详情
       </Link>
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">编辑计划</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          修改学习计划的目标和安排。
-        </p>
-      </div>
+      <header className="product-header"><div><p className="product-eyebrow">Refine direction</p><h1 className="product-title">编辑计划</h1><p className="product-subtitle">目标发生变化时，及时调整路径，而不是放弃路径。</p></div></header>
 
       <PlanForm plan={{
         id: plan.id,
         name: plan.name,
         description: plan.description,
         goal: plan.goal,
-        targetHours: plan.targetHours,
         startDate: plan.startDate,
         endDate: plan.endDate,
       }} />

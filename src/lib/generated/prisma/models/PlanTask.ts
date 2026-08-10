@@ -304,7 +304,6 @@ export type PlanTaskOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   plan?: Prisma.PlanOrderByWithRelationInput
-  _relevance?: Prisma.PlanTaskOrderByRelevanceInput
 }
 
 export type PlanTaskWhereUniqueInput = Prisma.AtLeast<{
@@ -486,12 +485,6 @@ export type PlanTaskListRelationFilter = {
 
 export type PlanTaskOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type PlanTaskOrderByRelevanceInput = {
-  fields: Prisma.PlanTaskOrderByRelevanceFieldEnum | Prisma.PlanTaskOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type PlanTaskCountOrderByAggregateInput = {
@@ -915,7 +908,41 @@ export type PlanTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   plan?: boolean | Prisma.PlanDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["planTask"]>
 
+export type PlanTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  planId?: boolean
+  userId?: boolean
+  title?: boolean
+  description?: boolean
+  dayNumber?: boolean
+  weekNumber?: boolean
+  category?: boolean
+  status?: boolean
+  priority?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.PlanDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["planTask"]>
 
+export type PlanTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  planId?: boolean
+  userId?: boolean
+  title?: boolean
+  description?: boolean
+  dayNumber?: boolean
+  weekNumber?: boolean
+  category?: boolean
+  status?: boolean
+  priority?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.PlanDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["planTask"]>
 
 export type PlanTaskSelectScalar = {
   id?: boolean
@@ -935,6 +962,14 @@ export type PlanTaskSelectScalar = {
 
 export type PlanTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "planId" | "userId" | "title" | "description" | "dayNumber" | "weekNumber" | "category" | "status" | "priority" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["planTask"]>
 export type PlanTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.PlanDefaultArgs<ExtArgs>
+}
+export type PlanTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.PlanDefaultArgs<ExtArgs>
+}
+export type PlanTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   plan?: boolean | Prisma.PlanDefaultArgs<ExtArgs>
 }
@@ -1077,6 +1112,30 @@ export interface PlanTaskDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends PlanTaskCreateManyArgs>(args?: Prisma.SelectSubset<T, PlanTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many PlanTasks and returns the data saved in the database.
+   * @param {PlanTaskCreateManyAndReturnArgs} args - Arguments to create many PlanTasks.
+   * @example
+   * // Create many PlanTasks
+   * const planTask = await prisma.planTask.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many PlanTasks and only return the `id`
+   * const planTaskWithIdOnly = await prisma.planTask.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends PlanTaskCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, PlanTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlanTaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a PlanTask.
    * @param {PlanTaskDeleteArgs} args - Arguments to delete one PlanTask.
    * @example
@@ -1139,6 +1198,36 @@ export interface PlanTaskDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends PlanTaskUpdateManyArgs>(args: Prisma.SelectSubset<T, PlanTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more PlanTasks and returns the data updated in the database.
+   * @param {PlanTaskUpdateManyAndReturnArgs} args - Arguments to update many PlanTasks.
+   * @example
+   * // Update many PlanTasks
+   * const planTask = await prisma.planTask.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more PlanTasks and only return the `id`
+   * const planTaskWithIdOnly = await prisma.planTask.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends PlanTaskUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, PlanTaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlanTaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one PlanTask.
@@ -1581,6 +1670,29 @@ export type PlanTaskCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * PlanTask createManyAndReturn
+ */
+export type PlanTaskCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlanTask
+   */
+  select?: Prisma.PlanTaskSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlanTask
+   */
+  omit?: Prisma.PlanTaskOmit<ExtArgs> | null
+  /**
+   * The data used to create many PlanTasks.
+   */
+  data: Prisma.PlanTaskCreateManyInput | Prisma.PlanTaskCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlanTaskIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * PlanTask update
  */
 export type PlanTaskUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1622,6 +1734,36 @@ export type PlanTaskUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many PlanTasks to update.
    */
   limit?: number
+}
+
+/**
+ * PlanTask updateManyAndReturn
+ */
+export type PlanTaskUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlanTask
+   */
+  select?: Prisma.PlanTaskSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlanTask
+   */
+  omit?: Prisma.PlanTaskOmit<ExtArgs> | null
+  /**
+   * The data used to update PlanTasks.
+   */
+  data: Prisma.XOR<Prisma.PlanTaskUpdateManyMutationInput, Prisma.PlanTaskUncheckedUpdateManyInput>
+  /**
+   * Filter which PlanTasks to update
+   */
+  where?: Prisma.PlanTaskWhereInput
+  /**
+   * Limit how many PlanTasks to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlanTaskIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

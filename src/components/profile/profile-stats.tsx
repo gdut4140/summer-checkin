@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Clock, CheckCircle, Fire } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 
@@ -18,7 +17,7 @@ export function ProfileStats({ totalHours, totalCheckins, streak }: Props) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="metric-strip metric-strip--three my-5">
       {stats.map((stat, i) => (
         <motion.div
           key={stat.label}
@@ -26,15 +25,13 @@ export function ProfileStats({ totalHours, totalCheckins, streak }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: i * 0.08 }}
         >
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="flex justify-center mb-2">
+          <div className="p-4 text-center md:py-5">
+              <div className="mb-2 flex justify-center">
                 <stat.icon className={`h-5 w-5 ${stat.color}`} weight="fill" />
               </div>
-              <p className="text-xl font-bold">{stat.value}</p>
+              <p className="text-xl font-semibold">{stat.value}</p>
               <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </CardContent>
-          </Card>
+          </div>
         </motion.div>
       ))}
     </div>

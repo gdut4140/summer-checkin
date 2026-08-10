@@ -43,6 +43,11 @@ export type Plan = Prisma.PlanModel
  */
 export type PlanTask = Prisma.PlanTaskModel
 /**
+ * Model Todo
+ * 
+ */
+export type Todo = Prisma.TodoModel
+/**
  * Model Checkin
  * 
  */

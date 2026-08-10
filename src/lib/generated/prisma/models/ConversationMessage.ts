@@ -192,7 +192,6 @@ export type ConversationMessageOrderByWithRelationInput = {
   content?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
-  _relevance?: Prisma.ConversationMessageOrderByRelevanceInput
 }
 
 export type ConversationMessageWhereUniqueInput = Prisma.AtLeast<{
@@ -292,12 +291,6 @@ export type ConversationMessageListRelationFilter = {
 
 export type ConversationMessageOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ConversationMessageOrderByRelevanceInput = {
-  fields: Prisma.ConversationMessageOrderByRelevanceFieldEnum | Prisma.ConversationMessageOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ConversationMessageCountOrderByAggregateInput = {
@@ -456,7 +449,23 @@ export type ConversationMessageSelect<ExtArgs extends runtime.Types.Extensions.I
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMessage"]>
 
+export type ConversationMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  conversationId?: boolean
+  role?: boolean
+  content?: boolean
+  createdAt?: boolean
+  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["conversationMessage"]>
 
+export type ConversationMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  conversationId?: boolean
+  role?: boolean
+  content?: boolean
+  createdAt?: boolean
+  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["conversationMessage"]>
 
 export type ConversationMessageSelectScalar = {
   id?: boolean
@@ -468,6 +477,12 @@ export type ConversationMessageSelectScalar = {
 
 export type ConversationMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "role" | "content" | "createdAt", ExtArgs["result"]["conversationMessage"]>
 export type ConversationMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+}
+export type ConversationMessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
+}
+export type ConversationMessageIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }
 
@@ -600,6 +615,30 @@ export interface ConversationMessageDelegate<ExtArgs extends runtime.Types.Exten
   createMany<T extends ConversationMessageCreateManyArgs>(args?: Prisma.SelectSubset<T, ConversationMessageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ConversationMessages and returns the data saved in the database.
+   * @param {ConversationMessageCreateManyAndReturnArgs} args - Arguments to create many ConversationMessages.
+   * @example
+   * // Create many ConversationMessages
+   * const conversationMessage = await prisma.conversationMessage.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ConversationMessages and only return the `id`
+   * const conversationMessageWithIdOnly = await prisma.conversationMessage.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ConversationMessageCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ConversationMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationMessagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ConversationMessage.
    * @param {ConversationMessageDeleteArgs} args - Arguments to delete one ConversationMessage.
    * @example
@@ -662,6 +701,36 @@ export interface ConversationMessageDelegate<ExtArgs extends runtime.Types.Exten
    * 
    */
   updateMany<T extends ConversationMessageUpdateManyArgs>(args: Prisma.SelectSubset<T, ConversationMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ConversationMessages and returns the data updated in the database.
+   * @param {ConversationMessageUpdateManyAndReturnArgs} args - Arguments to update many ConversationMessages.
+   * @example
+   * // Update many ConversationMessages
+   * const conversationMessage = await prisma.conversationMessage.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ConversationMessages and only return the `id`
+   * const conversationMessageWithIdOnly = await prisma.conversationMessage.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ConversationMessageUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ConversationMessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationMessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ConversationMessage.
@@ -1095,6 +1164,29 @@ export type ConversationMessageCreateManyArgs<ExtArgs extends runtime.Types.Exte
 }
 
 /**
+ * ConversationMessage createManyAndReturn
+ */
+export type ConversationMessageCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConversationMessage
+   */
+  select?: Prisma.ConversationMessageSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConversationMessage
+   */
+  omit?: Prisma.ConversationMessageOmit<ExtArgs> | null
+  /**
+   * The data used to create many ConversationMessages.
+   */
+  data: Prisma.ConversationMessageCreateManyInput | Prisma.ConversationMessageCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationMessageIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ConversationMessage update
  */
 export type ConversationMessageUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1136,6 +1228,36 @@ export type ConversationMessageUpdateManyArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many ConversationMessages to update.
    */
   limit?: number
+}
+
+/**
+ * ConversationMessage updateManyAndReturn
+ */
+export type ConversationMessageUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConversationMessage
+   */
+  select?: Prisma.ConversationMessageSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConversationMessage
+   */
+  omit?: Prisma.ConversationMessageOmit<ExtArgs> | null
+  /**
+   * The data used to update ConversationMessages.
+   */
+  data: Prisma.XOR<Prisma.ConversationMessageUpdateManyMutationInput, Prisma.ConversationMessageUncheckedUpdateManyInput>
+  /**
+   * Filter which ConversationMessages to update
+   */
+  where?: Prisma.ConversationMessageWhereInput
+  /**
+   * Limit how many ConversationMessages to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationMessageIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

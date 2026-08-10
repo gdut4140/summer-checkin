@@ -3,7 +3,8 @@
 // ============================================================
 import { requireAuth } from "@/lib/auth-utils";
 import { TopNav } from "@/components/layout/top-nav";
-import { AmbientSound } from "@/components/dashboard/ambient-sound";
+import { DailyAgentCheck } from "@/components/dashboard/daily-agent-check";
+import { RainforestExplorer } from "@/components/agent/rainforest-explorer";
 
 export default async function DashboardLayout({
   children,
@@ -15,10 +16,11 @@ export default async function DashboardLayout({
   return (
     <div className="scenic-shell relative flex min-h-[100dvh] flex-col">
       <TopNav user={user} />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6 md:py-8">
+      <main className="relative flex flex-1 flex-col px-0 py-0">
         {children}
       </main>
-      <AmbientSound />
+      <DailyAgentCheck />
+      <RainforestExplorer />
     </div>
   );
 }

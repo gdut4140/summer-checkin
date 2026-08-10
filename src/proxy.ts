@@ -3,6 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Public assets must never enter auth redirects. A redirected media request
+  // returns HTML, which makes the browser report the MP4/MP3 as unplayable.
+  if (/\.[a-z0-9]+$/i.test(pathname)) {
+    return NextResponse.next();
+  }
+
   // Public routes
   const publicPaths = ["/", "/login", "/register"];
   const isPublicPath = publicPaths.some(
@@ -29,6 +35,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|uploads).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*|uploads).*)",
   ],
 };

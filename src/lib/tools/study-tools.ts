@@ -178,16 +178,19 @@ export function createStudyTools(userId: string) {
   const getMyMemories = tool({
     description:
       "查询 AI 对用户的长期记忆（偏好、目标、技能等）。" +
+      "支持语义搜索：传 query 参数会根据语义相关性返回匹配的记忆，" +
+      "不传 query 则返回最重要的记忆。" +
       "当用户问'你记得我什么？''对我了解多少？'或引用之前对话中提到过的个人信息时使用。",
 
     inputSchema: z.object({
       limit: z.number().optional().describe("返回几条记忆，默认 10"),
+      query: z.string().optional().describe("语义搜索关键词。例如用户提到'React'，传'React'找相关记忆"),
     }),
 
-    execute: async ({ limit = 10 }) => {
+    execute: async ({ limit = 10, query }) => {
       return safeExecute("getMyMemories", async () => {
-        console.log(`[getMyMemories] 查询用户 ${userId} 的记忆`);
-        const memories = await getRelevantMemories(userId, limit);
+        console.log(`[getMyMemories] 查询用户 ${userId} 的记忆, query: ${query || "(无)"}`);
+        const memories = await getRelevantMemories(userId, limit, query);
 
         if (memories.length === 0) {
           return {
@@ -205,7 +208,7 @@ export function createStudyTools(userId: string) {
           memories: memories.map((m) => ({
             id: m.id,
             content: m.content,
-            category: m.category,
+            category: m.type,
             createdAt: m.createdAt.toISOString(),
           })),
         };

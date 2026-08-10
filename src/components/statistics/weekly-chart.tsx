@@ -17,9 +17,9 @@ interface WeeklyChartProps {
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">每周学习时长（近 12 周）</CardTitle>
+    <Card className="surface overflow-hidden">
+      <CardHeader className="border-b border-white/8 px-5 py-4">
+        <CardTitle className="text-sm">每周学习时长 <span className="ml-1 font-normal text-white/32">近 12 周</span></CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
@@ -46,7 +46,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                   fontSize: "13px",
                 }}
               />
-              <Bar dataKey="hours" fill="#a16207" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="hours" fill="#67b4c9" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

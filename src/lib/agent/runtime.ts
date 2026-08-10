@@ -342,7 +342,7 @@ export async function analyze(
 
   try {
     const response = await client.chat.completions.create({
-      model: process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash",
+      model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
       temperature: 0.3,
       max_tokens: 16384,
       response_format: { type: "json_object" },
@@ -378,7 +378,7 @@ export async function analyze(
 /**
  * 规则兜底分析 — 当 LLM 不可用时，基于数据阈值做判断
  */
-function fallbackAnalysis(context: LearningContext): AgentAnalysis {
+export function fallbackAnalysis(context: LearningContext): AgentAnalysis {
   const findings: AnalysisFinding[] = [];
   const actions: AgentAction[] = [];
 
@@ -806,7 +806,7 @@ export async function runLearningAgent(
             stepId: analysisStep.id,
             action: "daily_action",
             status: "pending",
-            payload: asJson({ type: "action", ...action }),
+            payload: asJson({ ...action, type: "action" }),
           },
         });
       }

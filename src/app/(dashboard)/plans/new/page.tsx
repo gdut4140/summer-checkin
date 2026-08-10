@@ -9,21 +9,16 @@ export default async function NewPlanPage() {
   await requireAuth();
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="product-page max-w-4xl">
       <Link
         href="/plans"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="mb-5 inline-flex items-center gap-1 text-xs text-white/44 transition-colors hover:text-white"
       >
         <IconArrowLeft className="h-4 w-4" />
         返回计划列表
       </Link>
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">新建计划</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          制定你的学习目标和计划。
-        </p>
-      </div>
+      <header className="product-header"><div><p className="product-eyebrow">New direction</p><h1 className="product-title">新建计划</h1><p className="product-subtitle">先写清楚目标，再决定每天要走多远。</p></div></header>
 
       <PlanForm plan={null} />
     </div>

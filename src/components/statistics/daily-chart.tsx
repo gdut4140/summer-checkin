@@ -17,9 +17,9 @@ interface DailyChartProps {
 
 export function DailyChart({ data }: DailyChartProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">每日学习时长（近 30 天）</CardTitle>
+    <Card className="surface overflow-hidden">
+      <CardHeader className="border-b border-white/8 px-5 py-4">
+        <CardTitle className="text-sm">每日学习时长 <span className="ml-1 font-normal text-white/32">近 30 天</span></CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
@@ -50,10 +50,10 @@ export function DailyChart({ data }: DailyChartProps) {
               <Line
                 type="monotone"
                 dataKey="hours"
-                stroke="#a16207"
+                stroke="#d7ef83"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, fill: "#a16207" }}
+                activeDot={{ r: 4, fill: "#d7ef83" }}
               />
             </LineChart>
           </ResponsiveContainer>

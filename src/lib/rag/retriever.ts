@@ -1,107 +1,138 @@
 // ============================================================
-// Day 16 RAG: 向量检索 + 余弦相似度
+// RAG 向量检索 — JS 余弦相似度版
 //
-// ① cosineSimilarity  — 余弦相似度计算
-// ② searchSimilarChunks — 从 DB 加载所有 chunks，计算相似度排序
-//
-// 设计决策：数据量 < 1000 chunks 时，全部加载+内存计算
-// 远快于 MySQL 中逐条 JSON 比对（MySQL 不支持向量索引）
-// 未来数据量增长后可迁移到 Chroma / pgvector
+// 由于 DocumentChunk 的 embedding 列在 db 中是 jsonb 类型
+// （pgvector 未安装或不兼容时 Prisma Unsupported 退回 jsonb），
+// 改为全量加载后在 JS 中计算余弦相似度排序。
+// 文档块数量通常不超过几百条，性能足够。
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@/lib/generated/prisma/client";
 
 // ---- 类型 ----
 
-/** DocumentChunk 的 TypeScript 类型 */
 export interface DocChunk {
   id: string;
   sourceName: string;
   sourceType: string;
   chunkIndex: number;
   content: string;
-  embedding: number[];
   createdAt: Date;
 }
 
-// ---- 相似度计算 ----
+// ---- 余弦相似度 ----
 
-/**
- * 余弦相似度
- *
- * cos(θ) = A·B / (|A| × |B|)
- * 返回 [-1, 1]，1 表示完全相同方向（最相似）
- */
 export function cosineSimilarity(a: number[], b: number[]): number {
-  if (a.length !== b.length) {
-    throw new Error(`向量维度不一致: ${a.length} vs ${b.length}`);
-  }
-
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-
+  if (a.length !== b.length) return 0;
+  let dot = 0, na = 0, nb = 0;
   for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+    dot += a[i] * b[i];
+    na += a[i] * a[i];
+    nb += b[i] * b[i];
   }
-
-  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-  if (denominator === 0) return 0;
-  return dotProduct / denominator;
+  const d = Math.sqrt(na) * Math.sqrt(nb);
+  return d === 0 ? 0 : dot / d;
 }
 
 // ---- 检索 ----
 
+interface PgRow {
+  id: string;
+  sourceName: string;
+  sourceType: string;
+  chunkIndex: number;
+  content: string;
+  createdAt: Date;
+  embedding: unknown;
+}
+
 /**
- * 在用户可访问的 chunks 中检索与 query 最相似的 topK 条
- *
- * @param userId         当前用户 ID
- * @param queryEmbedding 查询文本的向量
- * @param topK           返回数量
- * @param sourceFilter   可选：按来源过滤（如 "Agent 开发学习路线.pdf"）
+ * 从 jsonb 值中提取 number[] 向量
+ */
+export function parseEmbedding(raw: unknown): number[] {
+  if (raw == null) return [];
+  // 数据库返回的 jsonb 可能是字符串（如 "[0.1, 0.2, ...]"）或已解析的数组
+  if (Array.isArray(raw)) return raw as number[];
+  if (typeof raw === "string") {
+    try { return JSON.parse(raw); } catch { return []; }
+  }
+  if (typeof raw === "object" && raw !== null) {
+    // 某些驱动将向量返回为 { value: [...] } 或类数组对象
+    const obj = raw as Record<string, unknown>;
+    if (Array.isArray(obj.value)) return obj.value as number[];
+    if (Array.isArray(obj.data)) return obj.data as number[];
+    // 尝试直接取数字值
+    const vals = Object.values(obj).filter(v => typeof v === "number");
+    if (vals.length > 0) return vals as number[];
+  }
+  return [];
+}
+
+/**
+ * 向量语义搜索（JS 内存计算）
  */
 export async function searchSimilarChunks(
   queryEmbedding: number[],
   topK = 5,
-  sourceFilter?: string
+  sourceFilter?: string,
+  userId?: string
 ): Promise<DocChunk[]> {
-  // 加载所有 chunks（当前阶段数据量小，全量加载）
-  const where: Record<string, unknown> = {};
-  if (sourceFilter) where.sourceName = sourceFilter;
+  let params: string[] = [];
+  const conditions: string[] = [`"embedding" IS NOT NULL`];
 
-  const chunks = await prisma.documentChunk.findMany({ where });
+  // userId 过滤
+  if (userId) {
+    params.push(userId);
+    conditions.push(`"userId" = $${params.length}`);
+  }
 
-  console.log(`[Retriever] 从 ${chunks.length} 个 chunks 中检索...`);
+  if (sourceFilter) {
+    params.push(sourceFilter);
+    conditions.push(`"sourceName" = $${params.length}`);
+  }
 
-  if (chunks.length === 0) return [];
+  // 1. 全量加载有 embedding 的文档块
+  let sql = `
+    SELECT id, "userId", "sourceName", "sourceType", "chunkIndex", content, "createdAt", "embedding"
+    FROM documentchunk
+    WHERE ${conditions.join(" AND ")}
+    ORDER BY "createdAt" DESC LIMIT 1000
+  `;
 
-  // 计算余弦相似度
-  const scored = chunks.map((chunk) => {
-    const embedding = chunk.embedding as unknown as number[];
-    const similarity = cosineSimilarity(queryEmbedding, embedding);
-    return { chunk, similarity };
+  const rows = await prisma.$queryRawUnsafe<PgRow[]>(sql, ...params);
+  return rankAndReturn(rows, queryEmbedding, topK);
+}
+
+function rankAndReturn(
+  rows: PgRow[],
+  queryEmbedding: number[],
+  topK: number
+): DocChunk[] {
+  if (rows.length === 0) {
+    console.log("[Retriever] 无文档块数据");
+    return [];
+  }
+
+  // 2. 计算相似度并排序
+  const scored = rows.map((r) => {
+    const vec = parseEmbedding(r.embedding);
+    const similarity = vec.length > 0 ? cosineSimilarity(queryEmbedding, vec) : 0;
+    return { row: r, similarity };
   });
 
-  // 按相似度降序排序
   scored.sort((a, b) => b.similarity - a.similarity);
-
-  // 取 topK
   const top = scored.slice(0, topK);
 
   console.log(
-    `[Retriever] Top-${topK} 相似度: ${top.map((s) => s.similarity.toFixed(4)).join(", ")}`
+    `[Retriever] JS 余弦相似度搜索 → ${top.length}/${rows.length} 条 (top=${top[0]?.similarity?.toFixed(4) ?? "N/A"})`
   );
 
-  return top.map((s) => ({
-    id: s.chunk.id,
-    sourceName: s.chunk.sourceName,
-    sourceType: s.chunk.sourceType,
-    chunkIndex: s.chunk.chunkIndex,
-    content: s.chunk.content,
-    embedding: s.chunk.embedding as unknown as number[],
-    createdAt: s.chunk.createdAt,
+  return top.map(({ row: r }) => ({
+    id: r.id,
+    sourceName: r.sourceName,
+    sourceType: r.sourceType,
+    chunkIndex: r.chunkIndex,
+    content: r.content,
+    createdAt: r.createdAt,
   }));
 }

@@ -1,87 +1,143 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
-import { subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, format } from "date-fns";
-import { StatsSummary } from "@/components/statistics/stats-summary";
-import { DailyChart } from "@/components/statistics/daily-chart";
-import { WeeklyChart } from "@/components/statistics/weekly-chart";
-import { SubjectPieChart } from "@/components/statistics/subject-pie-chart";
+import { startOfDay, endOfDay, format } from "date-fns";
+import { CalendarCheck, Clock, CheckCircle, ChartLineUp, Star, Lightning } from "@phosphor-icons/react/dist/ssr";
+import { ProfileHeader } from "@/components/profile/profile-header";
+import { ActivityTimeline } from "@/components/profile/activity-timeline";
+import type { CheckinWithPlan } from "@/types";
 
-export default async function StatisticsPage() {
+export default async function ProfilePage() {
   const user = await requireAuth();
   const now = new Date();
 
-  const dailyData = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = subDays(now, i);
-    const dStart = startOfDay(d);
-    const dEnd = endOfDay(d);
-    const checkins = await prisma.checkin.findMany({
-      where: { userId: user.id, checkinDate: { gte: dStart, lte: dEnd } },
-    });
-    dailyData.push({
-      date: format(d, "MM/dd"),
-      hours: Math.round(checkins.reduce((s, c) => s + c.hours, 0) * 10) / 10,
-    });
-  }
+  const fullUser = await prisma.user.findUnique({ where: { id: user.id } });
 
-  const weeklyData = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = subDays(now, i * 7);
-    const ws = startOfWeek(d, { weekStartsOn: 1 });
-    const we = endOfWeek(d, { weekStartsOn: 1 });
-    const checkins = await prisma.checkin.findMany({
-      where: { userId: user.id, checkinDate: { gte: ws, lte: we } },
-    });
-    weeklyData.push({
-      week: format(ws, "MM/dd"),
-      hours: Math.round(checkins.reduce((s, c) => s + c.hours, 0) * 10) / 10,
-    });
-  }
-
-  const allCheckins = await prisma.checkin.findMany({
+  // 计划统计
+  const plans = await prisma.plan.findMany({
     where: { userId: user.id },
-    select: { subject: true, hours: true, checkinDate: true },
+    include: { tasks: { select: { status: true, completedAt: true } } },
   });
-  const subjectMap: Record<string, number> = {};
-  for (const c of allCheckins) {
-    const key = c.subject || "其他";
-    subjectMap[key] = (subjectMap[key] || 0) + c.hours;
-  }
-  const subjectData = Object.entries(subjectMap)
-    .map(([name, hours]) => ({ name, hours: Math.round(hours * 10) / 10 }))
-    .sort((a, b) => b.hours - a.hours);
 
-  const totalHours = allCheckins.reduce((s, c) => s + c.hours, 0);
-  const totalDays = new Set(allCheckins.map((c) => format(c.checkinDate, "yyyy-MM-dd"))).size;
-  const avgPerDay = totalDays > 0 ? totalHours / totalDays : 0;
-  const bestSubject = subjectData[0]?.name ?? "暂无";
+  const activePlans = plans.filter((p) => p.status === "active");
+  const completedPlans = plans.filter((p) => p.status === "completed");
+  const totalTasks = plans.reduce((s, p) => s + p.tasks.length, 0);
+  const doneTasks = plans.reduce((s, p) => s + p.tasks.filter((t) => t.status === "done").length, 0);
+  const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+  // 最近行动
+  const recentCheckins = await prisma.checkin.findMany({
+    where: { userId: user.id },
+    orderBy: { checkinDate: "desc" },
+    take: 8,
+    include: { plan: { select: { name: true } } },
+  });
+  const checkinsWithPlan: CheckinWithPlan[] = recentCheckins.map((c) => ({
+    id: c.id, content: c.content, hours: c.hours, subject: c.subject,
+    mood: c.mood, checkinDate: c.checkinDate, planName: c.plan?.name ?? null,
+  }));
+
+  // 加入天数
+  const joinDays = fullUser?.createdAt
+    ? Math.floor((now.getTime() - fullUser.createdAt.getTime()) / 86400000)
+    : 0;
+
+  // 今日完成
+  const todayStart = startOfDay(now);
+  const todayEnd = endOfDay(now);
+  const todayDone = plans.flatMap((p) =>
+    p.tasks.filter((t) => t.status === "done" && t.completedAt && t.completedAt >= todayStart && t.completedAt <= todayEnd)
+  ).length;
+
+  // 连续活跃
+  let streakDays = 0;
+  const completedDates = new Set<string>();
+  for (const plan of plans) {
+    for (const t of plan.tasks) {
+      if (t.status === "done" && t.completedAt) completedDates.add(format(t.completedAt, "yyyy-MM-dd"));
+    }
+  }
+  const sortedDates = [...completedDates].sort().reverse();
+  for (let i = 0; i < sortedDates.length; i++) {
+    if (sortedDates[i] === format(new Date(now.getTime() - i * 86400000), "yyyy-MM-dd")) streakDays++;
+    else break;
+  }
+
+  const overview = [
+    { label: "加入天数", value: String(joinDays), unit: "天", icon: CalendarCheck },
+    { label: "连续活跃", value: String(streakDays), unit: "天", icon: Lightning },
+    { label: "已完成计划", value: String(completedPlans.length), unit: "项", icon: CheckCircle },
+    { label: "任务完成率", value: String(progress), unit: "%", icon: ChartLineUp },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          数据统计
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          分析你的学习模式和趋势。
-        </p>
-      </div>
-
-      <StatsSummary
-        totalHours={Math.round(totalHours * 10) / 10}
-        totalDays={totalDays}
-        avgPerDay={Math.round(avgPerDay * 10) / 10}
-        bestSubject={bestSubject}
+    <div className="product-page space-y-6">
+      <ProfileHeader
+        user={{
+          name: fullUser?.name ?? user.name,
+          email: fullUser?.email ?? user.email,
+          bio: fullUser?.bio ?? null,
+          image: fullUser?.image ?? null,
+          createdAt: fullUser?.createdAt ?? new Date(),
+        }}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DailyChart data={dailyData} />
-        <WeeklyChart data={weeklyData} />
-      </div>
+      {/* 概览 */}
+      <section className="grid grid-cols-2 border-y border-white/10 bg-black/10 lg:grid-cols-4">
+        {overview.map((item, i) => (
+          <div key={item.label} className={`flex min-h-24 items-center gap-3 px-3 py-4 md:px-5 ${i % 2 === 1 ? "border-l border-white/10" : ""} ${i > 1 ? "border-t border-white/10 lg:border-t-0" : ""} ${i > 0 ? "lg:border-l lg:border-white/10" : ""}`}>
+            <item.icon className="size-5 shrink-0 text-[#d7ef83]" weight="duotone" />
+            <div>
+              <p className="text-xs text-white/42">{item.label}</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-white">{item.value}<span className="ml-1 text-xs font-normal text-white/36">{item.unit}</span></p>
+            </div>
+          </div>
+        ))}
+      </section>
 
-      <div className="max-w-md">
-        <SubjectPieChart data={subjectData} />
-      </div>
+      {/* 进度条 */}
+      {totalTasks > 0 && (
+        <section className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white/60">总任务进度</span>
+            <span className="tabular-nums text-[#d7ef83] font-medium">{doneTasks}/{totalTasks} · {progress}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-white/8">
+            <div className="h-full rounded-full bg-[#d7ef83] transition-all duration-700" style={{ width: `${progress}%` }} />
+          </div>
+        </section>
+      )}
+
+      {/* 今日 */}
+      <section className="rounded-lg border border-white/8 bg-[#0a2119]/50 px-5 py-4">
+        <div className="flex items-center gap-2">
+          <Star className="size-4 text-[#d7ef83]" weight="fill" />
+          <span className="text-sm font-medium text-white">今日动态</span>
+        </div>
+        <p className="mt-2 text-sm text-white/50">
+          {todayDone > 0
+            ? `已完成 ${todayDone} 个任务 · 连续 ${streakDays} 天活跃 · ${activePlans.length} 个计划进行中`
+            : `还没有完成任务 · ${activePlans.length} 个计划等你继续`}
+        </p>
+      </section>
+
+      {/* 最近行动 */}
+      {checkinsWithPlan.length > 0 && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white/70">
+            <Clock className="size-4 text-[#d7ef83]" weight="fill" />
+            最近行动
+          </h2>
+          <ActivityTimeline checkins={checkinsWithPlan} />
+        </section>
+      )}
+
+      {/* 空状态 */}
+      {plans.length === 0 && checkinsWithPlan.length === 0 && (
+        <section className="rounded-lg border border-dashed border-white/10 py-16 text-center">
+          <p className="text-sm text-white/40">这里还空着</p>
+          <p className="mt-1 text-xs text-white/25">去学习计划页创建第一个计划，或者开始打卡吧</p>
+        </section>
+      )}
     </div>
   );
 }

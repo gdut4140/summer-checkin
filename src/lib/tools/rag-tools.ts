@@ -1,7 +1,7 @@
 // ============================================================
-// Day 16 RAG: 知识库搜索工具
+// RAG: 个人知识库搜索工具
 //
-// searchKnowledgeBase — 所有用户共享同一知识库，无需 userId
+// searchKnowledgeBase — 仅搜索当前用户上传的文档
 // ============================================================
 
 import { tool } from "ai";
@@ -9,12 +9,11 @@ import { z } from "zod";
 import { searchKnowledge } from "@/lib/rag";
 import { safeExecute } from "./utils";
 
-export function createRAGTool() {
+export function createRAGTool(userId: string) {
   const searchKnowledgeBase = tool({
     description:
-      "搜索知识库中的文档。当用户询问关于 Agent 开发、AI 编程、LLM 应用开发、" +
-      "学习路线、技术架构等专业问题时，调用此工具查找知识库中的相关内容。" +
-      "知识库包含 Agent 开发学习路线、技术文档等参考资料。",
+      "搜索当前用户的个人知识库。当用户询问关于其上传的文档、资料内容时，调用此工具。" +
+      "知识库中的内容是该用户上传的文档（Markdown、PDF、文本等）。",
 
     inputSchema: z.object({
       query: z.string().describe("搜索查询，用自然语言描述你想查找的内容"),
@@ -22,9 +21,9 @@ export function createRAGTool() {
 
     execute: async ({ query }) => {
       return safeExecute("searchKnowledge", async () => {
-        console.log(`[RAG Tool] 搜索知识库: "${query.slice(0, 80)}"`);
+        console.log(`[RAG Tool] 用户 ${userId} 搜索知识库: "${query.slice(0, 80)}"`);
 
-        const result = await searchKnowledge(query);
+        const result = await searchKnowledge(query, userId);
 
         if (result.results.length === 0) {
           return {

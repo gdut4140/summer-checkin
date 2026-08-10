@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="border-t border-white/18 bg-[#071f1a]/76 text-white backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex items-center gap-2 text-sm font-semibold">
-          <Leaf className="h-5 w-5 text-[#f3c969]" weight="fill" />
+          <Leaf className="h-5 w-5 text-[#d7ef83]" weight="fill" />
           Summer Checkin AI
         </div>
         <div className="flex items-center gap-6 text-sm text-white/64">

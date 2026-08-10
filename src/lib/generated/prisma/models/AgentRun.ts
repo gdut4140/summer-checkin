@@ -310,7 +310,6 @@ export type AgentRunOrderByWithRelationInput = {
   approvals?: Prisma.AgentApprovalOrderByRelationAggregateInput
   toolCalls?: Prisma.AgentToolCallOrderByRelationAggregateInput
   decisions?: Prisma.AgentDecisionOrderByRelationAggregateInput
-  _relevance?: Prisma.AgentRunOrderByRelevanceInput
 }
 
 export type AgentRunWhereUniqueInput = Prisma.AtLeast<{
@@ -512,12 +511,6 @@ export type AgentRunListRelationFilter = {
 
 export type AgentRunOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AgentRunOrderByRelevanceInput = {
-  fields: Prisma.AgentRunOrderByRelevanceFieldEnum | Prisma.AgentRunOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AgentRunCountOrderByAggregateInput = {
@@ -1295,7 +1288,39 @@ export type AgentRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   _count?: boolean | Prisma.AgentRunCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agentRun"]>
 
+export type AgentRunSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  mode?: boolean
+  goal?: boolean
+  status?: boolean
+  currentStep?: boolean
+  maxSteps?: boolean
+  summary?: boolean
+  error?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["agentRun"]>
 
+export type AgentRunSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  mode?: boolean
+  goal?: boolean
+  status?: boolean
+  currentStep?: boolean
+  maxSteps?: boolean
+  summary?: boolean
+  error?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["agentRun"]>
 
 export type AgentRunSelectScalar = {
   id?: boolean
@@ -1321,6 +1346,12 @@ export type AgentRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   toolCalls?: boolean | Prisma.AgentRun$toolCallsArgs<ExtArgs>
   decisions?: boolean | Prisma.AgentRun$decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.AgentRunCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type AgentRunIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AgentRunIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $AgentRunPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1464,6 +1495,30 @@ export interface AgentRunDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends AgentRunCreateManyArgs>(args?: Prisma.SelectSubset<T, AgentRunCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AgentRuns and returns the data saved in the database.
+   * @param {AgentRunCreateManyAndReturnArgs} args - Arguments to create many AgentRuns.
+   * @example
+   * // Create many AgentRuns
+   * const agentRun = await prisma.agentRun.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AgentRuns and only return the `id`
+   * const agentRunWithIdOnly = await prisma.agentRun.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AgentRunCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AgentRunCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentRunPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AgentRun.
    * @param {AgentRunDeleteArgs} args - Arguments to delete one AgentRun.
    * @example
@@ -1526,6 +1581,36 @@ export interface AgentRunDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends AgentRunUpdateManyArgs>(args: Prisma.SelectSubset<T, AgentRunUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AgentRuns and returns the data updated in the database.
+   * @param {AgentRunUpdateManyAndReturnArgs} args - Arguments to update many AgentRuns.
+   * @example
+   * // Update many AgentRuns
+   * const agentRun = await prisma.agentRun.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AgentRuns and only return the `id`
+   * const agentRunWithIdOnly = await prisma.agentRun.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AgentRunUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AgentRunUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentRunPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AgentRun.
@@ -1971,6 +2056,29 @@ export type AgentRunCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * AgentRun createManyAndReturn
+ */
+export type AgentRunCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentRun
+   */
+  select?: Prisma.AgentRunSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentRun
+   */
+  omit?: Prisma.AgentRunOmit<ExtArgs> | null
+  /**
+   * The data used to create many AgentRuns.
+   */
+  data: Prisma.AgentRunCreateManyInput | Prisma.AgentRunCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentRunIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AgentRun update
  */
 export type AgentRunUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2012,6 +2120,36 @@ export type AgentRunUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many AgentRuns to update.
    */
   limit?: number
+}
+
+/**
+ * AgentRun updateManyAndReturn
+ */
+export type AgentRunUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentRun
+   */
+  select?: Prisma.AgentRunSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentRun
+   */
+  omit?: Prisma.AgentRunOmit<ExtArgs> | null
+  /**
+   * The data used to update AgentRuns.
+   */
+  data: Prisma.XOR<Prisma.AgentRunUpdateManyMutationInput, Prisma.AgentRunUncheckedUpdateManyInput>
+  /**
+   * Filter which AgentRuns to update
+   */
+  where?: Prisma.AgentRunWhereInput
+  /**
+   * Limit how many AgentRuns to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentRunIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

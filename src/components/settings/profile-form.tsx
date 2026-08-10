@@ -24,11 +24,11 @@ export function ProfileForm({ user }: { user: { name: string; bio: string | null
   const [, formAction, pending] = useActionState(handleAction, null);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">个人资料</CardTitle>
+    <Card className="surface overflow-hidden">
+      <CardHeader className="border-b border-white/8 px-5 py-4">
+        <CardTitle className="text-sm">个人资料</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-5 md:p-6">
         <form action={formAction} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="name">用户名</Label>

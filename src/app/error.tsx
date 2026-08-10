@@ -13,15 +13,15 @@ export default function GlobalError({
   return (
     <html>
       <body>
-        <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-background">
-          <div className="text-center space-y-5 max-w-md">
+        <div className="min-h-[100dvh] flex items-center justify-center bg-[#06150f] p-4">
+          <div className="surface max-w-md space-y-5 px-7 py-9 text-center">
             <div className="flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+              <div className="flex h-14 w-14 items-center justify-center rounded-md bg-destructive/10 text-destructive">
                 <WarningCircle className="h-8 w-8" weight="fill" />
               </div>
             </div>
-            <h1 className="text-xl font-bold">出错了</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl font-semibold text-white">出错了</h1>
+            <p className="text-sm text-white/45">
               {error.message || "发生了意外错误，请重试。"}
             </p>
             <Button onClick={reset}>重试</Button>

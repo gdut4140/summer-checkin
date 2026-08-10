@@ -228,7 +228,6 @@ export type AgentScheduleOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.AgentScheduleOrderByRelevanceInput
 }
 
 export type AgentScheduleWhereUniqueInput = Prisma.AtLeast<{
@@ -369,12 +368,6 @@ export type AgentScheduleListRelationFilter = {
 
 export type AgentScheduleOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AgentScheduleOrderByRelevanceInput = {
-  fields: Prisma.AgentScheduleOrderByRelevanceFieldEnum | Prisma.AgentScheduleOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AgentScheduleUserIdTypeCompoundUniqueInput = {
@@ -582,7 +575,31 @@ export type AgentScheduleSelect<ExtArgs extends runtime.Types.Extensions.Interna
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agentSchedule"]>
 
+export type AgentScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  type?: boolean
+  cron?: boolean
+  enabled?: boolean
+  lastRunAt?: boolean
+  nextRunAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["agentSchedule"]>
 
+export type AgentScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  type?: boolean
+  cron?: boolean
+  enabled?: boolean
+  lastRunAt?: boolean
+  nextRunAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["agentSchedule"]>
 
 export type AgentScheduleSelectScalar = {
   id?: boolean
@@ -598,6 +615,12 @@ export type AgentScheduleSelectScalar = {
 
 export type AgentScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "cron" | "enabled" | "lastRunAt" | "nextRunAt" | "createdAt" | "updatedAt", ExtArgs["result"]["agentSchedule"]>
 export type AgentScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AgentScheduleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AgentScheduleIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -734,6 +757,30 @@ export interface AgentScheduleDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends AgentScheduleCreateManyArgs>(args?: Prisma.SelectSubset<T, AgentScheduleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AgentSchedules and returns the data saved in the database.
+   * @param {AgentScheduleCreateManyAndReturnArgs} args - Arguments to create many AgentSchedules.
+   * @example
+   * // Create many AgentSchedules
+   * const agentSchedule = await prisma.agentSchedule.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AgentSchedules and only return the `id`
+   * const agentScheduleWithIdOnly = await prisma.agentSchedule.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AgentScheduleCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AgentScheduleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentSchedulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AgentSchedule.
    * @param {AgentScheduleDeleteArgs} args - Arguments to delete one AgentSchedule.
    * @example
@@ -796,6 +843,36 @@ export interface AgentScheduleDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends AgentScheduleUpdateManyArgs>(args: Prisma.SelectSubset<T, AgentScheduleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AgentSchedules and returns the data updated in the database.
+   * @param {AgentScheduleUpdateManyAndReturnArgs} args - Arguments to update many AgentSchedules.
+   * @example
+   * // Update many AgentSchedules
+   * const agentSchedule = await prisma.agentSchedule.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AgentSchedules and only return the `id`
+   * const agentScheduleWithIdOnly = await prisma.agentSchedule.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AgentScheduleUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AgentScheduleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentSchedulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AgentSchedule.
@@ -1233,6 +1310,29 @@ export type AgentScheduleCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * AgentSchedule createManyAndReturn
+ */
+export type AgentScheduleCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentSchedule
+   */
+  select?: Prisma.AgentScheduleSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentSchedule
+   */
+  omit?: Prisma.AgentScheduleOmit<ExtArgs> | null
+  /**
+   * The data used to create many AgentSchedules.
+   */
+  data: Prisma.AgentScheduleCreateManyInput | Prisma.AgentScheduleCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentScheduleIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AgentSchedule update
  */
 export type AgentScheduleUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1274,6 +1374,36 @@ export type AgentScheduleUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many AgentSchedules to update.
    */
   limit?: number
+}
+
+/**
+ * AgentSchedule updateManyAndReturn
+ */
+export type AgentScheduleUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentSchedule
+   */
+  select?: Prisma.AgentScheduleSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentSchedule
+   */
+  omit?: Prisma.AgentScheduleOmit<ExtArgs> | null
+  /**
+   * The data used to update AgentSchedules.
+   */
+  data: Prisma.XOR<Prisma.AgentScheduleUpdateManyMutationInput, Prisma.AgentScheduleUncheckedUpdateManyInput>
+  /**
+   * Filter which AgentSchedules to update
+   */
+  where?: Prisma.AgentScheduleWhereInput
+  /**
+   * Limit how many AgentSchedules to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentScheduleIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

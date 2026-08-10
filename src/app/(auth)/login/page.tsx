@@ -17,20 +17,32 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  function translateError(msg: string): string {
+    const map: Record<string, string> = {
+      "invalid email or password": "邮箱或密码错误",
+      "user not found": "用户不存在",
+      "invalid credentials": "邮箱或密码错误",
+      "email not verified": "邮箱未验证，请先验证邮箱",
+      "too many requests": "请求过于频繁，请稍后再试",
+    };
+    const lower = msg.toLowerCase();
+    for (const [key, val] of Object.entries(map)) {
+      if (lower.includes(key)) return val;
+    }
+    return msg || "登录失败";
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      // 多标签页场景下，cookie 可能被另一标签页覆盖导致 CSRF 校验失败，
-      // 重试一次让 better-auth 自动刷新 token
       let result = await authClient.signIn.email({ email, password });
       if (result.error) {
-        // 等待短暂时间后重试一次（让 cookie 状态稳定）
         await new Promise((resolve) => setTimeout(resolve, 500));
         result = await authClient.signIn.email({ email, password });
       }
       if (result.error) {
-        toast.error(result.error.message || "登录失败");
+        toast.error(translateError(result.error.message || ""));
       } else {
         toast.success("欢迎回来！");
         const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -44,13 +56,13 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="glass-panel border-white/60 shadow-2xl">
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold">登录</CardTitle>
-        <CardDescription>欢迎回到你的学习之旅</CardDescription>
+    <Card className="border-0 bg-transparent shadow-none backdrop-blur-none">
+      <CardHeader className="px-0">
+        <CardTitle className="text-2xl font-semibold text-white">欢迎回来</CardTitle>
+        <CardDescription>登录后继续今天的学习节奏</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5 px-0">
           <div className="space-y-2">
             <Label htmlFor="email">邮箱</Label>
             <Input
@@ -75,8 +87,8 @@ export default function LoginPage() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={loading}>
+        <CardFooter className="flex flex-col gap-4 px-0">
+          <Button type="submit" className="w-full text-[black]" disabled={loading}>
             {loading ? "登录中..." : "登录"}
           </Button>
           <p className="text-sm text-muted-foreground">

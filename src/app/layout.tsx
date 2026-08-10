@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import ClickSpark from "@/components/landing/ClickSpark";
+import { BackgroundVideo } from "@/components/layout/background-video";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,31 +22,23 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        {/* 视频背景 */}
-        <video
-          className="bg-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-        >
-          <source src="/rain.mp4" type="video/mp4" />
-        </video>
+        <BackgroundVideo />
         {/* 墨绿蒙层 */}
         <div className="bg-video-overlay" />
 
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClickSpark sparkColor="#f3c969" sparkCount={8} sparkSize={10} sparkRadius={18} duration={450}>
-            {children}
-            <Toaster richColors closeButton />
-          </ClickSpark>
-        </ThemeProvider>
+        <div className="relative z-10 flex flex-1 flex-col">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ClickSpark sparkColor="#d7ef83" sparkCount={8} sparkSize={10} sparkRadius={18} duration={450}>
+              {children}
+              <Toaster richColors closeButton />
+            </ClickSpark>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );

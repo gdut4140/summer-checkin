@@ -78,12 +78,12 @@ export interface PlanWithProgress {
   name: string;
   description: string | null;
   goal: string | null;
-  targetHours: number;
   startDate: Date | null;
   endDate: Date | null;
   status: string;
   createdAt: Date;
-  totalHours: number;
+  totalTasks: number;
+  completedTasks: number;
   progress: number;
 }
 

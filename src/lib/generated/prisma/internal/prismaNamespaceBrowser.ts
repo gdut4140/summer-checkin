@@ -56,6 +56,7 @@ export const ModelName = {
   Account: 'Account',
   Plan: 'Plan',
   PlanTask: 'PlanTask',
+  Todo: 'Todo',
   Checkin: 'Checkin',
   StudyRecord: 'StudyRecord',
   Badge: 'Badge',
@@ -170,6 +171,18 @@ export const PlanTaskScalarFieldEnum = {
 } as const
 
 export type PlanTaskScalarFieldEnum = (typeof PlanTaskScalarFieldEnum)[keyof typeof PlanTaskScalarFieldEnum]
+
+
+export const TodoScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  completed: 'completed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TodoScalarFieldEnum = (typeof TodoScalarFieldEnum)[keyof typeof TodoScalarFieldEnum]
 
 
 export const CheckinScalarFieldEnum = {
@@ -360,11 +373,11 @@ export type AIHistoryScalarFieldEnum = (typeof AIHistoryScalarFieldEnum)[keyof t
 
 export const DocumentChunkScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   sourceName: 'sourceName',
   sourceType: 'sourceType',
   chunkIndex: 'chunkIndex',
   content: 'content',
-  embedding: 'embedding',
   createdAt: 'createdAt'
 } as const
 
@@ -423,152 +436,20 @@ export const JsonNullValueInput = {
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
-export const UserOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  image: 'image',
-  password: 'password',
-  bio: 'bio',
-  theme: 'theme'
-} as const
-
-export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
-
-
-export const SessionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  token: 'token',
-  ipAddress: 'ipAddress',
-  userAgent: 'userAgent'
-} as const
-
-export type SessionOrderByRelevanceFieldEnum = (typeof SessionOrderByRelevanceFieldEnum)[keyof typeof SessionOrderByRelevanceFieldEnum]
-
-
-export const AccountOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  providerId: 'providerId',
-  accountId: 'accountId',
-  provider: 'provider',
-  password: 'password',
-  accessToken: 'accessToken',
-  refreshToken: 'refreshToken'
-} as const
-
-export type AccountOrderByRelevanceFieldEnum = (typeof AccountOrderByRelevanceFieldEnum)[keyof typeof AccountOrderByRelevanceFieldEnum]
-
-
-export const PlanOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  name: 'name',
-  description: 'description',
-  goal: 'goal',
-  status: 'status'
-} as const
-
-export type PlanOrderByRelevanceFieldEnum = (typeof PlanOrderByRelevanceFieldEnum)[keyof typeof PlanOrderByRelevanceFieldEnum]
-
-
-export const PlanTaskOrderByRelevanceFieldEnum = {
-  id: 'id',
-  planId: 'planId',
-  userId: 'userId',
-  title: 'title',
-  description: 'description',
-  category: 'category',
-  status: 'status',
-  priority: 'priority'
-} as const
-
-export type PlanTaskOrderByRelevanceFieldEnum = (typeof PlanTaskOrderByRelevanceFieldEnum)[keyof typeof PlanTaskOrderByRelevanceFieldEnum]
-
-
-export const CheckinOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  planId: 'planId',
-  sourceTaskId: 'sourceTaskId',
-  content: 'content',
-  subject: 'subject',
-  mood: 'mood',
-  screenshot: 'screenshot'
-} as const
-
-export type CheckinOrderByRelevanceFieldEnum = (typeof CheckinOrderByRelevanceFieldEnum)[keyof typeof CheckinOrderByRelevanceFieldEnum]
-
-
-export const StudyRecordOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  subject: 'subject',
-  checkinId: 'checkinId'
-} as const
-
-export type StudyRecordOrderByRelevanceFieldEnum = (typeof StudyRecordOrderByRelevanceFieldEnum)[keyof typeof StudyRecordOrderByRelevanceFieldEnum]
-
-
-export const BadgeOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  icon: 'icon',
-  criteria: 'criteria'
-} as const
-
-export type BadgeOrderByRelevanceFieldEnum = (typeof BadgeOrderByRelevanceFieldEnum)[keyof typeof BadgeOrderByRelevanceFieldEnum]
-
-
-export const UserBadgeOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  badgeId: 'badgeId'
-} as const
-
-export type UserBadgeOrderByRelevanceFieldEnum = (typeof UserBadgeOrderByRelevanceFieldEnum)[keyof typeof UserBadgeOrderByRelevanceFieldEnum]
-
-
-export const ConversationOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  title: 'title'
-} as const
-
-export type ConversationOrderByRelevanceFieldEnum = (typeof ConversationOrderByRelevanceFieldEnum)[keyof typeof ConversationOrderByRelevanceFieldEnum]
-
-
-export const ConversationMessageOrderByRelevanceFieldEnum = {
-  id: 'id',
-  conversationId: 'conversationId',
-  role: 'role',
-  content: 'content'
-} as const
-
-export type ConversationMessageOrderByRelevanceFieldEnum = (typeof ConversationMessageOrderByRelevanceFieldEnum)[keyof typeof ConversationMessageOrderByRelevanceFieldEnum]
-
-
-export const AgentRunOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  mode: 'mode',
-  goal: 'goal',
-  status: 'status',
-  summary: 'summary',
-  error: 'error'
-} as const
-
-export type AgentRunOrderByRelevanceFieldEnum = (typeof AgentRunOrderByRelevanceFieldEnum)[keyof typeof AgentRunOrderByRelevanceFieldEnum]
 
 
 export const JsonNullValueFilter = {
@@ -578,115 +459,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-export const AgentStepOrderByRelevanceFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  kind: 'kind',
-  status: 'status',
-  title: 'title',
-  detail: 'detail',
-  error: 'error'
-} as const
-
-export type AgentStepOrderByRelevanceFieldEnum = (typeof AgentStepOrderByRelevanceFieldEnum)[keyof typeof AgentStepOrderByRelevanceFieldEnum]
-
-
-export const AgentApprovalOrderByRelevanceFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  stepId: 'stepId',
-  action: 'action',
-  status: 'status',
-  decisionReason: 'decisionReason'
-} as const
-
-export type AgentApprovalOrderByRelevanceFieldEnum = (typeof AgentApprovalOrderByRelevanceFieldEnum)[keyof typeof AgentApprovalOrderByRelevanceFieldEnum]
-
-
-export const AgentToolCallOrderByRelevanceFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  stepId: 'stepId',
-  toolName: 'toolName',
-  status: 'status',
-  idempotencyKey: 'idempotencyKey',
-  error: 'error'
-} as const
-
-export type AgentToolCallOrderByRelevanceFieldEnum = (typeof AgentToolCallOrderByRelevanceFieldEnum)[keyof typeof AgentToolCallOrderByRelevanceFieldEnum]
-
-
-export const AgentDecisionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  runId: 'runId',
-  type: 'type',
-  reason: 'reason',
-  status: 'status',
-  feedback: 'feedback'
-} as const
-
-export type AgentDecisionOrderByRelevanceFieldEnum = (typeof AgentDecisionOrderByRelevanceFieldEnum)[keyof typeof AgentDecisionOrderByRelevanceFieldEnum]
-
-
-export const UserMemoryOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  type: 'type',
-  content: 'content'
-} as const
-
-export type UserMemoryOrderByRelevanceFieldEnum = (typeof UserMemoryOrderByRelevanceFieldEnum)[keyof typeof UserMemoryOrderByRelevanceFieldEnum]
-
-
-export const AIHistoryOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  message: 'message',
-  response: 'response'
-} as const
-
-export type AIHistoryOrderByRelevanceFieldEnum = (typeof AIHistoryOrderByRelevanceFieldEnum)[keyof typeof AIHistoryOrderByRelevanceFieldEnum]
-
-
-export const DocumentChunkOrderByRelevanceFieldEnum = {
-  id: 'id',
-  sourceName: 'sourceName',
-  sourceType: 'sourceType',
-  content: 'content'
-} as const
-
-export type DocumentChunkOrderByRelevanceFieldEnum = (typeof DocumentChunkOrderByRelevanceFieldEnum)[keyof typeof DocumentChunkOrderByRelevanceFieldEnum]
-
-
-export const NotificationOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  type: 'type',
-  title: 'title',
-  content: 'content',
-  actionUrl: 'actionUrl'
-} as const
-
-export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum]
-
-
-export const AgentScheduleOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  type: 'type',
-  cron: 'cron'
-} as const
-
-export type AgentScheduleOrderByRelevanceFieldEnum = (typeof AgentScheduleOrderByRelevanceFieldEnum)[keyof typeof AgentScheduleOrderByRelevanceFieldEnum]
 

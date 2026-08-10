@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { PlanDetail } from "@/components/plans/plan-detail";
-import { Button } from "@/components/ui/button";
+import type { PlanTaskInfo } from "@/types";
 function IconArrowLeft({ className }: { className?: string }) {
   return <svg className={className} viewBox="0 0 256 256" fill="currentColor"><path d="M224 128a8 8 0 0 1-8 8H59.31l58.35 58.34a8 8 0 0 1-11.32 11.32l-72-72a8 8 0 0 1 0-11.32l72-72a8 8 0 0 1 11.32 11.32L59.31 120H216a8 8 0 0 1 8 8Z"/></svg>;
 }
@@ -24,7 +24,6 @@ export default async function PlanDetailPage({
   const plan = await prisma.plan.findUnique({
     where: { id },
     include: {
-      checkins: { select: { hours: true } },
       tasks: {
         orderBy: [{ weekNumber: "asc" }, { dayNumber: "asc" }],
       },
@@ -35,23 +34,21 @@ export default async function PlanDetailPage({
     notFound();
   }
 
-  const totalHours = plan.checkins.reduce((s, c) => s + c.hours, 0);
-  const progress = plan.targetHours > 0
-    ? Math.min(100, Math.round((totalHours / plan.targetHours) * 100))
-    : 0;
+  const totalTasks = plan.tasks.length;
+  const completedTasks = plan.tasks.filter((t) => t.status === "done").length;
+  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   const tasksStats = {
-    total: plan.tasks.length,
-    done: plan.tasks.filter((t) => t.status === "done").length,
+    total: totalTasks,
+    done: completedTasks,
     inProgress: plan.tasks.filter((t) => t.status === "in_progress").length,
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* 返回导航 */}
+    <div className="product-page max-w-5xl">
       <Link
         href="/plans"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="mb-5 inline-flex items-center gap-1 text-xs text-white/44 transition-colors hover:text-white"
       >
         <IconArrowLeft className="h-4 w-4" />
         返回计划列表
@@ -63,37 +60,29 @@ export default async function PlanDetailPage({
           name: plan.name,
           description: plan.description,
           goal: plan.goal,
-          targetHours: plan.targetHours,
           startDate: plan.startDate,
           endDate: plan.endDate,
           status: plan.status,
           createdAt: plan.createdAt,
-          totalHours,
+          totalTasks,
+          completedTasks,
           progress,
         }}
         tasks={plan.tasks.map((t) => ({
           id: t.id,
+          planId: plan.id,
           title: t.title,
           description: t.description,
           dayNumber: t.dayNumber,
           weekNumber: t.weekNumber,
-          category: t.category,
-          status: t.status,
-          priority: t.priority,
+          category: t.category as PlanTaskInfo["category"],
+          status: t.status as PlanTaskInfo["status"],
+          priority: t.priority as PlanTaskInfo["priority"],
           completedAt: t.completedAt?.toISOString() ?? null,
           createdAt: t.createdAt.toISOString(),
         }))}
         tasksStats={tasksStats}
       />
-
-      {/* 编辑按钮 */}
-      <div className="flex justify-center">
-        <Link href={`/plans/${plan.id}/edit`}>
-          <Button variant="outline" size="sm">
-            编辑计划
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 }

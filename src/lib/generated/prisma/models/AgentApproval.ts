@@ -226,7 +226,6 @@ export type AgentApprovalOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   run?: Prisma.AgentRunOrderByWithRelationInput
   step?: Prisma.AgentStepOrderByWithRelationInput
-  _relevance?: Prisma.AgentApprovalOrderByRelevanceInput
 }
 
 export type AgentApprovalWhereUniqueInput = Prisma.AtLeast<{
@@ -366,12 +365,6 @@ export type AgentApprovalListRelationFilter = {
 
 export type AgentApprovalOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AgentApprovalOrderByRelevanceInput = {
-  fields: Prisma.AgentApprovalOrderByRelevanceFieldEnum | Prisma.AgentApprovalOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AgentApprovalCountOrderByAggregateInput = {
@@ -707,7 +700,33 @@ export type AgentApprovalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   step?: boolean | Prisma.AgentApproval$stepArgs<ExtArgs>
 }, ExtArgs["result"]["agentApproval"]>
 
+export type AgentApprovalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  runId?: boolean
+  stepId?: boolean
+  action?: boolean
+  status?: boolean
+  payload?: boolean
+  decisionReason?: boolean
+  decidedAt?: boolean
+  createdAt?: boolean
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentApproval$stepArgs<ExtArgs>
+}, ExtArgs["result"]["agentApproval"]>
 
+export type AgentApprovalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  runId?: boolean
+  stepId?: boolean
+  action?: boolean
+  status?: boolean
+  payload?: boolean
+  decisionReason?: boolean
+  decidedAt?: boolean
+  createdAt?: boolean
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentApproval$stepArgs<ExtArgs>
+}, ExtArgs["result"]["agentApproval"]>
 
 export type AgentApprovalSelectScalar = {
   id?: boolean
@@ -723,6 +742,14 @@ export type AgentApprovalSelectScalar = {
 
 export type AgentApprovalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "runId" | "stepId" | "action" | "status" | "payload" | "decisionReason" | "decidedAt" | "createdAt", ExtArgs["result"]["agentApproval"]>
 export type AgentApprovalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentApproval$stepArgs<ExtArgs>
+}
+export type AgentApprovalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+  step?: boolean | Prisma.AgentApproval$stepArgs<ExtArgs>
+}
+export type AgentApprovalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
   step?: boolean | Prisma.AgentApproval$stepArgs<ExtArgs>
 }
@@ -861,6 +888,30 @@ export interface AgentApprovalDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends AgentApprovalCreateManyArgs>(args?: Prisma.SelectSubset<T, AgentApprovalCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AgentApprovals and returns the data saved in the database.
+   * @param {AgentApprovalCreateManyAndReturnArgs} args - Arguments to create many AgentApprovals.
+   * @example
+   * // Create many AgentApprovals
+   * const agentApproval = await prisma.agentApproval.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AgentApprovals and only return the `id`
+   * const agentApprovalWithIdOnly = await prisma.agentApproval.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AgentApprovalCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AgentApprovalCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentApprovalPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AgentApproval.
    * @param {AgentApprovalDeleteArgs} args - Arguments to delete one AgentApproval.
    * @example
@@ -923,6 +974,36 @@ export interface AgentApprovalDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends AgentApprovalUpdateManyArgs>(args: Prisma.SelectSubset<T, AgentApprovalUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AgentApprovals and returns the data updated in the database.
+   * @param {AgentApprovalUpdateManyAndReturnArgs} args - Arguments to update many AgentApprovals.
+   * @example
+   * // Update many AgentApprovals
+   * const agentApproval = await prisma.agentApproval.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AgentApprovals and only return the `id`
+   * const agentApprovalWithIdOnly = await prisma.agentApproval.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AgentApprovalUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AgentApprovalUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentApprovalPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AgentApproval.
@@ -1361,6 +1442,29 @@ export type AgentApprovalCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * AgentApproval createManyAndReturn
+ */
+export type AgentApprovalCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentApproval
+   */
+  select?: Prisma.AgentApprovalSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentApproval
+   */
+  omit?: Prisma.AgentApprovalOmit<ExtArgs> | null
+  /**
+   * The data used to create many AgentApprovals.
+   */
+  data: Prisma.AgentApprovalCreateManyInput | Prisma.AgentApprovalCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentApprovalIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AgentApproval update
  */
 export type AgentApprovalUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1402,6 +1506,36 @@ export type AgentApprovalUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many AgentApprovals to update.
    */
   limit?: number
+}
+
+/**
+ * AgentApproval updateManyAndReturn
+ */
+export type AgentApprovalUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentApproval
+   */
+  select?: Prisma.AgentApprovalSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentApproval
+   */
+  omit?: Prisma.AgentApprovalOmit<ExtArgs> | null
+  /**
+   * The data used to update AgentApprovals.
+   */
+  data: Prisma.XOR<Prisma.AgentApprovalUpdateManyMutationInput, Prisma.AgentApprovalUncheckedUpdateManyInput>
+  /**
+   * Filter which AgentApprovals to update
+   */
+  where?: Prisma.AgentApprovalWhereInput
+  /**
+   * Limit how many AgentApprovals to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentApprovalIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -42,11 +42,11 @@ export async function changePassword(formData: FormData): Promise<ActionResult> 
 
     await auth.api.changePassword({
       headers: await headers(),
-      body: {
-        currentPassword,
-        newPassword,
-      },
+      body: { currentPassword, newPassword, revokeOtherSessions: true },
     });
+
+    // 密码修改后登出当前会话
+    await auth.api.signOut({ headers: await headers() });
 
     return { success: true };
   } catch (error) {

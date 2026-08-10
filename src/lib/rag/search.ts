@@ -40,17 +40,18 @@ export interface SearchResult {
  */
 export async function searchKnowledge(
   query: string,
+  userId?: string,
   recallTopK = 20,
   finalTopN = 5,
   sourceFilter?: string
 ): Promise<SearchResult> {
-  console.log(`[Search] 查询: "${query.slice(0, 80)}"`);
+  console.log(`[Search] 查询: "${query.slice(0, 80)}"${userId ? ` (user: ${userId})` : ""}`);
 
   // 1. Query → Embedding
   const queryEmbedding = await embedText(query);
 
   // 2. 召回：向量相似度 Top-K
-  const recalled = await searchSimilarChunks(queryEmbedding, recallTopK, sourceFilter);
+  const recalled = await searchSimilarChunks(queryEmbedding, recallTopK, sourceFilter, userId);
 
   if (recalled.length === 0) {
     console.log("[Search] 未找到相关结果");
@@ -60,7 +61,9 @@ export async function searchKnowledge(
   // 3. 重排：embedding 模型余弦相似度
   // 先查有多少 chunks
   const { prisma } = await import("@/lib/prisma");
-  const totalChunks = await prisma.documentChunk.count();
+  const totalChunks = userId
+    ? await prisma.documentChunk.count({ where: { userId } })
+    : await prisma.documentChunk.count();
 
   const documents = recalled.map((c) => c.content);
 

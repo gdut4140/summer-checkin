@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model User {
@@ -32,7 +32,9 @@ model User {
   agentRuns     AgentRun[]
   decisions     AgentDecision[]
   notifications Notification[]
-  schedules     AgentSchedule[]
+  schedules       AgentSchedule[]
+  todos           Todo[]
+  documents       DocumentChunk[]
 
   @@map("user")
 }
@@ -95,7 +97,7 @@ model PlanTask {
   planId      String
   userId      String
   title       String
-  description String?   @db.Text
+  description String?
   dayNumber   Int?
   weekNumber  Int?
   category    String    @default("study")
@@ -112,6 +114,21 @@ model PlanTask {
   @@index([userId, status])
   @@index([userId, dayNumber])
   @@map("plantask")
+}
+
+model Todo {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completed])
+  @@index([userId, createdAt])
+  @@map("todo")
 }
 
 model Checkin {
@@ -195,7 +212,7 @@ model ConversationMessage {
   id             String   @id @default(cuid())
   conversationId String
   role           String
-  content        String   @db.Text
+  content        String
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -208,12 +225,12 @@ model AgentRun {
   id          String    @id @default(cuid())
   userId      String
   mode        String    @default("planner")
-  goal        String    @db.Text
+  goal        String
   status      String    @default("queued")
   currentStep Int       @default(0)
   maxSteps    Int       @default(12)
-  summary     String?   @db.Text
-  error       String?   @db.Text
+  summary     String?
+  error       String?
   startedAt   DateTime?
   completedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -237,10 +254,10 @@ model AgentStep {
   kind        String
   status      String    @default("pending")
   title       String
-  detail      String?   @db.Text
+  detail      String?
   input       Json?
   output      Json?
-  error       String?   @db.Text
+  error       String?
   startedAt   DateTime?
   completedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -261,7 +278,7 @@ model AgentApproval {
   action         String
   status         String    @default("pending")
   payload        Json?
-  decisionReason String?   @db.Text
+  decisionReason String?
   decidedAt      DateTime?
   createdAt      DateTime  @default(now())
 
@@ -281,7 +298,7 @@ model AgentToolCall {
   idempotencyKey String?   @unique
   input          Json?
   output         Json?
-  error          String?   @db.Text
+  error          String?
   startedAt      DateTime?
   completedAt    DateTime?
   createdAt      DateTime  @default(now())
@@ -299,10 +316,10 @@ model AgentDecision {
   userId    String
   runId     String?
   type      String
-  reason    String   @db.Text
+  reason    String
   action    Json
   status    String   @default("executed")
-  feedback  String?  @db.Text
+  feedback  String?
   createdAt DateTime @default(now())
 
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -315,14 +332,15 @@ model AgentDecision {
 }
 
 model UserMemory {
-  id         String    @id @default(cuid())
+  id         String                      @id @default(cuid())
   userId     String
-  type       String    @default("fact")
-  content    String    @db.Text
-  importance Float     @default(0.5)
-  confidence Float     @default(0.5)
+  type       String                      @default("fact")
+  content    String
+  embedding  Unsupported("jsonb")
+  importance Float                       @default(0.5)
+  confidence Float                       @default(0.5)
   lastUsed   DateTime?
-  createdAt  DateTime  @default(now())
+  createdAt  DateTime                    @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -335,8 +353,8 @@ model UserMemory {
 model AIHistory {
   id        String   @id @default(cuid())
   userId    String
-  message   String   @db.Text
-  response  String   @db.Text
+  message   String
+  response  String
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -346,14 +364,18 @@ model AIHistory {
 }
 
 model DocumentChunk {
-  id         String   @id @default(cuid())
+  id         String                      @id @default(cuid())
+  userId     String
   sourceName String
-  sourceType String   @default("text")
+  sourceType String                      @default("text")
   chunkIndex Int
-  content    String   @db.Text
-  embedding  Json
-  createdAt  DateTime @default(now())
+  content    String
+  embedding  Unsupported("jsonb")
+  createdAt  DateTime                    @default(now())
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sourceName])
   @@index([sourceName])
   @@map("documentchunk")
 }
@@ -363,7 +385,7 @@ model Notification {
   userId    String
   type      String   @default("reminder")
   title     String
-  content   String   @db.Text
+  content   String
   read      Boolean  @default(false)
   actionUrl String?
   createdAt DateTime @default(now())

@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const COLORS = ["#a16207", "#c2410c", "#be185d", "#ca8a04", "#92400e", "#b45309"];
+const COLORS = ["#d7ef83", "#67b4c9", "#e0886a", "#5aaa90", "#f3c969", "#c58fe8"];
 
 interface SubjectPieChartProps {
   data: { name: string; hours: number }[];
@@ -19,9 +19,9 @@ export function SubjectPieChart({ data }: SubjectPieChartProps) {
   const total = data.reduce((s, d) => s + d.hours, 0);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">科目分布</CardTitle>
+    <Card className="surface overflow-hidden">
+      <CardHeader className="border-b border-white/8 px-5 py-4">
+        <CardTitle className="text-sm">科目分布</CardTitle>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (

@@ -43,7 +43,7 @@ export async function PATCH(
     const client = createAIClient();
 
     const response = await client.chat.completions.create({
-      model: process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash",
+      model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
       messages: [
         {
           role: "system",

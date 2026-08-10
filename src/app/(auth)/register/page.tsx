@@ -18,6 +18,22 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
+  function translateError(msg: string): string {
+    const map: Record<string, string> = {
+      "user already exists": "该邮箱已注册，请直接登录",
+      "email already exists": "该邮箱已注册，请直接登录",
+      "invalid email": "邮箱格式不正确",
+      "password too short": "密码长度不足，至少需要 8 位",
+      "weak password": "密码强度不够，请使用更复杂的密码",
+      "too many requests": "请求过于频繁，请稍后再试",
+    };
+    const lower = msg.toLowerCase();
+    for (const [key, val] of Object.entries(map)) {
+      if (lower.includes(key)) return val;
+    }
+    return msg || "注册失败，请重试";
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (password !== confirm) {
@@ -36,7 +52,7 @@ export default function RegisterPage() {
         result = await authClient.signUp.email({ name, email, password });
       }
       if (result.error) {
-        toast.error(result.error.message || "注册失败");
+        toast.error(translateError(result.error.message || ""));
       } else {
         toast.success("注册成功！欢迎加入 Summer Checkin。");
         router.push("/dashboard");
@@ -49,13 +65,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="glass-panel border-white/60 shadow-2xl">
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold">注册账号</CardTitle>
-        <CardDescription>开始记录你的暑假学习之旅</CardDescription>
+    <Card className="border-0 bg-transparent shadow-none backdrop-blur-none">
+      <CardHeader className="px-0">
+        <CardTitle className="text-2xl font-semibold text-white">建立学习空间</CardTitle>
+        <CardDescription>创建账号，开始记录你的成长轨迹</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-0">
           <div className="space-y-2">
             <Label htmlFor="name">用户名</Label>
             <Input
@@ -103,7 +119,7 @@ export default function RegisterPage() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardFooter className="flex flex-col gap-4 px-0">
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "注册中..." : "注册"}
           </Button>

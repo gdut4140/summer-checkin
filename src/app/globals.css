@@ -16,10 +16,10 @@
   --green-700: #134236;
   --green-600: #1a5c4b;
   --green-500: #1f735e;
-  --green-400: #3b9078;
-  --green-300: #5aaa90;
-  --green-200: #88ccb5;
-  --green-100: #b8e6d5;
+  --green-400: #d7ef83;
+  --green-300: #d7ef83;
+  --green-200: #d7ef83;
+  --green-100: #d7ef83;
 
   /* ── 主题色映射 ── */
   --background: #0c1f19;
@@ -28,8 +28,8 @@
   --card-foreground: #f2f8f4;
   --popover: rgba(255, 255, 255, 0.16);
   --popover-foreground: #f2f8f4;
-  --primary: #3b9078;
-  --primary-foreground: #ffffff;
+  --primary: #d7ef83;
+  --primary-foreground: #051612;
   --secondary: rgba(255, 255, 255, 0.1);
   --secondary-foreground: #dceddf;
   --muted: rgba(255, 255, 255, 0.08);
@@ -40,21 +40,21 @@
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.14);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: #3b9078;
+  --ring: #d7ef83;
   --radius: 0.75rem;
-  --chart-1: #3b9078;
+  --chart-1: #d7ef83;
   --chart-2: #c8b45a;
-  --chart-3: #67b4c9;
+  --chart-3: #d7ef83;
   --chart-4: #e0886a;
   --chart-5: #88b85a;
   --sidebar-background: rgba(12, 31, 25, 0.9);
   --sidebar-foreground: #f2f8f4;
-  --sidebar-primary: #3b9078;
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary: #d7ef83;
+  --sidebar-primary-foreground: #051612;
   --sidebar-accent: rgba(180, 210, 190, 0.16);
   --sidebar-accent-foreground: #d0ede0;
   --sidebar-border: rgba(255, 255, 255, 0.12);
-  --sidebar-ring: #3b9078;
+  --sidebar-ring: #d7ef83;
   --sidebar: rgba(12, 31, 25, 0.9);
 }
 
@@ -65,7 +65,7 @@
   --card-foreground: #f2f8f4;
   --popover: rgba(255, 255, 255, 0.14);
   --popover-foreground: #f2f8f4;
-  --primary: #5aaa90;
+  --primary: #d7ef83;
   --primary-foreground: #051612;
   --secondary: rgba(255, 255, 255, 0.08);
   --secondary-foreground: #dceddf;
@@ -77,15 +77,15 @@
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.08);
-  --ring: #5aaa90;
+  --ring: #d7ef83;
   --sidebar-background: rgba(8, 23, 19, 0.9);
   --sidebar-foreground: #f2f8f4;
-  --sidebar-primary: #5aaa90;
+  --sidebar-primary: #d7ef83;
   --sidebar-primary-foreground: #051612;
   --sidebar-accent: rgba(180, 210, 190, 0.12);
   --sidebar-accent-foreground: #cbe8d9;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #5aaa90;
+  --sidebar-ring: #d7ef83;
   --sidebar: rgba(8, 23, 19, 0.9);
 }
 
@@ -161,7 +161,7 @@
 .bg-video {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   object-fit: cover;
   width: 100%;
   height: 100%;
@@ -172,31 +172,30 @@
 .bg-video-overlay {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(5, 22, 18, 0.55) 0%,
-    rgba(8, 30, 24, 0.4) 40%,
-    rgba(4, 18, 14, 0.65) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(5, 22, 18, 0.55) 0%,
+      rgba(8, 30, 24, 0.4) 40%,
+      rgba(4, 18, 14, 0.65) 100%);
 }
 
 @layer components {
+
   /* ── 玻璃白卡片 ── */
   [data-slot="card"] {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-    backdrop-filter: blur(20px) saturate(120%);
+    background: rgba(12, 31, 25, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(24px) saturate(130%);
   }
 
   [data-slot="input"],
   [data-slot="textarea"],
   [data-slot="select-trigger"] {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
     color: var(--foreground);
   }
 
@@ -207,38 +206,55 @@
 
   /* ── 通用玻璃面板 ── */
   .glass-panel {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(24px) saturate(120%);
+    background: rgba(12, 31, 25, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(28px) saturate(130%);
+  }
+
+  .glass-panel-strong {
+    background: rgba(8, 20, 16, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(32px) saturate(140%);
   }
 
   .page-surface {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
-    backdrop-filter: blur(28px) saturate(120%);
+    background: rgba(12, 31, 25, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(28px) saturate(130%);
   }
 
   /* ── 墨绿半透明面板 ── */
   .dark-glass {
-    background: rgba(8, 28, 22, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(24px) saturate(120%);
+    background: rgba(8, 20, 16, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(28px) saturate(130%);
   }
 }
 
 @layer utilities {
   .bg-grid {
     background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 56px 56px;
+  }
+
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
 @media (max-width: 768px) {
+
   .bg-video,
   .bg-video-overlay {
     position: fixed;
@@ -246,10 +262,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bg-video {
-    display: none;
-  }
-
   *,
   *::before,
   *::after {
@@ -258,4 +270,450 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Product surface system ─────────────────────────────────────
+   All authenticated pages use the same quiet, high-contrast hierarchy.
+   The landing page keeps its own composition; these primitives are for
+   product surfaces only. */
+.product-page {
+  min-height: calc(100dvh - 4.5rem);
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 2.25rem clamp(1rem, 3vw, 3rem) 4rem;
+}
+
+.product-page--wide { max-width: 1600px; }
+
+.product-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.product-eyebrow {
+  color: #d7ef83;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.product-title {
+  margin-top: 0.7rem;
+  color: #f5faf6;
+  font-size: 2.1rem;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+
+.product-subtitle {
+  max-width: 38rem;
+  margin-top: 0.55rem;
+  color: rgba(232, 246, 237, 0.5);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.surface {
+  background: rgba(7, 23, 17, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.65rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(26px) saturate(125%);
+}
+
+/* 雨林自习室：让视频成为空间主体，内容只做轻量玻璃承载。 */
+.rainforest-page {
+  min-height: calc(100dvh - 4.5rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.rainforest-glass {
+  background: rgba(5, 19, 14, 0.36);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.65rem;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px) saturate(118%);
+}
+
+.rainforest-focus-grid { flex: 1; }
+
+.dashboard-nav {
+  position: fixed !important;
+  inset: 0 0 auto;
+  height: 0;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.dashboard-nav__inner {
+  position: relative;
+  height: 80px;
+}
+
+.dashboard-nav__tools {
+  position: absolute;
+  top: 16px;
+  right: 2rem;
+}
+
+.atomic-nav {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  width: 176px;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(7, 23, 17, 0.66);
+  padding: 7px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(24px) saturate(130%);
+  transition: width 480ms cubic-bezier(0.22, 1, 0.36, 1), background-color 300ms ease, border-color 300ms ease;
+}
+
+.atomic-nav:hover,
+.atomic-nav:focus-within {
+  width: 510px;
+  border-color: rgba(215, 239, 131, 0.22);
+  background: rgba(7, 23, 17, 0.82);
+}
+
+.ambient-sound-control { height: 34px; }
+.ambient-sound-shell { position: relative; }
+.ambient-sound-shell > div {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+}
+.ambient-sound-shell > button { width: 32px; height: 32px; }
+
+.atomic-nav__brand { min-width: 160px; }
+.atomic-nav__links {
+  width: 0;
+  margin-left: 0;
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+  transition: width 480ms cubic-bezier(0.22, 1, 0.36, 1), margin-left 480ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease 40ms, transform 360ms ease;
+}
+.atomic-nav:hover .atomic-nav__links,
+.atomic-nav:focus-within .atomic-nav__links {
+  width: 326px;
+  margin-left: 8px;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.immersive-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.rainforest-immersive { overflow: hidden; }
+.rainforest-immersive .dashboard-nav,
+.rainforest-immersive .rainforest-orb,
+.rainforest-immersive .ambient-sound-control { display: none !important; }
+
+.immersive-timer {
+  color: rgba(250, 253, 250, 0.96);
+  font-size: 8rem;
+  font-weight: 200;
+  line-height: 1;
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.34);
+}
+
+.immersive-exit {
+  position: fixed;
+  left: 50%;
+  bottom: 2.5rem;
+  width: 180px;
+  height: 42px;
+  overflow: hidden;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(5, 18, 14, 0.28);
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.72rem;
+  backdrop-filter: blur(14px);
+  user-select: none;
+}
+.immersive-exit::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 0; background: rgba(215, 239, 131, 0.22); }
+.immersive-exit.is-holding::before { animation: immersive-hold 1.4s linear forwards; }
+@keyframes immersive-hold { to { width: 100%; } }
+
+@media (max-width: 767px) {
+  .immersive-timer { font-size: 4.5rem; }
+  .immersive-exit { bottom: 1.5rem; }
+}
+
+@media (min-width: 1280px) {
+  .rainforest-focus-grid { min-height: 520px; }
+}
+
+.surface-muted {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.55rem;
+}
+
+.scenic-shell [data-slot="card"] {
+  background: rgba(7, 23, 17, 0.72);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.65rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
+}
+
+.scenic-shell [data-slot="input"],
+.scenic-shell [data-slot="textarea"],
+.scenic-shell [data-slot="select-trigger"] {
+  border-radius: 0.45rem;
+  border-color: rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.product-page .glass-panel,
+.product-page .glass-panel-strong,
+.product-page .dark-glass { border-radius: 0.65rem; }
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.metric-strip > * + * { border-left: 1px solid rgba(255, 255, 255, 0.1); }
+.metric-strip--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.section-heading h2 {
+  color: rgba(245, 250, 246, 0.86);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.section-heading p,
+.section-heading span { color: rgba(232, 246, 237, 0.36); font-size: 0.72rem; }
+
+.field-label { color: rgba(232, 246, 237, 0.58); font-size: 0.75rem; font-weight: 500; }
+
+@media (max-width: 767px) {
+  .product-page { padding-top: 1.5rem; padding-bottom: 3rem; }
+  .product-header { align-items: flex-start; flex-direction: column; margin-bottom: 1.5rem; }
+  .product-title { font-size: 1.75rem; }
+  .metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metric-strip--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .metric-strip > * + * { border-left: 0; }
+  .metric-strip > *:nth-child(even) { border-left: 1px solid rgba(255, 255, 255, 0.1); }
+  .metric-strip > *:nth-child(n + 3) { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+  .metric-strip--three > * + * { border-left: 1px solid rgba(255, 255, 255, 0.1); }
+  .metric-strip--three > *:nth-child(n + 3) { border-top: 0; }
+}
+
+/* 探索雨林：全局可拖动智能体入口 */
+.rainforest-orb {
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 64px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: grab;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.35));
+}
+
+.rainforest-orb:active { cursor: grabbing; }
+
+.rainforest-orb__halo {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(215, 239, 131, 0.55);
+  animation: rainforest-breathe 3.2s ease-in-out infinite;
+}
+
+.rainforest-orb__core {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #e8f7ae;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.22), transparent 28%),
+    linear-gradient(145deg, #286c50 0%, #123f32 54%, #0a251e 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.22), inset 0 -6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.rainforest-orb__core svg {
+  width: 24px;
+  height: 24px;
+  animation: rainforest-leaf 4s ease-in-out infinite;
+}
+
+.rainforest-orb__spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #eaf9aa;
+  box-shadow: 0 0 9px #d7ef83;
+}
+
+.rainforest-orb__spark--one { right: 5px; top: 8px; animation: rainforest-spark 2.8s ease-in-out infinite; }
+.rainforest-orb__spark--two { bottom: 8px; left: 4px; animation: rainforest-spark 2.8s 1.2s ease-in-out infinite; }
+
+@keyframes rainforest-breathe {
+  0%, 100% { transform: scale(0.96); opacity: 0.55; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes rainforest-leaf {
+  0%, 100% { transform: rotate(-7deg) translateY(1px); }
+  50% { transform: rotate(7deg) translateY(-2px); }
+}
+
+@keyframes rainforest-spark {
+  0%, 100% { transform: scale(0.45); opacity: 0.25; }
+  45% { transform: scale(1); opacity: 1; }
+}
+
+.rainforest-workbench {
+  display: grid !important;
+  width: min(1440px, calc(100vw - 32px)) !important;
+  max-width: none !important;
+  height: min(780px, calc(100dvh - 32px)) !important;
+  grid-template-columns: 220px minmax(380px, 1fr) 380px;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.rainforest-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(7, 21, 16, 0.38);
+  backdrop-filter: blur(22px) saturate(120%);
+}
+
+.rainforest-panel--left { border-right: 1px solid rgba(255, 255, 255, 0.1); background: rgba(5, 16, 12, 0.48); }
+.rainforest-panel--center { background: rgba(11, 30, 23, 0.28); }
+.rainforest-panel--right { border-left: 1px solid rgba(255, 255, 255, 0.1); background: rgba(5, 16, 12, 0.42); }
+.rainforest-panel--right > :where(.overflow-y-auto, .min-h-0) { padding: 14px; }
+
+/* 右面板内紧凑化 — 覆写全页面风格的样式 */
+.rainforest-panel--right .glass-panel { padding: 10px 12px !important; border-radius: 10px !important; }
+.rainforest-panel--right .text-sm { font-size: 0.8rem; }
+.rainforest-panel--right .space-y-3 { --spacing: 8px; }
+.rainforest-panel--right .space-y-4 { --spacing: 10px; }
+.rainforest-panel--right .rounded-xl { border-radius: 8px !important; }
+.rainforest-panel--right .px-4 { padding-inline: 10px !important; }
+.rainforest-panel--right .py-4 { padding-block: 10px !important; }
+.rainforest-mobile-nav { display: none; }
+
+/* ── 右面板内容动画 ── */
+.rainforest-panel-content {
+  animation: rf-slide-in 0.2s ease-out;
+}
+@keyframes rf-slide-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── 右面板紧凑卡片 ── */
+.rainforest-panel--right .rf-card {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.03);
+  padding: 0.625rem;
+}
+.rainforest-panel--right .rf-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.rainforest-panel--right .rf-stat-item {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.03);
+  padding: 0.625rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  transition: border-color 0.2s;
+}
+.rainforest-panel--right .rf-stat-item:hover {
+  border-color: rgba(255,255,255,.12);
+}
+.rainforest-panel--right .rf-stat-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.rainforest-panel--right .rf-stat-label {
+  font-size: 10px;
+  color: rgba(255,255,255,.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 1023px) {
+  .rainforest-workbench {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 58px;
+  }
+
+  .rainforest-panel--left,
+  .rainforest-panel--right { border: 0; }
+
+  .rainforest-workbench > .rainforest-panel.rainforest-panel--mobile-hidden { display: none !important; }
+
+  .rainforest-mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(5, 16, 12, 0.98);
+  }
+
+  .rainforest-mobile-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 10px;
+  }
+
+  .rainforest-mobile-nav svg { width: 19px; height: 19px; }
 }

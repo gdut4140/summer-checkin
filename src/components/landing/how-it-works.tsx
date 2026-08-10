@@ -11,10 +11,10 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="bg-[#0a332b]/78 px-4 py-20 text-white backdrop-blur-md md:px-8 md:py-28">
+    <section className="bg-[#0a281f]/62 px-4 py-20 text-white backdrop-blur-md md:px-8 md:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold text-[#f3c969]">三步形成节奏</p>
+          <p className="text-sm font-semibold text-[#d7ef83]">三步形成节奏</p>
           <h2 className="mt-3 text-3xl font-semibold md:text-5xl">学习不必紧绷，<br />但要一直向前</h2>
         </div>
         <div className="mt-16 grid gap-10 md:grid-cols-3 md:gap-0">
@@ -28,7 +28,7 @@ export function HowItWorks() {
               className="relative border-white/20 md:border-l md:px-8 first:md:border-l-0 first:md:pl-0"
             >
               <div className="flex items-center justify-between">
-                <step.icon className="h-8 w-8 text-[#f3c969]" weight="duotone" />
+                <step.icon className="h-8 w-8 text-[#d7ef83]" weight="duotone" />
                 <span className="text-sm text-white/45">{step.number}</span>
               </div>
               <h3 className="mt-8 text-xl font-semibold">{step.title}</h3>

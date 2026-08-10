@@ -21,7 +21,7 @@ interface ClickSparkProps {
 }
 
 export default function ClickSpark({
-  sparkColor = "#f3c969",
+  sparkColor = "#d7ef83",
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,

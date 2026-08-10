@@ -114,10 +114,10 @@ export async function POST(request: NextRequest) {
     // ============================================================
     let ragPrompt = "";
     try {
-      const ragResult = await searchKnowledge(lastUserMsg.content);
+      const ragResult = await searchKnowledge(lastUserMsg.content, user.id);
       ragPrompt = formatKnowledgeForPrompt(ragResult);
     } catch (err) {
-      // RAG 检索失败不阻塞对话（Python 服务可能没启动）
+      // RAG 检索失败不阻塞对话
       console.warn("[AI] RAG 检索跳过（服务不可用）:", err);
     }
 
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       // Phase 1: Coach 工具（学习分析 + 计划调整）
       tools: {
         ...createStudyTools(user.id),
-        ...createRAGTool(),
+        ...createRAGTool(user.id),
         ...createAgentTools(user.id),
         ...createCoachTools(user.id),
       },

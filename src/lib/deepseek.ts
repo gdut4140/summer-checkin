@@ -11,26 +11,29 @@ import { createOpenAI } from "@ai-sdk/openai";
 
 /**
  * 创建 AI SDK Provider（用于 streamText）
- * baseURL 指向 DeepSeek，兼容 OpenAI 协议
+ * baseURL 指向 Agnes AI，兼容 OpenAI 协议
  */
 const aiProvider = createOpenAI({
   apiKey: process.env.DASHSCOPE_API_KEY,
-  baseURL: process.env.DASHSCOPE_BASE_URL ?? "https://api.deepseek.com/v1",
+  baseURL: process.env.DASHSCOPE_BASE_URL ?? "https://apihub.agnes-ai.com/v1",
 });
 
 /**
  * 获取语言模型实例
  */
 export function getAIModel() {
-  return aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash");
+  return aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash");
 }
 
 /**
  * 获取深度思考 provider options
- * 同模型 deepseek-v4-flash，通过 thinking_mode 切换推理开关
+ * 仅 DeepSeek 支持 thinking_mode；其他 provider 此选项无效
  */
 export function getDeepThinkOptions(deepThink: boolean) {
   if (!deepThink) return undefined;
+  // Agnes AI 不支持 thinking_mode，仅 DeepSeek 可用
+  const baseURL = process.env.DASHSCOPE_BASE_URL ?? "";
+  if (!baseURL.includes("deepseek")) return undefined;
   return {
     openai: {
       thinking_mode: "enabled",
@@ -46,7 +49,7 @@ export function getDeepThinkOptions(deepThink: boolean) {
 export function createAIClient(): OpenAI {
   const apiKey = process.env.DASHSCOPE_API_KEY ?? "";
   const baseURL =
-    process.env.DASHSCOPE_BASE_URL ?? "https://api.deepseek.com/v1";
+    process.env.DASHSCOPE_BASE_URL ?? "https://apihub.agnes-ai.com/v1";
 
   if (!apiKey) {
     throw new Error("Missing DASHSCOPE_API_KEY environment variable");
@@ -145,7 +148,7 @@ export const SYSTEM_PROMPT = `你是 Summer AI 学习助手，一个专注于帮
 - **createPlan**：创建学习计划
 - **getMyPlans**：查询学习计划和进度
 - **getRecentCheckins**：查询近期打卡记录
-- **getMyMemories**：查询 AI 对你的长期记忆
+- **getMyMemories**：语义搜索 AI 对你的长期记忆。传 query 按相关性检索，不传返回最重要的
 - **searchKnowledgeBase**：搜索知识库文档（Agent 开发、AI 编程等专业知识）
 - **breakdownPlanTasks**：将学习计划拆分为每日/每周具体任务
 - **getPlanTasks**：查看计划的全部任务和完成进度
@@ -182,7 +185,7 @@ export async function generateChatTitle(firstMessage: string): Promise<string> {
   const client = createAIClient();
 
   const response = await client.chat.completions.create({
-    model: process.env.DASHSCOPE_MODEL ?? "deepseek-v4-flash",
+    model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
     messages: [
       {
         role: "system",

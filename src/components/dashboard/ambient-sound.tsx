@@ -22,12 +22,12 @@ export function AmbientSound() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [volume, setVolume] = useState(0.3);
   const [open, setOpen] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const audio = new Audio("/rain.mp3");
     audio.loop = true;
-    audio.volume = volume;
+    audio.volume = 0.3;
     audioRef.current = audio;
 
     // 直接播放；若浏览器拦截则等首次交互后恢复
@@ -83,7 +83,7 @@ export function AmbientSound() {
   }
 
   function showSlider() {
-    clearTimeout(timer.current);
+    if (timer.current) clearTimeout(timer.current);
     setOpen(true);
   }
 
@@ -97,15 +97,15 @@ export function AmbientSound() {
 
   return (
     <div
-      className="fixed top-[4.5rem] right-4 z-50 flex flex-col items-center"
+      className="ambient-sound-control relative z-50 flex items-center"
       onMouseEnter={showSlider}
       onMouseLeave={hideSlider}
     >
       {/* 一体玻璃胶囊 — 按钮 + 滑条统一风格 */}
-      <div className={`flex flex-col items-center rounded-full border backdrop-blur-xl shadow-lg transition-all duration-500 ease-out ${
+      <div className={`ambient-sound-shell flex flex-col items-center rounded-full border backdrop-blur-xl shadow-lg transition-all duration-500 ease-out ${
         isSilent
           ? "border-white/[0.1] bg-white/[0.05]"
-          : "border-emerald-400/20 bg-emerald-400/[0.06]"
+          : "border-[#d7ef83]/20 bg-[#d7ef83]/[0.06]"
       } ${open ? "rounded-[28px]" : "rounded-full"}`}>
         {/* 按钮区 */}
         <button
@@ -113,7 +113,7 @@ export function AmbientSound() {
           className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-300 ${
             isSilent
               ? "text-white/40 hover:text-white/70 hover:bg-white/[0.08]"
-              : "text-emerald-300 hover:text-emerald-200 hover:bg-emerald-400/[0.08]"
+              : "text-[#d7ef83] hover:text-[#d7ef83] hover:bg-[#d7ef83]/[0.08]"
           }`}
           aria-label="调节音量"
         >
@@ -138,7 +138,7 @@ export function AmbientSound() {
           >
             {/* 填充区 */}
             <div
-              className="absolute bottom-0 left-0 right-0 rounded-full bg-gradient-to-t from-emerald-500 to-emerald-400 transition-[height] duration-75"
+              className="absolute bottom-0 left-0 right-0 rounded-full bg-gradient-to-t from-[#d7ef83] to-[#d7ef83] transition-[height] duration-75"
               style={{ height: `${fillPercent}%` }}
             />
             {/* 拖拽手柄 */}

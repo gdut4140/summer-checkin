@@ -294,7 +294,6 @@ export type AgentStepOrderByWithRelationInput = {
   run?: Prisma.AgentRunOrderByWithRelationInput
   approvals?: Prisma.AgentApprovalOrderByRelationAggregateInput
   toolCalls?: Prisma.AgentToolCallOrderByRelationAggregateInput
-  _relevance?: Prisma.AgentStepOrderByRelevanceInput
 }
 
 export type AgentStepWhereUniqueInput = Prisma.AtLeast<{
@@ -487,12 +486,6 @@ export type AgentStepListRelationFilter = {
 
 export type AgentStepOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AgentStepOrderByRelevanceInput = {
-  fields: Prisma.AgentStepOrderByRelevanceFieldEnum | Prisma.AgentStepOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AgentStepRunIdStepNumberCompoundUniqueInput = {
@@ -1002,7 +995,39 @@ export type AgentStepSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   _count?: boolean | Prisma.AgentStepCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agentStep"]>
 
+export type AgentStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  runId?: boolean
+  stepNumber?: boolean
+  kind?: boolean
+  status?: boolean
+  title?: boolean
+  detail?: boolean
+  input?: boolean
+  output?: boolean
+  error?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["agentStep"]>
 
+export type AgentStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  runId?: boolean
+  stepNumber?: boolean
+  kind?: boolean
+  status?: boolean
+  title?: boolean
+  detail?: boolean
+  input?: boolean
+  output?: boolean
+  error?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  createdAt?: boolean
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["agentStep"]>
 
 export type AgentStepSelectScalar = {
   id?: boolean
@@ -1026,6 +1051,12 @@ export type AgentStepInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   approvals?: boolean | Prisma.AgentStep$approvalsArgs<ExtArgs>
   toolCalls?: boolean | Prisma.AgentStep$toolCallsArgs<ExtArgs>
   _count?: boolean | Prisma.AgentStepCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type AgentStepIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
+}
+export type AgentStepIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  run?: boolean | Prisma.AgentRunDefaultArgs<ExtArgs>
 }
 
 export type $AgentStepPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1167,6 +1198,30 @@ export interface AgentStepDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   createMany<T extends AgentStepCreateManyArgs>(args?: Prisma.SelectSubset<T, AgentStepCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many AgentSteps and returns the data saved in the database.
+   * @param {AgentStepCreateManyAndReturnArgs} args - Arguments to create many AgentSteps.
+   * @example
+   * // Create many AgentSteps
+   * const agentStep = await prisma.agentStep.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many AgentSteps and only return the `id`
+   * const agentStepWithIdOnly = await prisma.agentStep.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AgentStepCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AgentStepCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentStepPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a AgentStep.
    * @param {AgentStepDeleteArgs} args - Arguments to delete one AgentStep.
    * @example
@@ -1229,6 +1284,36 @@ export interface AgentStepDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * 
    */
   updateMany<T extends AgentStepUpdateManyArgs>(args: Prisma.SelectSubset<T, AgentStepUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more AgentSteps and returns the data updated in the database.
+   * @param {AgentStepUpdateManyAndReturnArgs} args - Arguments to update many AgentSteps.
+   * @example
+   * // Update many AgentSteps
+   * const agentStep = await prisma.agentStep.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more AgentSteps and only return the `id`
+   * const agentStepWithIdOnly = await prisma.agentStep.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AgentStepUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AgentStepUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentStepPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AgentStep.
@@ -1672,6 +1757,29 @@ export type AgentStepCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * AgentStep createManyAndReturn
+ */
+export type AgentStepCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentStep
+   */
+  select?: Prisma.AgentStepSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentStep
+   */
+  omit?: Prisma.AgentStepOmit<ExtArgs> | null
+  /**
+   * The data used to create many AgentSteps.
+   */
+  data: Prisma.AgentStepCreateManyInput | Prisma.AgentStepCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentStepIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * AgentStep update
  */
 export type AgentStepUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1713,6 +1821,36 @@ export type AgentStepUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many AgentSteps to update.
    */
   limit?: number
+}
+
+/**
+ * AgentStep updateManyAndReturn
+ */
+export type AgentStepUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentStep
+   */
+  select?: Prisma.AgentStepSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentStep
+   */
+  omit?: Prisma.AgentStepOmit<ExtArgs> | null
+  /**
+   * The data used to update AgentSteps.
+   */
+  data: Prisma.XOR<Prisma.AgentStepUpdateManyMutationInput, Prisma.AgentStepUncheckedUpdateManyInput>
+  /**
+   * Filter which AgentSteps to update
+   */
+  where?: Prisma.AgentStepWhereInput
+  /**
+   * Limit how many AgentSteps to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentStepIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

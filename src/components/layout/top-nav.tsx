@@ -5,22 +5,17 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { LogoutButton } from "@/app/(dashboard)/actions";
 import {
-  House,
-  CheckCircle,
-  CalendarCheck,
   ChartLine,
-  ListChecks,
-  User,
-  Robot,
   Gear,
+  ListChecks,
   List,
   X,
   SignOut,
-  MagnifyingGlass,
   Leaf,
+  Tree,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AppAvatar } from "@/components/ui/app-avatar";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -34,8 +29,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SearchDialog } from "@/components/search-dialog";
 import { NotificationBell } from "@/components/layout/notification-bell";
+import { AmbientSound } from "@/components/dashboard/ambient-sound";
 
 interface TopNavProps {
   user: {
@@ -48,23 +43,18 @@ interface TopNavProps {
 
 // 主要导航（顶部居中显示），次要项收入用户菜单
 const mainNav = [
-  { href: "/dashboard", label: "首页" },
-  { href: "/checkin", label: "今日打卡" },
+  { href: "/dashboard", label: "雨林" },
+  { href: "/checkin", label: "我的小岛" },
   { href: "/plans", label: "学习计划" },
-  { href: "/calendar", label: "打卡日历" },
-  { href: "/statistics", label: "数据统计" },
+  { href: "/statistics", label: "个人主页" },
 ];
 
 // 移动端抽屉的完整导航（带图标）
 const fullNav = [
-  { href: "/agent", label: "Agent 工作台", icon: Robot },
-  { href: "/dashboard", label: "首页", icon: House },
-  { href: "/checkin", label: "今日打卡", icon: CheckCircle },
+  { href: "/dashboard", label: "雨林", icon: Tree },
+  { href: "/checkin", label: "我的小岛", icon: Tree },
   { href: "/plans", label: "学习计划", icon: ListChecks },
-  { href: "/calendar", label: "打卡日历", icon: CalendarCheck },
-  { href: "/statistics", label: "数据统计", icon: ChartLine },
-  { href: "/ai", label: "AI 助手", icon: Robot },
-  { href: "/profile", label: "个人主页", icon: User },
+  { href: "/statistics", label: "个人主页", icon: ChartLine },
   { href: "/settings", label: "设置", icon: Gear },
 ];
 
@@ -77,165 +67,102 @@ export function TopNav({ user }: TopNavProps) {
 
   return (
     <>
-      <SearchDialog />
-      <header className="sticky top-0 z-40 w-full border-b border-white/[0.12] bg-[#0a1e18]/80 text-white backdrop-blur-2xl backdrop-saturate-150">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/30 bg-white/14 text-white shadow-sm">
-              <Leaf className="h-4 w-4" weight="fill" />
-            </div>
-            <span className="hidden font-semibold text-white sm:inline">
-              Summer Checkin
-            </span>
-          </Link>
+      <header className="dashboard-nav pointer-events-none sticky top-0 z-40 w-full text-white">
+        <div className="dashboard-nav__inner mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-8">
+          <Link href="/dashboard" className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/12 bg-[#071711]/66 p-1.5 pr-3 text-xs font-semibold shadow-xl backdrop-blur-2xl lg:hidden"><span className="flex size-7 items-center justify-center rounded-full bg-[#d7ef83] text-[#051612]"><Leaf className="size-3.5" weight="fill" /></span>Summer Checkin</Link>
+          <div className="atomic-nav pointer-events-auto hidden items-center lg:flex">
+            <Link href="/dashboard" className="atomic-nav__brand flex shrink-0 items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-full bg-[#d7ef83] text-[#051612]"><Leaf className="size-4" weight="fill" /></span>
+              <span className="whitespace-nowrap text-sm font-semibold">Summer Checkin</span>
+            </Link>
+            <nav className="atomic-nav__links flex items-center gap-1" aria-label="主导航">
+              {mainNav.map((item) => (
+                <Link key={item.href} href={item.href} className={cn("rounded-full px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors", isActive(item.href) ? "bg-[#d7ef83] text-[#051612]" : "text-white/52 hover:bg-white/8 hover:text-white")}>{item.label}</Link>
+              ))}
+            </nav>
+          </div>
 
-          {/* 桌面端居中导航 */}
-          <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
-            {mainNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
-                  isActive(item.href)
-                    ? "bg-white/[0.15] text-white shadow-sm"
-                    : "text-white/68 hover:bg-white/12 hover:text-white"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* 右侧：通知 + 搜索 + AI 助手 + 用户菜单（桌面） */}
-          <div className="hidden items-center gap-2 lg:flex">
+          {/* 右侧：通知 + 用户菜单（桌面） */}
+          <div className="dashboard-nav__tools pointer-events-auto hidden items-center gap-1 rounded-full border border-white/12 bg-[#071711]/66 p-1.5 shadow-xl backdrop-blur-2xl lg:flex">
+            <AmbientSound />
             <NotificationBell />
-            <button
-              onClick={() => {
-                const event = new KeyboardEvent("keydown", { key: "k", metaKey: true })
-                document.dispatchEvent(event)
-              }}
-              className="flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white/70 backdrop-blur-sm transition-all hover:bg-white/18 hover:text-white"
-            >
-              <MagnifyingGlass className="h-4 w-4" />
-              <span>搜索</span>
-              <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border border-border/50 bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
-                ⌘K
-              </kbd>
-            </button>
-            <Link href="/agent">
-              <Button variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/14 hover:text-white">
-                <Robot className="h-4 w-4" />
-                Agent 工作台
-              </Button>
-            </Link>
-            <Link href="/ai">
-              <Button variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/14 hover:text-white">
-                <Robot className="h-4 w-4" weight="fill" />
-                AI 助手
-              </Button>
-            </Link>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 rounded-md border border-white/20 bg-white/10 py-1 pl-1 pr-2 backdrop-blur-sm transition-all hover:bg-white/16">
+              <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 py-1 pl-2 pr-1 backdrop-blur-sm transition-all hover:bg-white/12">
                 <List className="h-4 w-4 text-white" />
-                <Avatar className="h-7 w-7">
-                  <AvatarImage src={user.image ?? undefined} alt={user.name} />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                    {user.name?.charAt(0).toUpperCase() ?? "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <AppAvatar image={user.image} name={user.name ?? "U"} size="sm" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 backdrop-blur-xl bg-background/95">
-                <div className="flex flex-col gap-0.5 px-2 py-2">
-                  <span className="text-sm font-medium text-foreground">
-                    {user.name ?? "用户"}
-                  </span>
-                  <span className="text-xs text-muted-foreground truncate">
-                    {user.email ?? ""}
-                  </span>
+              <DropdownMenuContent align="end" className="w-56 rounded-xl border border-white/10 bg-[#0a1a15]/98 p-1 shadow-2xl backdrop-blur-2xl">
+                <div className="flex items-center gap-3 px-3 py-3">
+                  <AppAvatar image={user.image} name={user.name ?? "U"} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{user.name ?? "用户"}</p>
+                    <p className="text-[11px] text-white/35 truncate">{user.email ?? ""}</p>
+                  </div>
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem render={<Link href="/profile" />}>
-                  <User className="h-4 w-4" />
-                  个人主页
-                </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/settings" />}>
-                  <Gear className="h-4 w-4" />
-                  设置
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <SignOut className="h-4 w-4" />
-                  <LogoutButton label="退出登录" />
-                </DropdownMenuItem>
+                <div className="h-px bg-white/5 mx-2" />
+                <LogoutButton />
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
-        {/* 移动端：汉堡菜单 */}
-        <div className="lg:hidden">
-          <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="flex items-center gap-2 rounded-md border border-white/25 bg-white/10 p-1.5 pr-3 text-white">
-              <List className="h-4 w-4" />
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={user.image ?? undefined} alt={user.name} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
-                  {user.name?.charAt(0).toUpperCase() ?? "U"}
-                </AvatarFallback>
-              </Avatar>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 p-0">
-              <div className="flex h-16 items-center justify-between border-b border-border px-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs">
-                    SC
+          {/* 移动端：汉堡菜单 */}
+          <div className="pointer-events-auto lg:hidden">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger className="flex items-center gap-2 rounded-md border border-white/25 bg-white/10 p-1.5 pr-3 text-white">
+                <List className="h-4 w-4" />
+                <AppAvatar image={user.image} name={user.name ?? "U"} size="sm" />
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 p-0">
+                <div className="flex h-16 items-center justify-between border-b border-border px-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs">
+                      SC
+                    </div>
+                    <span className="font-semibold text-sm">菜单</span>
                   </div>
-                  <span className="font-semibold text-sm">菜单</span>
+                  <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <nav className="grid gap-1 p-3">
-                {fullNav.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      isActive(item.href)
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                    )}
-                  >
-                    <item.icon
-                      weight={isActive(item.href) ? "fill" : "regular"}
-                      className="h-5 w-5"
-                    />
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-              <div className="absolute bottom-4 left-0 right-0 px-4">
-                <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {user.name ?? "用户"}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {user.email ?? ""}
-                    </p>
+                <nav className="grid gap-1 p-3">
+                  {fullNav.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        isActive(item.href)
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                      )}
+                    >
+                      <item.icon
+                        weight={isActive(item.href) ? "fill" : "regular"}
+                        className="h-5 w-5"
+                      />
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="absolute bottom-4 left-0 right-0 px-4">
+                  <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {user.name ?? "用户"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email ?? ""}
+                      </p>
+                    </div>
+                    <LogoutButton />
                   </div>
-                  <LogoutButton />
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
     </>
   );
 }

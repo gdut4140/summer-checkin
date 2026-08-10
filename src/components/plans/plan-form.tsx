@@ -17,7 +17,6 @@ interface PlanFormProps {
     name: string;
     description: string | null;
     goal: string | null;
-    targetHours: number;
     startDate: Date | null;
     endDate: Date | null;
   } | null;
@@ -47,15 +46,15 @@ export function PlanForm({ plan }: PlanFormProps) {
   const [, formAction, pending] = useActionState(handleAction, null);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl flex items-center gap-2">
-          <ListChecks className="h-6 w-6 text-primary" weight="fill" />
+    <Card className="surface overflow-hidden">
+      <CardHeader className="border-b border-white/8 px-5 py-4">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+          <ListChecks className="h-5 w-5 text-[#d7ef83]" weight="duotone" />
           {isEditing ? "编辑计划" : "新建计划"}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form action={formAction} className="space-y-5">
+      <CardContent className="p-5 md:p-7">
+        <form action={formAction} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">计划名称 <span className="text-destructive">*</span></Label>
             <Input
@@ -67,6 +66,7 @@ export function PlanForm({ plan }: PlanFormProps) {
             />
           </div>
 
+          <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="description">计划描述</Label>
             <Textarea
@@ -87,18 +87,9 @@ export function PlanForm({ plan }: PlanFormProps) {
               defaultValue={plan?.goal ?? ""}
             />
           </div>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="targetHours">目标时长（小时）</Label>
-              <Input
-                id="targetHours"
-                name="targetHours"
-                type="number"
-                min="0"
-                defaultValue={plan?.targetHours || ""}
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">开始日期</Label>
               <Input
@@ -127,9 +118,9 @@ export function PlanForm({ plan }: PlanFormProps) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={pending} size="lg">
+          <div className="flex justify-end border-t border-white/8 pt-5"><Button type="submit" disabled={pending} size="lg">
             {pending ? "保存中..." : isEditing ? "更新计划" : "创建计划"}
-          </Button>
+          </Button></div>
         </form>
       </CardContent>
     </Card>

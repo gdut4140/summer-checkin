@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -15,7 +13,12 @@
 
 # next.js
 /.next/
+/.next-codex/
+/.next-codex-qa/
 /out/
+
+# codegraph
+/.codegraph/
 
 # production
 /build
@@ -30,15 +33,16 @@ ehthumbs.db
 Desktop.ini
 *.pem
 
-# debug
+# debug / logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
-# local env files
-.env*.local
+# local env files (只提交 .example，真实 key 不上传)
 .env
+.env*.local
 
 # vercel
 .vercel
@@ -59,8 +63,25 @@ next-env.d.ts
 *.swo
 *~
 
+# OS
+Thumbs.db
+.DS_Store
+
 # REST client test files
 *.http
 
 # AI models (downloaded at runtime)
 /models/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Docker
+docker-compose.override.yml
+
+# 截图 / 临时图片
+image.png

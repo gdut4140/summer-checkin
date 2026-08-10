@@ -244,7 +244,6 @@ export type StudyRecordOrderByWithRelationInput = {
   checkinId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.StudyRecordOrderByRelevanceInput
 }
 
 export type StudyRecordWhereUniqueInput = Prisma.AtLeast<{
@@ -366,12 +365,6 @@ export type StudyRecordListRelationFilter = {
 
 export type StudyRecordOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type StudyRecordOrderByRelevanceInput = {
-  fields: Prisma.StudyRecordOrderByRelevanceFieldEnum | Prisma.StudyRecordOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type StudyRecordCountOrderByAggregateInput = {
@@ -560,7 +553,27 @@ export type StudyRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studyRecord"]>
 
+export type StudyRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  date?: boolean
+  totalMinutes?: boolean
+  subject?: boolean
+  checkinId?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["studyRecord"]>
 
+export type StudyRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  date?: boolean
+  totalMinutes?: boolean
+  subject?: boolean
+  checkinId?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["studyRecord"]>
 
 export type StudyRecordSelectScalar = {
   id?: boolean
@@ -574,6 +587,12 @@ export type StudyRecordSelectScalar = {
 
 export type StudyRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "date" | "totalMinutes" | "subject" | "checkinId" | "createdAt", ExtArgs["result"]["studyRecord"]>
 export type StudyRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type StudyRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type StudyRecordIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -708,6 +727,30 @@ export interface StudyRecordDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends StudyRecordCreateManyArgs>(args?: Prisma.SelectSubset<T, StudyRecordCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many StudyRecords and returns the data saved in the database.
+   * @param {StudyRecordCreateManyAndReturnArgs} args - Arguments to create many StudyRecords.
+   * @example
+   * // Create many StudyRecords
+   * const studyRecord = await prisma.studyRecord.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many StudyRecords and only return the `id`
+   * const studyRecordWithIdOnly = await prisma.studyRecord.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends StudyRecordCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, StudyRecordCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudyRecordPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a StudyRecord.
    * @param {StudyRecordDeleteArgs} args - Arguments to delete one StudyRecord.
    * @example
@@ -770,6 +813,36 @@ export interface StudyRecordDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends StudyRecordUpdateManyArgs>(args: Prisma.SelectSubset<T, StudyRecordUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more StudyRecords and returns the data updated in the database.
+   * @param {StudyRecordUpdateManyAndReturnArgs} args - Arguments to update many StudyRecords.
+   * @example
+   * // Update many StudyRecords
+   * const studyRecord = await prisma.studyRecord.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more StudyRecords and only return the `id`
+   * const studyRecordWithIdOnly = await prisma.studyRecord.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends StudyRecordUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, StudyRecordUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudyRecordPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one StudyRecord.
@@ -1205,6 +1278,29 @@ export type StudyRecordCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * StudyRecord createManyAndReturn
+ */
+export type StudyRecordCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StudyRecord
+   */
+  select?: Prisma.StudyRecordSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the StudyRecord
+   */
+  omit?: Prisma.StudyRecordOmit<ExtArgs> | null
+  /**
+   * The data used to create many StudyRecords.
+   */
+  data: Prisma.StudyRecordCreateManyInput | Prisma.StudyRecordCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudyRecordIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * StudyRecord update
  */
 export type StudyRecordUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1246,6 +1342,36 @@ export type StudyRecordUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many StudyRecords to update.
    */
   limit?: number
+}
+
+/**
+ * StudyRecord updateManyAndReturn
+ */
+export type StudyRecordUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StudyRecord
+   */
+  select?: Prisma.StudyRecordSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the StudyRecord
+   */
+  omit?: Prisma.StudyRecordOmit<ExtArgs> | null
+  /**
+   * The data used to update StudyRecords.
+   */
+  data: Prisma.XOR<Prisma.StudyRecordUpdateManyMutationInput, Prisma.StudyRecordUncheckedUpdateManyInput>
+  /**
+   * Filter which StudyRecords to update
+   */
+  where?: Prisma.StudyRecordWhereInput
+  /**
+   * Limit how many StudyRecords to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudyRecordIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
