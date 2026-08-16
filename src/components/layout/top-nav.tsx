@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { AmbientSound } from "@/components/dashboard/ambient-sound";
+import { ChatRoom } from "@/components/chatroom/chat-room";
 
 interface TopNavProps {
   user: {
@@ -85,6 +86,7 @@ export function TopNav({ user }: TopNavProps) {
           {/* 右侧：通知 + 用户菜单（桌面） */}
           <div className="dashboard-nav__tools pointer-events-auto hidden items-center gap-1 rounded-full border border-white/12 bg-[#071711]/66 p-1.5 shadow-xl backdrop-blur-2xl lg:flex">
             <AmbientSound />
+            <ChatRoom />
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 py-1 pl-2 pr-1 backdrop-blur-sm transition-all hover:bg-white/12">

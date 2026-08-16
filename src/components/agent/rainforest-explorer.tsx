@@ -5,7 +5,6 @@ import {
   ArrowClockwise,
   Brain,
   ChatsCircle,
-  Check,
   ClockCounterClockwise,
   Files,
   Leaf,
@@ -29,7 +28,6 @@ import { cn } from "@/lib/utils";
 import { KnowledgeBase } from "./knowledge-base";
 import { CoachOverview } from "./coach-overview";
 import { NotificationCenter } from "./notification-center";
-import { DecisionTimeline } from "./decision-timeline";
 import { AgentWorkspace, type AgentRunListItem } from "./agent-workspace";
 import type { ChatMessage } from "@/types";
 
@@ -39,30 +37,10 @@ interface Conversation {
   updatedAt: string;
 }
 
-interface AgentRun {
-  id: string;
-  mode: string;
-  goal: string;
-  status: string;
-  summary: string | null;
-  updatedAt: string;
-  pendingApproval: { id?: string } | null;
-}
-
 type MobilePanel = "history" | "chat" | "agent" | "knowledge";
 type WorkMode = "chat" | "planner";
 type RightPanel = "agent" | "knowledge";
-type AgentSubTab = "coach" | "notifications" | "decisions" | "workspace";
-
-const statusText: Record<string, string> = {
-  queued: "准备中",
-  running: "执行中",
-  awaiting_approval: "待确认",
-  completed: "已完成",
-  failed: "失败",
-  rejected: "已拒绝",
-  cancelled: "已取消",
-};
+type AgentSubTab = "coach" | "workspace" | "notifications";
 
 const quickPrompts = [
   { label: "拆解本周目标", prompt: "根据我的学习情况，帮我拆解本周最重要的三个目标。", mode: "chat" as const },
@@ -87,7 +65,7 @@ export function RainforestExplorer() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [runs, setRuns] = useState<AgentRun[]>([]);
+  const [runs, setRuns] = useState<AgentRunListItem[]>([]);
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<WorkMode>("chat");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("chat");
@@ -226,6 +204,8 @@ export function RainforestExplorer() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error ?? "生成计划失败");
     await loadRuns();
+    setRightPanel("agent");
+    setAgentSubTab("workspace");
     setMobilePanel("agent");
     toast.success("计划草案已生成，请在右侧确认");
   }
@@ -295,19 +275,6 @@ export function RainforestExplorer() {
   function stopMessage() {
     abortRef.current?.abort();
     setLoading(false);
-  }
-
-  async function decideRun(run: AgentRun, decision: "approve" | "reject") {
-    if (!run.pendingApproval?.id) return;
-    const response = await fetch(`/api/agent/runs/${run.id}/approval`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ approvalId: run.pendingApproval.id, decision }),
-    });
-    const data = await response.json();
-    if (!response.ok) return toast.error(data.error ?? "提交失败");
-    await loadRuns();
-    toast.success(decision === "approve" ? "计划已创建" : "已放弃这份草案");
   }
 
   function onPointerDown(event: React.PointerEvent<HTMLButtonElement>) {
@@ -464,29 +431,32 @@ export function RainforestExplorer() {
             {/* ── Agent 面板：子标签 ── */}
             {rightPanel === "agent" && (
               <>
-                <div className="flex items-center gap-1 border-b border-white/10 px-2 py-2">
+                <div className="grid grid-cols-3 gap-1 border-b border-white/10 px-3 py-2">
                   {([
                     { key: "coach" as const, label: "教练", icon: Brain },
+                    { key: "workspace" as const, label: "计划", icon: ListChecks },
                     { key: "notifications" as const, label: "通知", icon: ClockCounterClockwise },
-                    { key: "decisions" as const, label: "日志", icon: ListChecks },
-                    { key: "workspace" as const, label: "工作台", icon: Robot },
                   ]).map((tab) => (
                     <button
                       key={tab.key}
                       onClick={() => setAgentSubTab(tab.key)}
                       className={cn(
-                        "flex items-center gap-1 rounded px-2 py-1 text-[11px] transition-all duration-200",
-                        agentSubTab === tab.key ? "bg-white/12 text-white shadow-sm" : "text-white/40 hover:text-white/70"
+                        "flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] font-medium transition-colors",
+                        agentSubTab === tab.key
+                          ? "bg-primary/15 text-primary"
+                          : "text-white/45 hover:bg-white/[0.06] hover:text-white"
                       )}
-                    ><tab.icon className="size-3" />{tab.label}</button>
+                    >
+                      <tab.icon className="size-3.5" weight={agentSubTab === tab.key ? "fill" : "regular"} />
+                      {tab.label}
+                    </button>
                   ))}
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto" key={agentSubTab}>
                   <div className="rainforest-panel-content">
                     {agentSubTab === "coach" && <CoachOverview />}
-                    {agentSubTab === "notifications" && <NotificationCenter />}
-                    {agentSubTab === "decisions" && <DecisionTimeline />}
                     {agentSubTab === "workspace" && <AgentWorkspace initialRuns={runs} />}
+                    {agentSubTab === "notifications" && <NotificationCenter />}
                   </div>
                 </div>
               </>

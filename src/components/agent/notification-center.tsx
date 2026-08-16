@@ -1,29 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bell,
   BellRinging,
-  CalendarCheck,
   ChartBar,
-  CheckCircle,
   Envelope,
   EnvelopeOpen,
   Fire,
   Gear,
-  Info,
-  Lightbulb,
-  Megaphone,
   Newspaper,
-  Sparkle,
   Trash,
-  Warning,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import type { NotificationInfo, NotificationType } from "@/types";
 
@@ -31,13 +21,13 @@ import type { NotificationInfo, NotificationType } from "@/types";
 
 const typeConfig: Record<
   NotificationType,
-  { icon: typeof Bell; label: string; color: string }
+  { icon: typeof Bell; label: string; color: string; bg: string }
 > = {
-  reminder: { icon: BellRinging, label: "提醒", color: "text-amber-400" },
-  analysis: { icon: ChartBar, label: "分析", color: "text-blue-400" },
-  report: { icon: Newspaper, label: "报告", color: "text-emerald-400" },
-  encouragement: { icon: Fire, label: "鼓励", color: "text-orange-400" },
-  system: { icon: Gear, label: "系统", color: "text-muted-foreground" },
+  reminder: { icon: BellRinging, label: "提醒", color: "text-amber-400", bg: "bg-amber-500/12" },
+  analysis: { icon: ChartBar, label: "分析", color: "text-blue-400", bg: "bg-blue-500/12" },
+  report: { icon: Newspaper, label: "报告", color: "text-emerald-400", bg: "bg-emerald-500/12" },
+  encouragement: { icon: Fire, label: "鼓励", color: "text-orange-400", bg: "bg-orange-500/12" },
+  system: { icon: Gear, label: "系统", color: "text-muted-foreground", bg: "bg-white/[0.06]" },
 };
 
 const filterTypes: { key: NotificationType | "all"; label: string }[] = [
@@ -57,28 +47,31 @@ export function NotificationCenter() {
   const [filter, setFilter] = useState<NotificationType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [total, setTotal] = useState(0);
-
-  const fetchNotifications = useCallback(async () => {
-    setLoading(true);
-    try {
-      const typeParam = filter !== "all" ? `&type=${filter}` : "";
-      const res = await fetch(`/api/notifications?limit=50${typeParam}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      setNotifications(data.notifications ?? []);
-      setUnreadCount(data.unreadCount ?? 0);
-      setTotal(data.total ?? 0);
-    } catch {
-      toast.error("加载通知失败");
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    let cancelled = false;
+    const typeParam = filter !== "all" ? `&type=${filter}` : "";
+    fetch(`/api/notifications?limit=50${typeParam}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setNotifications(data.notifications ?? []);
+          setUnreadCount(data.unreadCount ?? 0);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("加载通知失败");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [filter]);
 
   async function markAsRead(id: string) {
     try {
@@ -143,18 +136,15 @@ export function NotificationCenter() {
   // ---- Loading ----
   if (loading && notifications.length === 0) {
     return (
-      <div className="space-y-4 animate-in fade-in duration-500">
+      <div className="flex flex-col gap-3">
         <div className="flex gap-2">
-          {filterTypes.map((f) => (
-            <Skeleton key={f.key} className="h-8 w-16 rounded-full" />
+          {filterTypes.slice(0, 4).map((f) => (
+            <Skeleton key={f.key} className="h-7 w-14 rounded-full" />
           ))}
         </div>
-        <div className="space-y-3">
+        <div className="flex flex-col gap-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="glass-panel rounded-xl px-4 py-4">
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-3 w-full" />
-            </div>
+            <Skeleton key={i} className="h-16 rounded-xl" />
           ))}
         </div>
       </div>
@@ -163,39 +153,41 @@ export function NotificationCenter() {
 
   // ---- Render ----
   return (
-    <div className="space-y-4 animate-in fade-in duration-500">
-      {/* ── 头部操作栏 ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <Bell className="h-5 w-5 text-primary" weight="fill" />
-            通知中心
-          </h2>
+    <div className="flex flex-col gap-3">
+      {/* 头部 */}
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
+          <Bell className="size-4 text-primary" weight="fill" />
+          通知中心
           {unreadCount > 0 && (
-            <Badge className="bg-primary text-primary-foreground text-[11px] px-2">
-              {unreadCount} 未读
-            </Badge>
+            <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary">
+              {unreadCount}
+            </span>
           )}
-        </div>
+        </h2>
         {unreadCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs gap-1.5">
-            <EnvelopeOpen className="h-3.5 w-3.5" />
+          <button
+            type="button"
+            onClick={markAllAsRead}
+            className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <EnvelopeOpen className="size-3" />
             全部已读
-          </Button>
+          </button>
         )}
       </div>
 
-      {/* ── 类型筛选 ── */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+      {/* 类型筛选 */}
+      <div className="flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
         {filterTypes.map((f) => (
           <button
             key={f.key}
             type="button"
             onClick={() => setFilter(f.key)}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+            className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
               filter === f.key
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-white/[0.06] hover:text-foreground"
             }`}
           >
             {f.label}
@@ -203,122 +195,107 @@ export function NotificationCenter() {
         ))}
       </div>
 
-      {/* ── 通知列表 ── */}
+      {/* 列表 */}
       {notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <Envelope className="h-7 w-7 text-muted-foreground/50" />
+        <div className="flex flex-col items-center justify-center py-14 text-center">
+          <div className="flex size-10 items-center justify-center rounded-full bg-white/[0.04]">
+            <Envelope className="size-4 text-muted-foreground/60" />
           </div>
-          <h3 className="mt-4 text-sm font-semibold">暂无通知</h3>
-          <p className="mt-1 text-xs text-muted-foreground max-w-xs">
+          <h3 className="mt-3 text-[13px] font-medium text-foreground">暂无通知</h3>
+          <p className="mt-1 max-w-xs text-xs text-muted-foreground">
             {filter !== "all"
               ? "当前筛选条件下没有通知"
               : "AI 教练会在分析你的学习数据后生成通知"}
           </p>
         </div>
       ) : (
-        <ScrollArea className="h-[560px]">
-          <div className="space-y-2 pr-2">
-            {notifications.map((notification) => {
-              const config = typeConfig[notification.type] ?? typeConfig.system;
-              const Icon = config.icon;
-              const isExpanded = expandedId === notification.id;
-              const isReport = notification.type === "report";
+        <div className="flex flex-col gap-2">
+          {notifications.map((notification) => {
+            const config = typeConfig[notification.type] ?? typeConfig.system;
+            const Icon = config.icon;
+            const isExpanded = expandedId === notification.id;
+            const isReport = notification.type === "report";
 
-              return (
-                <div
-                  key={notification.id}
-                  className={`glass-panel rounded-xl transition-all ${
-                    !notification.read
-                      ? "border-primary/30 ring-1 ring-primary/10"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
+            return (
+              <div
+                key={notification.id}
+                className={`rounded-xl border transition-colors ${
+                  !notification.read
+                    ? "border-white/[0.1] bg-white/[0.04]"
+                    : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleExpand(notification.id)}
+                  className="w-full px-3.5 py-3 text-left"
                 >
-                  <button
-                    type="button"
-                    onClick={() => toggleExpand(notification.id)}
-                    className="w-full text-left px-4 py-3.5"
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* 图标 */}
-                      <div
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                          notification.read ? "bg-muted" : "bg-primary/10"
-                        }`}
-                      >
-                        <Icon
-                          className={`h-4 w-4 ${config.color}`}
-                          weight={notification.read ? "regular" : "fill"}
-                        />
-                      </div>
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${config.bg} ${config.color}`}
+                    >
+                      <Icon className="size-3.5" weight={notification.read ? "regular" : "fill"} />
+                    </span>
 
-                      {/* 内容 */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-sm font-semibold truncate">
-                            {notification.title}
-                          </span>
-                          {!notification.read && (
-                            <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                          )}
-                        </div>
-                        {!isExpanded && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {isReport
-                              ? notification.content.replace(/^#.*$/m, "").trim().slice(0, 120)
-                              : notification.content.slice(0, 120)}
-                          </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate text-[13px] font-medium text-foreground">
+                          {notification.title}
+                        </span>
+                        {!notification.read && (
+                          <span className="size-1.5 shrink-0 rounded-full bg-primary" />
                         )}
                       </div>
 
-                      {/* 时间 + 操作 */}
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <span className={`text-[11px] font-medium ${config.color}`}>{config.label}</span>
+                        <span className="text-[11px] text-muted-foreground/70 tabular-nums">
                           {formatRelativeTime(notification.createdAt)}
                         </span>
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] px-1.5 py-0 ${config.color} border-current/20`}
+                      </div>
+
+                      {!isExpanded && (
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
+                          {isReport
+                            ? notification.content.replace(/^#.*$/m, "").trim().slice(0, 120)
+                            : notification.content.slice(0, 120)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 展开内容 */}
+                  {isExpanded && (
+                    <div
+                      className="mt-3 border-t border-white/[0.06] pt-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {isReport ? (
+                        <div className="prose prose-sm prose-invert max-w-none text-xs leading-relaxed [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-xs [&_h1]:font-bold [&_h2]:font-semibold [&_p]:text-xs [&_li]:text-xs">
+                          <ReactMarkdown>{notification.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground/80">
+                          {notification.content}
+                        </p>
+                      )}
+                      <div className="mt-2 flex justify-end">
+                        <button
+                          type="button"
+                          className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-destructive"
+                          onClick={() => deleteOne(notification.id)}
                         >
-                          {config.label}
-                        </Badge>
+                          <Trash className="size-3" />
+                          删除
+                        </button>
                       </div>
                     </div>
-
-                    {/* 展开内容 */}
-                    {isExpanded && (
-                      <div
-                        className="mt-3 pt-3 border-t border-border/50"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {isReport ? (
-                          <div className="prose prose-sm prose-invert max-w-none text-xs leading-relaxed [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-xs [&_h1]:font-bold [&_h2]:font-semibold [&_p]:text-xs [&_li]:text-xs">
-                            <ReactMarkdown>{notification.content}</ReactMarkdown>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                            {notification.content}
-                          </p>
-                        )}
-                        <div className="flex justify-end gap-2 mt-3">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs gap-1 text-muted-foreground hover:text-destructive"
-                            onClick={() => deleteOne(notification.id)}
-                          >
-                            <Trash className="h-3 w-3" />
-                            删除
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

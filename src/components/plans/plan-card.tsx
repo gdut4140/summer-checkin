@@ -25,7 +25,7 @@ const statusMeta: Record<string, { label: string; icon: typeof CheckCircle; colo
   paused: { label: "已暂停", icon: PauseCircle, color: "text-amber-300" },
 };
 
-export function PlanCard({ plan, onClick }: { plan: PlanWithProgress; onClick?: () => void }) {
+export function PlanCard({ plan }: { plan: PlanWithProgress }) {
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -46,7 +46,7 @@ export function PlanCard({ plan, onClick }: { plan: PlanWithProgress; onClick?: 
 
   return (
     <>
-      <article onClick={onClick} className="group relative flex min-h-72 cursor-pointer flex-col overflow-hidden rounded-lg border border-white/10 bg-[#0a2119]/72 p-5 shadow-[0_14px_35px_rgba(0,0,0,0.18)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#0c281f]/80">
+      <article onClick={() => router.push(`/plans/${plan.id}`)} className="group relative flex min-h-72 cursor-pointer flex-col overflow-hidden rounded-lg border border-white/10 bg-[#0a2119]/72 p-5 shadow-[0_14px_35px_rgba(0,0,0,0.18)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#0c281f]/80">
         <div className="flex items-start justify-between gap-3">
           <div className={`flex items-center gap-1.5 text-[11px] font-medium ${status.color}`}><StatusIcon className="size-3.5" weight="fill" />{status.label}</div>
           <div onClick={(e) => e.stopPropagation()}>
@@ -77,7 +77,7 @@ export function PlanCard({ plan, onClick }: { plan: PlanWithProgress; onClick?: 
             <CalendarBlank className="size-3.5" />{plan.endDate ? `${format(plan.endDate, "M月d日")} 截止` : "未设截止"}
           </div>
           <button
-            onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+            onClick={(e) => { e.stopPropagation(); router.push(`/plans/${plan.id}`); }}
             className="rounded-md bg-[#d7ef83]/10 px-2.5 py-1 text-[11px] font-medium text-[#d7ef83] transition hover:bg-[#d7ef83]/20"
           >
             查看计划

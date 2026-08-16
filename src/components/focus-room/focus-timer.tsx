@@ -19,6 +19,7 @@ interface FocusTimerProps {
   focusMinutes?: number;
   breakMinutes?: number;
   onRestoreFocusMinutes?: (minutes: number) => void;
+  immersive?: boolean;
 }
 
 const RING_RADIUS = 108;
@@ -98,7 +99,7 @@ function playBeep(f: number) {
 }
 
 export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function FocusTimer(
-  { focusMinutes = 25, breakMinutes = 5, onRestoreFocusMinutes },
+  { focusMinutes = 25, breakMinutes = 5, onRestoreFocusMinutes, immersive = false },
   ref,
 ) {
   const [mode, setMode] = useState<TimerMode>("focus");
@@ -246,6 +247,12 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     persist(false, seconds, null);
   }, [hydrated, focusMinutes, breakMinutes]);
 
+  // 进入沉浸模式时若计时器未运行则自动开始（沉浸模式下无操作按钮）
+  useEffect(() => {
+    if (immersive && hydrated && !isRunningRef.current) start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [immersive, hydrated]);
+
   function start() {
     const seconds = remainingRef.current > 0
       ? remainingRef.current
@@ -318,6 +325,10 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
   const displayMin = Math.floor(remaining / 60);
   const displaySec = remaining % 60;
   const timeDisplay = `${String(displayMin).padStart(2, "0")}:${String(displaySec).padStart(2, "0")}`;
+
+  if (immersive) {
+    return <span className="immersive-timer tabular-nums">{timeDisplay}</span>;
+  }
 
   return (
     <div className="flex flex-col items-center">

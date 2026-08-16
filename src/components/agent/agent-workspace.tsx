@@ -1,28 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   ArrowClockwise,
+  ArrowUpRight,
   CheckCircle,
   ListChecks,
   PaperPlaneTilt,
-  Robot,
+  PencilSimple,
   Spinner,
-  Stop,
   X,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import type { AgentRunResponse } from "@/lib/agent";
 
 export interface AgentRunListItem {
@@ -51,16 +45,6 @@ const statusLabels: Record<string, string> = {
   failed: "失败",
   cancelled: "已取消",
   rejected: "已拒绝",
-};
-
-const statusVariants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
-  queued: "outline",
-  running: "secondary",
-  awaiting_approval: "default",
-  completed: "secondary",
-  failed: "destructive",
-  cancelled: "outline",
-  rejected: "destructive",
 };
 
 function formatTime(value: string) {
@@ -97,17 +81,32 @@ function isPlanDraft(value: unknown): value is {
   );
 }
 
-function StepIcon({ status }: { status: string }) {
-  if (status === "completed") {
-    return <CheckCircle className="h-5 w-5 text-emerald-600" weight="fill" />;
+function getCreatedPlanId(run: AgentRunResponse | null): string | null {
+  if (!run) return null;
+  for (const step of run.steps) {
+    if (step.kind !== "execution") continue;
+    const output = step.output as { planId?: string } | null;
+    if (output && typeof output.planId === "string" && output.planId) {
+      return output.planId;
+    }
   }
-  if (status === "failed") {
-    return <X className="h-5 w-5 text-destructive" />;
+  return null;
+}
+
+function getStatusPill(mode: string, status: string): { label: string; className: string } {
+  if (mode !== "planner" && status === "completed") {
+    return { label: "小建议", className: "bg-[#f3c969] text-[#17352d]" };
   }
-  if (status === "running") {
-    return <Spinner className="h-5 w-5 animate-spin text-primary" />;
-  }
-  return <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />;
+  const map: Record<string, { label: string; className: string }> = {
+    queued: { label: "排队中", className: "bg-white/[0.08] text-muted-foreground" },
+    running: { label: "运行中", className: "bg-primary/15 text-primary" },
+    awaiting_approval: { label: "待确认", className: "bg-amber-500/15 text-amber-300" },
+    completed: { label: "已完成", className: "bg-emerald-500/15 text-emerald-400" },
+    failed: { label: "失败", className: "bg-destructive/20 text-destructive" },
+    cancelled: { label: "已取消", className: "bg-white/[0.08] text-muted-foreground" },
+    rejected: { label: "已拒绝", className: "bg-destructive/20 text-destructive" },
+  };
+  return map[status] ?? { label: statusLabels[status] ?? status, className: "bg-white/[0.08] text-muted-foreground" };
 }
 
 export function AgentWorkspace({ initialRuns }: Props) {
@@ -216,247 +215,260 @@ export function AgentWorkspace({ initialRuns }: Props) {
     }
   }
 
-
-  async function cancelRun() {
-    if (!selectedRun) return;
-    setDetailLoading(true);
-    try {
-      const response = await fetch(`/api/agent/runs/${selectedRun.id}/cancel`, { method: "POST" });
-      const data = (await response.json()) as { run?: AgentRunResponse; error?: string };
-      if (!response.ok || !data.run) throw new Error(data.error ?? "取消失败");
-      setSelectedRun(data.run);
-      setRuns((previous) =>
-        previous.map((item) =>
-          item.id === data.run?.id
-            ? { ...item, status: data.run.status, summary: data.run.summary, updatedAt: data.run.updatedAt }
-            : item
-        )
-      );
-      toast.success("Agent 运行已取消");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "取消失败");
-    } finally {
-      setDetailLoading(false);
-    }
-  }
+  const createdPlanId = getCreatedPlanId(selectedRun);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Robot className="h-5 w-5 text-primary" weight="fill" />
-              新建 Agent 运行
-            </CardTitle>
-            <CardDescription>先生成草案，确认后才会写入你的学习计划。</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Textarea
-              value={goal}
-              onChange={(event) => setGoal(event.target.value)}
-              placeholder="例如：30 天掌握 Next.js，并完成一个作品"
-              rows={4}
-              maxLength={1000}
-              disabled={loading}
-            />
-            <div className="flex justify-end">
-              <Button onClick={startRun} disabled={!goal.trim() || loading}>
-                {loading ? <Spinner className="h-4 w-4 animate-spin" /> : <PaperPlaneTilt className="h-4 w-4" weight="fill" />}
-                开始
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="flex flex-col gap-3">
+      {/* ── 新建：紧凑 composer ── */}
+      <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 transition-colors focus-within:border-primary/40">
+        <Textarea
+          value={goal}
+          onChange={(event) => setGoal(event.target.value)}
+          placeholder="描述目标，例如：30 天掌握 Next.js…"
+          rows={2}
+          maxLength={1000}
+          disabled={loading}
+          className="min-h-0 resize-none border-0 bg-transparent px-1 py-0.5 text-[13px] shadow-none focus-visible:ring-0"
+        />
+        <div className="mt-1.5 flex items-center justify-between gap-2 px-1">
+          <span className="text-[11px] text-muted-foreground/60">确认后才会写入计划</span>
+          <Button
+            onClick={startRun}
+            size="sm"
+            className="h-7 gap-1 px-2.5 text-xs"
+            disabled={!goal.trim() || loading}
+          >
+            {loading ? <Spinner className="size-3.5 animate-spin" /> : <PaperPlaneTilt className="size-3.5" weight="fill" />}
+            生成
+          </Button>
+        </div>
+      </div>
 
-        <Card>
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <div>
-              <CardTitle className="text-base">运行记录</CardTitle>
-              <CardDescription>{runs.length} 条最近记录</CardDescription>
-            </div>
-            <Button variant="ghost" size="icon" onClick={refreshRun} disabled={detailLoading} title="刷新当前运行">
-              <ArrowClockwise className={detailLoading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {runs.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">还没有 Agent 运行</p>
-            ) : (
-              runs.map((run) => (
+      {/* ── 运行记录 ── */}
+      <div>
+        <div className="mb-1.5 flex items-center justify-between px-0.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+            运行记录
+          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-muted-foreground/60">{runs.length} 条</span>
+            <button
+              type="button"
+              onClick={refreshRun}
+              disabled={detailLoading}
+              title="刷新当前运行"
+              className="flex size-5 items-center justify-center rounded text-muted-foreground/60 transition-colors hover:text-foreground disabled:opacity-40"
+            >
+              <ArrowClockwise className={detailLoading ? "size-3 animate-spin" : "size-3"} />
+            </button>
+          </div>
+        </div>
+
+        {runs.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-white/[0.08] py-8 text-center text-xs text-muted-foreground/70">
+            还没有运行记录，输入目标生成第一份计划草案
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            {runs.map((run) => {
+              const pill = getStatusPill(run.mode, run.status);
+              return (
                 <button
                   key={run.id}
                   type="button"
                   onClick={() => loadRun(run.id)}
-                  className={`w-full rounded-lg border px-3 py-3 text-left transition-colors ${
-                    selectedId === run.id ? "border-primary bg-primary/5" : "border-transparent hover:bg-muted"
-                  }`}
+                  className={cn(
+                    "w-full rounded-xl px-3 py-2.5 text-left transition-colors",
+                    selectedId === run.id ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
+                  )}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        {run.mode !== "planner" && (
-                          <Badge variant="secondary" className="shrink-0 text-[10px] px-1.5 py-0">
-                            {run.mode === "daily" ? "每日" : run.mode === "coach" ? "教练" : run.mode}
-                          </Badge>
-                        )}
-                        <span className="line-clamp-1 text-sm font-medium">
-                          {run.mode !== "planner"
-                            ? run.summary ?? formatTime(run.updatedAt)
-                            : run.goal}
-                        </span>
-                      </div>
-                    </div>
-                    {(() => {
-                      const isDailyDone = run.mode !== "planner" && run.status === "completed";
-                      return (
-                        <Badge
-                          variant={isDailyDone || run.status === "rejected" || run.status === "failed" ? "default" : (statusVariants[run.status] ?? "outline")}
-                          className={`shrink-0 ${isDailyDone ? "bg-[#f3c969] text-[#17352d] hover:bg-[#f3c969]/90 border-0" : run.status === "rejected" || run.status === "failed" ? "bg-destructive text-destructive-foreground border-0" : ""}`}
-                        >
-                          {isDailyDone ? "小建议" : (statusLabels[run.status] ?? run.status)}
-                        </Badge>
-                      );
-                    })()}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-[13px] font-medium text-foreground">
+                      {run.mode !== "planner" ? run.summary ?? formatTime(run.updatedAt) : run.goal}
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none",
+                        pill.className
+                      )}
+                    >
+                      {pill.label}
+                    </span>
                   </div>
-                  <p className="mt-2 truncate text-xs text-muted-foreground">
-                    {run.latestStep?.title ?? run.summary ?? "等待处理"} · {formatTime(run.updatedAt)}
-                  </p>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground/70">
+                    {run.mode !== "planner" && (
+                      <span>{run.mode === "daily" ? "每日分析" : "教练分析"}</span>
+                    )}
+                    <span className="truncate">{run.latestStep?.title ?? run.summary ?? "等待处理"}</span>
+                    <span className="shrink-0 tabular-nums">{formatTime(run.updatedAt)}</span>
+                  </div>
                 </button>
-              ))
-            )}
-          </CardContent>
-        </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <Card className="min-h-[32rem]">
-        {!selectedRun ? (
-          <div className="flex min-h-[32rem] flex-col items-center justify-center px-6 text-center">
-            <Robot className="h-10 w-10 text-primary/70" weight="duotone" />
-            <h2 className="mt-4 text-lg font-semibold">选择一次 Agent 运行</h2>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">计划草案、审批和执行轨迹会集中显示在这里。</p>
-          </div>
-        ) : (
-          <>
-            <CardHeader className="gap-3 border-b">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle className="flex items-center gap-2">
-                    <ListChecks className="h-5 w-5 text-primary" />
-                    {selectedRun.mode === "daily" ? "每日自动分析" : selectedRun.mode === "coach" ? "教练分析" : "Agent 运行详情"}
-                    {selectedRun.mode !== "planner" && (
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">系统自动</Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription className="mt-1 break-words">{selectedRun.summary || selectedRun.goal}</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  {(() => {
-                    const isDailyDone = selectedRun.mode !== "planner" && selectedRun.status === "completed";
-                    const isRejected = selectedRun.status === "rejected" || selectedRun.status === "failed";
-                    return (
-                      <Badge
-                        variant={isDailyDone || isRejected ? "default" : (statusVariants[selectedRun.status] ?? "outline")}
-                        className={`${isDailyDone ? "bg-[#f3c969] text-[#17352d] border-0" : isRejected ? "bg-destructive text-destructive-foreground border-0" : ""}`}
-                      >
-                        {isDailyDone ? "小建议" : (statusLabels[selectedRun.status] ?? selectedRun.status)}
-                      </Badge>
-                    );
-                  })()}
-                </div>
+      {/* ── 详情：仅选中时显示 ── */}
+      {selectedRun && (
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5">
+          <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <ListChecks className="size-4 text-primary" />
+                <span className="text-[13px] font-semibold text-foreground">
+                  {selectedRun.mode === "daily"
+                    ? "每日自动分析"
+                    : selectedRun.mode === "coach"
+                      ? "教练分析"
+                      : "计划草案"}
+                </span>
               </div>
-              {selectedRun.summary && <p className="text-sm text-foreground/80">{selectedRun.summary}</p>}
-              {selectedRun.error && <p className="text-sm text-destructive">{selectedRun.error}</p>}
-            </CardHeader>
-            <CardContent className="space-y-6 py-6">
-              {selectedRun.approvals.length > 0 && (
-                <div className="mb-3">
-                  <Badge className={`text-xs font-semibold border-0 ${
-                    selectedRun.mode !== "planner"
-                      ? "bg-amber-500/20 text-amber-300"
-                      : "bg-primary/20 text-primary-foreground"
-                  }`}>
-                    {selectedRun.mode !== "planner" ? "系统自动总结" : "计划草案"}
-                  </Badge>
-                </div>
-              )}
-              {selectedRun.approvals.map((approval) => {
-                const draft = isPlanDraft(approval.payload) ? approval.payload : null;
-                const payload = approval.payload as Record<string, unknown> | null;
+              <p className="mt-1 text-xs text-muted-foreground wrap-break-word">
+                {selectedRun.summary || selectedRun.goal}
+              </p>
+            </div>
+            {(() => {
+              const pill = getStatusPill(selectedRun.mode, selectedRun.status);
+              return (
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none",
+                    pill.className
+                  )}
+                >
+                  {pill.label}
+                </span>
+              );
+            })()}
+          </div>
 
-                // daily_analysis / daily_action → 系统自动总结
-                if (approval.action === "daily_analysis" || approval.action === "daily_action") {
-                  const isFinding = approval.action === "daily_analysis";
-                  const severity = (payload?.severity as string) ?? "info";
-                  const severityColor: Record<string, string> = {
-                    critical: "border-red-500/20 bg-red-500/10 text-red-300",
-                    warning: "border-amber-500/20 bg-amber-500/10 text-amber-300",
-                    info: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-                  };
-                  return (
-                    <div key={approval.id} className={`rounded-lg border px-3 py-3 mb-3 backdrop-blur-sm ${severityColor[severity] ?? severityColor.info}`}>
-                      <p className="text-xs font-medium uppercase tracking-wide opacity-60">
-                        {isFinding ? "分析发现" : "建议行动"} · {severity}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-foreground">{payload?.detail as string ?? payload?.reason as string ?? "—"}</p>
-                    </div>
-                  );
-                }
+          {selectedRun.error && (
+            <p className="mt-2 text-xs text-destructive">{selectedRun.error}</p>
+          )}
 
-                // create_plan / 默认 → 计划草案
+          {createdPlanId && (
+            <div className="mt-3 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/[0.06] px-3 py-2.5">
+              <CheckCircle className="size-4 shrink-0 text-primary" weight="fill" />
+              <span className="text-xs font-medium text-foreground">计划已创建</span>
+              <div className="ml-auto flex items-center gap-1.5">
+                <Link
+                  href={`/plans/${createdPlanId}`}
+                  className="flex items-center gap-1 rounded-md bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-white/[0.1]"
+                >
+                  查看 <ArrowUpRight className="size-3" />
+                </Link>
+                <Link
+                  href={`/plans/${createdPlanId}/edit`}
+                  className="flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <PencilSimple className="size-3" />
+                  编辑
+                </Link>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-col gap-2">
+            {selectedRun.approvals.map((approval) => {
+              const draft = isPlanDraft(approval.payload) ? approval.payload : null;
+              const payload = approval.payload as Record<string, unknown> | null;
+
+              // daily_analysis / daily_action → 系统自动总结
+              if (approval.action === "daily_analysis" || approval.action === "daily_action") {
+                const isFinding = approval.action === "daily_analysis";
+                const severity = (payload?.severity as string) ?? "info";
+                const severityColor: Record<string, string> = {
+                  critical: "text-red-300",
+                  warning: "text-amber-300",
+                  info: "text-emerald-300",
+                };
                 return (
-                  <div key={approval.id} className="mb-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 backdrop-blur-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <p className="text-xs font-medium text-emerald-400">
-                        {approval.status === "pending" ? "确认后将会创建真实计划和任务" : `审批状态：${approval.status}`}
-                      </p>
-                      {approval.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => decide("reject")} disabled={detailLoading}>
-                            <X className="h-4 w-4" />
-                            拒绝
-                          </Button>
-                          <Button size="sm" onClick={() => decide("approve")} disabled={detailLoading}>
-                            <CheckCircle className="h-4 w-4" />
-                            确认创建
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    {draft && (
-                      <div className="space-y-3 rounded-lg border border-border/40 bg-background/60 p-4">
-                        <div>
-                          <p className="text-base font-semibold text-foreground">{draft.name}</p>
-                          <p className="mt-1 text-sm text-muted-foreground font-medium">{draft.description ?? draft.goal}</p>
-                        </div>
-                        <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-emerald-400">
-                          <span>目标时长：{draft.targetHours} 小时</span>
-                          <span>任务数：{draft.tasks.length}</span>
-                        </div>
-                        <Separator />
-                        <div className="space-y-2">
-                          {draft.tasks.map((task, index) => (
-                            <div key={`${task.title}-${index}`} className="flex gap-3 text-sm">
-                              <span className="w-5 shrink-0 text-right text-xs font-semibold text-emerald-500/60">{index + 1}</span>
-                              <div className="min-w-0">
-                                <p className="font-semibold text-foreground">{task.title}</p>
-                                {task.description && <p className="mt-0.5 text-xs text-muted-foreground font-medium">{task.description}</p>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        {draft.assumptions && draft.assumptions.length > 0 && (
-                          <p className="text-xs text-muted-foreground font-medium">前提：{draft.assumptions.join("；")}</p>
-                        )}
+                  <div key={approval.id} className="rounded-lg bg-white/[0.03] px-3 py-2.5">
+                    <p className={`text-[11px] font-semibold uppercase tracking-wide ${severityColor[severity] ?? severityColor.info}`}>
+                      {isFinding ? "分析发现" : "建议行动"} · {severity}
+                    </p>
+                    <p className="mt-1 text-[13px] leading-relaxed text-foreground">
+                      {payload?.detail as string ?? payload?.reason as string ?? "—"}
+                    </p>
+                  </div>
+                );
+              }
+
+              // create_plan / 默认 → 计划草案
+              return (
+                <div key={approval.id} className="rounded-lg bg-white/[0.03] p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-medium text-emerald-400">
+                      {approval.status === "pending"
+                        ? "确认后将会创建真实计划和任务"
+                        : `审批状态：${approval.status}`}
+                    </p>
+                    {approval.status === "pending" && (
+                      <div className="flex gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 gap-1 text-[11px]"
+                          onClick={() => decide("reject")}
+                          disabled={detailLoading}
+                        >
+                          <X className="size-3" />
+                          拒绝
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-6 gap-1 text-[11px]"
+                          onClick={() => decide("approve")}
+                          disabled={detailLoading}
+                        >
+                          <CheckCircle className="size-3" />
+                          确认创建
+                        </Button>
                       </div>
                     )}
                   </div>
-                );
-              })}
-            </CardContent>
-          </>
-        )}
-      </Card>
+                  {draft && (
+                    <div className="mt-2.5 flex flex-col gap-2.5 rounded-lg bg-white/[0.03] p-3">
+                      <div>
+                        <p className="text-[13px] font-semibold text-foreground">{draft.name}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {draft.description ?? draft.goal}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs font-semibold text-emerald-400">
+                        <span>目标时长：{draft.targetHours} 小时</span>
+                        <span>任务数：{draft.tasks.length}</span>
+                      </div>
+                      <Separator />
+                      <div className="flex flex-col gap-2">
+                        {draft.tasks.map((task, index) => (
+                          <div key={`${task.title}-${index}`} className="flex gap-2.5">
+                            <span className="w-4 shrink-0 text-right text-xs font-semibold text-emerald-500/60">
+                              {index + 1}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-medium text-foreground">{task.title}</p>
+                              {task.description && (
+                                <p className="mt-0.5 text-xs text-muted-foreground">{task.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {draft.assumptions && draft.assumptions.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          前提：{draft.assumptions.join("；")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

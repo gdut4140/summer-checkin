@@ -24,7 +24,7 @@ services:
     image: summer-checkin-app:latest
     container_name: summer-checkin-app
     restart: unless-stopped
-    entrypoint: ["node", "server.js"]
+    entrypoint: ["/app/docker-entrypoint.sh"]
     depends_on:
       postgres:
         condition: service_healthy

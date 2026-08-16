@@ -71,19 +71,19 @@ export async function getRelevantMemories(
       const rows = await prisma.$queryRawUnsafe<
         Array<{
           id: string;
-          user_id: string;
+          userId: string;
           type: string;
           content: string;
           importance: number;
           confidence: number;
-          last_used: Date | null;
-          created_at: Date;
+          lastUsed: Date | null;
+          createdAt: Date;
           embedding: unknown;
         }>
       >(
-        `SELECT id, user_id, type, content, importance, confidence, last_used, created_at, embedding
+        `SELECT id, "userId", type, content, importance, confidence, "lastUsed", "createdAt", embedding
          FROM usermemory
-         WHERE user_id = $1 AND embedding IS NOT NULL
+         WHERE "userId" = $1 AND embedding IS NOT NULL
          LIMIT 200`,
         userId
       );
@@ -104,8 +104,8 @@ export async function getRelevantMemories(
           type: r.type as MemoryType,
           importance: r.importance,
           confidence: r.confidence,
-          lastUsed: r.last_used,
-          createdAt: r.created_at,
+          lastUsed: r.lastUsed,
+          createdAt: r.createdAt,
         }));
       }
       // 如果向量搜索无结果（所有记忆都还没有 embedding），回退到原逻辑
@@ -352,7 +352,7 @@ export async function extractAndSaveMemories(
           // 有向量 → 用原始 SQL 写入（Prisma 不支持 Unsupported 字段）
           const id = crypto.randomUUID();
           await prisma.$executeRawUnsafe(
-            `INSERT INTO usermemory (id, user_id, type, content, embedding, importance, confidence, created_at)
+            `INSERT INTO usermemory (id, "userId", type, content, embedding, importance, confidence, "createdAt")
              VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)`,
             id,
             userId,

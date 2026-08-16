@@ -127,3 +127,18 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type AgentSchedule = Prisma.AgentScheduleModel
+/**
+ * Model ChatRoom
+ * 
+ */
+export type ChatRoom = Prisma.ChatRoomModel
+/**
+ * Model ChatRoomMember
+ * 
+ */
+export type ChatRoomMember = Prisma.ChatRoomMemberModel
+/**
+ * Model ChatMessage
+ * 
+ */
+export type ChatMessage = Prisma.ChatMessageModel

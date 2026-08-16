@@ -35,6 +35,8 @@ model User {
   schedules       AgentSchedule[]
   todos           Todo[]
   documents       DocumentChunk[]
+  chatRooms       ChatRoomMember[]
+  chatMessages    ChatMessage[]
 
   @@map("user")
 }
@@ -78,6 +80,7 @@ model Plan {
   name        String
   description String?
   goal        String?
+  document    String?
   targetHours Float     @default(0)
   startDate   DateTime?
   endDate     DateTime?
@@ -413,4 +416,45 @@ model AgentSchedule {
   @@unique([userId, type])
   @@index([enabled, nextRunAt])
   @@map("agentschedule")
+}
+
+model ChatRoom {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  ChatRoomMember[]
+  messages ChatMessage[]
+
+  @@map("chatroom")
+}
+
+model ChatRoomMember {
+  id       String   @id @default(cuid())
+  roomId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@map("chatroommember")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String?
+  role      String   @default("user")
+  content   String
+  createdAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([roomId, createdAt])
+  @@map("chatmessage")
 }

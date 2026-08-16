@@ -1,4 +1,5 @@
 #!/bin/sh
-# 不需要 Prisma CLI，直接等 MySQL 健康后启动即可
-# docker-compose 的 depends_on + healthcheck 已经保证 MySQL 就绪
+# 启动 WebSocket sidecar（后台）再启动 Next.js 主进程（前台）
+# 依赖 depends_on + healthcheck 保证 Postgres 就绪
+tsx server/index.ts &
 exec node server.js

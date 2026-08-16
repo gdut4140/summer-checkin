@@ -5,10 +5,22 @@ import { FocusTimer, type PomodoroHandle } from "./focus-timer";
 
 const focusPresets = [25, 45, 60];
 
-export function PomodoroStation() {
+export function PomodoroStation({ immersive = false }: { immersive?: boolean }) {
   const timerRef = useRef<PomodoroHandle>(null);
   const [focusMinutes, setFocusMinutes] = useState(25);
   const breakMinutes = 5;
+
+  if (immersive) {
+    return (
+      <FocusTimer
+        ref={timerRef}
+        focusMinutes={focusMinutes}
+        breakMinutes={breakMinutes}
+        onRestoreFocusMinutes={setFocusMinutes}
+        immersive
+      />
+    );
+  }
 
   return (
     <div className="flex w-full flex-col items-center">

@@ -23,17 +23,29 @@ export function PlanDrawer({ plan, onClose, onRefresh }: Props) {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTaskTitle, setEditingTaskTitle] = useState("");
 
+  // 抽屉打开 / 切换计划时重置本地状态（渲染期同步 props 状态，避免在 effect 里同步 setState）
+  const planKey = plan?.id ?? null;
+  const [lastPlanKey, setLastPlanKey] = useState<string | null>(planKey);
+  if (planKey !== lastPlanKey) {
+    setLastPlanKey(planKey);
+    setTasks([]);
+    setLoading(plan != null);
+    setEditing(false);
+    setEditingTaskId(null);
+    setEditName(plan?.name ?? "");
+    setEditGoal(plan?.goal ?? "");
+  }
+
   useEffect(() => {
-    if (!plan) { setTasks([]); setEditing(false); setEditingTaskId(null); return; }
-    setEditName(plan.name);
-    setEditGoal(plan.goal ?? "");
-    setLoading(true);
+    if (!plan) return;
+    let cancelled = false;
     fetch(`/api/plans/${plan.id}/tasks`)
       .then((r) => r.json())
-      .then((data) => setTasks(data.tasks ?? []))
-      .catch(() => setTasks([]))
-      .finally(() => setLoading(false));
-  }, [plan?.id]);
+      .then((data) => { if (!cancelled) setTasks(data.tasks ?? []); })
+      .catch(() => { if (!cancelled) setTasks([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [plan]);
 
   useEffect(() => {
     if (plan) document.body.style.overflow = "hidden";
@@ -45,7 +57,7 @@ export function PlanDrawer({ plan, onClose, onRefresh }: Props) {
   const toggleTask = useCallback(async (task: PlanTaskInfo) => {
     if (!plan) return;
     setToggling((prev) => new Set(prev).add(task.id));
-    const newStatus = task.status === "done" ? "pending" : "done";
+    const newStatus: PlanTaskInfo["status"] = task.status === "done" ? "pending" : "done";
     try {
       await fetch(`/api/plans/${plan.id}/tasks`, {
         method: "PATCH",

@@ -431,11 +431,11 @@
 .rainforest-immersive .ambient-sound-control { display: none !important; }
 
 .immersive-timer {
-  color: rgba(250, 253, 250, 0.96);
+  color: #d7ef83;
   font-size: 8rem;
-  font-weight: 200;
+  font-weight: 700;
   line-height: 1;
-  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.34);
+  text-shadow: 0 0 60px rgba(215, 239, 131, 0.28), 0 10px 40px rgba(0, 0, 0, 0.34);
 }
 
 .immersive-exit {
@@ -465,6 +465,21 @@
 
 @media (min-width: 1280px) {
   .rainforest-focus-grid { min-height: 520px; }
+}
+
+/* 聊天室弹窗：固定尺寸并覆盖 Dialog 默认的 sm:max-w-sm(384px) 上限，移动端全屏 */
+.chatroom-dialog {
+  width: min(940px, calc(100vw - 24px)) !important;
+  max-width: none !important;
+  height: min(680px, calc(100dvh - 48px)) !important;
+}
+
+@media (max-width: 767px) {
+  .chatroom-dialog {
+    width: 100vw !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+  }
 }
 
 .surface-muted {
@@ -672,7 +687,7 @@
   border-color: rgba(255,255,255,.12);
 }
 .rainforest-panel--right .rf-stat-value {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.2;
 }

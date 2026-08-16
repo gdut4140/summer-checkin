@@ -31,7 +31,6 @@ export function ActivityTimeline({ checkins }: { checkins: CheckinWithPlan[] }) 
                   </p>
                   <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                     <span>{format(checkin.checkinDate, "yyyy 年 M 月 d 日")}</span>
-                    <span>{checkin.hours}h</span>
                     {checkin.mood && <span>{checkin.mood}</span>}
                   </div>
                 </div>

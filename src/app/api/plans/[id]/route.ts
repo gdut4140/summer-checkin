@@ -18,6 +18,7 @@ export async function PATCH(
   if (body.goal !== undefined) data.goal = body.goal;
   if (body.description !== undefined) data.description = body.description;
   if (body.status !== undefined) data.status = body.status;
+  if (body.document !== undefined) data.document = body.document;
 
   const updated = await prisma.plan.update({ where: { id }, data });
   return NextResponse.json(updated);

@@ -70,6 +70,11 @@ COPY --from=builder /app/node_modules/resolve-pkg-maps ./node_modules/resolve-pk
 # 复制知识库文档（RAG 需要）
 COPY --from=builder /app/knowledge ./knowledge
 
+# 复制 WebSocket sidecar（独立进程，复用应用依赖 + ws）
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/src/lib/generated ./src/lib/generated
+COPY --from=builder /app/node_modules/ws ./node_modules/ws
+
 # 设置文件权限
 RUN chown -R nextjs:nodejs /app
 
