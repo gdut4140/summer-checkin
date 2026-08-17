@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
+import { planTaskSourceHash } from "@/lib/plan-tasks";
 
 export async function GET(
   _req: Request,
@@ -14,9 +15,21 @@ export async function GET(
 
   const tasks = await prisma.planTask.findMany({
     where: { planId: id },
-    orderBy: [{ weekNumber: "asc" }, { dayNumber: "asc" }],
+    // id 兜底排序：拆分出来的任务 weekNumber/dayNumber 多为 null，不加 id 排序不稳定会乱序
+    orderBy: [{ weekNumber: "asc" }, { dayNumber: "asc" }, { id: "asc" }],
   });
+
+  // 任务是否过期：文档（含目标/说明）自上次拆分后是否有改动。
+  // 从未通过 /split 拆分过（如 AI 直接创建任务）时不判断，避免误报。
+  const stale =
+    !!plan.tasksSourceHash && plan.tasksSourceHash !== planTaskSourceHash(plan);
+
+  // 是否正在后台拆分任务（抽屉据此显示"任务刷新中"）
+  const splitting = !!plan.tasksSplittingAt;
+
   return NextResponse.json({
+    stale,
+    splitting,
     tasks: tasks.map((t) => ({ ...t, completedAt: t.completedAt?.toISOString() ?? null, createdAt: t.createdAt.toISOString() })),
   });
 }

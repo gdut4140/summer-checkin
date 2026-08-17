@@ -9,7 +9,7 @@ export default async function PlansPage() {
   const user = await requireAuth();
   const plans = await prisma.plan.findMany({
     where: { userId: user.id },
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
     include: { tasks: { select: { status: true } } },
   });
 
@@ -22,7 +22,6 @@ export default async function PlansPage() {
       description: plan.description,
       goal: plan.goal,
       startDate: plan.startDate,
-      endDate: plan.endDate,
       status: plan.status,
       createdAt: plan.createdAt,
       totalTasks,
@@ -31,18 +30,13 @@ export default async function PlansPage() {
     };
   });
 
-  const activePlans = plansWithProgress.filter((plan) => plan.status === "active");
-  const averageProgress = activePlans.length > 0
-    ? Math.round(activePlans.reduce((sum, plan) => sum + plan.progress, 0) / activePlans.length)
+  const averageProgress = plansWithProgress.length > 0
+    ? Math.round(plansWithProgress.reduce((sum, plan) => sum + plan.progress, 0) / plansWithProgress.length)
     : 0;
-  const nextDeadline = activePlans
-    .filter((plan) => plan.endDate)
-    .sort((a, b) => (a.endDate?.getTime() ?? 0) - (b.endDate?.getTime() ?? 0))[0]?.endDate;
 
   const overview = [
-    { label: "进行中的计划", value: String(activePlans.length), unit: "项", icon: ListChecks },
+    { label: "全部计划", value: String(plansWithProgress.length), unit: "项", icon: ListChecks },
     { label: "平均进度", value: String(averageProgress), unit: "%", icon: ChartLineUp },
-    { label: "最近截止", value: nextDeadline ? `${nextDeadline.getMonth() + 1}月${nextDeadline.getDate()}日` : "未设置", unit: "", icon: Flag },
   ];
 
   return (
@@ -56,9 +50,9 @@ export default async function PlansPage() {
           <NewPlanButton />
         </header>
 
-        <section className="mt-7 grid grid-cols-2 border-y border-white/10 bg-black/10 lg:grid-cols-4" aria-label="计划总览">
+        <section className="mt-7 grid grid-cols-2 border-y border-white/10 bg-black/10" aria-label="计划总览">
           {overview.map((item, index) => (
-            <div key={item.label} className={`flex min-h-24 items-center gap-3 px-3 py-4 md:px-5 ${index % 2 === 1 ? "border-l border-white/10" : ""} ${index > 1 ? "border-t border-white/10 lg:border-t-0" : ""} ${index > 0 ? "lg:border-l lg:border-white/10" : ""}`}>
+            <div key={item.label} className={`flex min-h-24 items-center gap-3 px-3 py-4 md:px-5 ${index > 0 ? "border-l border-white/10" : ""}`}>
               <item.icon className="size-5 shrink-0 text-[#d7ef83]" weight="duotone" />
               <div>
                 <p className="text-xs text-white/42">{item.label}</p>
@@ -72,7 +66,7 @@ export default async function PlansPage() {
           <div className="mt-8 flex min-h-72 flex-col items-center justify-center border border-dashed border-white/16 bg-black/10 px-5 text-center">
             <Flag className="size-8 text-[#d7ef83]" weight="duotone" />
             <h2 className="mt-4 text-base font-medium text-white">从一个明确的目标开始</h2>
-            <p className="mt-1 max-w-sm text-sm leading-6 text-white/42">计划不需要复杂，先写下目标时长和截止时间，再逐步补充任务。</p>
+            <p className="mt-1 max-w-sm text-sm leading-6 text-white/42">计划不需要复杂，先写下目标时长，再逐步补充任务。</p>
             <CreateFirstPlanLink />
           </div>
         ) : (

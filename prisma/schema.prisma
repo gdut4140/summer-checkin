@@ -34,6 +34,7 @@ model User {
   notifications Notification[]
   schedules       AgentSchedule[]
   todos           Todo[]
+  docs            Document[]
   documents       DocumentChunk[]
   chatRooms       ChatRoomMember[]
   chatMessages    ChatMessage[]
@@ -75,18 +76,21 @@ model Account {
 }
 
 model Plan {
-  id          String    @id @default(cuid())
-  userId      String
-  name        String
-  description String?
-  goal        String?
-  document    String?
-  targetHours Float     @default(0)
-  startDate   DateTime?
-  endDate     DateTime?
-  status      String    @default("active")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  userId          String
+  name            String
+  description     String?
+  goal            String?
+  document        String?
+  // 任务最后一次拆分时所用文档的哈希，用于判断文档改动后任务是否过期（抽屉手动刷新）
+  tasksSourceHash String?
+  // 任务正在后台拆分的起始时间（非空 = 刷新中），供抽屉显示"任务刷新中"
+  tasksSplittingAt DateTime?
+  targetHours     Float     @default(0)
+  startDate       DateTime?
+  status          String    @default("active")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   checkins Checkin[]
@@ -364,6 +368,20 @@ model AIHistory {
 
   @@index([userId, createdAt])
   @@map("aihistory")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@map("document")
 }
 
 model DocumentChunk {

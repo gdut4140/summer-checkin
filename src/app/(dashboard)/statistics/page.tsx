@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, format } from "date-fns";
-import { CalendarCheck, Clock, CheckCircle, ChartLineUp, Star, Lightning } from "@phosphor-icons/react/dist/ssr";
+import { CalendarCheck, Clock, ChartLineUp, Star, Lightning } from "@phosphor-icons/react/dist/ssr";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ActivityTimeline } from "@/components/profile/activity-timeline";
 import type { CheckinWithPlan } from "@/types";
@@ -18,8 +18,6 @@ export default async function ProfilePage() {
     include: { tasks: { select: { status: true, completedAt: true } } },
   });
 
-  const activePlans = plans.filter((p) => p.status === "active");
-  const completedPlans = plans.filter((p) => p.status === "completed");
   const totalTasks = plans.reduce((s, p) => s + p.tasks.length, 0);
   const doneTasks = plans.reduce((s, p) => s + p.tasks.filter((t) => t.status === "done").length, 0);
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
@@ -65,7 +63,6 @@ export default async function ProfilePage() {
   const overview = [
     { label: "加入天数", value: String(joinDays), unit: "天", icon: CalendarCheck },
     { label: "连续活跃", value: String(streakDays), unit: "天", icon: Lightning },
-    { label: "已完成计划", value: String(completedPlans.length), unit: "项", icon: CheckCircle },
     { label: "任务完成率", value: String(progress), unit: "%", icon: ChartLineUp },
   ];
 
@@ -115,8 +112,8 @@ export default async function ProfilePage() {
         </div>
         <p className="mt-2 text-sm text-white/50">
           {todayDone > 0
-            ? `已完成 ${todayDone} 个任务 · 连续 ${streakDays} 天活跃 · ${activePlans.length} 个计划进行中`
-            : `还没有完成任务 · ${activePlans.length} 个计划等你继续`}
+            ? `已完成 ${todayDone} 个任务 · 连续 ${streakDays} 天活跃 · ${plans.length} 个计划`
+            : `还没有完成任务 · ${plans.length} 个计划等你继续`}
         </p>
       </section>
 

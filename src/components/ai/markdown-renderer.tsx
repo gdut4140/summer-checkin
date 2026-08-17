@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -8,7 +9,8 @@ interface Props {
   content: string;
 }
 
-export function MarkdownRenderer({ content }: Props) {
+// memo：内容未变化时跳过整棵 Markdown 重解析（对话流式更新、面板重渲染时不再每帧重跑）
+export const MarkdownRenderer = memo(function MarkdownRenderer({ content }: Props) {
   return (
     <div className="markdown-body">
       <ReactMarkdown
@@ -74,4 +76,4 @@ export function MarkdownRenderer({ content }: Props) {
       </ReactMarkdown>
     </div>
   );
-}
+});

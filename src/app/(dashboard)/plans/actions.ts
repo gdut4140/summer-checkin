@@ -19,12 +19,9 @@ export async function createPlan(formData: FormData): Promise<ActionResult> {
     const startDate = formData.get("startDate")
       ? new Date(formData.get("startDate") as string)
       : null;
-    const endDate = formData.get("endDate")
-      ? new Date(formData.get("endDate") as string)
-      : null;
 
     await prisma.plan.create({
-      data: { userId: user.id, name, description, goal, targetHours: 0, startDate, endDate },
+      data: { userId: user.id, name, description, goal, targetHours: 0, startDate },
     });
 
     revalidatePath("/plans");
@@ -52,13 +49,10 @@ export async function updatePlan(planId: string, formData: FormData): Promise<Ac
     const startDate = formData.get("startDate")
       ? new Date(formData.get("startDate") as string)
       : null;
-    const endDate = formData.get("endDate")
-      ? new Date(formData.get("endDate") as string)
-      : null;
 
     await prisma.plan.update({
       where: { id: planId },
-      data: { name, description, goal, startDate, endDate },
+      data: { name, description, goal, startDate },
     });
 
     revalidatePath("/plans");

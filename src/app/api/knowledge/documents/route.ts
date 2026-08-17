@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
 
     let text: string;
-    let sourceType: "text" | "markdown" | "pdf" = "text";
+    let sourceType: "text" | "markdown" | "pdf" | "docx" = "text";
 
     if (ext === "md") {
       text = await file.text();
@@ -86,9 +86,20 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    } else if (ext === "docx") {
+      // Word: 尝试用 Python 提取，失败则返回错误
+      try {
+        text = await extractDocxFromFile(file);
+        sourceType = "docx";
+      } catch (err: any) {
+        return NextResponse.json(
+          { error: `Word 文本提取失败: ${err.message}` },
+          { status: 400 }
+        );
+      }
     } else {
       return NextResponse.json(
-        { error: `不支持的格式: .${ext}，支持 .txt .md .pdf` },
+        { error: `不支持的格式: .${ext}，支持 .txt .md .pdf .docx` },
         { status: 400 }
       );
     }
@@ -123,7 +134,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const sourceName = (body.name?.trim() || "手动输入") + ".txt";
+  const sourceName = (body?.name?.trim() || "手动输入") + ".txt";
   const result = await processKnowledgeText({
     userId: user.id,
     text,
@@ -134,8 +145,12 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(result, { status: 201 });
 }
 
-// ---- PDF 提取（Python 脚本）----
-async function extractPdfFromFile(file: File): Promise<string> {
+// ---- PDF / Word 提取（Python 脚本）----
+async function extractViaPython(
+  file: File,
+  scriptName: string,
+  ext: string
+): Promise<string> {
   const { exec } = await import("child_process");
   const { writeFile, unlink, readFile } = await import("fs/promises");
   const { randomUUID } = await import("crypto");
@@ -144,22 +159,22 @@ async function extractPdfFromFile(file: File): Promise<string> {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const tmpDir = os.tmpdir();
-  const tmpName = `kb-pdf-${randomUUID()}`;
-  const pdfPath = path.join(tmpDir, `${tmpName}.pdf`);
+  const tmpName = `kb-${ext}-${randomUUID()}`;
+  const inputPath = path.join(tmpDir, `${tmpName}.${ext}`);
   const txtPath = path.join(tmpDir, `${tmpName}.txt`);
 
   try {
-    await writeFile(pdfPath, buffer);
+    await writeFile(inputPath, buffer);
 
-    const scriptPath = path.join(process.cwd(), "scripts", "extract_pdf.py");
+    const scriptPath = path.join(process.cwd(), "scripts", scriptName);
     await new Promise<void>((resolve, reject) => {
       exec(
-        `python "${scriptPath}" "${pdfPath}" "${txtPath}"`,
+        `python "${scriptPath}" "${inputPath}" "${txtPath}"`,
         { timeout: 30000 },
         (error, _stdout, stderr) => {
           if (error) {
             reject(
-              new Error(stderr || error.message || "PDF extraction failed")
+              new Error(stderr || error.message || "text extraction failed")
             );
             return;
           }
@@ -168,10 +183,17 @@ async function extractPdfFromFile(file: File): Promise<string> {
       );
     });
 
-    const extracted = await readFile(txtPath, "utf-8");
-    return extracted;
+    return await readFile(txtPath, "utf-8");
   } finally {
-    await unlink(pdfPath).catch(() => {});
+    await unlink(inputPath).catch(() => {});
     await unlink(txtPath).catch(() => {});
   }
+}
+
+async function extractPdfFromFile(file: File): Promise<string> {
+  return extractViaPython(file, "extract_pdf.py", "pdf");
+}
+
+async function extractDocxFromFile(file: File): Promise<string> {
+  return extractViaPython(file, "extract_docx.py", "docx");
 }

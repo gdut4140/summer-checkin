@@ -41,4 +41,4 @@ if __name__ == "__main__":
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(text)
 
-    print(f"✅ 提取完成: {len(text)} 字符 → {output_path}")
+    print(f"提取完成: {len(text)} 字符 -> {output_path}")

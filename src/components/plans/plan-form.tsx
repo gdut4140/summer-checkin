@@ -18,7 +18,6 @@ interface PlanFormProps {
     description: string | null;
     goal: string | null;
     startDate: Date | null;
-    endDate: Date | null;
   } | null;
 }
 
@@ -89,33 +88,18 @@ export function PlanForm({ plan }: PlanFormProps) {
           </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startDate">开始日期</Label>
-              <Input
-                id="startDate"
-                name="startDate"
-                type="date"
-                defaultValue={
-                  plan?.startDate
-                    ? new Date(plan.startDate).toISOString().split("T")[0]
-                    : ""
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="endDate">结束日期</Label>
-              <Input
-                id="endDate"
-                name="endDate"
-                type="date"
-                defaultValue={
-                  plan?.endDate
-                    ? new Date(plan.endDate).toISOString().split("T")[0]
-                    : ""
-                }
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="startDate">开始日期</Label>
+            <Input
+              id="startDate"
+              name="startDate"
+              type="date"
+              defaultValue={
+                plan?.startDate
+                  ? new Date(plan.startDate).toISOString().split("T")[0]
+                  : ""
+              }
+            />
           </div>
 
           <div className="flex justify-end border-t border-white/8 pt-5"><Button type="submit" disabled={pending} size="lg">

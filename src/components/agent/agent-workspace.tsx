@@ -5,10 +5,10 @@ import Link from "next/link";
 import {
   ArrowClockwise,
   ArrowUpRight,
+  ArrowsOutSimple,
   CheckCircle,
   ListChecks,
   PaperPlaneTilt,
-  PencilSimple,
   Spinner,
   X,
 } from "@phosphor-icons/react";
@@ -359,11 +359,11 @@ export function AgentWorkspace({ initialRuns }: Props) {
                   查看 <ArrowUpRight className="size-3" />
                 </Link>
                 <Link
-                  href={`/plans/${createdPlanId}/edit`}
+                  href={`/plans/${createdPlanId}/studio`}
                   className="flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
-                  <PencilSimple className="size-3" />
-                  编辑
+                  <ArrowsOutSimple className="size-3" weight="bold" />
+                  文档模式
                 </Link>
               </div>
             </div>

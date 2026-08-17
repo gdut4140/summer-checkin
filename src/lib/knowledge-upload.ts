@@ -12,7 +12,7 @@ interface ProcessOptions {
   userId: string;
   text: string;
   sourceName: string;
-  sourceType: "text" | "markdown" | "pdf";
+  sourceType: "text" | "markdown" | "pdf" | "docx";
 }
 
 /**

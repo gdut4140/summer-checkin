@@ -7,6 +7,7 @@ import {
   type AgentRunResponse,
   type PlanDraft,
 } from "./types";
+import { planDraftToMarkdown } from "@/lib/studio/plan-serialize";
 
 const MAX_TASKS = 40;
 
@@ -130,6 +131,12 @@ async function collectContext(userId: string): Promise<AgentContextSnapshot> {
   };
 }
 
+// 提取模型输出中的 JSON 主体（兼容可能的 markdown 代码围栏）
+function extractJsonText(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  return (fenced ? fenced[1] : text).trim();
+}
+
 function parseDraft(value: unknown): PlanDraft | null {
   const candidate =
     value && typeof value === "object" && "plan" in value
@@ -137,6 +144,9 @@ function parseDraft(value: unknown): PlanDraft | null {
       : value;
   const result = planDraftSchema.safeParse(candidate);
   if (!result.success) return null;
+  // 模型没给出任务安排（tasks 缺失或为空，schema 的 .default([]) 会静默通过）→ 视为无效，
+  // 交给 fallback（自带任务），避免创建出没有任务的计划
+  if (result.data.tasks.length === 0) return null;
   return {
     ...result.data,
     tasks: result.data.tasks.slice(0, MAX_TASKS),
@@ -149,31 +159,40 @@ async function generateDraft(
 ): Promise<{ draft: PlanDraft; source: "model" | "fallback" }> {
   try {
     const client = createAIClient();
-    const response = await client.chat.completions.create({
-      model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-      temperature: 0.3,
-      max_tokens: 4096,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "你是学习计划规划 Agent。只返回 JSON，不要 Markdown。计划必须可执行，最多 40 个任务。字段为 name、description、goal、targetHours、assumptions、tasks；tasks 每项包含 title、description、dayNumber、weekNumber、category(study/project/review/exercise)、priority(high/normal/low)。",
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            goal,
-            context,
-            instruction: "根据用户目标和真实学习数据生成 7-30 天的计划草案，优先给出清晰的阶段产出。",
-          }),
-        },
-      ],
-    });
-    const text = response.choices[0]?.message?.content?.trim();
-    if (text) {
-      const parsed = parseDraft(JSON.parse(text));
-      if (parsed) return { draft: parsed, source: "model" };
+    // 模型偶尔输出损坏/截断的 JSON（如未加引号的属性名），解析失败时重试一次
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const response = await client.chat.completions.create({
+        model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
+        temperature: 0.3,
+        max_tokens: 8192,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "你是学习计划规划 Agent。只返回 JSON，不要 Markdown。计划必须可执行，最多 40 个任务。字段为 name、description、goal、targetHours、assumptions、tasks；tasks 每项包含 title、description、dayNumber、weekNumber、category(study/project/review/exercise)、priority(high/normal/low)。",
+          },
+          {
+            role: "user",
+            content: JSON.stringify({
+              goal,
+              context,
+              instruction: "根据用户目标和真实学习数据生成 7-30 天的计划草案，优先给出清晰的阶段产出。",
+            }),
+          },
+        ],
+      });
+      const text = response.choices[0]?.message?.content?.trim();
+      if (!text) continue;
+      try {
+        const parsed = parseDraft(JSON.parse(extractJsonText(text)));
+        if (parsed) return { draft: parsed, source: "model" };
+      } catch (parseError) {
+        console.warn(
+          `[Agent] 第 ${attempt + 1} 次 draft JSON 解析失败:`,
+          parseError instanceof Error ? parseError.message : parseError
+        );
+      }
     }
   } catch (error) {
     console.warn("[Agent] plan draft generation failed, using fallback:", error);
@@ -397,6 +416,9 @@ export async function decideAgentApproval(
         goal: draft.goal,
         targetHours: draft.targetHours,
         status: "active",
+        // 确认创建时直接生成详细计划文档（学习指导 + 任务安排），
+        // 用户打开文档工作室即可看到详细的、有具体指导的计划
+        document: planDraftToMarkdown(draft),
       },
     });
 

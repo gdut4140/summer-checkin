@@ -9,6 +9,7 @@ import {
   Gear,
   ListChecks,
   List,
+  Note,
   X,
   SignOut,
   Leaf,
@@ -47,6 +48,7 @@ const mainNav = [
   { href: "/dashboard", label: "雨林" },
   { href: "/checkin", label: "我的小岛" },
   { href: "/plans", label: "学习计划" },
+  { href: "/docs", label: "文档" },
   { href: "/statistics", label: "个人主页" },
 ];
 
@@ -55,6 +57,7 @@ const fullNav = [
   { href: "/dashboard", label: "雨林", icon: Tree },
   { href: "/checkin", label: "我的小岛", icon: Tree },
   { href: "/plans", label: "学习计划", icon: ListChecks },
+  { href: "/docs", label: "文档", icon: Note },
   { href: "/statistics", label: "个人主页", icon: ChartLine },
   { href: "/settings", label: "设置", icon: Gear },
 ];
@@ -91,11 +94,11 @@ export function TopNav({ user }: TopNavProps) {
             <DropdownMenu>
               <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 py-1 pl-2 pr-1 backdrop-blur-sm transition-all hover:bg-white/12">
                 <List className="h-4 w-4 text-white" />
-                <AppAvatar image={user.image} name={user.name ?? "U"} size="sm" />
+                <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="sm" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-xl border border-white/10 bg-[#0a1a15]/98 p-1 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center gap-3 px-3 py-3">
-                  <AppAvatar image={user.image} name={user.name ?? "U"} size="md" />
+                  <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{user.name ?? "用户"}</p>
                     <p className="text-[11px] text-white/35 truncate">{user.email ?? ""}</p>
@@ -112,7 +115,7 @@ export function TopNav({ user }: TopNavProps) {
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger className="flex items-center gap-2 rounded-md border border-white/25 bg-white/10 p-1.5 pr-3 text-white">
                 <List className="h-4 w-4" />
-                <AppAvatar image={user.image} name={user.name ?? "U"} size="sm" />
+                <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="sm" />
               </SheetTrigger>
               <SheetContent side="right" className="w-72 p-0">
                 <div className="flex h-16 items-center justify-between border-b border-border px-4">

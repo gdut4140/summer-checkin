@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
+  Eye,
   File,
   FileText,
   Plus,
@@ -29,9 +31,18 @@ interface DocInfo {
 
 const typeLabel: Record<string, string> = {
   text: "文本",
+  txt: "文本",
   markdown: "Markdown",
+  md: "Markdown",
   pdf: "PDF",
+  docx: "Word",
 };
+
+function canViewDoc(sourceType: string, sourceName: string) {
+  const normalized = sourceType.toLowerCase();
+  if (["text", "txt", "markdown", "md"].includes(normalized)) return true;
+  return /\.(txt|md|markdown)$/i.test(sourceName);
+}
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -53,6 +64,7 @@ function timeAgo(iso: string) {
 // ---- 主组件 ----
 
 export function KnowledgeBase() {
+  const router = useRouter();
   const [docs, setDocs] = useState<DocInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -165,7 +177,7 @@ export function KnowledgeBase() {
       const file = e.dataTransfer.files[0];
       if (file) {
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-        if (["txt", "md", "pdf"].includes(ext)) {
+        if (["txt", "md", "pdf", "docx"].includes(ext)) {
           void uploadFile(file);
         } else {
           toast.error(`不支持 .${ext} 格式`);
@@ -173,6 +185,17 @@ export function KnowledgeBase() {
       }
     },
     [uploadFile]
+  );
+
+  const viewDoc = useCallback(
+    (doc: DocInfo) => {
+      if (!canViewDoc(doc.sourceType, doc.sourceName)) {
+        toast.error("当前仅支持查看 txt / md 文档");
+        return;
+      }
+      router.push(`/docs/knowledge/${encodeURIComponent(doc.sourceName)}`);
+    },
+    [router]
   );
 
   return (
@@ -208,7 +231,7 @@ export function KnowledgeBase() {
                 <input
                   ref={fileRef}
                   type="file"
-                  accept=".txt,.md,.pdf"
+                  accept=".txt,.md,.pdf,.docx"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -236,7 +259,7 @@ export function KnowledgeBase() {
                 </Button>
               </div>
               <p className="mt-2 text-[10px] text-white/25">
-                支持 .txt .md .pdf
+                支持 .txt .md .pdf .docx
               </p>
             </>
           )}
@@ -323,13 +346,24 @@ export function KnowledgeBase() {
                     <span>{timeAgo(doc.createdAt)}</span>
                   </p>
                 </div>
-                <button
-                  onClick={() => deleteDoc(doc.sourceName)}
-                  className="shrink-0 rounded p-1 text-white/20 opacity-0 transition hover:bg-white/10 hover:text-red-300 group-hover:opacity-100"
-                  title="删除文档"
-                >
-                  <Trash className="size-3.5" />
-                </button>
+                <div className="flex shrink-0 items-center gap-1">
+                  {canViewDoc(doc.sourceType, doc.sourceName) && (
+                    <button
+                      onClick={() => viewDoc(doc)}
+                      className="rounded p-1 text-white/25 opacity-0 transition hover:bg-white/10 hover:text-[#d7ef83] group-hover:opacity-100"
+                      title="查看文档"
+                    >
+                      <Eye className="size-3.5" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => deleteDoc(doc.sourceName)}
+                    className="rounded p-1 text-white/20 opacity-0 transition hover:bg-white/10 hover:text-red-300 group-hover:opacity-100"
+                    title="删除文档"
+                  >
+                    <Trash className="size-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

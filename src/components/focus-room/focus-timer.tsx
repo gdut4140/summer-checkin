@@ -338,6 +338,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
           <motion.circle cx={SVG_CENTER} cy={SVG_CENTER} r={RING_RADIUS}
             fill="none" stroke="#d7ef83" strokeWidth={5} strokeLinecap="round"
             strokeDasharray={CIRCUMFERENCE}
+            initial={false}
             animate={{ strokeDashoffset: dashOffset }}
             transition={{ duration: 0.5, ease: "linear" }}
             style={{ filter: "drop-shadow(0 0 12px rgba(215,239,131,0.5))" }}

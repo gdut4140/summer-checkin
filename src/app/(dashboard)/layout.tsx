@@ -4,7 +4,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { TopNav } from "@/components/layout/top-nav";
 import { DailyAgentCheck } from "@/components/dashboard/daily-agent-check";
-import { RainforestExplorer } from "@/components/agent/rainforest-explorer";
+import { AgentOrb } from "@/components/agent/agent-orb";
 
 export default async function DashboardLayout({
   children,
@@ -20,7 +20,7 @@ export default async function DashboardLayout({
         {children}
       </main>
       <DailyAgentCheck />
-      <RainforestExplorer />
+      <AgentOrb />
     </div>
   );
 }

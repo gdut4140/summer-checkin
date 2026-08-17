@@ -40,9 +40,11 @@ export type PlanMinAggregateOutputType = {
   name: string | null
   description: string | null
   goal: string | null
+  document: string | null
+  tasksSourceHash: string | null
+  tasksSplittingAt: Date | null
   targetHours: number | null
   startDate: Date | null
-  endDate: Date | null
   status: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -54,9 +56,11 @@ export type PlanMaxAggregateOutputType = {
   name: string | null
   description: string | null
   goal: string | null
+  document: string | null
+  tasksSourceHash: string | null
+  tasksSplittingAt: Date | null
   targetHours: number | null
   startDate: Date | null
-  endDate: Date | null
   status: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -68,9 +72,11 @@ export type PlanCountAggregateOutputType = {
   name: number
   description: number
   goal: number
+  document: number
+  tasksSourceHash: number
+  tasksSplittingAt: number
   targetHours: number
   startDate: number
-  endDate: number
   status: number
   createdAt: number
   updatedAt: number
@@ -92,9 +98,11 @@ export type PlanMinAggregateInputType = {
   name?: true
   description?: true
   goal?: true
+  document?: true
+  tasksSourceHash?: true
+  tasksSplittingAt?: true
   targetHours?: true
   startDate?: true
-  endDate?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -106,9 +114,11 @@ export type PlanMaxAggregateInputType = {
   name?: true
   description?: true
   goal?: true
+  document?: true
+  tasksSourceHash?: true
+  tasksSplittingAt?: true
   targetHours?: true
   startDate?: true
-  endDate?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -120,9 +130,11 @@ export type PlanCountAggregateInputType = {
   name?: true
   description?: true
   goal?: true
+  document?: true
+  tasksSourceHash?: true
+  tasksSplittingAt?: true
   targetHours?: true
   startDate?: true
-  endDate?: true
   status?: true
   createdAt?: true
   updatedAt?: true
@@ -221,9 +233,11 @@ export type PlanGroupByOutputType = {
   name: string
   description: string | null
   goal: string | null
+  document: string | null
+  tasksSourceHash: string | null
+  tasksSplittingAt: Date | null
   targetHours: number
   startDate: Date | null
-  endDate: Date | null
   status: string
   createdAt: Date
   updatedAt: Date
@@ -258,9 +272,11 @@ export type PlanWhereInput = {
   name?: Prisma.StringFilter<"Plan"> | string
   description?: Prisma.StringNullableFilter<"Plan"> | string | null
   goal?: Prisma.StringNullableFilter<"Plan"> | string | null
+  document?: Prisma.StringNullableFilter<"Plan"> | string | null
+  tasksSourceHash?: Prisma.StringNullableFilter<"Plan"> | string | null
+  tasksSplittingAt?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
   targetHours?: Prisma.FloatFilter<"Plan"> | number
   startDate?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
-  endDate?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
   status?: Prisma.StringFilter<"Plan"> | string
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
@@ -275,9 +291,11 @@ export type PlanOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   goal?: Prisma.SortOrderInput | Prisma.SortOrder
+  document?: Prisma.SortOrderInput | Prisma.SortOrder
+  tasksSourceHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  tasksSplittingAt?: Prisma.SortOrderInput | Prisma.SortOrder
   targetHours?: Prisma.SortOrder
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
-  endDate?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -295,9 +313,11 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Plan"> | string
   description?: Prisma.StringNullableFilter<"Plan"> | string | null
   goal?: Prisma.StringNullableFilter<"Plan"> | string | null
+  document?: Prisma.StringNullableFilter<"Plan"> | string | null
+  tasksSourceHash?: Prisma.StringNullableFilter<"Plan"> | string | null
+  tasksSplittingAt?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
   targetHours?: Prisma.FloatFilter<"Plan"> | number
   startDate?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
-  endDate?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
   status?: Prisma.StringFilter<"Plan"> | string
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
@@ -312,9 +332,11 @@ export type PlanOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   goal?: Prisma.SortOrderInput | Prisma.SortOrder
+  document?: Prisma.SortOrderInput | Prisma.SortOrder
+  tasksSourceHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  tasksSplittingAt?: Prisma.SortOrderInput | Prisma.SortOrder
   targetHours?: Prisma.SortOrder
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
-  endDate?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -334,9 +356,11 @@ export type PlanScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Plan"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
   goal?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
+  document?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
+  tasksSourceHash?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
+  tasksSplittingAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Plan"> | Date | string | null
   targetHours?: Prisma.FloatWithAggregatesFilter<"Plan"> | number
   startDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Plan"> | Date | string | null
-  endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Plan"> | Date | string | null
   status?: Prisma.StringWithAggregatesFilter<"Plan"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
@@ -347,9 +371,11 @@ export type PlanCreateInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -364,9 +390,11 @@ export type PlanUncheckedCreateInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -379,9 +407,11 @@ export type PlanUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -396,9 +426,11 @@ export type PlanUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,9 +444,11 @@ export type PlanCreateManyInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -425,9 +459,11 @@ export type PlanUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -439,9 +475,11 @@ export type PlanUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -463,9 +501,11 @@ export type PlanCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   goal?: Prisma.SortOrder
+  document?: Prisma.SortOrder
+  tasksSourceHash?: Prisma.SortOrder
+  tasksSplittingAt?: Prisma.SortOrder
   targetHours?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
-  endDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -481,9 +521,11 @@ export type PlanMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   goal?: Prisma.SortOrder
+  document?: Prisma.SortOrder
+  tasksSourceHash?: Prisma.SortOrder
+  tasksSplittingAt?: Prisma.SortOrder
   targetHours?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
-  endDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -495,9 +537,11 @@ export type PlanMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   goal?: Prisma.SortOrder
+  document?: Prisma.SortOrder
+  tasksSourceHash?: Prisma.SortOrder
+  tasksSplittingAt?: Prisma.SortOrder
   targetHours?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
-  endDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -559,16 +603,16 @@ export type PlanUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.PlanScalarWhereInput | Prisma.PlanScalarWhereInput[]
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type FloatFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
 }
 
 export type PlanCreateNestedOneWithoutTasksInput = {
@@ -606,9 +650,11 @@ export type PlanCreateWithoutUserInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -621,9 +667,11 @@ export type PlanUncheckedCreateWithoutUserInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -666,9 +714,11 @@ export type PlanScalarWhereInput = {
   name?: Prisma.StringFilter<"Plan"> | string
   description?: Prisma.StringNullableFilter<"Plan"> | string | null
   goal?: Prisma.StringNullableFilter<"Plan"> | string | null
+  document?: Prisma.StringNullableFilter<"Plan"> | string | null
+  tasksSourceHash?: Prisma.StringNullableFilter<"Plan"> | string | null
+  tasksSplittingAt?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
   targetHours?: Prisma.FloatFilter<"Plan"> | number
   startDate?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
-  endDate?: Prisma.DateTimeNullableFilter<"Plan"> | Date | string | null
   status?: Prisma.StringFilter<"Plan"> | string
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
@@ -679,9 +729,11 @@ export type PlanCreateWithoutTasksInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -695,9 +747,11 @@ export type PlanUncheckedCreateWithoutTasksInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -725,9 +779,11 @@ export type PlanUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -741,9 +797,11 @@ export type PlanUncheckedUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -755,9 +813,11 @@ export type PlanCreateWithoutCheckinsInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -771,9 +831,11 @@ export type PlanUncheckedCreateWithoutCheckinsInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -801,9 +863,11 @@ export type PlanUpdateWithoutCheckinsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -817,9 +881,11 @@ export type PlanUncheckedUpdateWithoutCheckinsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -831,9 +897,11 @@ export type PlanCreateManyUserInput = {
   name: string
   description?: string | null
   goal?: string | null
+  document?: string | null
+  tasksSourceHash?: string | null
+  tasksSplittingAt?: Date | string | null
   targetHours?: number
   startDate?: Date | string | null
-  endDate?: Date | string | null
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -844,9 +912,11 @@ export type PlanUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -859,9 +929,11 @@ export type PlanUncheckedUpdateWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -874,9 +946,11 @@ export type PlanUncheckedUpdateManyWithoutUserInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  document?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSourceHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tasksSplittingAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   targetHours?: Prisma.FloatFieldUpdateOperationsInput | number
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -928,9 +1002,11 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   description?: boolean
   goal?: boolean
+  document?: boolean
+  tasksSourceHash?: boolean
+  tasksSplittingAt?: boolean
   targetHours?: boolean
   startDate?: boolean
-  endDate?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -946,9 +1022,11 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   description?: boolean
   goal?: boolean
+  document?: boolean
+  tasksSourceHash?: boolean
+  tasksSplittingAt?: boolean
   targetHours?: boolean
   startDate?: boolean
-  endDate?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -961,9 +1039,11 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   description?: boolean
   goal?: boolean
+  document?: boolean
+  tasksSourceHash?: boolean
+  tasksSplittingAt?: boolean
   targetHours?: boolean
   startDate?: boolean
-  endDate?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -976,15 +1056,17 @@ export type PlanSelectScalar = {
   name?: boolean
   description?: boolean
   goal?: boolean
+  document?: boolean
+  tasksSourceHash?: boolean
+  tasksSplittingAt?: boolean
   targetHours?: boolean
   startDate?: boolean
-  endDate?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "description" | "goal" | "targetHours" | "startDate" | "endDate" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "description" | "goal" | "document" | "tasksSourceHash" | "tasksSplittingAt" | "targetHours" | "startDate" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   checkins?: boolean | Prisma.Plan$checkinsArgs<ExtArgs>
@@ -1011,9 +1093,11 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     description: string | null
     goal: string | null
+    document: string | null
+    tasksSourceHash: string | null
+    tasksSplittingAt: Date | null
     targetHours: number
     startDate: Date | null
-    endDate: Date | null
     status: string
     createdAt: Date
     updatedAt: Date
@@ -1448,9 +1532,11 @@ export interface PlanFieldRefs {
   readonly name: Prisma.FieldRef<"Plan", 'String'>
   readonly description: Prisma.FieldRef<"Plan", 'String'>
   readonly goal: Prisma.FieldRef<"Plan", 'String'>
+  readonly document: Prisma.FieldRef<"Plan", 'String'>
+  readonly tasksSourceHash: Prisma.FieldRef<"Plan", 'String'>
+  readonly tasksSplittingAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly targetHours: Prisma.FieldRef<"Plan", 'Float'>
   readonly startDate: Prisma.FieldRef<"Plan", 'DateTime'>
-  readonly endDate: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly status: Prisma.FieldRef<"Plan", 'String'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Plan", 'DateTime'>

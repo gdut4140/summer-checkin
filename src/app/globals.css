@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "../styles/markdown.css";
+@import "../styles/studio.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -627,6 +628,25 @@
   grid-template-rows: minmax(0, 1fr);
 }
 
+/* 智能体独立全屏页面：盖满整个视口（无顶部导航） */
+.rainforest-workbench--page {
+  display: grid !important;
+  width: 100vw !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  min-height: 0;
+  grid-template-columns: 220px minmax(380px, 1fr) 380px;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+@media (max-width: 1023px) {
+  .rainforest-workbench--page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 58px;
+  }
+  .rainforest-workbench--page > .rainforest-panel.rainforest-panel--mobile-hidden { display: none !important; }
+}
+
 .rainforest-panel {
   min-width: 0;
   min-height: 0;
@@ -731,4 +751,22 @@
   }
 
   .rainforest-mobile-nav svg { width: 19px; height: 19px; }
+}
+
+/* 任务刷新中的不确定进度条 */
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+.animate-indeterminate {
+  animation: indeterminate 1.4s ease-in-out infinite;
+}
+
+/* toast 关闭按钮跟随主题色文字，保证在主题色气泡上可读 */
+[data-sonner-toaster] [data-close-button] {
+  color: var(--primary-foreground);
+  border-color: rgba(5, 22, 18, 0.25);
+}
+[data-sonner-toaster] [data-close-button]:hover {
+  background: rgba(5, 22, 18, 0.12);
 }

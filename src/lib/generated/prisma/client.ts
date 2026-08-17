@@ -137,6 +137,11 @@ export type UserMemory = Prisma.UserMemoryModel
  */
 export type AIHistory = Prisma.AIHistoryModel
 /**
+ * Model Document
+ * 
+ */
+export type Document = Prisma.DocumentModel
+/**
  * Model DocumentChunk
  * 
  */

@@ -23,6 +23,7 @@ import { getAIModel, getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } fro
 import { prisma } from "@/lib/prisma";
 import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
 import { createStudyTools, createRAGTool, createAgentTools, createCoachTools } from "@/lib/tools";
+import { createStudioTools } from "@/lib/tools/studio-tools";
 import {
   getRelevantMemories,
   formatMemoriesForPrompt,
@@ -48,6 +49,9 @@ export async function POST(request: NextRequest) {
     }[];
     const conversationId = body.conversationId as string | undefined;
     const deepThink = body.deepThink as boolean | undefined;
+    const studioContext = body.studioContext as
+      | { kind?: "plan" | "doc"; refId?: string; document?: string }
+      | undefined;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
@@ -121,7 +125,56 @@ export async function POST(request: NextRequest) {
       console.warn("[AI] RAG 检索跳过（服务不可用）:", err);
     }
 
-    const fullSystem = [SYSTEM_PROMPT, ragPrompt, memoryPrompt]
+    // ============================================================
+    // Phase 3/4 文档工作室：注入当前文档上下文 + 文档修改工具
+    // ============================================================
+    let studioPrompt = "";
+    let studioTools = {};
+    const studioKind = studioContext?.kind;
+    const studioRefId = studioContext?.refId;
+    if (
+      (studioKind === "plan" || studioKind === "doc") &&
+      studioRefId &&
+      typeof studioContext?.document === "string"
+    ) {
+      if (studioKind === "plan") {
+        const plan = await prisma.plan.findFirst({
+          where: { id: studioRefId, userId: user.id },
+          select: { id: true, name: true },
+        });
+        if (plan) {
+          studioTools = createStudioTools(user.id, {
+            kind: "plan",
+            id: plan.id,
+          });
+          studioPrompt = [
+            `用户正在文档工作室里编辑学习计划「${plan.name}」的 Markdown 文档，完整内容如下：`,
+            "",
+            studioContext.document,
+            "",
+            "你可以调用工具直接修改它：调整计划信息用 updatePlanInfo；修改文档内容用 updateDocument（必须传完整的修改后文档）。",
+            "涉及任务时，请同步修改文档中「## 任务安排」段落的任务行。",
+          ].join("\n");
+        }
+      } else {
+        const doc = await prisma.document.findFirst({
+          where: { id: studioRefId, userId: user.id },
+          select: { id: true, title: true },
+        });
+        if (doc) {
+          studioTools = createStudioTools(user.id, { kind: "doc", id: doc.id });
+          studioPrompt = [
+            `用户正在文档工作室里编辑文档「${doc.title}」的 Markdown 内容，完整内容如下：`,
+            "",
+            studioContext.document,
+            "",
+            "你可以用 updateDocument 工具直接修改这份文档（必须传完整的修改后文档）。",
+          ].join("\n");
+        }
+      }
+    }
+
+    const fullSystem = [SYSTEM_PROMPT, studioPrompt, ragPrompt, memoryPrompt]
       .filter(Boolean)
       .join("\n\n");
 
@@ -151,6 +204,7 @@ export async function POST(request: NextRequest) {
         ...createRAGTool(user.id),
         ...createAgentTools(user.id),
         ...createCoachTools(user.id),
+        ...studioTools,
       },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
       // Day 22: 增至 10 步 — Agent Workflow 需要更多步骤（规划→拆分→检查）

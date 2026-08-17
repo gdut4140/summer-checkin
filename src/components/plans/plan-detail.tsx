@@ -88,7 +88,6 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
                   <span className="text-[12px] text-muted-foreground flex items-center gap-1">
                     <IconCalendar className="h-3 w-3" />
                     {format(plan.startDate, "yyyy年M月d日")}
-                    {plan.endDate && ` — ${format(plan.endDate, "M月d日")}`}
                   </span>
                 )}
               </div>

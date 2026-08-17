@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarBlank, CheckCircle, Circle, CircleDashed, Eye, PencilSimple } from "@phosphor-icons/react";
+import Link from "next/link";
+import { ArrowsOutSimple, CalendarBlank, CheckCircle, Circle, CircleDashed, Eye, PencilSimple } from "@phosphor-icons/react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { MarkdownRenderer } from "@/components/ai/markdown-renderer";
@@ -55,7 +56,6 @@ export function PlanDocument({ plan, tasks, tasksStats, initialDocument }: Props
           <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <CalendarBlank className="size-3.5" />
             {plan.startDate ? format(plan.startDate, "M月d日") : "未定"}
-            {plan.endDate ? ` — ${format(plan.endDate, "M月d日")}` : ""}
           </div>
 
           <div className="mt-3">
@@ -123,15 +123,24 @@ export function PlanDocument({ plan, tasks, tasksStats, initialDocument }: Props
               <PencilSimple className="size-3.5" />编辑
             </button>
           </div>
-          {editing && (
-            <button
-              onClick={save}
-              disabled={saving}
-              className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/plans/${plan.id}/studio`}
+              className="flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/20"
             >
-              {saving ? "保存中…" : "保存"}
-            </button>
-          )}
+              <ArrowsOutSimple className="size-3.5" weight="bold" />
+              文档模式
+            </Link>
+            {editing && (
+              <button
+                onClick={save}
+                disabled={saving}
+                className="rounded-md bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+              >
+                {saving ? "保存中…" : "保存"}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mx-auto max-w-3xl rounded-xl border border-white/[0.08] bg-[#0a1a15]/70 p-8">

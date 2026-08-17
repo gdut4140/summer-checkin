@@ -73,24 +73,22 @@ export function createAgentTools(userId: string) {
   // ============================================================
   const breakdownPlanTasks = tool({
     description:
-      "将一个学习计划拆分为具体的每日/每周任务。当用户创建学习计划后，需要将大目标分解为可执行的小任务时使用。" +
+      "将一个学习计划拆分为具体的、平铺的可执行任务。当用户创建学习计划后，需要将大目标分解为可执行的小任务时使用。" +
       "你必须先通过 getMyPlans 或 createPlan 获取 planId，" +
-      "然后根据计划的目标、总时长来生成结构化的任务列表。" +
+      "然后根据计划的目标、总时长来生成任务列表。" +
       "任务应该具体、可量化、有明确的完成标准。" +
-      "例如：'30天学React'应拆分为：Day 1-3 环境搭建与JSX基础 → Day 4-7 组件与Props → ...",
+      "不要按周/天分组，不要输出 Day/Week 编号，平铺成一条条任务即可。",
 
     inputSchema: z.object({
       planId: z.string().describe("要拆分的计划ID"),
       tasks: z
         .array(
           z.object({
-            title: z.string().describe("任务标题，简洁明确，如'Day 1-2: 环境搭建与JSX基础'"),
+            title: z.string().describe("任务标题，简洁明确，如'环境搭建与 JSX 基础'"),
             description: z
               .string()
               .optional()
               .describe("任务详细描述，包含具体学习内容、资源链接、完成标准"),
-            dayNumber: z.number().optional().describe("第几天（从1开始），用于排序和每日检查"),
-            weekNumber: z.number().optional().describe("第几周（从1开始），用于阶段性检查"),
             category: z
               .enum(["study", "project", "review", "exercise"])
               .optional()
@@ -101,7 +99,7 @@ export function createAgentTools(userId: string) {
               .describe("优先级：high=核心必做, normal=常规任务, low=选做"),
           })
         )
-        .describe("要创建的任务列表，AI 应根据计划目标拆分为每日/每周的具体任务"),
+        .describe("要创建的任务列表，AI 应根据计划目标拆分为平铺的具体任务"),
     }),
 
     execute: async ({ planId, tasks }) => {
@@ -118,25 +116,38 @@ export function createAgentTools(userId: string) {
           throw new Error(`计划不存在: ${planId}`);
         }
 
-        // 批量创建任务
-        const created = await Promise.all(
-          tasks.map((t) =>
-            prisma.planTask.create({
-              data: {
-                planId,
-                userId,
-                title: t.title,
-                description: t.description ?? null,
-                dayNumber: t.dayNumber ?? null,
-                weekNumber: t.weekNumber ?? null,
-                category: t.category ?? "study",
-                priority: t.priority ?? "normal",
-              },
-            })
-          )
+        // 幂等创建：createPlan 已自动拆分过的任务（按归一化标题匹配）不再重复创建，
+        // 避免 AI 在 createPlan 后仍调用 breakdownPlanTasks 造成任务重复。
+        const existing = await prisma.planTask.findMany({
+          where: { planId },
+          select: { title: true },
+        });
+        const existingTitles = new Set(
+          existing.map((t) => t.title.trim().toLowerCase().replace(/\s+/g, " "))
         );
 
-        console.log(`[breakdownPlanTasks] ✅ 创建了 ${created.length} 个任务`);
+        // 批量创建任务（跳过已存在的同名任务）
+        const created = await Promise.all(
+          tasks
+            .filter(
+              (t) =>
+                !existingTitles.has(t.title.trim().toLowerCase().replace(/\s+/g, " "))
+            )
+            .map((t) =>
+              prisma.planTask.create({
+                data: {
+                  planId,
+                  userId,
+                  title: t.title,
+                  description: t.description ?? null,
+                  category: t.category ?? "study",
+                  priority: t.priority ?? "normal",
+                },
+              })
+            )
+        );
+
+        console.log(`[breakdownPlanTasks] ✅ 创建了 ${created.length} 个任务（去重后）`);
 
         return {
           success: true,

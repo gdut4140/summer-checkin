@@ -21,8 +21,13 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
         {/* Day 4: 使用 Markdown 渲染器替代纯文本 */}
         {isUser ? (
           <p className="whitespace-pre-wrap">{message.content}</p>
-        ) : (
+        ) : message.content ? (
           <MarkdownRenderer content={message.content} />
+        ) : (
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary" />
+            思考中…
+          </span>
         )}
         <p
           className={cn(

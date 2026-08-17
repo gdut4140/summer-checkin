@@ -26,19 +26,20 @@ export default function RootLayout({
         {/* 墨绿蒙层 */}
         <div className="bg-video-overlay" />
 
-        <div className="relative z-10 flex flex-1 flex-col">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="relative z-10 flex flex-1 flex-col">
             <ClickSpark sparkColor="#d7ef83" sparkCount={8} sparkSize={10} sparkRadius={18} duration={450}>
               {children}
-              <Toaster richColors closeButton />
             </ClickSpark>
-          </ThemeProvider>
-        </div>
+          </div>
+          {/* 提示气泡置于 body 层级：不被 z-10 层叠上下文困住，保证显示在智能体弹窗之上 */}
+          <Toaster closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -42,7 +42,10 @@ async function main() {
   console.log("\n3️⃣  数据库读写测试...");
   try {
     const { PrismaClient } = await import("../src/lib/generated/prisma/client");
-    const prisma = new PrismaClient();
+    const { PrismaPg } = await import("@prisma/adapter-pg");
+    const prisma = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+    });
 
     // 先测试嵌入
     const vec = await embedText("测试记忆：用户喜欢用 VS Code");

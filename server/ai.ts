@@ -52,7 +52,7 @@ export async function handleAI(roomId: string, prompt: string, userId: string) {
     tools: {
       createTodos: tool({
         description: "把讨论中提到的行动项/学习任务创建为该用户的学习待办",
-        parameters: z.object({
+        inputSchema: z.object({
           items: z.array(
             z.object({
               title: z.string().describe("待办标题，简洁具体"),

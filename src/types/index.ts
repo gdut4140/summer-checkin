@@ -79,7 +79,6 @@ export interface PlanWithProgress {
   description: string | null;
   goal: string | null;
   startDate: Date | null;
-  endDate: Date | null;
   status: string;
   createdAt: Date;
   totalTasks: number;

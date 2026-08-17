@@ -237,6 +237,7 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   schedules?: Prisma.AgentScheduleListRelationFilter
   todos?: Prisma.TodoListRelationFilter
+  docs?: Prisma.DocumentListRelationFilter
   documents?: Prisma.DocumentChunkListRelationFilter
   chatRooms?: Prisma.ChatRoomMemberListRelationFilter
   chatMessages?: Prisma.ChatMessageListRelationFilter
@@ -268,6 +269,7 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   schedules?: Prisma.AgentScheduleOrderByRelationAggregateInput
   todos?: Prisma.TodoOrderByRelationAggregateInput
+  docs?: Prisma.DocumentOrderByRelationAggregateInput
   documents?: Prisma.DocumentChunkOrderByRelationAggregateInput
   chatRooms?: Prisma.ChatRoomMemberOrderByRelationAggregateInput
   chatMessages?: Prisma.ChatMessageOrderByRelationAggregateInput
@@ -302,6 +304,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   schedules?: Prisma.AgentScheduleListRelationFilter
   todos?: Prisma.TodoListRelationFilter
+  docs?: Prisma.DocumentListRelationFilter
   documents?: Prisma.DocumentChunkListRelationFilter
   chatRooms?: Prisma.ChatRoomMemberListRelationFilter
   chatMessages?: Prisma.ChatMessageListRelationFilter
@@ -365,6 +368,7 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -396,6 +400,7 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -427,6 +432,7 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -458,6 +464,7 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -743,6 +750,20 @@ export type UserUpdateOneRequiredWithoutAiHistoriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiHistoriesInput, Prisma.UserUpdateWithoutAiHistoriesInput>, Prisma.UserUncheckedUpdateWithoutAiHistoriesInput>
 }
 
+export type UserCreateNestedOneWithoutDocsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocsInput, Prisma.UserUncheckedCreateWithoutDocsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocsInput, Prisma.UserUncheckedCreateWithoutDocsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocsInput
+  upsert?: Prisma.UserUpsertWithoutDocsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocsInput, Prisma.UserUpdateWithoutDocsInput>, Prisma.UserUncheckedUpdateWithoutDocsInput>
+}
+
 export type UserUpdateOneRequiredWithoutDocumentsNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsInput
@@ -834,6 +855,7 @@ export type UserCreateWithoutSessionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -864,6 +886,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -910,6 +933,7 @@ export type UserUpdateWithoutSessionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -940,6 +964,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -970,6 +995,7 @@ export type UserCreateWithoutAccountsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1000,6 +1026,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1046,6 +1073,7 @@ export type UserUpdateWithoutAccountsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1076,6 +1104,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1106,6 +1135,7 @@ export type UserCreateWithoutPlansInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1136,6 +1166,7 @@ export type UserUncheckedCreateWithoutPlansInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1182,6 +1213,7 @@ export type UserUpdateWithoutPlansInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1212,6 +1244,7 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1242,6 +1275,7 @@ export type UserCreateWithoutPlanTasksInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1272,6 +1306,7 @@ export type UserUncheckedCreateWithoutPlanTasksInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1318,6 +1353,7 @@ export type UserUpdateWithoutPlanTasksInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1348,6 +1384,7 @@ export type UserUncheckedUpdateWithoutPlanTasksInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1378,6 +1415,7 @@ export type UserCreateWithoutTodosInput = {
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1408,6 +1446,7 @@ export type UserUncheckedCreateWithoutTodosInput = {
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1454,6 +1493,7 @@ export type UserUpdateWithoutTodosInput = {
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1484,6 +1524,7 @@ export type UserUncheckedUpdateWithoutTodosInput = {
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1514,6 +1555,7 @@ export type UserCreateWithoutCheckinsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1544,6 +1586,7 @@ export type UserUncheckedCreateWithoutCheckinsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1590,6 +1633,7 @@ export type UserUpdateWithoutCheckinsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1620,6 +1664,7 @@ export type UserUncheckedUpdateWithoutCheckinsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1650,6 +1695,7 @@ export type UserCreateWithoutStudyRecordsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1680,6 +1726,7 @@ export type UserUncheckedCreateWithoutStudyRecordsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1726,6 +1773,7 @@ export type UserUpdateWithoutStudyRecordsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1756,6 +1804,7 @@ export type UserUncheckedUpdateWithoutStudyRecordsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1786,6 +1835,7 @@ export type UserCreateWithoutUserBadgesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1816,6 +1866,7 @@ export type UserUncheckedCreateWithoutUserBadgesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1862,6 +1913,7 @@ export type UserUpdateWithoutUserBadgesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -1892,6 +1944,7 @@ export type UserUncheckedUpdateWithoutUserBadgesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1922,6 +1975,7 @@ export type UserCreateWithoutConversationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -1952,6 +2006,7 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1998,6 +2053,7 @@ export type UserUpdateWithoutConversationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2028,6 +2084,7 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2058,6 +2115,7 @@ export type UserCreateWithoutAgentRunsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -2088,6 +2146,7 @@ export type UserUncheckedCreateWithoutAgentRunsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2134,6 +2193,7 @@ export type UserUpdateWithoutAgentRunsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2164,6 +2224,7 @@ export type UserUncheckedUpdateWithoutAgentRunsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2194,6 +2255,7 @@ export type UserCreateWithoutDecisionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -2224,6 +2286,7 @@ export type UserUncheckedCreateWithoutDecisionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2270,6 +2333,7 @@ export type UserUpdateWithoutDecisionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2300,6 +2364,7 @@ export type UserUncheckedUpdateWithoutDecisionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2330,6 +2395,7 @@ export type UserCreateWithoutMemoriesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -2360,6 +2426,7 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2406,6 +2473,7 @@ export type UserUpdateWithoutMemoriesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2436,6 +2504,7 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2466,6 +2535,7 @@ export type UserCreateWithoutAiHistoriesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -2496,6 +2566,7 @@ export type UserUncheckedCreateWithoutAiHistoriesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2542,6 +2613,7 @@ export type UserUpdateWithoutAiHistoriesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2564,6 +2636,147 @@ export type UserUncheckedUpdateWithoutAiHistoriesInput = {
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
   userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
+  todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
+  chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
+  chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDocsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
+  todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
+  chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
+  chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDocsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
+  todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
+  chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
+  chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDocsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocsInput, Prisma.UserUncheckedCreateWithoutDocsInput>
+}
+
+export type UserUpsertWithoutDocsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocsInput, Prisma.UserUncheckedUpdateWithoutDocsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocsInput, Prisma.UserUncheckedCreateWithoutDocsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocsInput, Prisma.UserUncheckedUpdateWithoutDocsInput>
+}
+
+export type UserUpdateWithoutDocsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
+  todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
+  chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
+  chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
@@ -2603,6 +2816,7 @@ export type UserCreateWithoutDocumentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
 }
@@ -2633,6 +2847,7 @@ export type UserUncheckedCreateWithoutDocumentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
 }
@@ -2679,6 +2894,7 @@ export type UserUpdateWithoutDocumentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
 }
@@ -2709,6 +2925,7 @@ export type UserUncheckedUpdateWithoutDocumentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -2738,6 +2955,7 @@ export type UserCreateWithoutNotificationsInput = {
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -2768,6 +2986,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2814,6 +3033,7 @@ export type UserUpdateWithoutNotificationsInput = {
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2844,6 +3064,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2874,6 +3095,7 @@ export type UserCreateWithoutSchedulesInput = {
   decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
@@ -2904,6 +3126,7 @@ export type UserUncheckedCreateWithoutSchedulesInput = {
   decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2950,6 +3173,7 @@ export type UserUpdateWithoutSchedulesInput = {
   decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
@@ -2980,6 +3204,7 @@ export type UserUncheckedUpdateWithoutSchedulesInput = {
   decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -3011,6 +3236,7 @@ export type UserCreateWithoutChatRoomsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
 }
@@ -3041,6 +3267,7 @@ export type UserUncheckedCreateWithoutChatRoomsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
 }
@@ -3087,6 +3314,7 @@ export type UserUpdateWithoutChatRoomsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
 }
@@ -3117,6 +3345,7 @@ export type UserUncheckedUpdateWithoutChatRoomsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -3147,6 +3376,7 @@ export type UserCreateWithoutChatMessagesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberCreateNestedManyWithoutUserInput
 }
@@ -3177,6 +3407,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
   todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedCreateNestedManyWithoutUserInput
 }
@@ -3223,6 +3454,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUpdateManyWithoutUserNestedInput
 }
@@ -3253,6 +3485,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
   todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatRooms?: Prisma.ChatRoomMemberUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -3278,6 +3511,7 @@ export type UserCountOutputType = {
   notifications: number
   schedules: number
   todos: number
+  docs: number
   documents: number
   chatRooms: number
   chatMessages: number
@@ -3299,6 +3533,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   schedules?: boolean | UserCountOutputTypeCountSchedulesArgs
   todos?: boolean | UserCountOutputTypeCountTodosArgs
+  docs?: boolean | UserCountOutputTypeCountDocsArgs
   documents?: boolean | UserCountOutputTypeCountDocumentsArgs
   chatRooms?: boolean | UserCountOutputTypeCountChatRoomsArgs
   chatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs
@@ -3422,6 +3657,13 @@ export type UserCountOutputTypeCountTodosArgs<ExtArgs extends runtime.Types.Exte
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountDocsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentChunkWhereInput
 }
@@ -3467,6 +3709,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   schedules?: boolean | Prisma.User$schedulesArgs<ExtArgs>
   todos?: boolean | Prisma.User$todosArgs<ExtArgs>
+  docs?: boolean | Prisma.User$docsArgs<ExtArgs>
   documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
   chatRooms?: boolean | Prisma.User$chatRoomsArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -3529,6 +3772,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   schedules?: boolean | Prisma.User$schedulesArgs<ExtArgs>
   todos?: boolean | Prisma.User$todosArgs<ExtArgs>
+  docs?: boolean | Prisma.User$docsArgs<ExtArgs>
   documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
   chatRooms?: boolean | Prisma.User$chatRoomsArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -3555,6 +3799,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     schedules: Prisma.$AgentSchedulePayload<ExtArgs>[]
     todos: Prisma.$TodoPayload<ExtArgs>[]
+    docs: Prisma.$DocumentPayload<ExtArgs>[]
     documents: Prisma.$DocumentChunkPayload<ExtArgs>[]
     chatRooms: Prisma.$ChatRoomMemberPayload<ExtArgs>[]
     chatMessages: Prisma.$ChatMessagePayload<ExtArgs>[]
@@ -3979,6 +4224,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   schedules<T extends Prisma.User$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   todos<T extends Prisma.User$todosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$todosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TodoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  docs<T extends Prisma.User$docsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$docsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documents<T extends Prisma.User$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatRooms<T extends Prisma.User$chatRoomsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatRoomsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatRoomMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4771,6 +5017,30 @@ export type User$todosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   distinct?: Prisma.TodoScalarFieldEnum | Prisma.TodoScalarFieldEnum[]
+}
+
+/**
+ * User.docs
+ */
+export type User$docsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
 }
 
 /**

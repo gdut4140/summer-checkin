@@ -16,6 +16,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { safeExecute } from "./utils";
 import { getRelevantMemories } from "@/lib/memory";
+import { syncTasksFromDocument } from "@/lib/studio/plan-sync";
+import { splitPlanTasks } from "@/lib/plan-split";
 import type {
   PlanInfo,
   CheckinInfo,
@@ -34,16 +36,26 @@ export function createStudyTools(userId: string) {
   const createPlan = tool({
     description:
       "为用户创建一个新的学习计划。当用户请求制定学习计划、安排学习任务时使用。" +
-      "你需要从对话中提取计划名称、描述、目标和预计时长。",
+      "你需要从对话中提取计划名称、描述、目标和预计时长，并生成一份详细的学习计划文档（Markdown），" +
+      "文档要包含具体的学习指导：每个阶段学什么、怎么学、推荐资源、完成标准。",
 
     inputSchema: z.object({
       name: z.string().describe("计划名称，例如：'30天React学习计划'"),
       description: z.string().optional().describe("计划的详细描述"),
       goal: z.string().optional().describe("最终目标"),
       targetHours: z.number().optional().describe("目标总时长（小时）"),
+      document: z
+        .string()
+        .optional()
+        .describe(
+          "详细的学习计划文档（Markdown）。必须包含：## 目标、## 计划说明、" +
+            "## 学习指导（分阶段，每阶段列出具体学习内容、学习方法、推荐资源、完成标准）、" +
+            "## 任务安排（用 - [ ] 列出概括性任务标题清单）。" +
+            "这份文档是给用户阅读和学习执行用的，越详细、指导性越强越好。"
+        ),
     }),
 
-    execute: async ({ name, description, goal, targetHours }) => {
+    execute: async ({ name, description, goal, targetHours, document }) => {
       return safeExecute("createPlan", async (): Promise<CreatePlanData> => {
         console.log(`[createPlan] 用户 ${userId} 创建计划: ${name}`);
 
@@ -54,9 +66,33 @@ export function createStudyTools(userId: string) {
             description: description ?? null,
             goal: goal ?? null,
             targetHours: targetHours ?? 0,
+            document: document ?? null,
             status: "active",
           },
         });
+
+        // 创建计划后自动拆分任务，让任务抽屉立即有任务，无需用户手动点「刷新任务」。
+        // ① 文档里已含「## 任务安排」段落 → 直接同步到 PlanTask（零额外 AI 调用）
+        // ② 否则 → 后台触发 AI 拆分（不阻塞工具返回）
+        void (async () => {
+          try {
+            const synced = document
+              ? await syncTasksFromDocument(plan.id, userId, document)
+              : { created: 0, updated: 0 };
+            if (synced.created === 0 && synced.updated === 0) {
+              const result = await splitPlanTasks(plan.id, userId);
+              console.log(
+                `[createPlan] 自动拆分完成 changed=${result.changed} created=${result.created ?? 0} updated=${result.updated ?? 0}`
+              );
+            } else {
+              console.log(
+                `[createPlan] 已从文档任务安排同步 created=${synced.created} updated=${synced.updated}`
+              );
+            }
+          } catch (error) {
+            console.error("[createPlan] 自动拆分失败:", error);
+          }
+        })();
 
         console.log(`[createPlan] ✅ 计划创建成功: ${plan.id}`);
         return {

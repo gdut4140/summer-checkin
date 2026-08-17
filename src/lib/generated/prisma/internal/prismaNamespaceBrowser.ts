@@ -70,6 +70,7 @@ export const ModelName = {
   AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
   AIHistory: 'AIHistory',
+  Document: 'Document',
   DocumentChunk: 'DocumentChunk',
   Notification: 'Notification',
   AgentSchedule: 'AgentSchedule',
@@ -146,9 +147,11 @@ export const PlanScalarFieldEnum = {
   name: 'name',
   description: 'description',
   goal: 'goal',
+  document: 'document',
+  tasksSourceHash: 'tasksSourceHash',
+  tasksSplittingAt: 'tasksSplittingAt',
   targetHours: 'targetHours',
   startDate: 'startDate',
-  endDate: 'endDate',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -372,6 +375,18 @@ export const AIHistoryScalarFieldEnum = {
 } as const
 
 export type AIHistoryScalarFieldEnum = (typeof AIHistoryScalarFieldEnum)[keyof typeof AIHistoryScalarFieldEnum]
+
+
+export const DocumentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
 export const DocumentChunkScalarFieldEnum = {
