@@ -1,10 +1,8 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, format } from "date-fns";
-import { CalendarCheck, Clock, ChartLineUp, Star, Lightning } from "@phosphor-icons/react/dist/ssr";
+import { CalendarCheck, ChartLineUp, Star, Lightning } from "@phosphor-icons/react/dist/ssr";
 import { ProfileHeader } from "@/components/profile/profile-header";
-import { ActivityTimeline } from "@/components/profile/activity-timeline";
-import type { CheckinWithPlan } from "@/types";
 
 export default async function ProfilePage() {
   const user = await requireAuth();
@@ -21,18 +19,6 @@ export default async function ProfilePage() {
   const totalTasks = plans.reduce((s, p) => s + p.tasks.length, 0);
   const doneTasks = plans.reduce((s, p) => s + p.tasks.filter((t) => t.status === "done").length, 0);
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-
-  // 最近行动
-  const recentCheckins = await prisma.checkin.findMany({
-    where: { userId: user.id },
-    orderBy: { checkinDate: "desc" },
-    take: 8,
-    include: { plan: { select: { name: true } } },
-  });
-  const checkinsWithPlan: CheckinWithPlan[] = recentCheckins.map((c) => ({
-    id: c.id, content: c.content, hours: c.hours, subject: c.subject,
-    mood: c.mood, checkinDate: c.checkinDate, planName: c.plan?.name ?? null,
-  }));
 
   // 加入天数
   const joinDays = fullUser?.createdAt
@@ -117,19 +103,8 @@ export default async function ProfilePage() {
         </p>
       </section>
 
-      {/* 最近行动 */}
-      {checkinsWithPlan.length > 0 && (
-        <section>
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white/70">
-            <Clock className="size-4 text-[#d7ef83]" weight="fill" />
-            最近行动
-          </h2>
-          <ActivityTimeline checkins={checkinsWithPlan} />
-        </section>
-      )}
-
       {/* 空状态 */}
-      {plans.length === 0 && checkinsWithPlan.length === 0 && (
+      {plans.length === 0 && (
         <section className="rounded-lg border border-dashed border-white/10 py-16 text-center">
           <p className="text-sm text-white/40">这里还空着</p>
           <p className="mt-1 text-xs text-white/25">去学习计划页创建第一个计划，或者开始打卡吧</p>
