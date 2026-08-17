@@ -40,8 +40,8 @@ const typeLabel: Record<string, string> = {
 
 function canViewDoc(sourceType: string, sourceName: string) {
   const normalized = sourceType.toLowerCase();
-  if (["text", "txt", "markdown", "md"].includes(normalized)) return true;
-  return /\.(txt|md|markdown)$/i.test(sourceName);
+  if (["markdown", "md"].includes(normalized)) return true;
+  return /\.(md|markdown)$/i.test(sourceName);
 }
 
 function formatBytes(bytes: number) {
@@ -190,7 +190,7 @@ export function KnowledgeBase() {
   const viewDoc = useCallback(
     (doc: DocInfo) => {
       if (!canViewDoc(doc.sourceType, doc.sourceName)) {
-        toast.error("当前仅支持查看 txt / md 文档");
+        toast.error("当前仅支持查看 markdown 文档");
         return;
       }
       router.push(`/docs/knowledge/${encodeURIComponent(doc.sourceName)}`);

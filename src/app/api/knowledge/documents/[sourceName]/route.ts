@@ -31,11 +31,11 @@ export async function GET(
 
   const sourceType = chunks[0].sourceType;
   const typeLower = sourceType.toLowerCase();
-  const isViewableType = ["text", "txt", "markdown", "md"].includes(typeLower);
-  const isViewableExt = /\.(txt|md|markdown)$/i.test(decoded);
+  const isViewableType = ["markdown", "md"].includes(typeLower);
+  const isViewableExt = /\.(md|markdown)$/i.test(decoded);
   if (!isViewableType && !isViewableExt) {
     return NextResponse.json(
-      { error: "仅支持查看 txt / md 文档" },
+      { error: "仅支持查看 markdown 文档" },
       { status: 400 }
     );
   }

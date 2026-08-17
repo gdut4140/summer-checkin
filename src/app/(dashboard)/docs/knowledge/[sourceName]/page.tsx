@@ -22,7 +22,7 @@ export default async function KnowledgeDocReadPage({
     where: {
       userId: user.id,
       sourceName: decoded,
-      sourceType: { in: ["text", "txt", "markdown", "md"] },
+      sourceType: { in: ["markdown", "md"] },
     },
     select: {
       id: true,
@@ -36,10 +36,10 @@ export default async function KnowledgeDocReadPage({
 
   if (chunks.length === 0) notFound();
 
-  const fallbackAllowedByExt = /\.(txt|md|markdown)$/i.test(decoded);
+  const fallbackAllowedByExt = /\.(md|markdown)$/i.test(decoded);
   if (!fallbackAllowedByExt) {
     const typeLower = chunks[0].sourceType.toLowerCase();
-    if (!["text", "txt", "markdown", "md"].includes(typeLower)) {
+    if (!["markdown", "md"].includes(typeLower)) {
       notFound();
     }
   }
