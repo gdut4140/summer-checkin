@@ -1,8 +1,8 @@
 export default function DashboardLoading() {
   return (
-    <div className="min-h-[100dvh] flex flex-col">
-      <div className="h-[4.5rem] border-b border-white/8 bg-background/80 animate-pulse" />
-      <div className="product-page">
+    // 与 studio-root 纯黑兜底保持一致，dashboard→studio 路由切换过渡无跳色
+    <div className="min-h-[100dvh] flex flex-col pt-20" style={{ backgroundColor: "#050505" }}>
+      <div className="product-page px-4 sm:px-6 lg:px-10">
         <div className="space-y-6">
           <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
           <div className="h-9 w-52 bg-white/10 rounded animate-pulse" />

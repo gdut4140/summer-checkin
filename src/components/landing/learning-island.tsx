@@ -88,66 +88,66 @@ const PALETTE_RAIN: ScenePalette = {
   sceneIntensity: 1.3,
 };
 
-// ── 雪景调色板（冰蓝灰 + 纯白，全非绿色） ──
+// ── 雪景调色板（雪山 + 盖雪欧洲小镇，灰蓝 + 暖木屋） ──
 const PALETTE_SNOW: ScenePalette = {
-  treeTrunk: "#6b625c",
-  treeCrown1: "#e6f2ff",
-  treeCrown2: "#d4e8ff",
-  treeCrown3: "#c6e0ff",
-  treeCrown4: "#b8d4ff",
-  mountain1: "#557194",
-  mountain2: "#4a6380",
-  mountainSnow: "#f4faff",
-  fern1: "#b8d2e8",
-  fern2: "#cde0f0",
-  rock1: "#55667c",
-  rock2: "#6a7c94",
-  pond: "#7fb4d8",
-  pondFlower: "#f0dde5",
-  waterTop: "#5fa3cc",
-  rockTop: "#879cb8",
-  mossTop: "#dbe8f4",
-  forestTop: "#cddde8",
-  tileSide: "#2a3d55",
-  riverTop: "#3b9ec8",
-  riverEmissive: "#0a2a3a",
-  villageWall: "#d4c8a8",
-  villageRoof: "#c47a4a",
-  villageTop: "#a9b8cf",
-  sceneSky: "#e8f4ff",
-  sceneGround: "#0a1929",
-  sceneIntensity: 1.3,
+  treeTrunk: "#7a6e62",
+  treeCrown1: "#f4f8fb",
+  treeCrown2: "#e4eaf0",
+  treeCrown3: "#d0dae6",
+  treeCrown4: "#c0cee0",
+  mountain1: "#6a7a8c",
+  mountain2: "#5a6a7c",
+  mountainSnow: "#f8faff",
+  fern1: "#d0dae6",
+  fern2: "#e4eaf0",
+  rock1: "#5a6a7c",
+  rock2: "#7a8a9c",
+  pond: "#c0cee0",
+  pondFlower: "#e4eaf0",
+  waterTop: "#9ab0c8",
+  rockTop: "#d0dae6",
+  mossTop: "#e4eaf0",
+  forestTop: "#d8e2ee",
+  tileSide: "#2e3e4e",
+  riverTop: "#d0dae6",
+  riverEmissive: "#1a2a38",
+  villageWall: "#e8ddd0",
+  villageRoof: "#a89888",
+  villageTop: "#f0f4f8",
+  sceneSky: "#f0f5f9",
+  sceneGround: "#1e2e3e",
+  sceneIntensity: 1.22,
 };
 
-// ── 云天调色板（柔和卡其（#d6be98 奶油白版）+ 米白冠） ──
+// ── 暖云调色板（欧洲小镇 + 云层山脉，米白 + 暖陶瓦） ──
 const PALETTE_CLOUD: ScenePalette = {
-  treeTrunk: "#a69880",         // 暖棕树干（再白+1）
-  treeCrown1: "#faf6e8",         // 米白（再白+1）
-  treeCrown2: "#f1e8d0",         // 米黄卡其（再白+1）
-  treeCrown3: "#e6dab8",         // 卡其淡黄绿（再白+1）
-  treeCrown4: "#d9cdab",         // 淡卡其（再白+1）
-  mountain1: "#afaa9b",          // 远山 中性米灰（再白+1）
-  mountain2: "#c4beaf",          // 近山 米灰白（再白+1）
-  mountainSnow: "#fbf8ee",       // 云状山顶 米白（再白+1）
-  fern1: "#dde8c9",              // 蕨叶 淡灰绿（再白+1）
-  fern2: "#e9f3d3",              // 蕨叶 更淡绿（再白+1）
-  rock1: "#bdb49e",              // 岩石 暖米棕（再白+1）
-  rock2: "#d9d3c0",              // 岩石 米灰（再白+1）
-  pond: "#d3dfe9",               // 池塘 淡灰蓝（再白+1）
-  pondFlower: "#f3e2df",         // 花 淡粉米（再白+1）
-  waterTop: "#a9c2d5",           // 水顶 灰蓝（再白+1）
-  rockTop: "#e7e1cf",            // 岩石顶 米灰（再白+1）
-  mossTop: "#f3ebd6",            // 苔藓顶 暖米灰（再白+1）
-  forestTop: "#dde4c7",          // 森林顶 灰黄绿（再白+1）
-  tileSide: "#4e493b",           // 方块侧 暖深棕灰（再白+1）
-  riverTop: "#b6ccdc",           // 河 淡灰蓝（再白+1）
-  riverEmissive: "#373a3f",      // 河 自发光 深灰（再白+1）
-  villageWall: "#f4e9cb",        // 村墙 米黄（再白+1）
-  villageRoof: "#a48a64",        // 屋顶 深卡其棕（再白+1）
-  villageTop: "#ebdcb8",         // 村顶 淡黄（再白+1）
-  sceneSky: "#faf6e8",           // hemilight 天空色 米白柔（再白+1）
-  sceneGround: "#4a4639",        // hemilight 地面色 暖深棕灰（再白+1）
-  sceneIntensity: 1.26,          // 1.24→1.26 微提 2%
+  treeTrunk: "#8a7a62",
+  treeCrown1: "#faf4e4",
+  treeCrown2: "#f2e8cc",
+  treeCrown3: "#e8dcba",
+  treeCrown4: "#dcd0a6",
+  mountain1: "#8a9aaa",
+  mountain2: "#a0aeb8",
+  mountainSnow: "#fefcf4",
+  fern1: "#d8dfc4",
+  fern2: "#e8ecd4",
+  rock1: "#aaa08a",
+  rock2: "#c4bca6",
+  pond: "#c8d6de",
+  pondFlower: "#f0dcd4",
+  waterTop: "#9ab4c4",
+  rockTop: "#e4dcc8",
+  mossTop: "#f0e8d2",
+  forestTop: "#d4dcb8",
+  tileSide: "#3e3a2e",
+  riverTop: "#a8c0d0",
+  riverEmissive: "#2a2e34",
+  villageWall: "#f4ead4",
+  villageRoof: "#b0784a",
+  villageTop: "#f0e4cc",
+  sceneSky: "#faf4e4",
+  sceneGround: "#3a362e",
+  sceneIntensity: 1.28,
 };
 
 // ── Context：子组件（Tree / Fern / Rock / TileMesh 等）统一读 palette ──
@@ -456,23 +456,25 @@ function TinyRock({ variant }: { variant: number }) {
 }
 
 function TinyHouse({ variant }: { variant: number }) {
-  const woodColor = variant % 2 === 0 ? "#8b6b4a" : "#7a5c3e";
-  const roofColor = variant % 3 === 0 ? "#5c3a2e" : variant % 3 === 1 ? "#4a2c20" : "#6b4030";
+  const palette = usePalette();
+  const woodColor = palette.treeTrunk;
+  const roofColor = palette.villageRoof;
+  const wallColor = palette.villageWall;
   return (
     <group>
-      {/* 屋体 — 原木 */}
+      {/* 屋体 — 使用场景色 */}
       <mesh castShadow position={[0, 0.1, 0]}>
         <boxGeometry args={[0.18, 0.2, 0.15]} />
-        <meshStandardMaterial color={woodColor} roughness={0.85} />
+        <meshStandardMaterial color={wallColor} roughness={0.85} />
       </mesh>
       {/* 横向木纹条 */}
       {[0.04, 0.1, 0.16].map((y) => (
         <mesh key={y} position={[0, y, 0.08]}>
           <boxGeometry args={[0.19, 0.02, 0.01]} />
-          <meshStandardMaterial color="#6b4a30" roughness={0.9} />
+          <meshStandardMaterial color={woodColor} roughness={0.9} />
         </mesh>
       ))}
-      {/* 三角屋顶 — 深色木板 */}
+      {/* 三角屋顶 — 深陶瓦色 */}
       <mesh castShadow position={[0, 0.23, 0]}>
         <coneGeometry args={[0.15, 0.12, 4]} />
         <meshStandardMaterial color={roofColor} flatShading roughness={0.95} />
@@ -485,54 +487,56 @@ function TinyHouse({ variant }: { variant: number }) {
       {/* 门 */}
       <mesh position={[-0.04, 0.06, 0.08]}>
         <boxGeometry args={[0.035, 0.08, 0.01]} />
-        <meshStandardMaterial color="#4a3020" roughness={0.8} />
+        <meshStandardMaterial color={woodColor} roughness={0.8} />
       </mesh>
       {/* 烟囱 */}
       <mesh position={[0.05, 0.28, -0.02]}>
         <boxGeometry args={[0.03, 0.08, 0.03]} />
-        <meshStandardMaterial color="#6b5a4a" roughness={0.9} />
+        <meshStandardMaterial color={woodColor} roughness={0.9} />
       </mesh>
     </group>
   );
 }
 
 function Waterfall() {
+  const palette = usePalette();
   return (
     <group>
       {/* 水流柱 */}
       <mesh position={[0, -0.12, 0]}>
         <cylinderGeometry args={[0.04, 0.06, 0.35, 8]} />
-        <meshStandardMaterial color="#5abcdd" roughness={0.1} emissive="#1a4a60" emissiveIntensity={0.5} transparent opacity={0.75} />
+        <meshStandardMaterial color={palette.riverTop} roughness={0.1} emissive={palette.riverEmissive} emissiveIntensity={0.5} transparent opacity={0.75} />
       </mesh>
       {/* 水花 */}
       <mesh position={[0.03, -0.26, 0.02]}>
         <sphereGeometry args={[0.07, 6, 4]} />
-        <meshBasicMaterial color="#a0e8f8" transparent opacity={0.25} />
+        <meshBasicMaterial color={palette.waterTop} transparent opacity={0.25} />
       </mesh>
       <mesh position={[-0.04, -0.28, -0.01]}>
         <sphereGeometry args={[0.05, 5, 3]} />
-        <meshBasicMaterial color="#c8f4ff" transparent opacity={0.2} />
+        <meshBasicMaterial color={palette.waterTop} transparent opacity={0.2} />
       </mesh>
       {/* 顶部小水池 */}
       <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.1, 8]} />
-        <meshStandardMaterial color="#3b9ec8" roughness={0.15} emissive="#0a2a3a" emissiveIntensity={0.3} transparent opacity={0.8} />
+        <meshStandardMaterial color={palette.riverTop} roughness={0.15} emissive={palette.riverEmissive} emissiveIntensity={0.3} transparent opacity={0.8} />
       </mesh>
     </group>
   );
 }
 
 function RiverSurface() {
+  const palette = usePalette();
   return (
     <group>
       <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.13, 8]} />
-        <meshStandardMaterial color="#3b9ec8" roughness={0.15} emissive="#0a2a3a" emissiveIntensity={0.4} transparent opacity={0.9} />
+        <meshStandardMaterial color={palette.riverTop} roughness={0.15} emissive={palette.riverEmissive} emissiveIntensity={0.4} transparent opacity={0.9} />
       </mesh>
       {/* 波纹 */}
       <mesh position={[0.04, 0.02, 0.02]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.05, 0.07, 16]} />
-        <meshBasicMaterial color="#6cc8f0" transparent opacity={0.35} side={2} />
+        <meshBasicMaterial color={palette.waterTop} transparent opacity={0.35} side={2} />
       </mesh>
     </group>
   );

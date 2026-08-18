@@ -43,22 +43,22 @@ export function PlanCard({ plan, onProgress }: { plan: PlanWithProgress; onProgr
             type="button"
             aria-label="删除计划"
             onClick={(e) => { e.stopPropagation(); setDeleteOpen(true); }}
-            className="flex size-8 items-center justify-center rounded-md text-white/28 transition hover:bg-red-500/12 hover:text-red-300"
+            className="flex size-8 items-center justify-center rounded-md text-muted-foreground/60 transition hover:bg-red-500/12 hover:text-red-400"
           >
             <Trash className="size-4" />
           </button>
         </div>
 
-        <h3 className="mt-3 pr-8 text-lg font-semibold leading-7 text-white">{plan.name}</h3>
-        <div className="mt-2 flex min-h-10 items-start gap-2 text-xs leading-5 text-white/38">
-          <Target className="mt-0.5 size-3.5 shrink-0 text-[#67b4c9]" weight="duotone" />
+        <h3 className="mt-3 pr-8 text-lg font-semibold leading-7 text-foreground">{plan.name}</h3>
+        <div className="mt-2 flex min-h-10 items-start gap-2 text-xs leading-5 text-muted-foreground">
+          <Target className="mt-0.5 size-3.5 shrink-0 text-primary" weight="duotone" />
           <p className="line-clamp-2">{plan.goal || plan.description || "还没有填写具体目标，打开计划继续完善。"}</p>
         </div>
 
         <div className="mt-5 flex-1 border-t border-white/8 pt-4">
           <div className="flex items-end justify-between gap-3">
-            <div><p className="text-[10px] uppercase text-white/30">Progress</p><p className="mt-0.5 text-3xl font-semibold tabular-nums text-white">{plan.progress}<span className="ml-0.5 text-sm font-normal text-white/32">%</span></p></div>
-            <p className="pb-1 text-xs tabular-nums text-white/42">{plan.completedTasks} / {plan.totalTasks} 项任务</p>
+            <div><p className="text-[10px] uppercase text-muted-foreground/60">Progress</p><p className="mt-0.5 text-3xl font-semibold tabular-nums text-foreground">{plan.progress}<span className="ml-0.5 text-sm font-normal text-muted-foreground/60">%</span></p></div>
+            <p className="pb-1 text-xs tabular-nums text-muted-foreground/70">{plan.completedTasks} / {plan.totalTasks} 项任务</p>
           </div>
           <div className="mt-3 h-px overflow-hidden bg-white/10"><div className="h-full bg-primary transition-[width] duration-700" style={{ width: `${plan.progress}%` }} /></div>
         </div>
@@ -66,9 +66,9 @@ export function PlanCard({ plan, onProgress }: { plan: PlanWithProgress; onProgr
         <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-3">
           <button
             onClick={(e) => { e.stopPropagation(); onProgress?.(plan); }}
-            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-white/52 transition hover:bg-white/6 hover:text-white"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-white/6 hover:text-foreground"
           >
-            <ListChecks className="size-4 text-[#67b4c9]" weight="bold" />
+            <ListChecks className="size-4 text-primary" weight="bold" />
             任务清单
           </button>
           <button
@@ -82,7 +82,7 @@ export function PlanCard({ plan, onProgress }: { plan: PlanWithProgress; onProgr
       </article>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="border border-white/12 bg-background/95 text-white backdrop-blur-xl">
+        <DialogContent className="border border-white/12 bg-background/95 text-foreground backdrop-blur-xl">
           <DialogHeader><DialogTitle>删除这个计划？</DialogTitle><DialogDescription>“{plan.name}”删除后无法恢复，关联打卡记录会保留。</DialogDescription></DialogHeader>
           <DialogFooter><Button variant="outline" onClick={() => setDeleteOpen(false)}>取消</Button><Button onClick={handleDelete} disabled={deleting}>{deleting ? "删除中..." : "确认删除"}</Button></DialogFooter>
         </DialogContent>

@@ -53,7 +53,6 @@ export default async function PlansPage() {
           </div>
           <NewPlanButton />
         </header>
-
         <section className="product-metrics mt-7 grid-cols-1 sm:grid-cols-3" aria-label="计划总览">
           {overview.map((item, index) => (
             <div key={item.label} className={`product-metric flex items-center gap-3 ${index > 0 ? "border-t border-white/10 sm:border-t-0" : ""}`}>
@@ -61,8 +60,8 @@ export default async function PlansPage() {
                 <item.icon className="size-[18px]" weight="duotone" />
               </span>
               <div className="min-w-0">
-                <p className="text-[11px] text-white/38">{item.label}</p>
-                <p className="mt-1 text-[1.35rem] font-semibold tabular-nums text-white">{item.value}<span className="ml-1 text-xs font-normal text-white/34">{item.unit}</span></p>
+                <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                <p className="mt-1 text-[1.35rem] font-semibold tabular-nums text-foreground">{item.value}<span className="ml-1 text-xs font-normal text-muted-foreground">{item.unit}</span></p>
               </div>
             </div>
           ))}
@@ -71,18 +70,18 @@ export default async function PlansPage() {
         {plansWithProgress.length === 0 ? (
           <div className="mt-8 flex min-h-72 flex-col items-center justify-center border border-dashed border-white/16 bg-black/10 px-5 text-center">
             <Flag className="size-8 text-primary" weight="duotone" />
-            <h2 className="mt-4 text-base font-medium text-white">从一个明确的目标开始</h2>
-            <p className="mt-1 max-w-sm text-sm leading-6 text-white/42">计划不需要复杂，先写下目标时长，再逐步补充任务。</p>
+            <h2 className="mt-4 text-base font-medium text-foreground">从一个明确的目标开始</h2>
+            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">计划不需要复杂，先写下目标时长，再逐步补充任务。</p>
             <CreateFirstPlanLink />
           </div>
         ) : (
           <section className="mt-8" aria-labelledby="plan-list-title">
             <div className="mb-4 flex items-end justify-between border-b border-white/8 pb-3">
               <div>
-                <h2 id="plan-list-title" className="text-sm font-medium text-white/86">全部计划</h2>
-                <p className="mt-1 text-xs text-white/32">打开计划进入文档工作室，任务进度可在侧栏快速更新。</p>
+                <h2 id="plan-list-title" className="text-sm font-medium text-foreground/90">全部计划</h2>
+                <p className="mt-1 text-xs text-muted-foreground">打开计划进入文档工作室，任务进度可在侧栏快速更新。</p>
               </div>
-              <span className="text-xs tabular-nums text-white/34">{plansWithProgress.length} 项</span>
+              <span className="text-xs tabular-nums text-muted-foreground">{plansWithProgress.length} 项</span>
             </div>
             <PlanList plans={plansWithProgress} />
           </section>

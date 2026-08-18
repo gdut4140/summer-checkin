@@ -165,24 +165,24 @@ const InnerEditor = forwardRef<EditorPaneHandle, MilkdownEditorProps>(
 
         {selection && (
           <div
-            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-white/12 bg-background/95 p-1 shadow-xl backdrop-blur"
+            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-foreground/12 bg-background/95 p-1 shadow-xl backdrop-blur"
             style={{ left: selection.x, top: selection.y - 46 }}
           >
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectionAction("ask")}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-foreground/80 transition-colors hover:bg-white/10 hover:text-foreground"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-foreground/80 transition-colors hover:bg-foreground/10 hover:text-foreground"
             >
               <ChatCircleText className="size-3.5" />
               问 AI
             </button>
-            <span className="h-4 w-px bg-white/10" />
+            <span className="h-4 w-px bg-foreground/10" />
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectionAction("edit")}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-foreground/10"
             >
               <MagicWand className="size-3.5" weight="fill" />
               改这段

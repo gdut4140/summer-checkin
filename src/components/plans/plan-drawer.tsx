@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, CheckCircle, Circle, CircleDashed, ListChecks, PencilSimple, Check } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -24,6 +25,9 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [saving, setSaving] = useState(false);
+  // Portal 必须等客户端挂载后才能拿到 document.body（SSR/首屏 hydration 时不渲染）
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // 抽屉打开 / 切换计划时重置本地状态（渲染期同步 props 状态，避免在 effect 里同步 setState）
   const planKey = plan?.id ?? null;
@@ -190,145 +194,171 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
   const total = tasks.length;
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  return (
-    <>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-            onClick={onClose} className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
-        )}
-      </AnimatePresence>
+  return mounted && typeof document !== "undefined"
+    ? createPortal(
+        <>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                onClick={onClose}
+                className="fixed inset-0 z-40 bg-black/55 backdrop-blur-[3px]"
+              />
+            )}
+          </AnimatePresence>
 
-      <AnimatePresence>
-        {isOpen && plan && (
-          <motion.div initial={{ x: "100%" }} animate={{ x: "0%" }} exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-white/10 bg-background text-white shadow-2xl sm:w-[42%] lg:w-[34%]">
+          <AnimatePresence>
+            {isOpen && plan && (
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: "0%" }}
+                exit={{ x: "calc(100% + 24px)" }}
+                transition={{ type: "spring", damping: 32, stiffness: 340, mass: 0.9 }}
+                className="fixed inset-y-0 right-0 z-50 flex h-full w-full flex-col
+                           rounded-l-2xl
+                           border-l border-white/10
+                           bg-[var(--surface-nav-bg)]/95 text-foreground
+                           shadow-[0_-8px_40px_-12px_rgba(0,0,0,0.55),_-18px_0_50px_-18px_rgba(0,0,0,0.55)]
+                           backdrop-blur-2xl
+                           sm:w-[48%] md:w-[44%] lg:w-[36%] xl:w-[32%]"
+              >
+                {/* 左侧抽屉抓手：提示这是从右屏滑入的面板 */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute left-[6px] top-1/2 z-10 flex h-16 -translate-y-1/2 flex-col items-center justify-center gap-1.5 opacity-70"
+                >
+                  <span className="h-8 w-[3px] rounded-full bg-white/[0.15] shadow-[0_0_4px_rgba(255,255,255,0.08)]" />
+                </div>
 
-            {/* 头部：标题可手动编辑 */}
-            <div className="flex shrink-0 items-start gap-3 border-b border-white/8 px-5 py-4">
-              <div className="min-w-0 flex-1">
-                {editing ? (
-                  <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") void savePlan(); if (e.key === "Escape") { setEditing(false); setEditName(plan.name); } }}
-                    className="w-full bg-transparent text-lg font-semibold outline-none border-b-2 border-primary pb-0.5" />
-                ) : (
-                  <h2 className="text-lg font-semibold truncate">{plan.name}</h2>
-                )}
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                {editing ? (
-                  <>
-                    <button onClick={() => void savePlan()} disabled={saving || !editName.trim()}
-                      className="rounded-lg p-1.5 text-primary hover:bg-white/10 transition disabled:opacity-30">
-                      <Check className="h-5 w-5" weight="bold" />
-                    </button>
-                    <button onClick={() => { setEditing(false); setEditName(plan.name); }}
-                      className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition">
+                {/* 头部：标题可手动编辑 */}
+                <div className="flex shrink-0 items-start gap-3 border-b border-white/8 px-5 pt-4 pb-3">
+                  <div className="min-w-0 flex-1">
+                    {editing ? (
+                      <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") void savePlan(); if (e.key === "Escape") { setEditing(false); setEditName(plan.name); } }}
+                        className="w-full bg-transparent text-lg font-semibold outline-none border-b-2 border-primary pb-0.5" />
+                    ) : (
+                      <h2 className="text-lg font-semibold truncate">{plan.name}</h2>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {editing ? (
+                      <>
+                        <button onClick={() => void savePlan()} disabled={saving || !editName.trim()}
+                          className="rounded-lg p-1.5 text-primary hover:bg-white/10 transition disabled:opacity-30">
+                          <Check className="h-5 w-5" weight="bold" />
+                        </button>
+                        <button onClick={() => { setEditing(false); setEditName(plan.name); }}
+                          className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition">
+                          <X className="h-5 w-5" weight="bold" />
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => setEditing(true)}
+                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition">
+                        <PencilSimple className="h-5 w-5" weight="bold" />
+                      </button>
+                    )}
+                    <button onClick={onClose} className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition">
                       <X className="h-5 w-5" weight="bold" />
                     </button>
-                  </>
-                ) : (
-                  <button onClick={() => setEditing(true)}
-                    className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition">
-                    <PencilSimple className="h-5 w-5" weight="bold" />
-                  </button>
-                )}
-                <button onClick={onClose} className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition">
-                  <X className="h-5 w-5" weight="bold" />
-                </button>
-              </div>
-            </div>
-
-            {/* 进度 */}
-            <div className="shrink-0 border-b border-white/8 px-5 py-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-white/40">任务进度</span>
-                <span className="text-xs tabular-nums">{completed}/{total} 项 · {progress}%</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
-                <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-
-            {/* 任务列表 */}
-            <div className="flex-1 overflow-y-auto px-5 py-4">
-              {/* 文档改动后任务过期提示（拆分中隐藏，避免与刷新提示重叠） */}
-              {stale && !splitting && (
-                <div className="mb-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-3 py-2.5">
-                  <p className="text-xs leading-snug text-amber-200/90">计划已修改，任务可能不是最新的，点下方「刷新任务」更新</p>
-                </div>
-              )}
-
-              {/* 任务刷新中：后台任务真正在修改任务（splitting）或手动刷新（refreshing）时显示。
-                  注意 splitting 只在 AI 判断确认要改、实际开始重新拆分时才置上，所以大意没变的改动不会显示进度条。 */}
-              {(splitting || refreshing) && (
-                <div className="mb-3 rounded-lg border border-primary/20 bg-primary/[0.06] px-3 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="size-1.5 shrink-0 rounded-full bg-primary animate-pulse" />
-                    <p className="text-xs text-primary">任务刷新中，请稍候…</p>
-                  </div>
-                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full w-1/3 rounded-full bg-primary animate-indeterminate" />
                   </div>
                 </div>
-              )}
 
-              {/* 任务清单头部：始终提供刷新按钮（有改动或没改动都能手动刷新） */}
-              <div className="mb-1.5 flex items-center justify-between">
-                <span className="text-[11px] text-white/35">任务清单</span>
-                <button onClick={() => void runSplit()} disabled={splitting || refreshing || loading}
-                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-white/45 transition hover:bg-white/[0.06] hover:text-white disabled:opacity-50">
-                  <ListChecks className="size-3.5" />
-                  {splitting || refreshing ? "刷新中…" : "刷新任务"}
-                </button>
-              </div>
+                {/* 进度 */}
+                <div className="shrink-0 border-b border-white/8 px-5 py-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">任务进度</span>
+                    <span className="text-xs tabular-nums">{completed}/{total} 项 · {progress}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
+                    <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
 
-              {loading ? (
-                <div className="flex justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
-              ) : tasks.length === 0 && !splitting && !refreshing ? (
-                <p className="py-8 text-center text-xs text-white/30">还没有任务，点上方「刷新任务」从文档拆分</p>
-              ) : (
-                <div className="space-y-1">
-                  {tasks.map((task) => {
-                          const isToggling = toggling.has(task.id);
-                          return (
-                            <div key={task.id} className="group/task flex items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-white/[0.03]">
-                              {/* 勾选 */}
-                              <button onClick={() => !isToggling && toggleTask(task)} disabled={isToggling}
-                                className="shrink-0 mt-0.5 cursor-pointer disabled:opacity-50">
-                                {task.status === "done" ? (
-                                  <CheckCircle className="h-4 w-4 text-primary" weight="fill" />
-                                ) : task.status === "in_progress" ? (
-                                  <CircleDashed className="h-4 w-4 text-primary/60" weight="fill" />
-                                ) : (
-                                  <Circle className="h-4 w-4 text-white/15" />
-                                )}
-                              </button>
+                {/* 任务列表 */}
+                <div className="flex-1 overflow-y-auto px-5 py-4">
+                  {/* 文档改动后任务过期提示（拆分中隐藏，避免与刷新提示重叠） */}
+                  {stale && !splitting && (
+                    <div className="mb-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-3 py-2.5">
+                      <p className="text-xs leading-snug text-amber-200/90">计划已修改，任务可能不是最新的，点下方「刷新任务」更新</p>
+                    </div>
+                  )}
 
-                              {/* 文字区域也可点击打勾 */}
-                              <div
-                                className="min-w-0 flex-1 cursor-pointer"
-                                onClick={() => !isToggling && toggleTask(task)}
-                              >
-                                <p className={`text-sm ${task.status === "skipped" ? "line-through text-white/20" : task.status === "done" ? "text-white/50" : "text-white/80"}`}>
-                                  {task.title}
-                                </p>
-                                {task.category && (
-                                  <div className="mt-0.5">
-                                    <span className="text-[10px] text-white/25">{task.category === "study" ? "学习" : task.category === "project" ? "项目" : task.category === "review" ? "复习" : "练习"}</span>
+                  {/* 任务刷新中：后台任务真正在修改任务（splitting）或手动刷新（refreshing）时显示。
+                      注意 splitting 只在 AI 判断确认要改、实际开始重新拆分时才置上，所以大意没变的改动不会显示进度条。 */}
+                  {(splitting || refreshing) && (
+                    <div className="mb-3 rounded-lg border border-primary/20 bg-primary/[0.06] px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="size-1.5 shrink-0 rounded-full bg-primary animate-pulse" />
+                        <p className="text-xs text-primary">任务刷新中，请稍候…</p>
+                      </div>
+                      <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full w-1/3 rounded-full bg-primary animate-indeterminate" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 任务清单头部：始终提供刷新按钮（有改动或没改动都能手动刷新） */}
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground">任务清单</span>
+                    <button onClick={() => void runSplit()} disabled={splitting || refreshing || loading}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground disabled:opacity-50">
+                      <ListChecks className="size-3.5" />
+                      {splitting || refreshing ? "刷新中…" : "刷新任务"}
+                    </button>
+                  </div>
+
+                  {loading ? (
+                    <div className="flex justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
+                  ) : tasks.length === 0 && !splitting && !refreshing ? (
+                    <p className="py-8 text-center text-xs text-muted-foreground">还没有任务，点上方「刷新任务」从文档拆分</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {tasks.map((task) => {
+                              const isToggling = toggling.has(task.id);
+                              return (
+                                <div key={task.id} className="group/task flex items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-white/[0.03]">
+                                  {/* 勾选 */}
+                                  <button onClick={() => !isToggling && toggleTask(task)} disabled={isToggling}
+                                    className="shrink-0 mt-0.5 cursor-pointer disabled:opacity-50">
+                                    {task.status === "done" ? (
+                                      <CheckCircle className="h-4 w-4 text-primary" weight="fill" />
+                                    ) : task.status === "in_progress" ? (
+                                      <CircleDashed className="h-4 w-4 text-primary/60" weight="fill" />
+                                    ) : (
+                                      <Circle className="h-4 w-4 text-muted-foreground/30" />
+                                    )}
+                                  </button>
+
+                                  {/* 文字区域也可点击打勾 */}
+                                  <div
+                                    className="min-w-0 flex-1 cursor-pointer"
+                                    onClick={() => !isToggling && toggleTask(task)}
+                                  >
+                                    <p className={`text-sm ${task.status === "skipped" ? "line-through text-muted-foreground/50" : task.status === "done" ? "text-muted-foreground" : "text-foreground"}`}>
+                                      {task.title}
+                                    </p>
+                                    {task.category && (
+                                      <div className="mt-0.5">
+                                        <span className="text-[10px] text-muted-foreground/60">{task.category === "study" ? "学习" : task.category === "project" ? "项目" : task.category === "review" ? "复习" : "练习"}</span>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                  })}
+                                </div>
+                              );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )
+    : null;
 }

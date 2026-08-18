@@ -4,6 +4,7 @@ import { startOfDay, endOfDay, subDays, startOfYear, endOfYear, format, eachDayO
 import { LearningIsland } from "@/components/landing/learning-island";
 import { Heatmap } from "@/components/calendar/heatmap";
 import { CheckinButton } from "./checkin-button";
+import { FootprintHeading } from "./footprint-heading";
 import { SceneSelector } from "@/components/island/scene-selector";
 
 export default async function CheckinPage() {
@@ -140,14 +141,7 @@ export default async function CheckinPage() {
           <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-4 py-5 md:flex-row md:items-end md:gap-8 md:px-10 md:py-6">
             {/* 左侧：热力图 */}
             <div className="flex-1 overflow-hidden">
-              <div className="mb-3 flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground/70">
-                  雨林足迹
-                </span>
-                <span className="text-xs text-muted-foreground/60">
-                  今年探索了 {checkedInDays.size} 天 · 最长旅程 {longestStreak} 天
-                </span>
-              </div>
+              <FootprintHeading exploredDays={checkedInDays.size} longestStreak={longestStreak} />
               <div className="overflow-x-auto pb-1">
                 <Heatmap data={heatmapData} year={now.getFullYear()} compact />
               </div>

@@ -32,10 +32,11 @@ export function BackgroundVideo() {
 
   return (
     <>
-      {/* 雨林场景：背景视频 */}
+      {/* 雨林场景：背景视频（非文档页：比最亮档略收，更耐看） */}
       <video
         ref={videoRef}
         className={`bg-video transition-opacity duration-700 ${scene === "rain" ? "opacity-100" : "opacity-0"}`}
+        style={scene === "rain" ? { filter: "saturate(1.18) brightness(1.30) contrast(1.03)" } : undefined}
         autoPlay
         muted
         loop
@@ -54,7 +55,7 @@ export function BackgroundVideo() {
         aria-hidden="true"
       />
 
-      {/* 云天场景：背景图片（cloud.png） */}
+      {/* 暖云场景：背景图片（cloud.png） */}
       <div
         className={`bg-video bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${scene === "cloud" ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         style={{ backgroundImage: "url('/cloud.png')" }}

@@ -1,30 +1,39 @@
 "use client";
 
 import { useScene, type SceneType } from "@/context/scene-context";
+import { SCENE_COPY, type SceneCopy } from "@/config/theme";
 import { Check } from "@phosphor-icons/react/dist/ssr";
 
 interface SceneOption {
   id: SceneType;
-  label: string;
-  hint: string;
+  label: SceneCopy["labelShort"];
+  hint: SceneCopy["sceneHint"];
   bgStyle: React.CSSProperties;
 }
 
 const SCENES: SceneOption[] = [
   {
     id: "rain",
-    label: "雨林",
-    hint: "雨林视频背景",
+    get label() {
+      return SCENE_COPY.rain.labelShort;
+    },
+    get hint() {
+      return SCENE_COPY.rain.sceneHint;
+    },
     bgStyle: {
-      background:
-        "linear-gradient(135deg, #0a3d2e 0%, #134e3a 30%, #1e6b52 60%, #2d8a6b 100%)",
-      boxShadow: "inset 0 0 30px rgba(0,0,0,0.4)",
+      backgroundImage: "url('/rain.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
     },
   },
   {
     id: "snow",
-    label: "雪景",
-    hint: "冬日雪景背景",
+    get label() {
+      return SCENE_COPY.snow.labelShort;
+    },
+    get hint() {
+      return SCENE_COPY.snow.sceneHint;
+    },
     bgStyle: {
       backgroundImage: "url('/snow.png')",
       backgroundSize: "cover",
@@ -33,8 +42,12 @@ const SCENES: SceneOption[] = [
   },
   {
     id: "cloud",
-    label: "云天",
-    hint: "云层阳光背景",
+    get label() {
+      return SCENE_COPY.cloud.labelShort;
+    },
+    get hint() {
+      return SCENE_COPY.cloud.sceneHint;
+    },
     bgStyle: {
       backgroundImage: "url('/cloud.png')",
       backgroundSize: "cover",

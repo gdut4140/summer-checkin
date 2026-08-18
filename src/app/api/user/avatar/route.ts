@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
+import { VALID_AVATAR_IDS } from "@/lib/avatar-presets";
 
 export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { avatar } = (await req.json()) as { avatar: string };
-  const valid = ["seed","leaf","tree","water","mountain","sun","moon","flower","star","frog","owl","fox"];
-  if (!valid.includes(avatar)) {
+  if (!VALID_AVATAR_IDS.has(avatar)) {
     return NextResponse.json({ error: "Invalid avatar" }, { status: 400 });
   }
 

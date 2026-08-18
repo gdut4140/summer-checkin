@@ -216,7 +216,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
             onScroll={() => syncScroll("read")}
             className="studio-read studio-scroll h-full overflow-y-auto"
           >
-            <div className="mx-auto max-w-3xl px-8 pb-[45vh] pt-8">
+            <div className="mx-auto max-w-3xl px-8 pb-8 pt-8">
               <MarkdownRenderer content={value} />
             </div>
           </div>
@@ -233,7 +233,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
                   onChange={(e) => onChange(e.target.value)}
                   onScroll={() => syncScroll("edit")}
                   spellCheck={false}
-                  className="studio-scroll h-full w-full resize-none bg-transparent font-mono text-sm leading-7 text-foreground outline-none"
+                  className="studio-edit-textarea studio-scroll h-full w-full resize-none bg-transparent font-mono text-sm leading-7 outline-none"
                 />
               </div>
             </div>
@@ -285,14 +285,14 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
         {/* 选区浮动工具条 */}
         {selectionActionEnabled && selection && (
           <div
-            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-white/12 bg-background/95 p-1 shadow-xl backdrop-blur"
+            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-foreground/12 bg-background/95 p-1 shadow-xl backdrop-blur"
             style={{ left: selection.x, top: selection.y - 46 }}
           >
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleAction}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-foreground/10"
             >
               <ChatCircleText className="size-3.5" />
               问 AI

@@ -4,18 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { dailyCheckin } from "./actions";
 import { toast } from "sonner";
+import { useScene } from "@/context/scene-context";
 
 export function CheckinButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { scene, copy } = useScene();
+  const { visitButtonLabel, visitSuccessToast } = copy;
 
   async function handleCheckin() {
     setLoading(true);
-    const result = await dailyCheckin();
+    const result = await dailyCheckin(undefined, scene);
     setLoading(false);
 
     if (result.success) {
-      toast.success("雨林又多了你的足迹 🌿");
+      toast.success(visitSuccessToast);
       router.refresh();
     } else {
       toast.error(result.error || "出错了");
@@ -42,7 +45,7 @@ export function CheckinButton() {
             <path d="M20 12h2" />
             <path d="M14 8c0-2.2 1.8-4 4-4s4 1.8 4 4c0 3.3-4 7-4 7s-4-3.7-4-7Z" />
           </svg>
-            <span className="relative">来访雨林</span>
+            <span className="relative">{visitButtonLabel}</span>
         </>
       )}
     </button>

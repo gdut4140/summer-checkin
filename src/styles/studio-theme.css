@@ -1,0 +1,1313 @@
+/* ================================================================
+   Studio / MarkdownEditor 主题（与全局 Scene 解耦，编辑器独立三套配色）
+   注入入口：globals.css 顶部 @import
+   作用域限定在 .studio-root 与 .studio-theme-{dark|light|khaki}
+   ================================================================ */
+
+/* ── 根容器（状态注入层） ──
+   background-color 使用纯黑兜底：与 SSR 阶段、三个场景主题（深夜雨/雪日/暖云）底色几乎一致，
+   保证 SSR HTML → 客户端 hydration → route切换 loading fallback 三层过渡完全不可感知 */
+.studio-root {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #050505;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+/* 背景图层：单张图淡入淡出，背景从 --studio-bg-url 读
+   background-color 纯黑兜底：防止 --studio-bg-url 未就绪（SSR 首帧/切换瞬间）时透出下方全局场景视频 */
+.studio-root>.studio-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: #050505;
+  background-image: var(--studio-bg-url);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(0.95);
+  transition: opacity 700ms ease, background-image 700ms ease, filter 300ms ease;
+}
+
+/* 视频背景图层（rain.mp4）：与 .studio-bg-layer 同位，z-0
+   background-color 纯黑兜底：防止 <video> 首帧/未加载时透出下方全局场景视频 */
+.studio-root>.studio-bg-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  background-color: #050505;
+  filter: saturate(0.95);
+  transition: opacity 700ms ease, filter 300ms ease;
+}
+
+/* 面板遮罩层：在背景图上统一叠加一层"色板 base × alpha"，确保文字可读 */
+.studio-root>.studio-surface-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: background-color 300ms ease;
+  /* 三主题各自在下方覆盖此变量，alpha 由 React 注入 --studio-surface-alpha */
+  background-color: color-mix(in srgb, var(--studio-base, #000) calc(var(--studio-surface-alpha, 0.7) * 100%), transparent);
+}
+
+/* 顶栏独立的"多 15% 保护"alpha：同色板 base，但 alpha 单独变量 */
+.studio-root .studio-header-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5rem;
+  /* h-14 */
+  z-index: 2;
+  pointer-events: none;
+  background-color: color-mix(in srgb, var(--studio-base, #000) calc(var(--studio-header-alpha, 0.85) * 100%), transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── 文字色变量与色板 base 定义（三主题） ── */
+
+/* 1. dark：深夜蓝紫 */
+.studio-theme-dark.studio-root {
+  --studio-base: #0b1220;
+  --studio-text: #e6e6e6;
+  --studio-text-muted: #9aa4b2;
+  --studio-heading: #ffffff;
+  --studio-link: #7dd3fc;
+  --studio-mark-bg: rgba(125, 211, 252, 0.35);
+  --studio-mark-fg: #ffffff;
+  --studio-quote-bg: rgba(125, 211, 252, 0.07);
+  --studio-quote-border: rgba(125, 211, 252, 0.35);
+  --studio-code-bg: #141414;
+  --studio-code-text: #d4d4d4;
+  --studio-code-inline-bg: rgba(255, 255, 255, 0.08);
+  --studio-code-inline-text: #f0a0a0;
+  --studio-hr: rgba(255, 255, 255, 0.1);
+  --studio-th-bg: rgba(255, 255, 255, 0.05);
+  --studio-border: rgba(255, 255, 255, 0.08);
+  /* hljs：暗底 VSCode 风格 */
+  --hljs-comment: #6a9955;
+  --hljs-keyword: #569cd6;
+  --hljs-string: #ce9178;
+  --hljs-attr: #9cdcfe;
+  --hljs-number: #b5cea8;
+  --hljs-builtin: #4ec9b0;
+  --hljs-class: #dcdcaa;
+}
+
+/* 2. light：米白底 */
+.studio-theme-light.studio-root {
+  --studio-base: #f5f3ee;
+  --studio-text: #1c1e22;
+  --studio-text-muted: #5a6070;
+  --studio-heading: #0b0d10;
+  --studio-link: #2563eb;
+  --studio-mark-bg: rgba(37, 99, 235, 0.22);
+  --studio-mark-fg: #0b0d10;
+  --studio-quote-bg: rgba(37, 99, 235, 0.05);
+  --studio-quote-border: rgba(37, 99, 235, 0.35);
+  --studio-code-bg: #f2f2f2;
+  --studio-code-text: #1c1e22;
+  --studio-code-inline-bg: rgba(0, 0, 0, 0.06);
+  --studio-code-inline-text: #c63a4d;
+  --studio-hr: rgba(0, 0, 0, 0.12);
+  --studio-th-bg: rgba(0, 0, 0, 0.04);
+  --studio-border: rgba(0, 0, 0, 0.1);
+  /* hljs：亮底 One Light 风格 */
+  --hljs-comment: #6a737d;
+  --hljs-keyword: #d73a49;
+  --hljs-string: #032f62;
+  --hljs-attr: #6f42c1;
+  --hljs-number: #005cc5;
+  --hljs-builtin: #005cc5;
+  --hljs-class: #22863a;
+}
+
+/* 3. khaki：柔和卡其（奶油米黄 + 低饱和卡其绿关键词，不刺眼） */
+.studio-theme-khaki.studio-root {
+  --studio-base: #efe7d2;
+  --studio-text: #8a6f4a;
+  /* 浅咖啡偏卡其，柔和不刺眼 */
+  --studio-text-muted: #a89070;
+  --studio-heading: #8a6f4a;
+  /* 标题：比正文稍深的浅咖啡，层次分明 */
+  --studio-link: #8a6f4a;
+  --studio-mark-bg: rgba(138, 111, 74, 0.28);
+  --studio-mark-fg: #3e2f1a;
+  --studio-quote-bg: rgba(214, 190, 152, 0.25);
+  --studio-quote-border: rgba(184, 151, 106, 0.55);
+  --studio-code-bg: #e2d9c2;
+  --studio-code-text: #4a3a28;
+  --studio-code-inline-bg: rgba(130, 105, 60, 0.14);
+  --studio-code-inline-text: #8a5a1f;
+  --studio-hr: rgba(130, 105, 60, 0.22);
+  --studio-th-bg: rgba(184, 151, 106, 0.12);
+  --studio-border: rgba(130, 105, 60, 0.18);
+  /* hljs：卡其暗棕底关键字 */
+  --hljs-comment: #7a6850;
+  --hljs-keyword: #8a5a1f;
+  --hljs-string: #5a7a4a;
+  --hljs-attr: #6b5a8a;
+  --hljs-number: #6b4a3a;
+  --hljs-builtin: #5a6a8a;
+  --hljs-class: #6b5a2a;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   各主题滚动条适配
+   ════════════════════════════════════════════════════════════════ */
+
+/* dark 主题滚动条：深灰 + 灰滑块 */
+.studio-theme-dark .studio-root,
+.studio-theme-dark.studio-root * {
+  scrollbar-width: thin;
+  scrollbar-color: #3a4050 transparent;
+}
+
+.studio-theme-dark .studio-root::-webkit-scrollbar,
+.studio-theme-dark.studio-root *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.studio-theme-dark .studio-root::-webkit-scrollbar-track,
+.studio-theme-dark.studio-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-theme-dark .studio-root::-webkit-scrollbar-thumb,
+.studio-theme-dark.studio-root *::-webkit-scrollbar-thumb {
+  background: #3a4050;
+  border-radius: 4px;
+}
+
+.studio-theme-dark .studio-root::-webkit-scrollbar-thumb:hover,
+.studio-theme-dark.studio-root *::-webkit-scrollbar-thumb:hover {
+  background: #4a5060;
+}
+
+/* light 主题滚动条：浅灰 + 深灰滑块 */
+.studio-theme-light .studio-root,
+.studio-theme-light.studio-root * {
+  scrollbar-width: thin;
+  scrollbar-color: #c8c8c8 transparent;
+}
+
+.studio-theme-light .studio-root::-webkit-scrollbar,
+.studio-theme-light.studio-root *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.studio-theme-light .studio-root::-webkit-scrollbar-track,
+.studio-theme-light.studio-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-theme-light .studio-root::-webkit-scrollbar-thumb,
+.studio-theme-light.studio-root *::-webkit-scrollbar-thumb {
+  background: #c8c8c8;
+  border-radius: 4px;
+}
+
+.studio-theme-light .studio-root::-webkit-scrollbar-thumb:hover,
+.studio-theme-light.studio-root *::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* khaki 主题滚动条：卡其灰 + 深棕滑块 */
+.studio-theme-khaki .studio-root,
+.studio-theme-khaki.studio-root * {
+  scrollbar-width: thin;
+  scrollbar-color: #b8a888 transparent;
+}
+
+.studio-theme-khaki .studio-root::-webkit-scrollbar,
+.studio-theme-khaki.studio-root *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.studio-theme-khaki .studio-root::-webkit-scrollbar-track,
+.studio-theme-khaki.studio-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-theme-khaki .studio-root::-webkit-scrollbar-thumb,
+.studio-theme-khaki.studio-root *::-webkit-scrollbar-thumb {
+  background: #b8a888;
+  border-radius: 4px;
+}
+
+.studio-theme-khaki .studio-root::-webkit-scrollbar-thumb:hover,
+.studio-theme-khaki.studio-root *::-webkit-scrollbar-thumb:hover {
+  background: #a89878;
+}
+
+/* dark-rain 专属滚动条：柔和淡绿滑块 */
+.studio-root[data-preset="dark-rain"],
+.studio-root[data-preset="dark-rain"] * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(184, 220, 192, 0.35) transparent;
+}
+
+.studio-root[data-preset="dark-rain"]::-webkit-scrollbar,
+.studio-root[data-preset="dark-rain"] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.studio-root[data-preset="dark-rain"]::-webkit-scrollbar-track,
+.studio-root[data-preset="dark-rain"] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-root[data-preset="dark-rain"]::-webkit-scrollbar-thumb,
+.studio-root[data-preset="dark-rain"] *::-webkit-scrollbar-thumb {
+  background: rgba(184, 220, 192, 0.35);
+  border-radius: 4px;
+}
+
+.studio-root[data-preset="dark-rain"]::-webkit-scrollbar-thumb:hover,
+.studio-root[data-preset="dark-rain"] *::-webkit-scrollbar-thumb:hover {
+  background: rgba(184, 220, 192, 0.55);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   7 预设套餐：覆盖 shadcn UI 变量 + studio 变量
+   每个套餐自带完整色系，不受全局 data-scene 影响
+   ════════════════════════════════════════════════════════════════ */
+
+/* 1. 雨林：柔和淡绿文字（纯黑底 + 柔和奶绿文字，带雨景视频） */
+.studio-root[data-preset="dark-rain"] {
+  /* shadcn UI 变量 → 所有 Tailwind 类自动跟随 */
+  --primary: #e0f59a;
+  --primary-foreground: #2a3810;
+  --foreground: #e6f2e6;
+  --muted-foreground: #8fb095;
+  --background: #000000;
+  --border: rgba(184, 220, 192, 0.12);
+  --accent: rgba(184, 220, 192, 0.08);
+  --accent-foreground: #e6f2e6;
+  --secondary: rgba(184, 220, 192, 0.06);
+  --secondary-foreground: #cfe6cf;
+  --ring: #e0f59a;
+  --card: rgba(184, 220, 192, 0.05);
+  --card-foreground: #e6f2e6;
+  --popover: rgba(0, 0, 0, 0.92);
+  --popover-foreground: #e6f2e6;
+  --input: rgba(184, 220, 192, 0.08);
+  --muted: rgba(184, 220, 192, 0.06);
+  /* studio 专有变量 */
+  --studio-base: #000000;
+  --studio-text: #cfe6cf;
+  --studio-text-muted: #8fb095;
+  --studio-heading: #e6f2e6;
+  --studio-link: #b8d8c0;
+  --studio-mark-bg: rgba(224, 245, 154, 0.55);
+  --studio-mark-fg: #0a1a08;
+  --studio-quote-bg: rgba(184, 220, 192, 0.05);
+  --studio-quote-border: rgba(184, 220, 192, 0.25);
+  --studio-code-bg: #060606;
+  --studio-code-text: #d8ecd8;
+  --studio-code-inline-bg: rgba(224, 245, 154, 0.14);
+  --studio-code-inline-text: #e0f59a;
+  --studio-hr: rgba(184, 220, 192, 0.1);
+  --studio-th-bg: rgba(184, 220, 192, 0.05);
+  --studio-border: rgba(184, 220, 192, 0.1);
+  /* hljs：黑底雨林绿，色差拉大（关键字鲜亮、注释暗、字符串奶黄、数字纯白） */
+  --hljs-comment: #4f6b55;
+  --hljs-keyword: #e0f59a;
+  --hljs-string: #e8f5c0;
+  --hljs-attr: #d8f0c8;
+  --hljs-number: #ffffff;
+  --hljs-builtin: #c8e6a0;
+  --hljs-class: #f0f8e0;
+}
+
+/* 2. 雪日：淡白蓝系（黑底 + 淡白蓝按钮 + 淡白蓝文字，带雪景背景） */
+.studio-root[data-preset="light-snow"] {
+  --primary: #c8d8e8;
+  --primary-foreground: #0c1a28;
+  --foreground: #d8e4f0;
+  --muted-foreground: #7a90a8;
+  --background: #0c1a28;
+  --border: rgba(200, 216, 232, 0.12);
+  --accent: rgba(200, 216, 232, 0.1);
+  --accent-foreground: #c8d8e8;
+  --secondary: rgba(200, 216, 232, 0.06);
+  --secondary-foreground: #a8bccc;
+  --ring: #c8d8e8;
+  --card: rgba(200, 216, 232, 0.04);
+  --card-foreground: #d8e4f0;
+  --popover: rgba(12, 26, 40, 0.92);
+  --popover-foreground: #d8e4f0;
+  --input: rgba(200, 216, 232, 0.1);
+  --muted: rgba(200, 216, 232, 0.06);
+  --studio-base: #0c1a28;
+  --studio-text: #d8e4f0;
+  --studio-text-muted: #7a90a8;
+  --studio-heading: #eaf0f8;
+  --studio-link: #a8c0d8;
+  --studio-mark-bg: rgba(168, 192, 216, 0.38);
+  --studio-mark-fg: #ffffff;
+  --studio-quote-bg: rgba(200, 216, 232, 0.06);
+  --studio-quote-border: rgba(200, 216, 232, 0.3);
+  --studio-code-bg: #121f2e;
+  --studio-code-text: #d8e4f0;
+  --studio-code-inline-bg: rgba(200, 216, 232, 0.1);
+  --studio-code-inline-text: #a8c0d8;
+  --studio-hr: rgba(200, 216, 232, 0.12);
+  --studio-th-bg: rgba(200, 216, 232, 0.04);
+  --studio-border: rgba(200, 216, 232, 0.12);
+  /* hljs：雪域蓝调暗色风格 */
+  --hljs-comment: #6a8090;
+  --hljs-keyword: #90b8d8;
+  --hljs-string: #c8d8b0;
+  --hljs-attr: #d0b8d8;
+  --hljs-number: #d8d8b0;
+  --hljs-builtin: #a8c8d8;
+  --hljs-class: #b8d0b0;
+}
+
+/* 3. 暖云：黑底 + 暖卡其色调（#e0d4b8 系） */
+.studio-root[data-preset="khaki-cloud"] {
+  --primary: #e0d4b8;
+  --primary-foreground: #1a1408;
+  --foreground: #f0ece2;
+  --muted-foreground: #a8a090;
+  --background: #0a0a0a;
+  --border: rgba(224, 212, 184, 0.14);
+  --accent: rgba(224, 212, 184, 0.08);
+  --accent-foreground: #e0d4b8;
+  --secondary: rgba(224, 212, 184, 0.05);
+  --secondary-foreground: #c8c0ac;
+  --ring: #e0d4b8;
+  --card: rgba(224, 212, 184, 0.04);
+  --card-foreground: #e8e4d8;
+  --popover: rgba(10, 10, 10, 0.92);
+  --popover-foreground: #e8e4d8;
+  --input: rgba(224, 212, 184, 0.1);
+  --muted: rgba(224, 212, 184, 0.05);
+  --studio-base: #0a0a0a;
+  --studio-text: #e8e4d8;
+  --studio-text-muted: #a8a090;
+  --studio-heading: #e0d4b8;
+  --studio-link: #e0d4b8;
+  --studio-mark-bg: rgba(224, 212, 184, 0.22);
+  --studio-mark-fg: #ffffff;
+  --studio-quote-bg: rgba(224, 212, 184, 0.05);
+  --studio-quote-border: rgba(224, 212, 184, 0.3);
+  --studio-code-bg: #0a0a0a;
+  --studio-code-text: #d4d0c4;
+  --studio-code-inline-bg: rgba(224, 212, 184, 0.1);
+  --studio-code-inline-text: #e0d4b8;
+  --studio-hr: rgba(224, 212, 184, 0.12);
+  --studio-th-bg: rgba(224, 212, 184, 0.05);
+  --studio-border: rgba(224, 212, 184, 0.12);
+  /* hljs：黑底暖卡其低饱和风格 */
+  --hljs-comment: #8a8068;
+  --hljs-keyword: #c8b870;
+  --hljs-string: #d8c890;
+  --hljs-attr: #e0d4b8;
+  --hljs-number: #d8c8a0;
+  --hljs-builtin: #c0b890;
+  --hljs-class: #e0d4b8;
+}
+
+/* 4. 暗色：纯黑灰白系（纯暗底 + 白按钮） */
+.studio-root[data-preset="dark-pure"] {
+  --primary: #e0e0e0;
+  --primary-foreground: #1a1a1a;
+  --foreground: #e8e8e8;
+  --muted-foreground: #888888;
+  --background: #121212;
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: rgba(255, 255, 255, 0.06);
+  --accent-foreground: #f0f0f0;
+  --secondary: rgba(255, 255, 255, 0.04);
+  --secondary-foreground: #b0b0b0;
+  --ring: #e0e0e0;
+  --card: rgba(255, 255, 255, 0.03);
+  --card-foreground: #e8e8e8;
+  --popover: rgba(18, 18, 18, 0.92);
+  --popover-foreground: #e8e8e8;
+  --input: rgba(255, 255, 255, 0.06);
+  --muted: rgba(255, 255, 255, 0.04);
+  --studio-base: #121212;
+  --studio-text: #e8e8e8;
+  --studio-text-muted: #888888;
+  --studio-heading: #ffffff;
+  --studio-link: #c0c0c0;
+  --studio-mark-bg: rgba(192, 192, 192, 0.35);
+  --studio-mark-fg: #ffffff;
+  --studio-quote-bg: rgba(255, 255, 255, 0.04);
+  --studio-quote-border: rgba(255, 255, 255, 0.2);
+  --studio-code-inline-bg: rgba(255, 255, 255, 0.08);
+  --studio-code-inline-text: #cccccc;
+  --studio-hr: rgba(255, 255, 255, 0.08);
+  --studio-th-bg: rgba(255, 255, 255, 0.03);
+  --studio-border: rgba(255, 255, 255, 0.08);
+}
+
+/* 5. 亮色：纯白系（纯白底 + 深灰按钮） */
+.studio-root[data-preset="light-pure"] {
+  --primary: #1a1a1a;
+  --primary-foreground: #ffffff;
+  --foreground: #1a1a1a;
+  --muted-foreground: #666666;
+  --background: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --accent: rgba(0, 0, 0, 0.04);
+  --accent-foreground: #1a1a1a;
+  --secondary: rgba(0, 0, 0, 0.03);
+  --secondary-foreground: #333333;
+  --ring: #1a1a1a;
+  --card: rgba(0, 0, 0, 0.02);
+  --card-foreground: #1a1a1a;
+  --popover: rgba(255, 255, 255, 0.95);
+  --popover-foreground: #1a1a1a;
+  --input: rgba(0, 0, 0, 0.06);
+  --muted: rgba(0, 0, 0, 0.03);
+  --studio-base: #ffffff;
+  --studio-text: #1a1a1a;
+  --studio-text-muted: #666666;
+  --studio-heading: #000000;
+  --studio-link: #333333;
+  --studio-mark-bg: rgba(51, 51, 51, 0.2);
+  --studio-mark-fg: #000000;
+  --studio-quote-bg: rgba(0, 0, 0, 0.03);
+  --studio-quote-border: rgba(0, 0, 0, 0.2);
+  --studio-code-inline-bg: rgba(0, 0, 0, 0.06);
+  --studio-code-inline-text: #333333;
+  --studio-hr: rgba(0, 0, 0, 0.1);
+  --studio-th-bg: rgba(0, 0, 0, 0.02);
+  --studio-border: rgba(0, 0, 0, 0.1);
+}
+
+/* 6. 卡其：纯卡其系（奶油底 + 暖棕按钮，无背景图） */
+.studio-root[data-preset="khaki-pure"] {
+  --primary: #f5efde;
+  --primary-foreground: #4a3a28;
+  --foreground: #8a6f4a;
+  --muted-foreground: #a89070;
+  --background: #efe7d2;
+  --border: rgba(130, 105, 60, 0.18);
+  --accent: rgba(161, 116, 54, 0.1);
+  --accent-foreground: #6b5436;
+  --secondary: rgba(161, 116, 54, 0.06);
+  --secondary-foreground: #8a6f4a;
+  --ring: #f5efde;
+  --card: rgba(161, 116, 54, 0.04);
+  --card-foreground: #8a6f4a;
+  --popover: rgba(239, 231, 210, 0.95);
+  --popover-foreground: #8a6f4a;
+  --input: rgba(130, 105, 60, 0.12);
+  --muted: rgba(161, 116, 54, 0.06);
+  --studio-base: #efe7d2;
+  --studio-text: #8a6f4a;
+  --studio-text-muted: #a89070;
+  --studio-heading: #8a6f4a;
+  --studio-link: #8a6f4a;
+  --studio-mark-bg: rgba(138, 111, 74, 0.28);
+  --studio-mark-fg: #3e2f1a;
+  --studio-quote-bg: rgba(214, 190, 152, 0.25);
+  --studio-quote-border: rgba(184, 151, 106, 0.55);
+  --studio-code-inline-bg: rgba(130, 105, 60, 0.14);
+  --studio-code-inline-text: #8a5a1f;
+  --studio-hr: rgba(130, 105, 60, 0.22);
+  --studio-th-bg: rgba(184, 151, 106, 0.12);
+  --studio-border: rgba(130, 105, 60, 0.18);
+}
+
+/* 7. 抹茶：淡白绿系（浅绿白底 + 柔绿按钮 + 抹茶绿文字，无背景图） */
+.studio-root[data-preset="matcha-pure"] {
+  --primary: #7aaf8f;
+  --primary-foreground: #ffffff;
+  --foreground: #4a7a5a;
+  --muted-foreground: #7aaa8a;
+  --background: #f3f8f5;
+  --border: rgba(122, 175, 143, 0.15);
+  --accent: rgba(122, 175, 143, 0.08);
+  --accent-foreground: #3a6a4a;
+  --secondary: rgba(122, 175, 143, 0.06);
+  --secondary-foreground: #4a7a5a;
+  --ring: #7aaf8f;
+  --card: rgba(122, 175, 143, 0.04);
+  --card-foreground: #4a7a5a;
+  --popover: rgba(243, 248, 245, 0.95);
+  --popover-foreground: #4a7a5a;
+  --input: rgba(122, 175, 143, 0.1);
+  --muted: rgba(122, 175, 143, 0.06);
+  --studio-base: #f3f8f5;
+  --studio-text: #4a7a5a;
+  --studio-text-muted: #7aaa8a;
+  --studio-heading: #3a6a4a;
+  --studio-link: #5a8a6a;
+  --studio-mark-bg: rgba(90, 138, 106, 0.3);
+  --studio-mark-fg: #1a2a22;
+  --studio-quote-bg: rgba(122, 175, 143, 0.06);
+  --studio-quote-border: rgba(122, 175, 143, 0.3);
+  --studio-code-inline-bg: rgba(122, 175, 143, 0.1);
+  --studio-code-inline-text: #3a6a5a;
+  --studio-hr: rgba(122, 175, 143, 0.12);
+  --studio-th-bg: rgba(122, 175, 143, 0.04);
+  --studio-border: rgba(122, 175, 143, 0.15);
+}
+
+/* ── 阅读面板（Markdown）文字绑定变量 ── */
+.studio-root .studio-read {
+  color: var(--studio-text);
+}
+
+.studio-root .studio-read h1,
+.studio-root .studio-read h2,
+.studio-root .studio-read h3,
+.studio-root .studio-read h4,
+.studio-root .studio-read h5,
+.studio-root .studio-read h6 {
+  color: var(--studio-heading);
+  border-color: var(--studio-hr);
+}
+
+.studio-root .studio-read p,
+.studio-root .studio-read li,
+.studio-root .studio-read td,
+.studio-root .studio-read th,
+.studio-root .studio-read label {
+  color: var(--studio-text);
+}
+
+.studio-root .studio-read a {
+  color: var(--studio-link);
+  text-decoration-color: color-mix(in srgb, var(--studio-link) 40%, transparent);
+}
+
+.studio-root .studio-read a:hover {
+  text-decoration-color: currentColor;
+}
+
+.studio-root .studio-read blockquote {
+  background: var(--studio-quote-bg);
+  border-left-color: var(--studio-quote-border) !important;
+  color: var(--studio-text);
+}
+
+.studio-root .studio-read hr {
+  border-color: var(--studio-hr);
+  background-color: var(--studio-hr);
+}
+
+.studio-root .studio-read table {
+  border-color: var(--studio-border);
+}
+
+.studio-root .studio-read th {
+  background-color: var(--studio-th-bg);
+  border-color: var(--studio-border);
+}
+
+.studio-root .studio-read td {
+  border-color: var(--studio-border);
+}
+
+.studio-root .studio-read ul li::marker,
+.studio-root .studio-read ol li::marker {
+  color: var(--studio-text-muted);
+}
+
+.studio-root .studio-read code.inline-code,
+.studio-root .markdown-body code.inline-code {
+  background-color: var(--studio-code-inline-bg) !important;
+  color: var(--studio-code-inline-text) !important;
+}
+
+/* ── 编辑面板 textarea 绑定变量 ── */
+.studio-root .studio-edit-textarea {
+  color: var(--studio-text) !important;
+  caret-color: color-mix(in srgb, var(--studio-text) 70%, transparent);
+  selection: var(--studio-link);
+}
+
+.studio-root .studio-edit-textarea::selection {
+  background: color-mix(in srgb, var(--studio-link) 35%, transparent);
+  color: var(--studio-text);
+}
+
+.studio-root .studio-read ::selection {
+  background: color-mix(in srgb, var(--studio-link) 35%, transparent);
+  color: var(--studio-text);
+}
+
+/* ── Milkdown / ProseMirror 绑定（高优先级） ── */
+.studio-root .ProseMirror,
+.studio-root .ProseMirror p,
+.studio-root .ProseMirror li,
+.studio-root .ProseMirror blockquote,
+.studio-root .ProseMirror h1,
+.studio-root .ProseMirror h2,
+.studio-root .ProseMirror h3,
+.studio-root .ProseMirror h4,
+.studio-root .ProseMirror h5,
+.studio-root .ProseMirror h6,
+.studio-root .ProseMirror td,
+.studio-root .ProseMirror th {
+  color: var(--studio-text);
+}
+
+.studio-root .ProseMirror h1,
+.studio-root .ProseMirror h2,
+.studio-root .ProseMirror h3,
+.studio-root .ProseMirror h4,
+.studio-root .ProseMirror h5,
+.studio-root .ProseMirror h6 {
+  color: var(--studio-heading);
+}
+
+.studio-root .ProseMirror a {
+  color: var(--studio-link);
+}
+
+.studio-root .ProseMirror code {
+  background-color: var(--studio-code-inline-bg);
+  color: var(--studio-code-inline-text);
+}
+
+.studio-root .ProseMirror blockquote {
+  background: var(--studio-quote-bg);
+  border-left: 3px solid var(--studio-quote-border);
+}
+
+.studio-root .ProseMirror hr {
+  background-color: var(--studio-hr);
+  border: none;
+  height: 1px;
+}
+
+/* ── 代码块（.hljs 语法高亮）按变量覆盖：更高优先级 & 选择器 & !important ── */
+.studio-root.studio-root .markdown-body pre.code-block {
+  background-color: var(--studio-code-bg) !important;
+  color: var(--studio-code-text) !important;
+  border: 1px solid var(--studio-border);
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-comment,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-quote {
+  color: var(--hljs-comment) !important;
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-keyword,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-selector-tag,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-title,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-section,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-doctag,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-name,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-strong {
+  color: var(--hljs-keyword) !important;
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-string,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-title.class_,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-template-variable,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-addition {
+  color: var(--hljs-string) !important;
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-attr,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-variable,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-template-tag,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-symbol,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-bullet,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-deletion {
+  color: var(--hljs-attr) !important;
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-number,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-literal,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-type,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-params,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-meta,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-link {
+  color: var(--hljs-number) !important;
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-built_in,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-attribute {
+  color: var(--hljs-builtin) !important;
+}
+
+.studio-root.studio-root .markdown-body pre.code-block .hljs-selector-class,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-selector-attr,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-selector-pseudo,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-title.function_,
+.studio-root.studio-root .markdown-body pre.code-block .hljs-subst {
+  color: var(--hljs-class) !important;
+}
+
+/* 三主题下暗色代码块边界更柔和：light/khaki 外框改成比 studio-border 更强一圈 */
+.studio-theme-light.studio-root.studio-root .markdown-body pre.code-block,
+.studio-theme-khaki.studio-root.studio-root .markdown-body pre.code-block {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* 雨林主题：代码块容器外框 + 阴影更明显，避免和黑雨景背景融在一起 */
+.studio-root[data-preset="dark-rain"].studio-root.studio-root .markdown-body pre.code-block {
+  background-color: #060606 !important;
+  border: 1px solid rgba(224, 245, 154, 0.18) !important;
+  box-shadow: 0 0 0 1px rgba(184, 220, 192, 0.06), 0 4px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ── 工具组滑条：细轨道 + 浮动圆钮，避免和主题按钮争夺视觉重量 ── */
+.studio-root .studio-opacity-range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 112px;
+  height: 30px;
+  padding: 0;
+  margin: 0 1px;
+  border: 1px solid color-mix(in srgb, var(--studio-text) 18%, transparent);
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--studio-base) 42%, transparent);
+  background-image: linear-gradient(to right,
+      var(--studio-opacity-fill, var(--studio-heading)) 0%,
+      var(--studio-opacity-fill, var(--studio-heading)) var(--val, 30%),
+      color-mix(in srgb, var(--studio-text) 22%, transparent) var(--val, 30%),
+      color-mix(in srgb, var(--studio-text) 22%, transparent) 100%);
+  background-size: calc(100% - 18px) 5px;
+  background-position: center;
+  background-repeat: no-repeat;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.studio-root .studio-opacity-range::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 5px;
+  background: transparent;
+}
+
+.studio-root .studio-opacity-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--studio-opacity-thumb, #fff);
+  border: 2px solid color-mix(in srgb, var(--studio-opacity-fill, var(--studio-heading)) 70%, #fff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.34), 0 0 0 2px color-mix(in srgb, var(--studio-opacity-fill, var(--studio-heading)) 18%, transparent);
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.studio-root .studio-opacity-range::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+
+.studio-root .studio-opacity-range::-moz-range-track {
+  height: 5px;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+}
+
+.studio-root .studio-opacity-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--studio-opacity-thumb, #fff);
+  border: 2px solid color-mix(in srgb, var(--studio-opacity-fill, var(--studio-heading)) 70%, #fff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.34), 0 0 0 2px color-mix(in srgb, var(--studio-opacity-fill, var(--studio-heading)) 18%, transparent);
+  cursor: pointer;
+}
+
+.studio-root .studio-opacity-range:hover {
+  border-color: color-mix(in srgb, var(--studio-opacity-fill, var(--studio-heading)) 58%, transparent);
+  background-color: color-mix(in srgb, var(--studio-base) 54%, transparent);
+}
+
+.studio-root .studio-opacity-range:focus-visible {
+  border-color: var(--studio-opacity-fill, var(--studio-heading));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--studio-opacity-fill, var(--studio-heading)) 22%, transparent);
+}
+
+/* 暖云：包裹式胶囊滑条，填充撑满全高 30px，与下拉按钮高度对齐 */
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range {
+  --studio-opacity-fill: #e0d4b8;
+  --studio-opacity-thumb: #ffffff;
+  width: 116px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden; /* 关键：保证渐变在 999px 圆角下被完美裁剪 */
+  background-color: color-mix(in srgb, var(--studio-text) 6%, transparent);
+  /* 渐变 100% × 100% = 填充"全满"，不再是中间一条细线 */
+  background-image: linear-gradient(to right,
+      var(--studio-opacity-fill) 0%,
+      var(--studio-opacity-fill) var(--val, 30%),
+      transparent var(--val, 30%),
+      transparent 100%);
+  background-size: 100% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 235, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 10px rgba(8, 7, 5, 0.24);
+}
+
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 235, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 10px rgba(8, 7, 5, 0.24);
+}
+
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(234, 217, 180, 0.22),
+    inset 0 1px 0 rgba(255, 250, 235, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 10px rgba(8, 7, 5, 0.24);
+}
+
+/* Webkit：track 透明不可见，可见填充完全由 input 的 background 渐变承担 */
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-webkit-slider-runnable-track {
+  height: 30px;
+  border-radius: 999px;
+  background: transparent;
+}
+
+/* thumb 尺寸 20px，通过 margin-top: 5px 使其在 30px 高的胶囊中垂直居中 */
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 5px; /* (30 - 20) / 2 = 5px 居中 */
+  border-radius: 999px;
+  background: #ffffff;
+  border: none;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(224, 212, 184, 0.55);
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 3px 9px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(224, 212, 184, 0.75),
+    0 0 12px rgba(224, 212, 184, 0.35);
+}
+
+/* Firefox */
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-moz-range-track {
+  height: 30px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+}
+
+/* Firefox 原生支持上下两段填充色，再覆盖一层保证一致 */
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-moz-range-progress {
+  height: 30px;
+  border-radius: 999px 0 0 999px;
+  background: var(--studio-opacity-fill);
+}
+
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: none;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(224, 212, 184, 0.55);
+  cursor: pointer;
+}
+
+.studio-root[data-preset="khaki-cloud"] .studio-opacity-range::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* ── 目录面板（OutlinePanel）文字色绑定工作室主题变量 ── */
+.studio-root aside,
+.studio-root aside .text-muted-foreground {
+  color: var(--studio-text-muted);
+}
+
+.studio-root aside .text-muted-foreground\/60 {
+  color: color-mix(in srgb, var(--studio-text-muted) 60%, transparent);
+}
+
+.studio-root aside .text-muted-foreground\/80 {
+  color: color-mix(in srgb, var(--studio-text-muted) 80%, transparent);
+}
+
+.studio-root aside .text-foreground {
+  color: var(--studio-text);
+}
+
+.studio-root aside .text-primary {
+  color: var(--studio-link);
+}
+
+.studio-root aside button:hover {
+  border-color: color-mix(in srgb, var(--studio-text) 15%, transparent);
+  background-color: color-mix(in srgb, var(--studio-text) 5%, transparent);
+}
+
+.studio-root aside button.border-primary,
+.studio-root aside button.bg-primary\/10 {
+  border-color: var(--studio-link);
+  background-color: color-mix(in srgb, var(--studio-link) 10%, transparent);
+}
+
+/* 目录面板容器：背景透明化 + 边框用主题色 */
+.studio-root aside {
+  background-color: transparent;
+  border-right-color: var(--studio-border);
+}
+
+.studio-root aside .border-white\/\[0\.08\] {
+  border-color: var(--studio-border);
+}
+
+/* ── 深色模式下 AI 气泡：毛玻璃深底 + 阴影区分（无外框） ── */
+.studio-root.studio-theme-dark [data-role="ai"] {
+  background-color: color-mix(in srgb, var(--studio-base) 72%, transparent);
+  border: none;
+  color: var(--studio-text);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   扩展语法样式（对应完整 Markdown 渲染测试 1-13）
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 9. 脚注容器：列表 + 返回箭头 ── */
+.studio-root .footnotes ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0;
+}
+
+.studio-root .footnotes li {
+  color: var(--studio-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  list-style: decimal;
+}
+
+.studio-root .footnotes li::marker {
+  color: var(--studio-link);
+  font-weight: 600;
+}
+
+.studio-root a.footnote-backref {
+  color: var(--studio-link);
+  text-decoration: none;
+  margin-left: 0.35rem;
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+.studio-root a.footnote-backref:hover {
+  opacity: 1;
+}
+
+/* ── 11. <details><summary> 折叠块 ── */
+.studio-root details {
+  margin: 1.25rem 0;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: color-mix(in srgb, var(--studio-text) 3%, transparent);
+  border: 1px solid var(--studio-border);
+  transition: background-color 0.15s ease;
+}
+
+.studio-root details[open] {
+  background-color: color-mix(in srgb, var(--studio-text) 5%, transparent);
+}
+
+.studio-root details>summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--studio-heading);
+  list-style: none;
+  position: relative;
+  padding-left: 1.5rem;
+  user-select: none;
+}
+
+.studio-root details>summary::-webkit-details-marker {
+  display: none;
+}
+
+.studio-root details>summary::before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  font-size: 0.7em;
+  color: var(--studio-link);
+  transition: transform 0.2s ease;
+}
+
+.studio-root details[open]>summary::before {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.studio-root details>*:not(summary) {
+  margin-top: 0.75rem;
+  color: var(--studio-text);
+}
+
+/* ── 12. KaTeX 数学公式：布局由 katex.min.css 负责，这里只做主题适配 ── */
+.studio-root .katex {
+  font-size: 1.05em;
+  color: var(--studio-text);
+}
+
+/* 块级公式容器 */
+.studio-root .katex-display {
+  margin: 1.25rem 0;
+  padding: 0.75rem 1rem;
+  background-color: color-mix(in srgb, var(--studio-text) 4%, transparent);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.studio-root .katex-display>.katex {
+  display: inline-block;
+  text-align: center;
+}
+
+/* KaTeX 内部符号颜色全部继承 --studio-text，避免默认黑色在黑底看不见 */
+.studio-root .katex .mord,
+.studio-root .katex .mbin,
+.studio-root .katex .mrel,
+.studio-root .katex .mopen,
+.studio-root .katex .mclose,
+.studio-root .katex .mpunct,
+.studio-root .katex .minner,
+.studio-root .katex .mop,
+.studio-root .katex .mathrm,
+.studio-root .katex .textit,
+.studio-root .katex .mathbf,
+.studio-root .katex .amsrm,
+.studio-root .katex .mathbb,
+.studio-root .katex .mathcal,
+.studio-root .katex .mathfrak,
+.studio-root .katex .mathscr,
+.studio-root .katex .mathsf,
+.studio-root .katex .mathtt {
+  color: inherit;
+}
+
+/* KaTeX 分隔线、根号线等线条色 */
+.studio-root .katex .overline .overline-line,
+.studio-root .katex .underline .underline-line,
+.studio-root .katex .sqrt>.sqrt-sign,
+.studio-root .katex .rule {
+  border-color: var(--studio-text) !important;
+  background-color: var(--studio-text) !important;
+}
+
+/* ── 补充：强/强调字色（深色/雪日里避免默认继承有问题） ── */
+.studio-root .markdown-body strong {
+  color: var(--studio-heading);
+  font-weight: 700;
+}
+
+.studio-root .markdown-body em {
+  color: inherit;
+  font-style: italic;
+}
+
+.studio-root .markdown-body del {
+  color: var(--studio-text-muted);
+  text-decoration-line: line-through;
+}
+
+/* ── 行内 HTML <u> 下划线 ── */
+.studio-root .markdown-body u {
+  text-decoration: underline;
+  text-decoration-color: var(--studio-link);
+  text-underline-offset: 3px;
+  color: inherit;
+}
+
+/* ── 表格 th 对齐：remark-gfm 的 align 属性会渲染 style="text-align:xxx"，
+      这里只确保内容不被覆盖 ── */
+.studio-root .markdown-body th[style*="text-align:center"],
+.studio-root .markdown-body td[style*="text-align:center"] {
+  text-align: center;
+}
+
+.studio-root .markdown-body th[style*="text-align:right"],
+.studio-root .markdown-body td[style*="text-align:right"] {
+  text-align: right;
+}
+
+.studio-root.studio-theme-dark [data-role="ai"] .text-primary-foreground\/70,
+.studio-root.studio-theme-dark [data-role="ai"] .text-primary-foreground\/60 {
+  color: color-mix(in srgb, var(--studio-text-muted) 70%, transparent);
+}
+
+/* ── 亮色模式下 AI + 用户气泡：白底黑字 + 阴影边框（ChatGPT 风格） ── */
+.studio-root.studio-theme-light [data-role="ai"],
+.studio-root.studio-theme-light [data-role="user"] {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.studio-root.studio-theme-light [data-role="user"] .text-primary-foreground,
+.studio-root.studio-theme-light [data-role="ai"] .text-primary-foreground {
+  color: #1a1a1a;
+}
+
+.studio-root.studio-theme-light [data-role="user"] .text-primary-foreground\/70,
+.studio-root.studio-theme-light [data-role="user"] .text-primary-foreground\/60,
+.studio-root.studio-theme-light [data-role="ai"] .text-primary-foreground\/70,
+.studio-root.studio-theme-light [data-role="ai"] .text-primary-foreground\/60 {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* ── 雪日模式下 AI + 用户气泡：深色雪域蓝底 + 淡白蓝字 + 阴影边框 ── */
+.studio-root[data-preset="light-snow"] [data-role="ai"],
+.studio-root[data-preset="light-snow"] [data-role="user"] {
+  background-color: rgba(12, 26, 40, 0.72);
+  color: #d8e4f0;
+  border: none;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 0 1px rgba(200, 216, 232, 0.08), 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.studio-root[data-preset="light-snow"] [data-role="user"] .text-primary-foreground,
+.studio-root[data-preset="light-snow"] [data-role="ai"] .text-primary-foreground {
+  color: #d8e4f0;
+}
+
+.studio-root[data-preset="light-snow"] [data-role="user"] .text-primary-foreground\/70,
+.studio-root[data-preset="light-snow"] [data-role="user"] .text-primary-foreground\/60,
+.studio-root[data-preset="light-snow"] [data-role="ai"] .text-primary-foreground\/70,
+.studio-root[data-preset="light-snow"] [data-role="ai"] .text-primary-foreground\/60 {
+  color: rgba(200, 216, 232, 0.6);
+}
+
+/* ── 雨林模式下 AI + 用户气泡：浅黑 50% 毛玻璃（更透）+ 柔和淡绿字 + 淡绿细阴影边框 ── */
+.studio-root[data-preset="dark-rain"] [data-role="ai"],
+.studio-root[data-preset="dark-rain"] [data-role="user"] {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #cfe6cf;
+  border: none;
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 0 0 1px rgba(184, 220, 192, 0.1), 0 4px 16px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.studio-root[data-preset="dark-rain"] [data-role="user"] .text-primary-foreground,
+.studio-root[data-preset="dark-rain"] [data-role="ai"] .text-primary-foreground,
+.studio-root[data-preset="dark-rain"] [data-role="ai"] p,
+.studio-root[data-preset="dark-rain"] [data-role="ai"] .markdown-body {
+  color: #cfe6cf;
+}
+
+.studio-root[data-preset="dark-rain"] [data-role="user"] .text-primary-foreground\/70,
+.studio-root[data-preset="dark-rain"] [data-role="user"] .text-primary-foreground\/60,
+.studio-root[data-preset="dark-rain"] [data-role="ai"] .text-primary-foreground\/70,
+.studio-root[data-preset="dark-rain"] [data-role="ai"] .text-primary-foreground\/60 {
+  color: rgba(184, 220, 192, 0.6);
+}
+
+/* ── 卡其模式下 AI + 用户气泡：浅白卡其底 + 深棕字 + 阴影边框 ── */
+.studio-root.studio-theme-khaki [data-role="ai"],
+.studio-root.studio-theme-khaki [data-role="user"] {
+  background-color: #f5efde;
+  color: #4a3a28;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(130, 105, 60, 0.12), 0 1px 3px rgba(130, 105, 60, 0.1);
+}
+
+.studio-root.studio-theme-khaki [data-role="user"] .text-primary-foreground,
+.studio-root.studio-theme-khaki [data-role="ai"] .text-primary-foreground {
+  color: #4a3a28;
+}
+
+.studio-root.studio-theme-khaki [data-role="user"] .text-primary-foreground\/70,
+.studio-root.studio-theme-khaki [data-role="user"] .text-primary-foreground\/60,
+.studio-root.studio-theme-khaki [data-role="ai"] .text-primary-foreground\/70,
+.studio-root.studio-theme-khaki [data-role="ai"] .text-primary-foreground\/60 {
+  color: rgba(74, 58, 40, 0.5);
+}
+
+/* ── 抹茶模式下 AI + 用户气泡：浅抹茶底 + 抹茶绿字 + 阴影边框 ── */
+.studio-root[data-preset="matcha-pure"] [data-role="ai"],
+.studio-root[data-preset="matcha-pure"] [data-role="user"] {
+  background-color: #e6efe8;
+  color: #3a6a4a;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(122, 175, 143, 0.12), 0 1px 3px rgba(122, 175, 143, 0.1);
+}
+
+.studio-root[data-preset="matcha-pure"] [data-role="user"] .text-primary-foreground,
+.studio-root[data-preset="matcha-pure"] [data-role="ai"] .text-primary-foreground {
+  color: #3a6a4a;
+}
+
+.studio-root[data-preset="matcha-pure"] [data-role="user"] .text-primary-foreground\/70,
+.studio-root[data-preset="matcha-pure"] [data-role="user"] .text-primary-foreground\/60,
+.studio-root[data-preset="matcha-pure"] [data-role="ai"] .text-primary-foreground\/70,
+.studio-root[data-preset="matcha-pure"] [data-role="ai"] .text-primary-foreground\/60 {
+  color: rgba(58, 106, 74, 0.5);
+}
+
+/* ── 暖云（黑底暖卡其）模式下 AI + 用户气泡：AI 深底 + 用户暖卡其底 + 阴影区分 ── */
+.studio-root[data-preset="khaki-cloud"] [data-role="ai"],
+.studio-root[data-preset="khaki-cloud"] [data-role="user"] {
+  border: none;
+}
+
+.studio-root[data-preset="khaki-cloud"] [data-role="user"] {
+  background-color: #e0d4b8;
+  color: #1a1408;
+  box-shadow: 0 0 0 1px rgba(224, 212, 184, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.studio-root[data-preset="khaki-cloud"] [data-role="user"] .text-primary-foreground {
+  color: #1a1408;
+}
+
+.studio-root[data-preset="khaki-cloud"] [data-role="ai"] .text-primary-foreground,
+.studio-root[data-preset="khaki-cloud"] [data-role="ai"] p,
+.studio-root[data-preset="khaki-cloud"] [data-role="ai"] .markdown-body {
+  color: var(--studio-text);
+}
+
+.studio-root[data-preset="khaki-cloud"] [data-role="user"] .text-primary-foreground\/70,
+.studio-root[data-preset="khaki-cloud"] [data-role="user"] .text-primary-foreground\/60 {
+  color: rgba(26, 20, 8, 0.55);
+}
+
+.studio-root[data-preset="khaki-cloud"] [data-role="ai"] .text-primary-foreground\/70,
+.studio-root[data-preset="khaki-cloud"] [data-role="ai"] .text-primary-foreground\/60 {
+  color: rgba(224, 212, 184, 0.5);
+}

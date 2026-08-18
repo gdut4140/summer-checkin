@@ -1,8 +1,27 @@
-// 沉浸模式 · 动漫唯美语录（50 句，原创）
-export const focusQuotes = [
-  "雨落进书页的缝隙，时间便有了声音。",
+import type { SceneType } from "@/config/theme";
+
+// 沉浸模式 · 场景专属语录（3 句，每个场景写 3 句风格贴合的场景语）
+const SCENE_QUOTES: Record<SceneType, string[]> = {
+  rain: [
+    "雨林深处，专注是最温柔的光。",
+    "雨落进书页的缝隙，时间便有了声音。",
+    "每一滴雨，都在为坚持的你鼓掌。",
+  ],
+  snow: [
+    "雪地里的脚印，每一步都算数。",
+    "雪花从不会急着落对地方，你也不必慌张。",
+    "最安静的雪天，最适合听自己成长的声音。",
+  ],
+  cloud: [
+    "云卷云舒之间，专注慢慢长出形状。",
+    "把心挂在云上，再沉的事也会变轻。",
+    "云知道所有答案，你只需慢慢向前。",
+  ],
+};
+
+// 沉浸模式 · 通用动漫唯美语录（47+ 句，原创）
+const GENERAL_QUOTES = [
   "你认真低头的样子，比窗外的星星更亮。",
-  "每一滴雨，都在为坚持的你鼓掌。",
   "世界很吵，但你的专注很安静。",
   "种一棵树最好的时间是十年前，其次是现在。",
   "慢慢来，比较快。",
@@ -40,7 +59,6 @@ export const focusQuotes = [
   "成长，是擦干眼泪后继续前行。",
   "你若盛开，蝴蝶自来。",
   "把梦做得大一点，然后一步一步去够它。",
-  "雨林深处，专注是最温柔的光。",
   "愿你以渺小启程，以伟大收场。",
   "山高路远，去看世界，也去找自己。",
   "所有的坚持，都会在某个清晨悄然开花。",
@@ -52,15 +70,32 @@ export const focusQuotes = [
   "风会记得每朵花的香，时间会记得你的坚持。",
 ];
 
+/** 按场景合成语录池：当前场景专属 3 条 + 通用语录（保证 3+47 = 50 句，和原来规模一致） */
+function quotesForScene(scene: SceneType | null | undefined): string[] {
+  const pool = [...GENERAL_QUOTES];
+  const sceneQuotes = scene ? SCENE_QUOTES[scene] ?? [] : [];
+  return [...sceneQuotes, ...pool];
+}
+
 let lastIndex = -1;
 
-// 随机取一句，避免与上一次重复
-export function randomQuote(): string {
-  const count = focusQuotes.length;
+/**
+ * 随机取一句，避免与上一次重复。
+ * 可选传入 scene：传了就会把当前场景的 3 条专属语录（雨/雪/云各 3 句）掺到最前面，
+ * 让沉浸模式下的「场景感话语」出现概率更高。
+ */
+export function randomQuote(scene?: SceneType | null): string {
+  const pool = quotesForScene(scene);
+  const count = pool.length;
   let index = Math.floor(Math.random() * count);
   if (count > 1 && index === lastIndex) {
     index = (index + 1) % count;
   }
   lastIndex = index;
-  return focusQuotes[index];
+  return pool[index];
 }
+
+/**
+ * 【兼容老调用】不传 scene 时，随机从通用 + 雨林专属语录里取（与之前行为基本兼容）
+ */
+export { GENERAL_QUOTES as focusQuotes };

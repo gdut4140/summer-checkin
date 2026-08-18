@@ -91,7 +91,7 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl font-semibold tracking-normal text-white">{plan.name}</h1>
+              <h1 className="text-2xl font-semibold tracking-normal text-foreground">{plan.name}</h1>
               {plan.description && (
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                   {plan.description}

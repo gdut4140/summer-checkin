@@ -1,9 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+/* rehype-katex 生成的公式依赖官方布局规则（分式、上下标、根号等）。 */
+@import "katex/dist/katex.min.css";
 @import "../styles/markdown.css";
 @import "../styles/studio.css";
 
+@import "../styles/studio-theme.css";
 @custom-variant dark (&:is(.dark *));
 
 /* ───────────────────────────────────────────────────────────────
@@ -177,137 +180,136 @@
 
 /* —— 雪景（冷冰蓝 + 雪白，整体通透） —— */
 [data-scene="snow"] {
-  /* Shadcn 色（主色换成冰蓝，背景换成冷深蓝灰） */
-  --theme-background: #0a1929;
-  --theme-foreground: #eaf4ff;
-  --theme-card: rgba(255, 255, 255, 0.1);
-  --theme-card-foreground: #eaf4ff;
-  --theme-popover: rgba(20, 40, 65, 0.85);
-  --theme-popover-foreground: #eaf4ff;
-  --theme-primary: #7dd3fc;
-  /* sky-300 冰蓝 */
-  --theme-primary-foreground: #0c2a3a;
-  /* 深蓝保证可读 */
-  --theme-secondary: rgba(125, 211, 252, 0.1);
-  --theme-secondary-foreground: #cfe4f7;
-  --theme-muted: rgba(255, 255, 255, 0.07);
-  --theme-muted-foreground: #93b0c7;
-  --theme-accent: rgba(165, 180, 252, 0.18);
-  /* 淡紫蓝 */
-  --theme-accent-foreground: #d8e4ff;
-  --theme-border: rgba(255, 255, 255, 0.12);
-  --theme-input: rgba(255, 255, 255, 0.08);
-  --theme-ring: #7dd3fc;
-  --theme-chart-1: #7dd3fc;
-  --theme-chart-2: #a5b4fc;
-  --theme-chart-3: #67e8f9;
-  --theme-chart-4: #c4b5fd;
-  --theme-chart-5: #e0f2fe;
-  --theme-sidebar-background: rgba(10, 25, 41, 0.9);
-  --theme-sidebar-foreground: #eaf4ff;
-  --theme-sidebar-primary: #7dd3fc;
-  --theme-sidebar-primary-foreground: #0c2a3a;
-  --theme-sidebar-accent: rgba(165, 180, 252, 0.14);
-  --theme-sidebar-accent-foreground: #d8e4ff;
+  /* Shadcn 色（主色换成灰白蓝，整体低饱和） */
+  --theme-background: #1e2730;
+  --theme-foreground: #eef2f7;
+  --theme-card: rgba(255, 255, 255, 0.08);
+  --theme-card-foreground: #eef2f7;
+  --theme-popover: rgba(30, 39, 48, 0.85);
+  --theme-popover-foreground: #eef2f7;
+  --theme-primary: #d4e2f0;
+  /* 淡白蓝（白多蓝少） */
+  --theme-primary-foreground: #1e2a38;
+  /* 深灰蓝保证可读 */
+  --theme-secondary: rgba(212, 226, 240, 0.08);
+  --theme-secondary-foreground: #c8d8ea;
+  --theme-muted: rgba(255, 255, 255, 0.06);
+  --theme-muted-foreground: #8a9aaa;
+  --theme-accent: rgba(200, 216, 234, 0.12);
+  /* 淡白蓝 */
+  --theme-accent-foreground: #e0eaf2;
+  --theme-border: rgba(255, 255, 255, 0.1);
+  --theme-input: rgba(255, 255, 255, 0.06);
+  --theme-ring: #d4e2f0;
+  --theme-chart-1: #d4e2f0;
+  --theme-chart-2: #dee8f3;
+  --theme-chart-3: #c8d8ea;
+  --theme-chart-4: #e8eef4;
+  --theme-chart-5: #b8cce0;
+  --theme-sidebar-background: rgba(30, 39, 48, 0.9);
+  --theme-sidebar-foreground: #eef2f7;
+  --theme-sidebar-primary: #d4e2f0;
+  --theme-sidebar-primary-foreground: #1e2a38;
+  --theme-sidebar-accent: rgba(200, 216, 234, 0.12);
+  --theme-sidebar-accent-foreground: #e0eaf2;
   --theme-sidebar-border: rgba(255, 255, 255, 0.1);
-  --theme-sidebar-ring: #7dd3fc;
-  --theme-sidebar: rgba(10, 25, 41, 0.9);
+  --theme-sidebar-ring: #d4e2f0;
+  --theme-sidebar: rgba(30, 39, 48, 0.9);
 
-  /* 玻璃 / 面板 背景层（整体冷调） */
-  --surface-card-bg: rgba(10, 25, 41, 0.55);
-  --surface-card-border: rgba(255, 255, 255, 0.1);
-  --surface-card-shadow: 0 8px 32px rgba(6, 20, 40, 0.35);
-  --surface-input-bg: rgba(255, 255, 255, 0.05);
-  --surface-input-border: rgba(125, 211, 252, 0.18);
-  --surface-glass-bg: rgba(10, 25, 41, 0.45);
-  --surface-glass-border: rgba(255, 255, 255, 0.1);
-  --surface-glass-shadow: 0 12px 40px rgba(6, 20, 40, 0.35);
-  --surface-glass-strong-bg: rgba(6, 18, 32, 0.72);
-  --surface-glass-strong-border: rgba(125, 211, 252, 0.16);
-  --surface-glass-strong-shadow: 0 16px 48px rgba(6, 20, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --surface-page-bg: rgba(10, 25, 41, 0.4);
-  --surface-page-border: rgba(255, 255, 255, 0.08);
-  --surface-page-shadow: 0 16px 48px rgba(6, 20, 40, 0.35);
-  --surface-darkglass-bg: rgba(6, 18, 32, 0.65);
-  --surface-darkglass-border: rgba(255, 255, 255, 0.1);
-  --surface-darkglass-shadow: 0 12px 40px rgba(6, 20, 40, 0.4);
-  --surface-product: rgba(8, 22, 38, 0.72);
-  --surface-product-border: rgba(255, 255, 255, 0.1);
-  --surface-product-shadow: 0 18px 48px rgba(6, 20, 40, 0.2);
-  --surface-metric-bg: rgba(5, 15, 28, 0.22);
-  --surface-panel-bg: rgba(8, 22, 38, 0.52);
-  --surface-panel-border: rgba(125, 211, 252, 0.1);
-  --surface-panel-shadow: 0 18px 46px rgba(6, 20, 40, 0.18);
-  --surface-row-hover-bg: rgba(15, 42, 66, 0.72);
-  --surface-row-hover-border: rgba(125, 211, 252, 0.25);
+  /* 玻璃 / 面板 背景层（灰白调低饱和） */
+  --surface-card-bg: rgba(30, 39, 48, 0.55);
+  --surface-card-border: rgba(255, 255, 255, 0.08);
+  --surface-card-shadow: 0 8px 32px rgba(10, 15, 20, 0.35);
+  --surface-input-bg: rgba(255, 255, 255, 0.04);
+  --surface-input-border: rgba(212, 226, 240, 0.15);
+  --surface-glass-bg: rgba(30, 39, 48, 0.4);
+  --surface-glass-border: rgba(255, 255, 255, 0.08);
+  --surface-glass-shadow: 0 12px 40px rgba(10, 15, 20, 0.35);
+  --surface-glass-strong-bg: rgba(20, 27, 34, 0.72);
+  --surface-glass-strong-border: rgba(212, 226, 240, 0.12);
+  --surface-glass-strong-shadow: 0 16px 48px rgba(10, 15, 20, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --surface-page-bg: rgba(30, 39, 48, 0.38);
+  --surface-page-border: rgba(255, 255, 255, 0.06);
+  --surface-page-shadow: 0 16px 48px rgba(10, 15, 20, 0.35);
+  --surface-darkglass-bg: rgba(20, 27, 34, 0.65);
+  --surface-darkglass-border: rgba(255, 255, 255, 0.08);
+  --surface-darkglass-shadow: 0 12px 40px rgba(10, 15, 20, 0.4);
+  --surface-product: rgba(22, 30, 38, 0.72);
+  --surface-product-border: rgba(255, 255, 255, 0.08);
+  --surface-product-shadow: 0 18px 48px rgba(10, 15, 20, 0.2);
+  --surface-metric-bg: rgba(15, 20, 26, 0.2);
+  --surface-panel-bg: rgba(22, 30, 38, 0.52);
+  --surface-panel-border: rgba(212, 226, 240, 0.08);
+  --surface-panel-shadow: 0 18px 46px rgba(10, 15, 20, 0.18);
+  --surface-row-hover-bg: rgba(25, 34, 44, 0.72);
+  --surface-row-hover-border: rgba(212, 226, 240, 0.2);
 
-  /* 雨林特色玻璃 → 雪景对应替换（保持类名即可全局切换） */
-  --surface-rainforest-bg: rgba(6, 20, 36, 0.36);
-  --surface-rainforest-border: rgba(255, 255, 255, 0.16);
-  --surface-rainforest-shadow: 0 18px 46px rgba(6, 20, 40, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --surface-nav-bg: rgba(8, 22, 38, 0.66);
-  --surface-nav-hover-bg: rgba(8, 22, 38, 0.85);
-  --surface-nav-hover-border: rgba(125, 211, 252, 0.25);
+  --surface-rainforest-bg: rgba(20, 27, 34, 0.36);
+  --surface-rainforest-border: rgba(255, 255, 255, 0.12);
+  --surface-rainforest-shadow: 0 18px 46px rgba(10, 15, 20, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --surface-nav-bg: rgba(22, 30, 38, 0.66);
+  --surface-nav-hover-bg: rgba(22, 30, 38, 0.85);
+  --surface-nav-hover-border: rgba(212, 226, 240, 0.2);
 
-  /* 文字强调色 / 眉标 */
-  --text-eyebrow: #7dd3fc;
-  --text-title: #f4faff;
-  --text-subtitle: rgba(220, 236, 252, 0.55);
-  --text-heading: rgba(244, 250, 255, 0.86);
-  --text-heading-muted: rgba(220, 236, 252, 0.4);
-  --text-field-label: rgba(220, 236, 252, 0.62);
+  /* 文字强调色 / 眉标（淡白蓝系） */
+  --text-eyebrow: #d4e2f0;
+  --text-title: #f0f4f8;
+  --text-subtitle: rgba(200, 210, 220, 0.5);
+  --text-heading: rgba(240, 244, 248, 0.85);
+  --text-heading-muted: rgba(200, 210, 220, 0.38);
+  --text-field-label: rgba(200, 210, 220, 0.6);
 
   /* 智能体 / 沉浸模式 */
-  --immersive-primary: #7dd3fc;
-  --immersive-progress: rgba(125, 211, 252, 0.25);
-  --orb-halo: rgba(125, 211, 252, 0.55);
-  --orb-core-grad-a: #1e5a82;
-  --orb-core-grad-b: #0f3a5a;
-  --orb-core-grad-c: #061e31;
-  --orb-spark: #e0f2fe;
-  --orb-spark-shadow: #7dd3fc;
+  --immersive-primary: #d4e2f0;
+  --immersive-progress: rgba(212, 226, 240, 0.2);
+  --orb-halo: rgba(212, 226, 240, 0.4);
+  --orb-core-grad-a: #4a5c70;
+  --orb-core-grad-b: #3a4a5c;
+  --orb-core-grad-c: #2a3644;
+  --orb-spark: #e8eef4;
+  --orb-spark-shadow: #d4e2f0;
 
   /* 工作区面板 */
-  --rf-panel-bg: rgba(8, 22, 38, 0.38);
-  --rf-panel-left-bg: rgba(6, 18, 32, 0.5);
-  --rf-panel-center-bg: rgba(12, 30, 50, 0.28);
-  --rf-panel-right-bg: rgba(6, 18, 32, 0.44);
-  --rf-mobile-nav-bg: rgba(6, 18, 32, 0.98);
+  --rf-panel-bg: rgba(22, 30, 38, 0.38);
+  --rf-panel-left-bg: rgba(20, 27, 34, 0.5);
+  --rf-panel-center-bg: rgba(26, 34, 44, 0.28);
+  --rf-panel-right-bg: rgba(20, 27, 34, 0.44);
+  --rf-mobile-nav-bg: rgba(20, 27, 34, 0.98);
 }
 
 [data-scene="snow"].dark {
-  --theme-background: #061524;
-  --theme-card: rgba(255, 255, 255, 0.08);
-  --theme-popover: rgba(12, 32, 54, 0.88);
-  --theme-secondary: rgba(125, 211, 252, 0.08);
-  --theme-secondary-foreground: #cfe4f7;
-  --theme-muted: rgba(255, 255, 255, 0.05);
-  --theme-muted-foreground: #82a0ba;
-  --theme-accent: rgba(165, 180, 252, 0.14);
-  --theme-accent-foreground: #d8e4ff;
-  --theme-border: rgba(255, 255, 255, 0.09);
-  --theme-input: rgba(255, 255, 255, 0.06);
-  --theme-sidebar-background: rgba(6, 21, 36, 0.92);
-  --theme-sidebar-accent: rgba(165, 180, 252, 0.12);
-  --theme-sidebar-accent-foreground: #d8e4ff;
-  --theme-sidebar-border: rgba(255, 255, 255, 0.08);
-  --theme-sidebar: rgba(6, 21, 36, 0.92);
+  --theme-background: #141c24;
+  --theme-card: rgba(255, 255, 255, 0.06);
+  --theme-popover: rgba(24, 32, 40, 0.88);
+  --theme-secondary: rgba(212, 226, 240, 0.06);
+  --theme-secondary-foreground: #c8d8ea;
+  --theme-muted: rgba(255, 255, 255, 0.04);
+  --theme-muted-foreground: #7a8a9a;
+  --theme-accent: rgba(200, 216, 234, 0.1);
+  --theme-accent-foreground: #e0eaf2;
+  --theme-border: rgba(255, 255, 255, 0.08);
+  --theme-input: rgba(255, 255, 255, 0.05);
+  --theme-sidebar-background: rgba(24, 32, 40, 0.92);
+  --theme-sidebar-accent: rgba(200, 216, 234, 0.1);
+  --theme-sidebar-accent-foreground: #e0eaf2;
+  --theme-sidebar-border: rgba(255, 255, 255, 0.06);
+  --theme-sidebar: rgba(24, 32, 40, 0.92);
 }
 
-/* —— 云天（柔和卡其主色 #d6be98 + 蓝天云背景，整体温暖柔和不刺眼） —— */
+/* —— 暖云（淡白卡其主色 #e0d4b8 + 蓝天云背景，整体淡白柔和不刺眼） —— */
 [data-scene="cloud"] {
-  /* Shadcn 色（低饱和卡其米黄系） */
+  /* Shadcn 色（低饱和淡白卡其米黄系） */
   --theme-background: #1f2736;
   --theme-foreground: #f1ead9;
   --theme-card: rgba(241, 234, 217, 0.07);
   --theme-card-foreground: #f1ead9;
   --theme-popover: rgba(44, 50, 66, 0.85);
   --theme-popover-foreground: #f1ead9;
-  --theme-primary: #d6be98;
-  /* 奶油白卡其 */
+  --theme-primary: #e0d4b8;
+  /* 淡白卡其 */
   --theme-primary-foreground: #3e2f1a;
   /* 深咖啡保证可读 */
-  --theme-secondary: rgba(214, 190, 152, 0.08);
+  --theme-secondary: rgba(224, 212, 184, 0.08);
   --theme-secondary-foreground: #e6dcc5;
   --theme-muted: rgba(255, 255, 255, 0.05);
   --theme-muted-foreground: #a89f8b;
@@ -316,20 +318,20 @@
   --theme-accent-foreground: #e6e0d1;
   --theme-border: rgba(241, 234, 217, 0.09);
   --theme-input: rgba(255, 255, 255, 0.05);
-  --theme-ring: #d6be98;
-  --theme-chart-1: #d6be98;
+  --theme-ring: #e0d4b8;
+  --theme-chart-1: #e0d4b8;
   --theme-chart-2: #dec9a6;
   --theme-chart-3: #e6d4b4;
   --theme-chart-4: #c9ac7f;
   --theme-chart-5: #e6decb;
   --theme-sidebar-background: rgba(31, 39, 54, 0.9);
   --theme-sidebar-foreground: #f1ead9;
-  --theme-sidebar-primary: #d6be98;
+  --theme-sidebar-primary: #e0d4b8;
   --theme-sidebar-primary-foreground: #3e2f1a;
   --theme-sidebar-accent: rgba(230, 222, 203, 0.1);
   --theme-sidebar-accent-foreground: #e6e0d1;
   --theme-sidebar-border: rgba(241, 234, 217, 0.08);
-  --theme-sidebar-ring: #d6be98;
+  --theme-sidebar-ring: #e0d4b8;
   --theme-sidebar: rgba(31, 39, 54, 0.9);
 
   /* 玻璃 / 面板（中性米灰） */
@@ -360,7 +362,7 @@
   --surface-row-hover-bg: rgba(44, 52, 70, 0.7);
   --surface-row-hover-border: rgba(214, 190, 152, 0.22);
 
-  /* 雨林特色玻璃 → 云天对应替换（米灰+卡其） */
+  /* 雨林特色玻璃 → 暖云对应替换（米灰+卡其） */
   --surface-rainforest-bg: rgba(32, 40, 56, 0.3);
   --surface-rainforest-border: rgba(241, 234, 217, 0.12);
   --surface-rainforest-shadow: 0 18px 46px rgba(30, 36, 50, 0.22), inset 0 1px 0 rgba(241, 234, 217, 0.04);
@@ -368,8 +370,8 @@
   --surface-nav-hover-bg: rgba(32, 40, 56, 0.82);
   --surface-nav-hover-border: rgba(214, 190, 152, 0.22);
 
-  /* 文字强调色 / 眉标（奶油白卡其） */
-  --text-eyebrow: #d6be98;
+  /* 文字强调色 / 眉标（淡白卡其） */
+  --text-eyebrow: #e0d4b8;
   --text-title: #f3eddf;
   --text-subtitle: rgba(230, 220, 197, 0.5);
   --text-heading: rgba(243, 237, 223, 0.85);
@@ -377,14 +379,14 @@
   --text-field-label: rgba(230, 220, 197, 0.58);
 
   /* 智能体 / 沉浸模式（降饱和） */
-  --immersive-primary: #d6be98;
-  --immersive-progress: rgba(214, 190, 152, 0.22);
-  --orb-halo: rgba(214, 190, 152, 0.48);
+  --immersive-primary: #e0d4b8;
+  --immersive-progress: rgba(224, 212, 184, 0.22);
+  --orb-halo: rgba(224, 212, 184, 0.48);
   --orb-core-grad-a: #655340;
   --orb-core-grad-b: #4d402f;
   --orb-core-grad-c: #332a1d;
   --orb-spark: #eadcc1;
-  --orb-spark-shadow: #d6be98;
+  --orb-spark-shadow: #e0d4b8;
 
   /* 工作区面板 */
   --rf-panel-bg: rgba(32, 40, 56, 0.34);
@@ -525,13 +527,16 @@
         rgba(4, 18, 14, 0.65) 100%));
 }
 
-/* 场景专属的蒙层渐变（直接覆盖上面的变量，让 scene-overlay 组件可以简化） */
+/* 场景专属的蒙层渐变（直接覆盖上面的变量，让 scene-overlay 组件可以简化）
+
+   —— 雨林：略增暗压（非文档页 稍微暗一点）
+      顶/中/底 α 从 0.08/0.04/0.12 → 0.15/0.09/0.22，暗得不重，保留通透同时给文字留景深 */
 [data-scene="rain"] .bg-video-overlay,
 [data-scene="rain"] {
   --scene-overlay-gradient: linear-gradient(180deg,
-      rgba(5, 22, 18, 0.55) 0%,
-      rgba(8, 30, 24, 0.4) 40%,
-      rgba(4, 18, 14, 0.65) 100%);
+      rgba(5, 22, 18, 0.15) 0%,
+      rgba(8, 30, 24, 0.09) 40%,
+      rgba(4, 18, 14, 0.22) 100%);
 }
 
 [data-scene="snow"] .bg-video-overlay,
@@ -542,14 +547,27 @@
       rgba(6, 22, 40, 0.55) 100%);
 }
 
-/* 云天：去掉中心暖金透光，改成中性米灰四角柔压，cloud.png 原汁原味 */
+/* 暖云：黑底白字 — 中性暗灰四角柔压，cloud.png 保留但整体偏暗 */
 [data-scene="cloud"] .bg-video-overlay,
 [data-scene="cloud"] {
   --scene-overlay-gradient: radial-gradient(ellipse at 50% 35%,
-      rgba(255, 255, 255, 0.02) 0%,
-      rgba(220, 210, 180, 0.02) 35%,
-      rgba(40, 44, 56, 0.24) 78%,
-      rgba(26, 30, 40, 0.46) 100%);
+      rgba(10, 10, 10, 0.05) 0%,
+      rgba(5, 5, 5, 0.15) 35%,
+      rgba(3, 3, 3, 0.55) 78%,
+      rgba(0, 0, 0, 0.75) 100%);
+}
+
+/* ── 全局 Loading 文字：按 data-scene 切换 ── */
+.global-loading-text .loading-rain,
+.global-loading-text .loading-snow,
+.global-loading-text .loading-cloud {
+  display: none;
+}
+
+[data-scene="rain"] .global-loading-text .loading-rain,
+[data-scene="snow"] .global-loading-text .loading-snow,
+[data-scene="cloud"] .global-loading-text .loading-cloud {
+  display: inline;
 }
 
 @layer components {

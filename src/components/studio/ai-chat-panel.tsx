@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ElementRef } from "react";
 import { ArrowsInSimple, ArrowsOutSimple, PaperPlaneTilt, Plus, Quotes, Sparkle, Stop, X } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { MessageBubble } from "@/components/ai/message-bubble";
@@ -38,6 +38,8 @@ interface AiChatPanelProps {
   aiExpanded?: boolean;
   /** 切换拉宽/收起 */
   onToggleAiExpanded?: () => void;
+  /** 外层 studio-root 元素：把对话框挂入其 DOM 树内以继承主题 CSS 变量 */
+  studioRoot?: HTMLElement | null;
 }
 
 const STORAGE_PREFIX = "studio-chat:";
@@ -51,6 +53,7 @@ export function AiChatPanel({
   storageKey,
   aiExpanded = false,
   onToggleAiExpanded,
+  studioRoot: studioRootProp,
 }: AiChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -61,6 +64,16 @@ export function AiChatPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const conversationIdRef = useRef<string | null>(null);
+  const panelRef = useRef<ElementRef<"aside">>(null);
+  const [studioRootFromDom, setStudioRootFromDom] = useState<HTMLElement | null>(null);
+  const dialogContainer = studioRootProp ?? studioRootFromDom;
+
+  // 自动向上查找 studio-root 容器（优先用传入的 studioRoot）
+  useEffect(() => {
+    if (studioRootProp) return;
+    const root = panelRef.current?.closest<HTMLElement>(".studio-root") ?? null;
+    setStudioRootFromDom(root);
+  }, [studioRootProp]);
 
   const onStreamEndRef = useRef(onStreamEnd);
   useEffect(() => {
@@ -233,7 +246,7 @@ export function AiChatPanel({
   }
 
   return (
-    <aside className="flex min-h-0 min-w-0 flex-1 flex-col border-l border-white/[0.08]">
+    <aside ref={panelRef} className="flex min-h-0 min-w-0 flex-1 flex-col border-l border-white/[0.08]">
       <div className="flex h-12 shrink-0 items-center gap-2 border-b border-white/[0.08] px-4">
         <Sparkle className="size-4 text-primary" weight="fill" />
         <span className="text-[13px] font-semibold">AI 对话</span>
@@ -364,12 +377,12 @@ export function AiChatPanel({
       </div>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="sm:max-w-sm border border-white/12 bg-background/95 text-white backdrop-blur-xl">
+        <DialogContent container={dialogContainer} className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>开始新对话？</DialogTitle>
             <DialogDescription>当前对话记录会被清空，且无法恢复。</DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="bg-transparent">
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>取消</Button>
             <Button onClick={confirmClear}>清空</Button>
           </DialogFooter>

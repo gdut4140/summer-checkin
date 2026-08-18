@@ -6,12 +6,15 @@ import { PomodoroStation } from "./pomodoro-station";
 import { LocalTodoPanel } from "./local-todo-panel";
 import { LongPressExit } from "./long-press-exit";
 import { randomQuote } from "@/lib/quotes";
+import { useScene, useSceneCopy } from "@/context/scene-context";
 
 export function RainforestFocusRoom() {
   const [immersive, setImmersive] = useState(false);
-  const [quote, setQuote] = useState(() => randomQuote());
+  const { scene } = useScene();
+  const { roomTitle, roomSlogan } = useSceneCopy();
+  const [quote, setQuote] = useState(() => randomQuote(scene));
 
-  // 挂到 body 上复用 .rainforest-immersive 规则：隐藏顶部导航 / 雨林浮球 / 环境音，并锁定滚动
+  // 挂到 body 上复用 .rainforest-immersive 规则：隐藏顶部导航 / 悬浮球 / 环境音，并锁定滚动
   useEffect(() => {
     if (immersive) document.body.classList.add("rainforest-immersive");
     else document.body.classList.remove("rainforest-immersive");
@@ -19,7 +22,7 @@ export function RainforestFocusRoom() {
   }, [immersive]);
 
   function enterImmersive() {
-    setQuote(randomQuote());
+    setQuote(randomQuote(scene));
     setImmersive(true);
   }
 
@@ -41,8 +44,8 @@ export function RainforestFocusRoom() {
       <header className="product-header shrink-0">
         <div>
           <p className="product-eyebrow">Deep focus</p>
-          <h1 className="product-title">雨林自习室</h1>
-          <p className="product-subtitle">在雨声中沉浸，让每一段专注都有节奏。</p>
+          <h1 className="product-title">{roomTitle}</h1>
+          <p className="product-subtitle">{roomSlogan}</p>
         </div>
         <button
           type="button"
@@ -54,7 +57,7 @@ export function RainforestFocusRoom() {
         </button>
       </header>
 
-      {/* 三栏：番茄钟 | 雨景 | 待办 */}
+      {/* 三栏：番茄钟 | 背景 | 待办 */}
       <div className="flex flex-1 items-center gap-0">
         <div className="flex w-1/4 shrink-0 items-center px-2">
           <PomodoroStation />

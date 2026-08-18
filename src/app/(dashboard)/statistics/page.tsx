@@ -32,15 +32,22 @@ export default async function ProfilePage() {
     p.tasks.filter((t) => t.status === "done" && t.completedAt && t.completedAt >= todayStart && t.completedAt <= todayEnd)
   ).length;
 
-  // 连续活跃
-  let streakDays = 0;
-  const completedDates = new Set<string>();
+  // 连续活跃：合并打卡日期 + 任务完成日期
+  const checkins = await prisma.checkin.findMany({
+    where: { userId: user.id },
+    select: { checkinDate: true },
+  });
+  const allActiveDates = new Set<string>();
+  for (const c of checkins) {
+    allActiveDates.add(format(c.checkinDate, "yyyy-MM-dd"));
+  }
   for (const plan of plans) {
     for (const t of plan.tasks) {
-      if (t.status === "done" && t.completedAt) completedDates.add(format(t.completedAt, "yyyy-MM-dd"));
+      if (t.status === "done" && t.completedAt) allActiveDates.add(format(t.completedAt, "yyyy-MM-dd"));
     }
   }
-  const sortedDates = [...completedDates].sort().reverse();
+  let streakDays = 0;
+  const sortedDates = [...allActiveDates].sort().reverse();
   for (let i = 0; i < sortedDates.length; i++) {
     if (sortedDates[i] === format(new Date(now.getTime() - i * 86400000), "yyyy-MM-dd")) streakDays++;
     else break;

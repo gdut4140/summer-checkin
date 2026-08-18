@@ -7,7 +7,6 @@ import {
   Hash,
   PaperPlaneTilt,
   Plus,
-  Sparkle,
   Users,
   X,
 } from "@phosphor-icons/react";
@@ -19,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { AppAvatar } from "@/components/ui/app-avatar";
 
 interface ChatMessage {
   id: string;
@@ -59,24 +59,6 @@ type ServerMessage =
 
 const STREAMING_ID = "__ai_streaming__";
 
-// 头像底色：按昵称稳定分配，避免每次刷新换色
-const AVATAR_COLORS = [
-  "bg-primary/85 text-primary-foreground",
-  "bg-sky-500/85 text-sky-950",
-  "bg-amber-500/85 text-amber-950",
-  "bg-rose-500/85 text-rose-950",
-  "bg-violet-500/85 text-violet-950",
-  "bg-teal-500/85 text-teal-950",
-];
-
-function avatarColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
-
 function getWsUrl(): string {
   const host = window.location.hostname;
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -91,7 +73,6 @@ function formatTime(iso: string): string {
   });
 }
 
-// 用于把相邻的同发送者消息归为一组
 function senderKey(m: ChatMessage): string {
   if (m.role === "assistant") return "ai";
   if (m.role === "system") return "sys";
@@ -126,7 +107,6 @@ export function ChatRoom() {
     openRef.current = open;
   }, [open]);
 
-  // 加载房间列表
   useEffect(() => {
     fetch("/api/rooms")
       .then((r) => r.json())
@@ -134,7 +114,6 @@ export function ChatRoom() {
       .catch(() => toast.error("加载房间失败"));
   }, []);
 
-  // 消息处理器（声明在前，供 WebSocket onmessage 引用）
   const handleServerMessage = useCallback((msg: ServerMessage) => {
     switch (msg.type) {
       case "ready":
@@ -197,7 +176,6 @@ export function ChatRoom() {
     }
   }, []);
 
-  // WebSocket 常驻连接（用于实时消息 + 未读统计）
   useEffect(() => {
     const ws = new WebSocket(getWsUrl());
     wsRef.current = ws;
@@ -221,7 +199,6 @@ export function ChatRoom() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 输入框自适应高度
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -304,16 +281,15 @@ export function ChatRoom() {
 
   return (
     <>
-      {/* 触发按钮 + 未读红点 */}
       <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="打开聊天室"
-        className="relative flex size-8 items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+        className="relative flex size-8 items-center justify-center rounded-full text-foreground/55 transition-colors hover:bg-foreground/10 hover:text-foreground"
       >
         <ChatsCircle className="size-4" weight="fill" />
         {totalUnread > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold leading-none text-destructive-foreground">
             {totalUnread > 99 ? "99+" : totalUnread}
           </span>
         )}
@@ -322,19 +298,25 @@ export function ChatRoom() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showCloseButton={false}
-          className="chatroom-dialog flex flex-col gap-0 overflow-hidden rounded-2xl border border-white/12 bg-background/95 p-0 text-white backdrop-blur-xl"
+          className="chatroom-dialog flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-background/90 p-0 text-foreground backdrop-blur-2xl"
         >
           <DialogTitle className="sr-only">学习聊天室</DialogTitle>
           <DialogDescription className="sr-only">
             多人实时聊天，@雨宝 唤起 AI 助教
           </DialogDescription>
 
+          {/* 主题装饰层 */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-primary/8 blur-3xl" />
+            <div className="absolute -right-16 bottom-10 h-48 w-48 rounded-full bg-accent/12 blur-3xl" />
+          </div>
+
           {/* 头部 */}
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-white/[0.08] px-3 sm:px-4">
+          <header className="relative flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/60 px-3 backdrop-blur-xl sm:px-4">
             <button
               onClick={backToList}
               aria-label="返回房间列表"
-              className="-ml-1 flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground md:hidden"
+              className="-ml-1 flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground md:hidden"
             >
               <CaretLeft className="size-4" weight="bold" />
             </button>
@@ -365,7 +347,7 @@ export function ChatRoom() {
               <button
                 onClick={() => setOpen(false)}
                 aria-label="关闭"
-                className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
+                className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
               >
                 <X className="size-4" />
               </button>
@@ -373,11 +355,11 @@ export function ChatRoom() {
           </header>
 
           {/* 主体：两栏（移动端按需切换） */}
-          <div className="flex min-h-0 flex-1">
+          <div className="relative flex min-h-0 flex-1">
             {/* 左侧房间列表 */}
             <aside
               className={cn(
-                "flex-col border-r border-white/[0.08] bg-white/[0.02] md:flex md:w-60 md:shrink-0",
+                "flex-col border-r border-border/60 bg-muted/20 md:flex md:w-60 md:shrink-0",
                 activeRoomId ? "hidden" : "flex w-full"
               )}
             >
@@ -397,7 +379,7 @@ export function ChatRoom() {
                       onClick={() => selectRoom(room.id)}
                       className={cn(
                         "group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-colors",
-                        active ? "bg-primary/12" : "hover:bg-white/[0.05]"
+                        active ? "bg-primary/12" : "hover:bg-foreground/[0.05]"
                       )}
                     >
                       <span
@@ -405,7 +387,7 @@ export function ChatRoom() {
                           "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
                           active
                             ? "bg-primary text-primary-foreground"
-                            : "bg-white/[0.06] text-muted-foreground group-hover:text-foreground"
+                            : "bg-foreground/[0.06] text-muted-foreground group-hover:text-foreground"
                         )}
                       >
                         <Hash className="size-4" weight={active ? "fill" : "bold"} />
@@ -425,7 +407,7 @@ export function ChatRoom() {
                         </span>
                       </span>
                       {unread > 0 && (
-                        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
                           {unread > 99 ? "99+" : unread}
                         </span>
                       )}
@@ -443,7 +425,7 @@ export function ChatRoom() {
                 )}
               </div>
               {/* 新建房间 */}
-              <div className="border-t border-white/[0.08] p-2.5">
+              <div className="border-t border-border/60 p-2.5">
                 {creating ? (
                   <input
                     autoFocus
@@ -457,12 +439,12 @@ export function ChatRoom() {
                       }
                     }}
                     placeholder="房间名，回车创建"
-                    className="h-9 w-full rounded-lg border border-primary/40 bg-white/[0.04] px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
+                    className="h-9 w-full rounded-lg border border-primary/40 bg-foreground/[0.04] px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
                   />
                 ) : (
                   <button
                     onClick={() => setCreating(true)}
-                    className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/12 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                    className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                   >
                     <Plus className="size-4" weight="bold" />
                     新建房间
@@ -523,12 +505,12 @@ export function ChatRoom() {
               </div>
 
               {/* 输入框 + @提及 */}
-              <div className="shrink-0 border-t border-white/[0.08] p-3 sm:p-4">
+              <div className="shrink-0 border-t border-border/60 bg-background/40 p-3 backdrop-blur-xl sm:p-4">
                 <div className="relative mx-auto max-w-3xl">
                   {showMention && (
                     <button
                       onClick={selectMention}
-                      className="absolute -top-14 left-0 flex items-center gap-2.5 rounded-xl border border-white/10 bg-background px-3 py-2 shadow-xl transition-colors hover:bg-primary/12"
+                      className="absolute -top-14 left-0 flex items-center gap-2.5 rounded-xl border border-border bg-popover px-3 py-2 shadow-xl transition-colors hover:bg-primary/12"
                     >
                       <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-primary">
                         <Sparkle className="size-4" weight="fill" />
@@ -539,7 +521,7 @@ export function ChatRoom() {
                       </span>
                     </button>
                   )}
-                  <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2 transition-colors focus-within:border-primary/40">
+                  <div className="flex items-end gap-2 rounded-2xl border border-border bg-foreground/[0.04] px-3 py-2 transition-colors focus-within:border-primary/40">
                     <textarea
                       ref={inputRef}
                       value={input}
@@ -593,7 +575,7 @@ function MessageRow({
   if (message.role === "system") {
     return (
       <div className="flex justify-center py-1">
-        <span className="rounded-full bg-white/[0.06] px-3 py-1 text-[11px] text-muted-foreground">
+        <span className="rounded-full bg-foreground/[0.06] px-3 py-1 text-[11px] text-muted-foreground">
           {message.content}
         </span>
       </div>
@@ -602,8 +584,6 @@ function MessageRow({
 
   const isAI = message.role === "assistant";
   const isStreaming = message.id === STREAMING_ID;
-  const initial = (message.userName ?? "?").charAt(0).toUpperCase();
-  const color = avatarColor(message.userName ?? "user");
 
   return (
     <div
@@ -615,18 +595,14 @@ function MessageRow({
     >
       {/* 头像 */}
       {isAI ? (
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/40 to-primary/10 text-primary ring-1 ring-primary/20">
-          <Sparkle className="size-4" weight="fill" />
-        </div>
+        <AppAvatar ai name="雨宝" size="sm" className="size-8" />
       ) : (
-        <div
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-            color
-          )}
-        >
-          {initial}
-        </div>
+        <AppAvatar
+          image={null}
+          name={message.userName ?? "用户"}
+          size="sm"
+          className="size-8"
+        />
       )}
 
       {/* 内容 */}
@@ -664,10 +640,10 @@ function MessageRow({
           className={cn(
             "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
             isAI
-              ? "rounded-bl-sm bg-white/[0.06] text-foreground/90 ring-1 ring-white/[0.06]"
+              ? "rounded-bl-sm bg-foreground/[0.06] text-foreground/90 ring-1 ring-foreground/[0.06]"
               : isMine
                 ? "rounded-br-sm bg-primary text-primary-foreground"
-                : "rounded-bl-sm bg-white/[0.08] text-foreground/90"
+                : "rounded-bl-sm bg-foreground/[0.08] text-foreground/90"
           )}
         >
           {message.content ? (

@@ -8,20 +8,33 @@ import {
   ArrowsOutSimple,
   CaretLeft,
   ChatCircleText,
+  Check,
   CheckCircle,
+  CaretDown,
   Columns,
   DotsSixVertical,
   DownloadSimple,
   Eye,
   List,
+  Moon,
   PencilSimple,
+  Sliders,
+  Snowflake,
   Spinner,
+  Sun,
+  TreeEvergreen,
   WarningCircle,
+  CloudSun,
+  Leaf,
 } from "@phosphor-icons/react";
 import { EditorPane, type EditorPaneHandle, type EditorPaneMode } from "./editor-pane";
 import { OutlinePanel } from "./outline-panel";
 import { AiChatPanel } from "./ai-chat-panel";
 import { extractHeadings } from "@/lib/studio/outline";
+import { useStudioTheme, type StudioPreset } from "./use-studio-theme";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import AccordionGallery, { type GalleryItem } from "./accordion-gallery";
+import type { BgGalleryItem } from "./bg-accordion-gallery";
 
 export interface MarkdownStudioDocument {
   id: string;
@@ -70,6 +83,36 @@ export function MarkdownStudio({
   const [outlineOpen, setOutlineOpen] = useState(true);
   const [aiOpen, setAiOpen] = useState(aiEnabled);
   const [aiExpanded, setAiExpanded] = useState(false);
+
+  /* ── 编辑器预设套餐（7 套餐：3 场景 + 4 纯色，各绑定主题+背景） ── */
+  const {
+    preset: studioPreset,
+    setPreset: setStudioPreset,
+    theme: studioTheme,
+    opacity: studioOpacity,
+    setOpacity: setStudioOpacity,
+    rootStyle,
+    bgType,
+    bgSrc,
+    hasBg,
+    canAdjustOpacity,
+    opacityMin,
+    opacityMax,
+    opacityLabel,
+  } = useStudioTheme();
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  /* 移动端 Popover 点击外部自动关闭 */
+  useEffect(() => {
+    if (!popoverOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (!popoverRef.current) return;
+      if (popoverRef.current.contains(e.target as Node)) return;
+      setPopoverOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [popoverOpen]);
   const [panelOrder, setPanelOrder] = useState<PanelKey[]>(
     aiEnabled ? ["outline", "editor", "ai"] : ["outline", "editor"]
   );
@@ -308,18 +351,42 @@ export function MarkdownStudio({
   }, [doSave]);
 
   return (
-    <div className="flex h-full flex-col bg-background text-foreground">
-      {/* 顶栏：返回 + 标题 + 目录/专注阅读/左右对照 + 保存状态 */}
-      <header className="relative flex h-14 shrink-0 items-center gap-3 border-b border-white/8 px-3 sm:px-4">
+    <div
+      data-preset={studioPreset}
+      suppressHydrationWarning
+      className={`studio-root studio-theme-${studioTheme} relative flex h-full flex-col`}
+      style={rootStyle}
+    >
+      {/* 背景图层（z-0）：根据当前 preset 的 bgType/bgSrc 只显示对应那一张 */}
+      {bgType === "video" && bgSrc ? (
+        <video
+          className="studio-bg-video"
+          src={bgSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-hidden
+        />
+      ) : bgType === "image" ? (
+        <div className="studio-bg-layer" aria-hidden />
+      ) : null}
+      {/* 面板遮罩层（z-1）：统一保证文字可读 */}
+      <div className="studio-surface-mask" aria-hidden />
+      {/* 顶栏独立保护（z-2）：14 高度的毛玻璃，避免顶栏文字和背景打架 */}
+      <div className="studio-header-mask" aria-hidden />
+
+      {/* 顶栏：返回 + 标题 + （桌面=主题胶囊+tab组合）/（移动=tab+Sliders Popover）+ 保存状态 */}
+      <header className="relative z-30 flex h-14 shrink-0 items-center gap-3 border-b border-foreground/8 px-3 text-foreground sm:px-4">
         <button
           type="button"
           onClick={() => void handleBack()}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-white/20 hover:text-foreground"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
         >
           <CaretLeft className="size-3.5" weight="bold" />
           {backLabel}
         </button>
-        <div className="h-4 w-px shrink-0 bg-white/10" />
+        <div className="h-4 w-px shrink-0 bg-foreground/10" />
         <div className="min-w-0 flex-1">
           {renaming ? (
             <input
@@ -338,10 +405,9 @@ export function MarkdownStudio({
               type="button"
               onClick={startRename}
               disabled={!onRename}
-              title={onRename ? "点击重命名" : undefined}
-              className="group flex max-w-full items-center gap-1.5 text-left"
+              className="group flex max-w-full items-center gap-1.5 text-left text-foreground"
             >
-              <span className="truncate text-sm font-semibold leading-tight">
+              <span className="truncate text-sm font-semibold leading-tight text-foreground">
                 {document.title}
               </span>
               {onRename && (
@@ -349,11 +415,6 @@ export function MarkdownStudio({
               )}
             </button>
           )}
-          <p className="truncate text-[10px] text-muted-foreground">
-            {readOnly
-              ? "只读模式 · 目录与阅读"
-              : "Markdown 文档 · 左右对照或专注阅读 · 框选文字可让 AI 改这段 · Ctrl+S 保存"}
-          </p>
         </div>
         {!readOnly && showAiUndo && (
           <button
@@ -365,60 +426,99 @@ export function MarkdownStudio({
             AI 已更新 · 撤销
           </button>
         )}
-        <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-primary/40 bg-white/4 p-0.5">
+
+        {/* 桌面端：顶栏中央胶囊 —— 预设套餐组 + 原有 tab 组合 */}
+        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-2 md:flex">
+          <StudioPresetToolGroup
+            preset={studioPreset}
+            onPreset={setStudioPreset}
+            opacity={studioOpacity}
+            onOpacity={setStudioOpacity}
+            hasBg={hasBg}
+            canAdjustOpacity={canAdjustOpacity}
+            opacityMin={opacityMin}
+            opacityMax={opacityMax}
+            opacityLabel={opacityLabel}
+          />
+          <div className="flex items-center gap-0.5 rounded-full bg-foreground/[0.04] p-0.5">
+            <button
+              type="button"
+              onClick={() => setOutlineOpen((v) => !v)}
+              className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all duration-200 ${
+                outlineOpen ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-foreground/[0.08] hover:text-foreground"
+              }`}
+            >
+              <List className="size-3.5" />
+              目录
+            </button>
+            {aiEnabled && (
+              <button
+                type="button"
+                onClick={() => setAiOpen((v) => !v)}
+                className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all duration-200 ${
+                  aiOpen ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-foreground/[0.08] hover:text-foreground"
+                }`}
+              >
+                <ChatCircleText className="size-3.5" />
+                AI
+              </button>
+            )}
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => setMode(mode === "split" ? "focus" : "split")}
+                className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all duration-200 ${
+                  mode === "focus" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-foreground/[0.08] hover:text-foreground"
+                }`}
+              >
+                {mode === "split" ? (
+                  <>
+                    <Eye className="size-3.5" />
+                    专注阅读
+                  </>
+                ) : (
+                  <>
+                    <Columns className="size-3.5" />
+                    左右对照
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 移动端：顶栏右侧 Sliders Popover 承载主题工具组 */}
+        <div className="relative md:hidden" ref={popoverRef}>
           <button
             type="button"
-            onClick={() => setOutlineOpen((v) => !v)}
-            title="目录"
-            className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-              outlineOpen ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
+            onClick={() => setPopoverOpen((v) => !v)}
+            className="flex shrink-0 items-center gap-1 rounded-lg border border-foreground/10 bg-foreground/[0.04] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
           >
-            <List className="size-3.5" />
-            目录
+            <Sliders className="size-4" />
           </button>
-          {aiEnabled && (
-            <button
-              type="button"
-              onClick={() => setAiOpen((v) => !v)}
-              title="AI 对话"
-              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                aiOpen ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <ChatCircleText className="size-3.5" />
-              AI
-            </button>
-          )}
-          {!readOnly && (
-            <button
-              type="button"
-              onClick={() => setMode(mode === "split" ? "focus" : "split")}
-              title={mode === "split" ? "专注阅读" : "左右对照"}
-              className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                mode === "focus" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {mode === "split" ? (
-                <>
-                  <Eye className="size-3.5" />
-                  专注阅读
-                </>
-              ) : (
-                <>
-                  <Columns className="size-3.5" />
-                  左右对照
-                </>
-              )}
-            </button>
+          {popoverOpen && (
+            <div className="absolute right-0 top-12 z-40 w-[26rem] max-w-[calc(100vw-2rem)] rounded-xl border border-foreground/12 bg-background/90 p-3 shadow-2xl backdrop-blur-lg">
+              <StudioPresetToolGroup
+                stacked
+                preset={studioPreset}
+                onPreset={setStudioPreset}
+                opacity={studioOpacity}
+                onOpacity={setStudioOpacity}
+                hasBg={hasBg}
+                canAdjustOpacity={canAdjustOpacity}
+                opacityMin={opacityMin}
+                opacityMax={opacityMax}
+                opacityLabel={opacityLabel}
+              />
+            </div>
           )}
         </div>
+
         {!readOnly && (
           <button
             type="button"
             onClick={exportMarkdown}
-            title="导出为 Markdown 文件"
-            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/4 px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-white/20 hover:text-foreground"
+            className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground sm:flex"
           >
             <DownloadSimple className="size-3.5" />
             导出
@@ -428,7 +528,7 @@ export function MarkdownStudio({
       </header>
 
       {/* 移动端 Tab 切换（桌面端隐藏） */}
-      <div className="flex shrink-0 border-b border-white/8 md:hidden">
+      <div className="flex shrink-0 border-b border-foreground/8 md:hidden">
         {(
           aiEnabled
             ? [
@@ -468,7 +568,7 @@ export function MarkdownStudio({
                 }}
                 className={`relative shrink-0 overflow-hidden transition-[width,transform] duration-300 ease-out ${
                   outlineOpen ? "md:w-56 md:translate-x-0" : "md:w-0 md:-translate-x-6"
-                } ${mobileTab === "outline" ? "flex w-full" : "hidden"} md:flex`}
+                } ${mobileTab === "outline" ? "flex w-full" : "hidden"} md:flex relative z-10`}
               >
                 <PanelGrip onPointerDown={(e) => startPanelDrag(e, "outline")} />
                 <div className="flex h-full w-full md:w-56">
@@ -486,7 +586,7 @@ export function MarkdownStudio({
                 }}
                 className={`relative min-w-0 flex-1 overflow-hidden md:block ${
                   mobileTab === "doc" ? "block" : "hidden"
-                } ${aiFlash ? "studio-ai-flash" : ""}`}
+                } ${aiFlash ? "studio-ai-flash" : ""} relative z-10`}
               >
                 <PanelGrip onPointerDown={(e) => startPanelDrag(e, "editor")} />
                 <EditorPane
@@ -507,7 +607,7 @@ export function MarkdownStudio({
               ref={(el) => {
                 panelElRefs.current["ai"] = el;
               }}
-              className={`relative shrink-0 overflow-hidden ${mobileTab === "ai" ? "flex w-full" : "hidden"} md:flex`}
+              className={`relative shrink-0 overflow-hidden ${mobileTab === "ai" ? "flex w-full" : "hidden"} md:flex relative z-10`}
               style={{
                 width: aiOpen ? (aiExpanded ? AI_PANEL_EXPANDED_WIDTH : AI_PANEL_WIDTH) : 0,
                 transform: aiOpen ? "translateX(0)" : "translateX(16px)",
@@ -535,12 +635,237 @@ export function MarkdownStudio({
   );
 }
 
+/* ────────────────────────────────────────────────────────────────────────
+   Studio 预设套餐工具组：圆润下拉框，7 套餐 + 透明度
+   stacked: false（桌面）| true（移动 Popover）
+   ──────────────────────────────────────────────────────────────────────── */
+
+interface PresetToolGroupProps {
+  stacked?: boolean;
+  preset: StudioPreset;
+  onPreset: (p: StudioPreset) => void;
+  opacity: number;
+  onOpacity: (n: number) => void;
+  hasBg: boolean;
+  canAdjustOpacity: boolean;
+  opacityMin: number;
+  opacityMax: number;
+  opacityLabel: string;
+}
+
+const PRESET_OPTIONS: {
+  value: StudioPreset;
+  label: string;
+  icon: React.ComponentType<{ className?: string; weight?: string }>;
+  group: "scene" | "pure";
+}[] = [
+  { value: "dark-rain", label: "雨林", icon: TreeEvergreen, group: "scene" },
+  { value: "light-snow", label: "雪日", icon: Snowflake, group: "scene" },
+  { value: "khaki-cloud", label: "暖云", icon: CloudSun, group: "scene" },
+  { value: "dark-pure", label: "暗色", icon: Moon, group: "pure" },
+  { value: "light-pure", label: "亮色", icon: Sun, group: "pure" },
+  { value: "khaki-pure", label: "卡其", icon: CloudSun, group: "pure" },
+  { value: "matcha-pure", label: "抹茶", icon: Leaf, group: "pure" },
+];
+
+/** 场景组背景图（AccordionGallery 用） */
+const SCENE_GALLERY_ITEMS: GalleryItem[] = [
+  { image: "/rain.png", label: "雨林", value: "dark-rain" },
+  { image: "/snow.png", label: "雪日", value: "light-snow" },
+  { image: "/cloud.png", label: "暖云", value: "khaki-cloud" },
+];
+
+function StudioPresetToolGroup({
+  stacked = false,
+  preset,
+  onPreset,
+  opacity,
+  onOpacity,
+  hasBg,
+  canAdjustOpacity,
+  opacityMin,
+  opacityMax,
+  opacityLabel,
+}: PresetToolGroupProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  const currentOption = PRESET_OPTIONS.find((o) => o.value === preset);
+  const CurrentIcon = currentOption?.icon ?? CloudSun;
+
+  const sceneOptions = PRESET_OPTIONS.filter((o) => o.group === "scene");
+  const pureOptions = PRESET_OPTIONS.filter((o) => o.group === "pure");
+
+  const dropdown = (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-[30px] items-center gap-1.5 rounded-full bg-foreground/[0.06] px-3 text-[12px] font-medium leading-none text-foreground transition-all hover:bg-foreground/[0.10]"
+      >
+        <CurrentIcon className="size-3.5" />
+        <span>{currentOption?.label ?? "选择主题"}</span>
+        <CaretDown className={`size-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          className={`absolute z-50 w-[400px] rounded-xl border border-foreground/12 bg-background/95 p-2.5 shadow-2xl backdrop-blur-xl ${
+            stacked ? "left-0 top-full mt-2" : "left-0 top-full mt-2"
+          }`}
+        >
+          {/* 场景组：手风琴画廊 */}
+          <div className="mb-1.5 px-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+            场景
+          </div>
+          <AccordionGallery
+            items={SCENE_GALLERY_ITEMS}
+            activeIndex={sceneOptions.findIndex((o) => o.value === preset)}
+            trigger="hover"
+            height={140}
+            expandRatio={0.5}
+            gap={6}
+            radius={10}
+            tilt={5}
+            onSelect={(_i, item) => {
+              onPreset(item.value as StudioPreset);
+              setOpen(false);
+            }}
+          />
+
+          {/* 纯色组 */}
+          <div className="mt-2.5 mb-1.5 px-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+            纯色
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {pureOptions.map((o) => {
+              const Icon = o.icon;
+              const active = preset === o.value;
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => {
+                    onPreset(o.value);
+                    setOpen(false);
+                  }}
+                  className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-[11px] transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-foreground/[0.06]"
+                  }`}
+                >
+                  <Icon className="size-3 shrink-0" />
+                  <span className="truncate">{o.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (stacked) {
+    return (
+      <div className="flex flex-col gap-3">
+        {dropdown}
+
+        {/* 透明度（纯色套餐不显示，固定透明度完全隐藏） */}
+        {hasBg && canAdjustOpacity && (
+          <div className="flex flex-col gap-1.5">
+            <div className="text-[11px] font-medium text-muted-foreground">
+              {opacityLabel}
+            </div>
+            <StudioOpacityRange
+              value={opacity}
+              onChange={onOpacity}
+              min={opacityMin}
+              max={opacityMax}
+              label={opacityLabel}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 桌面端：下拉框 + 透明度
+  return (
+    <div className="flex items-center gap-2">
+      {dropdown}
+
+      {/* 透明度（纯色/固定透明度套餐不显示） */}
+      {hasBg && canAdjustOpacity && (
+        <StudioOpacityRange
+          value={opacity}
+          onChange={onOpacity}
+          min={opacityMin}
+          max={opacityMax}
+          label={opacityLabel}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * 透明度滑条：通过 style["--val"] 把当前值喂给 CSS 的渐变分段
+ * 语义：opacity% = 面板透出背景的比例（100=全透）
+ * 视觉上从 0% 到 100% 填充，实际值范围由 min/max 决定
+ */
+function StudioOpacityRange({
+  value,
+  onChange,
+  min = 0,
+  max = 100,
+  label = "透明度",
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  min?: number;
+  max?: number;
+  label?: string;
+}) {
+  // 视觉填充：将 [min,max] 映射到 [0%,100%]
+  const fillPercent = max > min ? ((value - min) / (max - min)) * 100 : 0;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={1}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="studio-opacity-range"
+          style={{ ["--val" as any]: `${fillPercent}%` }}
+          aria-label={label}
+        />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs font-medium">
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function PanelGrip({ onPointerDown }: { onPointerDown: (e: ReactPointerEvent) => void }) {
   return (
     <div
       onPointerDown={onPointerDown}
-      className="absolute left-1/2 top-1 z-20 flex h-6 -translate-x-1/2 cursor-grab items-center justify-center rounded-md border border-white/15 bg-background/90 px-1.5 text-muted-foreground shadow-lg backdrop-blur transition-colors hover:text-foreground active:cursor-grabbing"
-      title="拖动排序"
+      className="absolute left-1/2 top-1 z-20 flex h-6 -translate-x-1/2 cursor-grab items-center justify-center rounded-md border border-foreground/15 bg-background/90 px-1.5 text-muted-foreground shadow-lg backdrop-blur transition-colors hover:text-foreground active:cursor-grabbing"
     >
       <DotsSixVertical className="size-4" />
     </div>
@@ -574,7 +899,7 @@ function SaveIndicator({ state }: { state: SaveState }) {
   }
   return (
     <span className="flex shrink-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-      <CheckCircle className="size-3.5 text-primary/80" weight="fill" />
+      <CheckCircle className="size-3.5 text-muted-foreground" weight="fill" />
       已保存
     </span>
   );

@@ -48,11 +48,11 @@ export function PlanForm({ plan }: PlanFormProps) {
       <div className="grid md:grid-cols-[220px_minmax(0,1fr)]">
         <aside className="border-b border-white/8 bg-black/10 p-5 md:border-b-0 md:border-r md:p-6">
           <span className="flex size-9 items-center justify-center rounded-md border border-primary/16 bg-primary/7 text-primary"><ListChecks className="size-[18px]" weight="duotone" /></span>
-          <h2 className="mt-4 text-sm font-semibold text-white">{isEditing ? "编辑计划" : "新建计划"}</h2>
-          <p className="mt-2 text-xs leading-6 text-white/34">名称保持简短，目标写成可以验证的结果，后续更容易拆成每天的任务。</p>
-          <div className="mt-6 hidden space-y-3 border-t border-white/8 pt-5 text-xs text-white/30 md:block">
-            <p className="flex items-center gap-2"><Flag className="size-4 text-[#67b4c9]" />明确结果</p>
-            <p className="flex items-center gap-2"><CalendarBlank className="size-4 text-[#67b4c9]" />设定起点</p>
+          <h2 className="mt-4 text-sm font-semibold text-foreground">{isEditing ? "编辑计划" : "新建计划"}</h2>
+          <p className="mt-2 text-xs leading-6 text-muted-foreground">名称保持简短，目标写成可以验证的结果，后续更容易拆成每天的任务。</p>
+          <div className="mt-6 hidden space-y-3 border-t border-white/8 pt-5 text-xs text-muted-foreground md:block">
+            <p className="flex items-center gap-2"><Flag className="size-4 text-primary" />明确结果</p>
+            <p className="flex items-center gap-2"><CalendarBlank className="size-4 text-primary" />设定起点</p>
           </div>
         </aside>
         <form action={formAction} className="space-y-6 p-5 md:p-7">

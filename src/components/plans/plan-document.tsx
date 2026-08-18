@@ -86,10 +86,10 @@ export function PlanDocument({ plan, tasks, tasksStats, initialDocument }: Props
                         ) : task.status === "in_progress" ? (
                           <CircleDashed className="mt-0.5 size-3.5 shrink-0 text-primary/70" weight="fill" />
                         ) : (
-                          <Circle className="mt-0.5 size-3.5 shrink-0 text-white/15" />
+                          <Circle className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/30" />
                         )}
                         <div className="min-w-0">
-                          <p className={`text-[11px] leading-snug ${task.status === "done" ? "text-muted-foreground/60 line-through" : "text-foreground/85"}`}>
+                          <p className={`text-[11px] leading-snug ${task.status === "done" ? "text-muted-foreground/60 line-through" : "text-foreground"}`}>
                             {task.title}
                           </p>
                           <p className="text-[10px] text-muted-foreground/50">

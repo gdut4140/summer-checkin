@@ -21,13 +21,13 @@ import type { NotificationInfo, NotificationType } from "@/types";
 
 const typeConfig: Record<
   NotificationType,
-  { icon: typeof Bell; label: string; color: string; bg: string }
+  { icon: typeof Bell; label: string; tint: string }
 > = {
-  reminder: { icon: BellRinging, label: "提醒", color: "text-amber-400", bg: "bg-amber-500/12" },
-  analysis: { icon: ChartBar, label: "分析", color: "text-blue-400", bg: "bg-blue-500/12" },
-  report: { icon: Newspaper, label: "报告", color: "text-primary", bg: "bg-primary/12" },
-  encouragement: { icon: Fire, label: "鼓励", color: "text-orange-400", bg: "bg-orange-500/12" },
-  system: { icon: Gear, label: "系统", color: "text-muted-foreground", bg: "bg-white/[0.06]" },
+  reminder: { icon: BellRinging, label: "提醒", tint: "bg-primary/12 text-primary" },
+  analysis: { icon: ChartBar, label: "分析", tint: "bg-primary/10 text-primary" },
+  report: { icon: Newspaper, label: "报告", tint: "bg-primary/8 text-primary" },
+  encouragement: { icon: Fire, label: "鼓励", tint: "bg-primary/14 text-primary" },
+  system: { icon: Gear, label: "系统", tint: "bg-foreground/[0.06] text-muted-foreground" },
 };
 
 const filterTypes: { key: NotificationType | "all"; label: string }[] = [
@@ -232,7 +232,7 @@ export function NotificationCenter() {
                 >
                   <div className="flex items-start gap-2.5">
                     <span
-                      className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${config.bg} ${config.color}`}
+                      className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${config.tint}`}
                     >
                       <Icon className="size-3.5" weight={notification.read ? "regular" : "fill"} />
                     </span>
@@ -248,7 +248,7 @@ export function NotificationCenter() {
                       </div>
 
                       <div className="mt-0.5 flex items-center gap-2">
-                        <span className={`text-[11px] font-medium ${config.color}`}>{config.label}</span>
+                        <span className={`text-[11px] font-medium ${config.tint.split(" ")[1]}`}>{config.label}</span>
                         <span className="text-[11px] text-muted-foreground/70 tabular-nums">
                           {formatRelativeTime(notification.createdAt)}
                         </span>

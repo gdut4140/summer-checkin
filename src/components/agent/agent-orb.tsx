@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Leaf } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSceneCopy } from "@/context/scene-context";
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -12,6 +13,7 @@ function clamp(value: number, min: number, max: number) {
 // 全局悬浮球：可拖动；点击（非拖拽）跳转到智能体独立页面 /agent
 export function AgentOrb() {
   const router = useRouter();
+  const { explorerTitle, explorerButtonLabel } = useSceneCopy();
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const dragRef = useRef({ dragging: false, moved: false, dx: 0, dy: 0 });
 
@@ -87,7 +89,7 @@ export function AgentOrb() {
         render={
           <button
             type="button"
-            aria-label="打开探索雨林"
+            aria-label={explorerButtonLabel}
             className="rainforest-orb fixed z-40 touch-none select-none"
             style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0)` }}
             onPointerDown={onPointerDown}
@@ -101,7 +103,7 @@ export function AgentOrb() {
         <span className="rainforest-orb__spark rainforest-orb__spark--one" />
         <span className="rainforest-orb__spark rainforest-orb__spark--two" />
       </TooltipTrigger>
-      <TooltipContent side="left">探索雨林</TooltipContent>
+      <TooltipContent side="left">{explorerTitle}</TooltipContent>
     </Tooltip>
   );
 }

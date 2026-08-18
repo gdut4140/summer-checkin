@@ -33,6 +33,8 @@ import {
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { AmbientSound } from "@/components/dashboard/ambient-sound";
 import { ChatRoom } from "@/components/chatroom/chat-room";
+import { GithubLink } from "@/components/layout/github-link";
+import { useSceneCopy } from "@/context/scene-context";
 
 interface TopNavProps {
   user: {
@@ -43,28 +45,36 @@ interface TopNavProps {
   };
 }
 
-// 主要导航（顶部居中显示），次要项收入用户菜单
-const mainNav = [
-  { href: "/dashboard", label: "雨林" },
+// 次要导航：场景无关的固定文字
+const STATIC_NAV = [
   { href: "/checkin", label: "我的小岛" },
   { href: "/plans", label: "学习计划" },
   { href: "/docs", label: "文档" },
   { href: "/statistics", label: "个人主页" },
-];
+] as const;
 
-// 移动端抽屉的完整导航（带图标）
-const fullNav = [
-  { href: "/dashboard", label: "雨林", icon: Tree },
+const STATIC_FULL_NAV = [
   { href: "/checkin", label: "我的小岛", icon: Tree },
   { href: "/plans", label: "学习计划", icon: ListChecks },
   { href: "/docs", label: "文档", icon: Note },
   { href: "/statistics", label: "个人主页", icon: ChartLine },
   { href: "/settings", label: "设置", icon: Gear },
-];
+] as const;
 
 export function TopNav({ user }: TopNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { labelShort } = useSceneCopy();
+
+  // 主要导航（顶部居中显示）：第一项按场景动态，其余静态
+  const mainNav = [
+    { href: "/dashboard", label: labelShort },
+    ...STATIC_NAV,
+  ];
+  const fullNav = [
+    { href: "/dashboard", label: labelShort, icon: Tree },
+    ...STATIC_FULL_NAV,
+  ];
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
@@ -108,6 +118,7 @@ export function TopNav({ user }: TopNavProps) {
                 <LogoutButton />
               </DropdownMenuContent>
             </DropdownMenu>
+            <GithubLink className="ml-1 mr-0.5" />
           </div>
 
           {/* 移动端：汉堡菜单 */}

@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { KnowledgeBase } from "./knowledge-base";
 import type { ChatMessage } from "@/types";
+import { useSceneCopy } from "@/context/scene-context";
 
 interface Conversation {
   id: string;
@@ -48,6 +49,7 @@ function timeAgo(value: string) {
 
 export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?: boolean }) {
   const router = useRouter();
+  const { explorerTitle, explorerSubtitle } = useSceneCopy();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -205,7 +207,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
       <aside className={cn("rainforest-panel rainforest-panel--left", mobilePanel !== "history" && "rainforest-panel--mobile-hidden")}>
             <div className="flex h-16 items-center gap-3 border-b border-white/10 px-4">
               <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><Leaf weight="fill" /></div>
-              <div className="min-w-0 flex-1"><p className="text-sm font-semibold">探索雨林</p><p className="text-[11px] text-white/46">你的学习智能体</p></div>
+              <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{explorerTitle}</p><p className="text-[11px] text-white/46">{explorerSubtitle}</p></div>
             </div>
             <div className="p-3">
               <Button onClick={startNewConversation} className="w-full justify-start bg-white/8 text-white hover:bg-white/14" variant="ghost">
