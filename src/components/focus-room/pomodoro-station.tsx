@@ -32,7 +32,7 @@ export function PomodoroStation({ immersive = false }: { immersive?: boolean }) 
             onClick={() => setFocusMinutes(minutes)}
             className={
               focusMinutes === minutes
-                ? "rounded bg-[#d7ef83] px-3 py-1.5 text-xs font-semibold text-[#051612]"
+                ? "rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                 : "rounded px-3 py-1.5 text-xs text-white/55 transition hover:text-white"
             }
           >

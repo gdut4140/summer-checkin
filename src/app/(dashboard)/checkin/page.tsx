@@ -4,6 +4,7 @@ import { startOfDay, endOfDay, subDays, startOfYear, endOfYear, format, eachDayO
 import { LearningIsland } from "@/components/landing/learning-island";
 import { Heatmap } from "@/components/calendar/heatmap";
 import { CheckinButton } from "./checkin-button";
+import { SceneSelector } from "@/components/island/scene-selector";
 
 export default async function CheckinPage() {
   const user = await requireAuth();
@@ -99,17 +100,20 @@ export default async function CheckinPage() {
       </div>
 
       {/* 顶部渐变遮罩（轻量，仅保证文字可读） */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-36 bg-gradient-to-b from-[#06150f]/85 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-36 bg-gradient-to-b from-background/85 to-transparent" />
 
       {/* ── 顶部：标题 + 统计 ── */}
       <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-4 px-4 pt-24 md:px-10 md:pt-24">
-        <div>
-          <p className="product-eyebrow whitespace-nowrap">
-            {todayDate}
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold text-white md:text-3xl">
-            我的小岛
-          </h1>
+        <div className="flex flex-col gap-3">
+          <div>
+            <p className="product-eyebrow whitespace-nowrap">
+              {todayDate}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-white md:text-3xl">
+              我的小岛
+            </h1>
+          </div>
+          <SceneSelector />
         </div>
         <div className="surface grid grid-cols-3 overflow-hidden">
           {[
@@ -130,9 +134,9 @@ export default async function CheckinPage() {
 
       {/* ── 底部：热力图 + 签到 融合面板 ── */}
       <div className="absolute inset-x-0 bottom-0 z-20">
-        <div className="pointer-events-none h-16 bg-gradient-to-t from-background/90 to-transparent" />
+        <div className="pointer-events-none h-16 bg-gradient-to-t from-background/70 to-transparent" />
 
-        <div className="border-t border-white/[0.08] bg-[#06150f]/92 backdrop-blur-3xl">
+        <div className="border-t border-white/[0.06] bg-background/75 backdrop-blur-4xl">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-4 py-5 md:flex-row md:items-end md:gap-8 md:px-10 md:py-6">
             {/* 左侧：热力图 */}
             <div className="flex-1 overflow-hidden">
@@ -153,7 +157,7 @@ export default async function CheckinPage() {
             <div className="hidden h-16 w-px bg-border md:block" />
             <div className="flex shrink-0 items-center justify-center md:justify-end">
               {todayCheckin ? (
-                <div className="flex items-center gap-3 rounded-md bg-[#d7ef83]/8 px-5 py-3 ring-1 ring-[#d7ef83]/20">
+                <div className="flex items-center gap-3 rounded-md bg-primary/8 px-5 py-3 ring-1 ring-primary/20">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
                     <svg className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12" />

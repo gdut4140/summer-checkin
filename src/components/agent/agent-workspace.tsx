@@ -101,7 +101,7 @@ function getStatusPill(mode: string, status: string): { label: string; className
     queued: { label: "排队中", className: "bg-white/[0.08] text-muted-foreground" },
     running: { label: "运行中", className: "bg-primary/15 text-primary" },
     awaiting_approval: { label: "待确认", className: "bg-amber-500/15 text-amber-300" },
-    completed: { label: "已完成", className: "bg-emerald-500/15 text-emerald-400" },
+    completed: { label: "已完成", className: "bg-primary/15 text-primary" },
     failed: { label: "失败", className: "bg-destructive/20 text-destructive" },
     cancelled: { label: "已取消", className: "bg-white/[0.08] text-muted-foreground" },
     rejected: { label: "已拒绝", className: "bg-destructive/20 text-destructive" },
@@ -381,7 +381,7 @@ export function AgentWorkspace({ initialRuns }: Props) {
                 const severityColor: Record<string, string> = {
                   critical: "text-red-300",
                   warning: "text-amber-300",
-                  info: "text-emerald-300",
+                  info: "text-primary/80",
                 };
                 return (
                   <div key={approval.id} className="rounded-lg bg-white/[0.03] px-3 py-2.5">
@@ -399,7 +399,7 @@ export function AgentWorkspace({ initialRuns }: Props) {
               return (
                 <div key={approval.id} className="rounded-lg bg-white/[0.03] p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs font-medium text-emerald-400">
+                    <p className="text-xs font-medium text-primary">
                       {approval.status === "pending"
                         ? "确认后将会创建真实计划和任务"
                         : `审批状态：${approval.status}`}
@@ -436,7 +436,7 @@ export function AgentWorkspace({ initialRuns }: Props) {
                           {draft.description ?? draft.goal}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs font-semibold text-emerald-400">
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs font-semibold text-primary">
                         <span>目标时长：{draft.targetHours} 小时</span>
                         <span>任务数：{draft.tasks.length}</span>
                       </div>
@@ -444,7 +444,7 @@ export function AgentWorkspace({ initialRuns }: Props) {
                       <div className="flex flex-col gap-2">
                         {draft.tasks.map((task, index) => (
                           <div key={`${task.title}-${index}`} className="flex gap-2.5">
-                            <span className="w-4 shrink-0 text-right text-xs font-semibold text-emerald-500/60">
+                            <span className="w-4 shrink-0 text-right text-xs font-semibold text-primary/60">
                               {index + 1}
                             </span>
                             <div className="min-w-0">

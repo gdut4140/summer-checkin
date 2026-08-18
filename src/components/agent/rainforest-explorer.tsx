@@ -204,7 +204,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
     <div className="rainforest-workbench--page w-full text-white">
       <aside className={cn("rainforest-panel rainforest-panel--left", mobilePanel !== "history" && "rainforest-panel--mobile-hidden")}>
             <div className="flex h-16 items-center gap-3 border-b border-white/10 px-4">
-              <div className="flex size-9 items-center justify-center rounded-md bg-[#d7ef83] text-[#10271e]"><Leaf weight="fill" /></div>
+              <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><Leaf weight="fill" /></div>
               <div className="min-w-0 flex-1"><p className="text-sm font-semibold">探索雨林</p><p className="text-[11px] text-white/46">你的学习智能体</p></div>
             </div>
             <div className="p-3">
@@ -216,7 +216,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
             <div className="space-y-1 px-3">
               {quickPrompts.map((item) => (
                 <button key={item.label} onClick={() => applyPrompt(item.prompt)} className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-xs text-white/66 transition hover:bg-white/7 hover:text-white">
-                  <MagicWand className="size-4 text-[#d7ef83]" />{item.label}
+                  <MagicWand className="size-4 text-primary" />{item.label}
                 </button>
               ))}
             </div>
@@ -245,11 +245,11 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-7">
               {messages.length === 0 ? (
                 <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center text-center">
-                  <div className="relative flex size-14 items-center justify-center rounded-lg border border-[#d7ef83]/30 bg-[#d7ef83]/10 text-[#d7ef83]"><Sparkle className="size-6" weight="fill" /></div>
+                  <div className="relative flex size-14 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary"><Sparkle className="size-6" weight="fill" /></div>
                   <h2 className="mt-5 text-xl font-semibold">今天想探索什么？</h2>
                   <p className="mt-2 max-w-md text-sm leading-6 text-white/48">我可以和你讨论知识，也可以读取学习节奏并创建可执行的计划草案。</p>
                   <div className="mt-6 grid w-full gap-2 sm:grid-cols-3">
-                    {quickPrompts.map((item) => <button key={item.label} onClick={() => applyPrompt(item.prompt)} className="rounded-md border border-white/10 bg-white/4 px-3 py-3 text-xs text-white/66 transition hover:border-[#d7ef83]/35 hover:bg-[#d7ef83]/7 hover:text-white">{item.label}</button>)}
+                    {quickPrompts.map((item) => <button key={item.label} onClick={() => applyPrompt(item.prompt)} className="rounded-md border border-white/10 bg-white/4 px-3 py-3 text-xs text-white/66 transition hover:border-primary/35 hover:bg-primary/7 hover:text-white">{item.label}</button>)}
                   </div>
                 </div>
               ) : (
@@ -257,11 +257,11 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
               )}
             </div>
             <div className="border-t border-white/10 bg-black/10 p-3 sm:p-4">
-              <div className="mx-auto max-w-3xl rounded-lg border border-white/12 bg-white/6 p-2 focus-within:border-[#d7ef83]/42">
+              <div className="mx-auto max-w-3xl rounded-lg border border-white/12 bg-white/6 p-2 focus-within:border-primary/42">
                 <Textarea ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} placeholder="问一个问题，或说说你卡在哪里…" className="min-h-16 resize-none border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" disabled={loading} />
                 <div className="flex items-center justify-end gap-1 pt-1">
-                  <button onClick={() => setDeepThink((value) => !value)} aria-label="深度思考" className={cn("flex size-8 items-center justify-center rounded-md", deepThink ? "bg-[#d7ef83]/16 text-[#d7ef83]" : "text-white/40 hover:bg-white/8")}><Brain weight={deepThink ? "fill" : "regular"} /></button>
-                  <Button size="icon" onClick={loading ? stopMessage : sendMessage} disabled={!loading && !input.trim()} className="size-8 bg-[#d7ef83] text-[#10271e] hover:bg-[#e5f6a6]">{loading ? <Stop weight="fill" /> : <PaperPlaneTilt weight="fill" />}</Button>
+                  <button onClick={() => setDeepThink((value) => !value)} aria-label="深度思考" className={cn("flex size-8 items-center justify-center rounded-md", deepThink ? "bg-primary/16 text-primary" : "text-white/40 hover:bg-white/8")}><Brain weight={deepThink ? "fill" : "regular"} /></button>
+                  <Button size="icon" onClick={loading ? stopMessage : sendMessage} disabled={!loading && !input.trim()} className="size-8 bg-primary text-primary-foreground hover:bg-primary/90">{loading ? <Stop weight="fill" /> : <PaperPlaneTilt weight="fill" />}</Button>
                 </div>
               </div>
             </div>
@@ -283,7 +283,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
           </aside>
 
           <nav className="rainforest-mobile-nav lg:hidden">
-            {([{ key: "history", label: "记录", icon: ChatsCircle }, { key: "chat", label: "探索", icon: Sparkle }, { key: "knowledge", label: "知识库", icon: Files }] as const).map((item) => <button key={item.key} onClick={() => setMobilePanel(item.key)} className={cn(mobilePanel === item.key && "text-[#d7ef83]")}><item.icon weight={mobilePanel === item.key ? "fill" : "regular"} /><span>{item.label}</span></button>)}
+            {([{ key: "history", label: "记录", icon: ChatsCircle }, { key: "chat", label: "探索", icon: Sparkle }, { key: "knowledge", label: "知识库", icon: Files }] as const).map((item) => <button key={item.key} onClick={() => setMobilePanel(item.key)} className={cn(mobilePanel === item.key && "text-primary")}><item.icon weight={mobilePanel === item.key ? "fill" : "regular"} /><span>{item.label}</span></button>)}
           </nav>
     </div>
   );

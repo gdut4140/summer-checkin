@@ -27,7 +27,7 @@ export function RainforestFocusRoom() {
     return (
       <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center px-6">
         <PomodoroStation immersive />
-        <p className="mt-10 max-w-md text-center text-sm font-light leading-relaxed tracking-wide text-[#d7ef83]/55">
+        <p className="mt-10 max-w-md text-center text-sm font-light leading-relaxed tracking-wide text-primary/55">
           「{quote}」
         </p>
         <LongPressExit onExit={() => setImmersive(false)} />
@@ -47,7 +47,7 @@ export function RainforestFocusRoom() {
         <button
           type="button"
           onClick={enterImmersive}
-          className="flex shrink-0 items-center gap-2 rounded-full bg-[#d7ef83] px-5 py-2.5 text-sm font-semibold text-[#051612] shadow-lg shadow-[#d7ef83]/30 transition hover:scale-[1.03] hover:bg-[#e5f6a6] active:scale-95"
+          className="flex shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition hover:scale-[1.03] hover:bg-primary/90 active:scale-95"
         >
           <ArrowsOut className="size-4" weight="bold" />
           沉浸模式

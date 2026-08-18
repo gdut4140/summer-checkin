@@ -61,7 +61,7 @@ const STREAMING_ID = "__ai_streaming__";
 
 // 头像底色：按昵称稳定分配，避免每次刷新换色
 const AVATAR_COLORS = [
-  "bg-emerald-500/85 text-emerald-950",
+  "bg-primary/85 text-primary-foreground",
   "bg-sky-500/85 text-sky-950",
   "bg-amber-500/85 text-amber-950",
   "bg-rose-500/85 text-rose-950",
@@ -322,7 +322,7 @@ export function ChatRoom() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showCloseButton={false}
-          className="chatroom-dialog flex flex-col gap-0 overflow-hidden rounded-2xl border border-white/12 bg-[#0a1a15]/95 p-0 text-white backdrop-blur-xl"
+          className="chatroom-dialog flex flex-col gap-0 overflow-hidden rounded-2xl border border-white/12 bg-background/95 p-0 text-white backdrop-blur-xl"
         >
           <DialogTitle className="sr-only">学习聊天室</DialogTitle>
           <DialogDescription className="sr-only">
@@ -528,7 +528,7 @@ export function ChatRoom() {
                   {showMention && (
                     <button
                       onClick={selectMention}
-                      className="absolute -top-14 left-0 flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0f241c] px-3 py-2 shadow-xl transition-colors hover:bg-[#13302a]"
+                      className="absolute -top-14 left-0 flex items-center gap-2.5 rounded-xl border border-white/10 bg-background px-3 py-2 shadow-xl transition-colors hover:bg-primary/12"
                     >
                       <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-primary">
                         <Sparkle className="size-4" weight="fill" />

@@ -165,7 +165,7 @@ const InnerEditor = forwardRef<EditorPaneHandle, MilkdownEditorProps>(
 
         {selection && (
           <div
-            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-white/12 bg-[#0d2a21]/95 p-1 shadow-xl backdrop-blur"
+            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-white/12 bg-background/95 p-1 shadow-xl backdrop-blur"
             style={{ left: selection.x, top: selection.y - 46 }}
           >
             <button

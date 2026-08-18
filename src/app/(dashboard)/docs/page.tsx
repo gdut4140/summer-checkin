@@ -16,13 +16,13 @@ export default async function DocsPage() {
   });
 
   return (
-    <div className="product-page">
+    <div className="product-page product-page--redesigned">
       <header className="product-header">
         <div>
           <p className="product-eyebrow">Doc studio</p>
           <h1 className="product-title">文档</h1>
           <p className="product-subtitle">
-            导入、编辑你的 Markdown 文档，用 AI 辅助阅读与修改。
+            写作、阅读与知识库整理集中在一个安静的工作空间。
           </p>
         </div>
       </header>

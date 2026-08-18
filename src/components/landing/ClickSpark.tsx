@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 
 interface Spark {
   x: number;
@@ -10,6 +10,7 @@ interface Spark {
 }
 
 interface ClickSparkProps {
+  /** 火花颜色；不传时会自动跟随当前场景主题色（读 CSS --primary） */
   sparkColor?: string;
   sparkSize?: number;
   sparkRadius?: number;
@@ -20,8 +21,15 @@ interface ClickSparkProps {
   children: React.ReactNode;
 }
 
+/** 从 computedStyle 读 CSS --primary 作为默认火花色（跟随场景切换） */
+function readThemePrimary(): string {
+  if (typeof window === "undefined") return "#d7ef83";
+  const v = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim();
+  return v || "#d7ef83";
+}
+
 export default function ClickSpark({
-  sparkColor = "#d7ef83",
+  sparkColor,
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,
@@ -33,6 +41,22 @@ export default function ClickSpark({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sparksRef = useRef<Spark[]>([]);
   const startTimeRef = useRef<number | null>(null);
+
+  // 未传 sparkColor → 订阅 CSS 变量（场景切换时自动变色）
+  const [autoColor, setAutoColor] = useState<string>("hsl(var(--primary))");
+  useEffect(() => {
+    if (sparkColor !== undefined) return;
+    setAutoColor(readThemePrimary());
+    const mo = new MutationObserver(() => setAutoColor(readThemePrimary()));
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-scene", "class"] });
+    window.addEventListener("theme-changed" as any, () => setAutoColor(readThemePrimary()));
+    return () => {
+      mo.disconnect();
+      window.removeEventListener("theme-changed" as any, () => setAutoColor(readThemePrimary()));
+    };
+  }, [sparkColor]);
+
+  const effectiveColor = sparkColor ?? autoColor;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -114,7 +138,7 @@ export default function ClickSpark({
         const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
         const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
 
-        ctx.strokeStyle = sparkColor;
+        ctx.strokeStyle = effectiveColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -132,7 +156,7 @@ export default function ClickSpark({
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
+  }, [effectiveColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
 
   const handleClick = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;

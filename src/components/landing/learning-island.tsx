@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
 import { MathUtils, type Group } from "three";
@@ -24,8 +24,41 @@ type Tile = {
   unlockOrder: number;
 };
 
-// ── 调色板 ──
-const PALETTE = {
+type SceneType = "rain" | "snow" | "cloud";
+
+// ── 场景调色板接口（新增 sceneLight 双场色 + villageTop 收归） ──
+interface ScenePalette {
+  treeTrunk: string;
+  treeCrown1: string;
+  treeCrown2: string;
+  treeCrown3: string;
+  treeCrown4: string;
+  mountain1: string;
+  mountain2: string;
+  mountainSnow: string;
+  fern1: string;
+  fern2: string;
+  rock1: string;
+  rock2: string;
+  pond: string;
+  pondFlower: string;
+  waterTop: string;
+  rockTop: string;
+  mossTop: string;
+  forestTop: string;
+  tileSide: string;
+  riverTop: string;
+  riverEmissive: string;
+  villageWall: string;
+  villageRoof: string;
+  villageTop: string;
+  sceneSky: string;
+  sceneGround: string;
+  sceneIntensity: number;
+}
+
+// ── 雨林调色板（原 PALETTE + 补 villageTop 与场景光） ──
+const PALETTE_RAIN: ScenePalette = {
   treeTrunk: "#6b5a3e",
   treeCrown1: "#4d9e6a",
   treeCrown2: "#5ead78",
@@ -49,7 +82,91 @@ const PALETTE = {
   riverEmissive: "#0a2a3a",
   villageWall: "#d4c8a8",
   villageRoof: "#c47a4a",
-} as const;
+  villageTop: "#8a9e7a",
+  sceneSky: "#d4f0e0",
+  sceneGround: "#0d241a",
+  sceneIntensity: 1.3,
+};
+
+// ── 雪景调色板（冰蓝灰 + 纯白，全非绿色） ──
+const PALETTE_SNOW: ScenePalette = {
+  treeTrunk: "#6b625c",
+  treeCrown1: "#e6f2ff",
+  treeCrown2: "#d4e8ff",
+  treeCrown3: "#c6e0ff",
+  treeCrown4: "#b8d4ff",
+  mountain1: "#557194",
+  mountain2: "#4a6380",
+  mountainSnow: "#f4faff",
+  fern1: "#b8d2e8",
+  fern2: "#cde0f0",
+  rock1: "#55667c",
+  rock2: "#6a7c94",
+  pond: "#7fb4d8",
+  pondFlower: "#f0dde5",
+  waterTop: "#5fa3cc",
+  rockTop: "#879cb8",
+  mossTop: "#dbe8f4",
+  forestTop: "#cddde8",
+  tileSide: "#2a3d55",
+  riverTop: "#3b9ec8",
+  riverEmissive: "#0a2a3a",
+  villageWall: "#d4c8a8",
+  villageRoof: "#c47a4a",
+  villageTop: "#a9b8cf",
+  sceneSky: "#e8f4ff",
+  sceneGround: "#0a1929",
+  sceneIntensity: 1.3,
+};
+
+// ── 云天调色板（柔和卡其（#d6be98 奶油白版）+ 米白冠） ──
+const PALETTE_CLOUD: ScenePalette = {
+  treeTrunk: "#a69880",         // 暖棕树干（再白+1）
+  treeCrown1: "#faf6e8",         // 米白（再白+1）
+  treeCrown2: "#f1e8d0",         // 米黄卡其（再白+1）
+  treeCrown3: "#e6dab8",         // 卡其淡黄绿（再白+1）
+  treeCrown4: "#d9cdab",         // 淡卡其（再白+1）
+  mountain1: "#afaa9b",          // 远山 中性米灰（再白+1）
+  mountain2: "#c4beaf",          // 近山 米灰白（再白+1）
+  mountainSnow: "#fbf8ee",       // 云状山顶 米白（再白+1）
+  fern1: "#dde8c9",              // 蕨叶 淡灰绿（再白+1）
+  fern2: "#e9f3d3",              // 蕨叶 更淡绿（再白+1）
+  rock1: "#bdb49e",              // 岩石 暖米棕（再白+1）
+  rock2: "#d9d3c0",              // 岩石 米灰（再白+1）
+  pond: "#d3dfe9",               // 池塘 淡灰蓝（再白+1）
+  pondFlower: "#f3e2df",         // 花 淡粉米（再白+1）
+  waterTop: "#a9c2d5",           // 水顶 灰蓝（再白+1）
+  rockTop: "#e7e1cf",            // 岩石顶 米灰（再白+1）
+  mossTop: "#f3ebd6",            // 苔藓顶 暖米灰（再白+1）
+  forestTop: "#dde4c7",          // 森林顶 灰黄绿（再白+1）
+  tileSide: "#4e493b",           // 方块侧 暖深棕灰（再白+1）
+  riverTop: "#b6ccdc",           // 河 淡灰蓝（再白+1）
+  riverEmissive: "#373a3f",      // 河 自发光 深灰（再白+1）
+  villageWall: "#f4e9cb",        // 村墙 米黄（再白+1）
+  villageRoof: "#a48a64",        // 屋顶 深卡其棕（再白+1）
+  villageTop: "#ebdcb8",         // 村顶 淡黄（再白+1）
+  sceneSky: "#faf6e8",           // hemilight 天空色 米白柔（再白+1）
+  sceneGround: "#4a4639",        // hemilight 地面色 暖深棕灰（再白+1）
+  sceneIntensity: 1.26,          // 1.24→1.26 微提 2%
+};
+
+// ── Context：子组件（Tree / Fern / Rock / TileMesh 等）统一读 palette ──
+const PaletteContext = createContext<ScenePalette>(PALETTE_RAIN);
+function usePalette(): ScenePalette {
+  return useContext(PaletteContext);
+}
+
+// ── DOM data-scene → palette ──
+function paletteForScene(scene: string | null | undefined): ScenePalette {
+  if (scene === "snow") return PALETTE_SNOW;
+  if (scene === "cloud") return PALETTE_CLOUD;
+  return PALETTE_RAIN;
+}
+function readSceneFromDOM(): SceneType {
+  if (typeof document === "undefined") return "rain";
+  const v = document.documentElement.dataset.scene as SceneType | undefined;
+  return v === "snow" || v === "cloud" ? v : "rain";
+}
 
 // ── 生成所有 tile ──
 const allTilesRaw: Array<{ x: number; z: number }> = [];
@@ -245,6 +362,7 @@ function NewTileSparkle({ color }: { color: string }) {
 }
 
 function TinyTree({ variant }: { variant: number }) {
+  const palette = usePalette();
   const crown = useRef<Group>(null);
   useFrame((state) => {
     if (!crown.current) return;
@@ -257,24 +375,24 @@ function TinyTree({ variant }: { variant: number }) {
     <group scale={s}>
       <mesh castShadow position={[0, 0.2, 0]}>
         <cylinderGeometry args={[0.03, 0.05, 0.4, 5]} />
-        <meshStandardMaterial color={PALETTE.treeTrunk} roughness={1} />
+        <meshStandardMaterial color={palette.treeTrunk} roughness={1} />
       </mesh>
       <group ref={crown} position={[0, 0.4, 0]}>
         <mesh castShadow position={[0, 0.04, 0]}>
           <icosahedronGeometry args={[0.18, 0]} />
-          <meshStandardMaterial color={PALETTE.treeCrown1} flatShading roughness={0.94} />
+          <meshStandardMaterial color={palette.treeCrown1} flatShading roughness={0.94} />
         </mesh>
         <mesh castShadow position={[-0.12, -0.01, 0.02]}>
           <icosahedronGeometry args={[0.14, 0]} />
-          <meshStandardMaterial color={PALETTE.treeCrown2} flatShading roughness={0.92} />
+          <meshStandardMaterial color={palette.treeCrown2} flatShading roughness={0.92} />
         </mesh>
         <mesh castShadow position={[0.12, 0, -0.02]}>
           <icosahedronGeometry args={[0.13, 0]} />
-          <meshStandardMaterial color={PALETTE.treeCrown3} flatShading roughness={0.92} />
+          <meshStandardMaterial color={palette.treeCrown3} flatShading roughness={0.92} />
         </mesh>
         <mesh castShadow position={[0.03, 0.18, 0.01]}>
           <icosahedronGeometry args={[0.12, 0]} />
-          <meshStandardMaterial color={PALETTE.treeCrown4} flatShading roughness={0.9} />
+          <meshStandardMaterial color={palette.treeCrown4} flatShading roughness={0.9} />
         </mesh>
       </group>
     </group>
@@ -282,26 +400,28 @@ function TinyTree({ variant }: { variant: number }) {
 }
 
 function TinyMountain({ variant }: { variant: number }) {
+  const palette = usePalette();
   const h = 0.5 + (variant % 3) * 0.1;
   return (
     <group>
       <mesh castShadow position={[0, h / 2, 0]} rotation={[0, variant * 0.42, 0]}>
         <coneGeometry args={[0.22, h, 5]} />
-        <meshStandardMaterial color={PALETTE.mountain1} flatShading roughness={1} />
+        <meshStandardMaterial color={palette.mountain1} flatShading roughness={1} />
       </mesh>
       <mesh castShadow position={[0.12, h * 0.34, 0.05]} rotation={[0, 0.5, 0]}>
         <coneGeometry args={[0.13, h * 0.6, 5]} />
-        <meshStandardMaterial color={PALETTE.mountain2} flatShading roughness={1} />
+        <meshStandardMaterial color={palette.mountain2} flatShading roughness={1} />
       </mesh>
       <mesh castShadow position={[-0.05, h - 0.05, 0]} rotation={[0, variant * 0.42, 0]}>
         <coneGeometry args={[0.06, 0.12, 5]} />
-        <meshStandardMaterial color={PALETTE.mountainSnow} flatShading roughness={0.95} />
+        <meshStandardMaterial color={palette.mountainSnow} flatShading roughness={0.95} />
       </mesh>
     </group>
   );
 }
 
 function TinyFern({ variant }: { variant: number }) {
+  const palette = usePalette();
   return (
     <group rotation={[0, variant * 0.65, 0]}>
       {[0, 1, 2, 3, 4].map((leaf) => (
@@ -312,7 +432,7 @@ function TinyFern({ variant }: { variant: number }) {
           rotation={[0.35, -leaf * 1.26, 0.65]}
         >
           <coneGeometry args={[0.032, 0.17, 4]} />
-          <meshStandardMaterial color={leaf % 2 ? PALETTE.fern1 : PALETTE.fern2} flatShading roughness={1} />
+          <meshStandardMaterial color={leaf % 2 ? palette.fern1 : palette.fern2} flatShading roughness={1} />
         </mesh>
       ))}
     </group>
@@ -320,15 +440,16 @@ function TinyFern({ variant }: { variant: number }) {
 }
 
 function TinyRock({ variant }: { variant: number }) {
+  const palette = usePalette();
   return (
     <group rotation={[0, variant * 0.8, 0]}>
       <mesh castShadow position={[0, 0.08, 0]} scale={[1, 0.72, 0.82]}>
         <dodecahedronGeometry args={[0.13, 0]} />
-        <meshStandardMaterial color={PALETTE.rock1} flatShading roughness={1} />
+        <meshStandardMaterial color={palette.rock1} flatShading roughness={1} />
       </mesh>
       <mesh castShadow position={[0.08, 0.04, 0.05]} scale={0.55}>
         <dodecahedronGeometry args={[0.1, 0]} />
-        <meshStandardMaterial color={PALETTE.rock2} flatShading roughness={1} />
+        <meshStandardMaterial color={palette.rock2} flatShading roughness={1} />
       </mesh>
     </group>
   );
@@ -418,16 +539,17 @@ function RiverSurface() {
 }
 
 function TinyPond({ variant }: { variant: number }) {
+  const palette = usePalette();
   return (
     <group>
       <mesh position={[-0.07, 0.02, 0.03]} rotation={[-Math.PI / 2, 0, variant * 0.7]}>
         <circleGeometry args={[0.055, 6]} />
-        <meshStandardMaterial color={PALETTE.pond} roughness={0.75} />
+        <meshStandardMaterial color={palette.pond} roughness={0.75} />
       </mesh>
       {variant % 2 === 0 && (
         <mesh position={[0.08, 0.03, -0.05]}>
           <sphereGeometry args={[0.022, 6, 4]} />
-          <meshStandardMaterial color={PALETTE.pondFlower} emissive="#7a4058" emissiveIntensity={0.2} />
+          <meshStandardMaterial color={palette.pondFlower} emissive="#7a4058" emissiveIntensity={0.2} />
         </mesh>
       )}
     </group>
@@ -468,6 +590,7 @@ function GrowingTile({
   isTodayNew: boolean;
   isFloating: boolean;
 }) {
+  const palette = usePalette();
   const group = useRef<Group>(null);
   const hovered = useRef(false);
   const hoverOffset = useRef(0);
@@ -487,12 +610,12 @@ function GrowingTile({
   });
 
   const topColor =
-    tile.kind === "water" ? PALETTE.waterTop
-    : tile.kind === "river" || tile.kind === "waterfall" ? PALETTE.riverTop
-    : tile.kind === "village" ? "#8a9e7a"
-    : tile.kind === "rock" ? PALETTE.rockTop
-    : tile.kind === "moss" ? PALETTE.mossTop
-    : PALETTE.forestTop;
+    tile.kind === "water" ? palette.waterTop
+    : tile.kind === "river" || tile.kind === "waterfall" ? palette.riverTop
+    : tile.kind === "village" ? palette.villageTop
+    : tile.kind === "rock" ? palette.rockTop
+    : tile.kind === "moss" ? palette.mossTop
+    : palette.forestTop;
 
   const tileW = UNIT * 0.92;
 
@@ -507,14 +630,14 @@ function GrowingTile({
       {/* 柱体侧面 */}
       <mesh castShadow receiveShadow position={[0, tile.height / 2, 0]}>
         <boxGeometry args={[tileW, tile.height, tileW]} />
-        <meshStandardMaterial color={PALETTE.tileSide} roughness={0.96} />
+        <meshStandardMaterial color={palette.tileSide} roughness={0.96} />
       </mesh>
       {/* 顶面 */}
       <mesh castShadow receiveShadow position={[0, tile.height + 0.02, 0]}>
         <boxGeometry args={[tileW, 0.04, tileW]} />
         <meshStandardMaterial
           color={topColor}
-          emissive={tile.kind === "water" ? "#124f4a" : (tile.kind === "river" || tile.kind === "waterfall") ? PALETTE.riverEmissive : "#000000"}
+          emissive={tile.kind === "water" ? "#124f4a" : (tile.kind === "river" || tile.kind === "waterfall") ? palette.riverEmissive : "#000000"}
           emissiveIntensity={tile.kind === "water" ? 0.4 : (tile.kind === "river" || tile.kind === "waterfall") ? 0.35 : 0}
           roughness={tile.kind === "water" ? 0.34 : 0.9}
         />
@@ -577,6 +700,14 @@ function useReducedMotion() {
   );
 }
 
+// ── 场景光：跟随 palette（雪/雨两套完全不同的环境色） ──
+function SceneLights() {
+  const palette = usePalette();
+  return (
+    <hemisphereLight args={[palette.sceneSky, palette.sceneGround, palette.sceneIntensity]} />
+  );
+}
+
 // ============================================================
 // ── 导出 ──
 // ============================================================
@@ -596,57 +727,77 @@ export function LearningIsland({
 }: LearningIslandProps) {
   const unlockedCount = Math.min(totalTiles, INITIAL_TILES + totalCheckins * TILES_PER_CHECKIN);
 
+  // ── 场景 → PALETTE：自动跟随 html[data-scene] 切换 ──
+  const [palette, setPalette] = useState<ScenePalette>(() => paletteForScene(readSceneFromDOM()));
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    // 初始状态
+    setPalette(paletteForScene(document.documentElement.dataset.scene));
+    // 监听场景切换（用户在 selector 点雨林/雪景）
+    const observer = new MutationObserver(() => {
+      setPalette(paletteForScene(document.documentElement.dataset.scene));
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-scene"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div
-      className="relative h-full w-full touch-none"
-      role="img"
-      aria-label={`我的小岛，累计 ${totalCheckins} 次打卡，连续 ${streak} 天，学习 ${Math.round(totalHours * 10) / 10} 小时`}
-    >
-      <Canvas
-        dpr={[1, 1.65]}
-        shadows
-        orthographic
-        camera={{ position: [8, 8, 9], zoom: 62, near: 0.1, far: 120 }}
-        gl={{ antialias: true, alpha: true }}
+    <PaletteContext.Provider value={palette}>
+      <div
+        className="relative h-full w-full touch-none"
+        role="img"
+        aria-label={`我的小岛，累计 ${totalCheckins} 次打卡，连续 ${streak} 天，学习 ${Math.round(totalHours * 10) / 10} 小时`}
       >
-        <ambientLight intensity={1.4} />
-        <hemisphereLight args={["#d4f0e0", "#0d241a", 1.3]} />
-        <directionalLight
-          castShadow
-          position={[5, 10, 4]}
-          intensity={2.0}
-          color="#f0faf0"
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-          shadow-camera-left={-8}
-          shadow-camera-right={8}
-          shadow-camera-top={8}
-          shadow-camera-bottom={-8}
-        />
-        <Island unlockedCount={unlockedCount} todayCount={todayCheckins} />
-        <ContactShadows
-          position={[0, -1.2, 0]}
-          opacity={0.35}
-          scale={14}
-          blur={2.8}
-          far={6}
-          color="#010906"
-        />
-        <OrbitControls
-          makeDefault
-          enablePan={false}
-          enableZoom={false}
-          minPolarAngle={Math.PI / 3.2}
-          maxPolarAngle={Math.PI / 2.4}
-          minAzimuthAngle={-Infinity}
-          maxAzimuthAngle={Infinity}
-          target={[0, 0.3, 0]}
-        />
-      </Canvas>
-      <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-xs text-white/45">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#7ed4a0]" />
-        拖动查看
+        <Canvas
+          dpr={[1, 1.65]}
+          shadows
+          orthographic
+          camera={{ position: [8, 8, 9], zoom: 62, near: 0.1, far: 120 }}
+          gl={{ antialias: true, alpha: true }}
+        >
+          <ambientLight intensity={1.4} />
+          <SceneLights />
+          <directionalLight
+            castShadow
+            position={[5, 10, 4]}
+            intensity={2.0}
+            color="#f0faf0"
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
+            shadow-camera-left={-8}
+            shadow-camera-right={8}
+            shadow-camera-top={8}
+            shadow-camera-bottom={-8}
+          />
+          <Island unlockedCount={unlockedCount} todayCount={todayCheckins} />
+          <ContactShadows
+            position={[0, -1.2, 0]}
+            opacity={0.35}
+            scale={14}
+            blur={2.8}
+            far={6}
+            color="#010906"
+          />
+          <OrbitControls
+            makeDefault
+            enablePan={false}
+            enableZoom={false}
+            minPolarAngle={Math.PI / 3.2}
+            maxPolarAngle={Math.PI / 2.4}
+            minAzimuthAngle={-Infinity}
+            maxAzimuthAngle={Infinity}
+            target={[0, 0.3, 0]}
+          />
+        </Canvas>
+        <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-xs text-white/45">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          拖动查看
+        </div>
       </div>
-    </div>
+    </PaletteContext.Provider>
   );
 }

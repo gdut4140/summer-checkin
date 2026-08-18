@@ -25,7 +25,7 @@ const typeConfig: Record<
 > = {
   reminder: { icon: BellRinging, label: "提醒", color: "text-amber-400", bg: "bg-amber-500/12" },
   analysis: { icon: ChartBar, label: "分析", color: "text-blue-400", bg: "bg-blue-500/12" },
-  report: { icon: Newspaper, label: "报告", color: "text-emerald-400", bg: "bg-emerald-500/12" },
+  report: { icon: Newspaper, label: "报告", color: "text-primary", bg: "bg-primary/12" },
   encouragement: { icon: Fire, label: "鼓励", color: "text-orange-400", bg: "bg-orange-500/12" },
   system: { icon: Gear, label: "系统", color: "text-muted-foreground", bg: "bg-white/[0.06]" },
 };

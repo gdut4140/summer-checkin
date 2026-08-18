@@ -4,11 +4,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 const PRESETS = [
-  { id: "seed", bg: "#051612", fg: "#d7ef83", shape: "🌱" },
-  { id: "leaf", bg: "#0a241e", fg: "#d7ef83", shape: "🌿" },
-  { id: "tree", bg: "#0d3027", fg: "#d7ef83", shape: "🌳" },
+  { id: "seed", bg: "#051612", fg: "hsl(var(--primary))", shape: "🌱" },
+  { id: "leaf", bg: "#0a241e", fg: "hsl(var(--primary))", shape: "🌿" },
+  { id: "tree", bg: "#0d3027", fg: "hsl(var(--primary))", shape: "🌳" },
   { id: "water", bg: "#0c1f19", fg: "#67b4c9", shape: "💧" },
-  { id: "mountain", bg: "#134236", fg: "#d7ef83", shape: "⛰️" },
+  { id: "mountain", bg: "#134236", fg: "hsl(var(--primary))", shape: "⛰️" },
   { id: "sun", bg: "#1a5c4b", fg: "#f3c969", shape: "🌤️" },
   { id: "moon", bg: "#0a241e", fg: "#c8b45a", shape: "🌙" },
   { id: "flower", bg: "#1f735e", fg: "#e0886a", shape: "🌸" },
@@ -57,7 +57,7 @@ export function AvatarPicker({ current, onSelect }: Props) {
             disabled={!!saving}
             className={`flex aspect-square items-center justify-center rounded-xl text-3xl transition-all ${
               isActive
-                ? "ring-2 ring-[#d7ef83] ring-offset-2 ring-offset-[#080f0c] scale-105"
+                ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
                 : "hover:scale-105 hover:ring-1 hover:ring-white/20"
             } ${isLoading ? "animate-pulse" : ""}`}
             style={{ backgroundColor: p.bg }}

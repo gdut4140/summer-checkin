@@ -21,10 +21,10 @@ const typeConfig: Record<
   DecisionType,
   { icon: typeof GitBranch; label: string; color: string; bg: string }
 > = {
-  PLAN_ADJUST: { icon: GitBranch, label: "计划调整", color: "text-emerald-400", bg: "bg-emerald-500/12" },
+  PLAN_ADJUST: { icon: GitBranch, label: "计划调整", color: "text-primary", bg: "bg-primary/12" },
   REMINDER: { icon: Timer, label: "提醒", color: "text-amber-400", bg: "bg-amber-500/12" },
   ANALYSIS: { icon: Lightning, label: "分析", color: "text-blue-400", bg: "bg-blue-500/12" },
-  TASK_CREATE: { icon: Target, label: "新建任务", color: "text-[#d7ef83]", bg: "bg-[#d7ef83]/12" },
+  TASK_CREATE: { icon: Target, label: "新建任务", color: "text-primary", bg: "bg-primary/12" },
 };
 
 const filterTypes: { key: DecisionType | "all"; label: string }[] = [
@@ -145,7 +145,7 @@ export function DecisionTimeline() {
             <div key={dateLabel} className="mb-5 last:mb-0">
               {/* 日期标签 */}
               <div className="mb-2 flex items-center gap-2.5">
-                <span className="size-2 rounded-full bg-primary/60 ring-2 ring-[#0c1f19]" />
+                <span className="size-2 rounded-full bg-primary/60 ring-2 ring-background/60" />
                 <span className="text-[11px] font-medium text-muted-foreground">{dateLabel}</span>
               </div>
 

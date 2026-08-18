@@ -27,6 +27,7 @@ export default async function KnowledgeDocReadPage({
     select: {
       id: true,
       sourceName: true,
+      sourceType: true,
       content: true,
       chunkIndex: true,
       createdAt: true,

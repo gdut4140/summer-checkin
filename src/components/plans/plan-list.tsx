@@ -17,7 +17,7 @@ export function PlanList({ plans }: { plans: PlanWithProgress[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {plans.map((plan) => (
           <PlanCard key={plan.id} plan={plan} onProgress={setSelected} />
         ))}

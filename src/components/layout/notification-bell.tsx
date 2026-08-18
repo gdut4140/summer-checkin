@@ -46,7 +46,7 @@ const typeMeta: Record<
 > = {
   reminder: { icon: BellRinging, label: "提醒", color: "text-amber-400", bg: "bg-amber-500/12" },
   analysis: { icon: ChartBar, label: "分析", color: "text-blue-400", bg: "bg-blue-500/12" },
-  report: { icon: Newspaper, label: "报告", color: "text-emerald-400", bg: "bg-emerald-500/12" },
+  report: { icon: Newspaper, label: "报告", color: "text-primary", bg: "bg-primary/12" },
   encouragement: { icon: Fire, label: "鼓励", color: "text-orange-400", bg: "bg-orange-500/12" },
   system: { icon: Gear, label: "系统", color: "text-muted-foreground", bg: "bg-white/[0.06]" },
 };
@@ -111,10 +111,10 @@ export function NotificationBell() {
   }
 
   const typeColor: Record<string, string> = {
-    reminder: "bg-[#d7ef83]",
-    analysis: "bg-[#d7ef83]/70",
-    report: "bg-[#d7ef83]/50",
-    encouragement: "bg-[#d7ef83]/60",
+    reminder: "bg-primary",
+    analysis: "bg-primary/70",
+    report: "bg-primary/50",
+    encouragement: "bg-primary/60",
     system: "bg-white/30",
   };
 
@@ -123,12 +123,12 @@ export function NotificationBell() {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger className="relative flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-2 text-white/60 backdrop-blur-sm transition-all hover:bg-white/10 hover:border-white/20 hover:text-white">
           {unread > 0 ? (
-            <BellRinging className="h-4 w-4 text-[#d7ef83]" weight="fill" />
+            <BellRinging className="h-4 w-4 text-primary" weight="fill" />
           ) : (
             <Bell className="h-4 w-4" />
           )}
           {unread > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d7ef83] px-1 text-[10px] font-bold text-[#051612] leading-none">
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none">
               {unread > 99 ? "99+" : unread}
             </span>
           )}
@@ -136,12 +136,12 @@ export function NotificationBell() {
 
         <PopoverContent
           align="end"
-          className="w-80 rounded-xl border border-white/10 bg-[#0a1a15]/98 p-0 shadow-2xl backdrop-blur-2xl"
+          className="w-80 rounded-xl border border-white/10 bg-background/98 p-0 shadow-2xl backdrop-blur-2xl"
         >
           <div className="flex items-center justify-between px-4 py-3">
             <span className="text-sm font-semibold text-white">通知</span>
             {unread > 0 && (
-              <span className="rounded-full bg-[#d7ef83]/15 px-2 py-0.5 text-[11px] font-medium text-[#d7ef83]">
+              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
                 {unread} 条未读
               </span>
             )}
@@ -167,7 +167,7 @@ export function NotificationBell() {
                   className="block w-full overflow-hidden text-left px-4 py-3 transition-colors hover:bg-white/[0.04]"
                 >
                   <div className="flex items-start gap-3">
-                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${typeColor[n.type] ?? "bg-white/30"} ${!n.read ? "ring-2 ring-[#d7ef83]/30" : ""}`} />
+                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${typeColor[n.type] ?? "bg-white/30"} ${!n.read ? "ring-2 ring-primary/30" : ""}`} />
                     <div className="min-w-0 flex-1">
                       <p className={`truncate text-[13px] ${!n.read ? "text-white font-medium" : "text-white/50"}`}>
                         {n.title}
@@ -192,7 +192,7 @@ export function NotificationBell() {
           if (!next) setViewing(null);
         }}
       >
-        <DialogContent className="border border-white/12 bg-[#0d2a21]/95 text-white backdrop-blur-xl sm:max-w-lg">
+        <DialogContent className="border border-white/12 bg-background/95 text-white backdrop-blur-xl sm:max-w-lg">
           {viewing &&
             (() => {
               const meta = typeMeta[viewing.type] ?? typeMeta.system;

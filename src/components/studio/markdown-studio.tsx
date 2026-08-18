@@ -308,7 +308,7 @@ export function MarkdownStudio({
   }, [doSave]);
 
   return (
-    <div className="flex h-full flex-col bg-[#0a1a15] text-foreground">
+    <div className="flex h-full flex-col bg-background text-foreground">
       {/* 顶栏：返回 + 标题 + 目录/专注阅读/左右对照 + 保存状态 */}
       <header className="relative flex h-14 shrink-0 items-center gap-3 border-b border-white/8 px-3 sm:px-4">
         <button
@@ -539,7 +539,7 @@ function PanelGrip({ onPointerDown }: { onPointerDown: (e: ReactPointerEvent) =>
   return (
     <div
       onPointerDown={onPointerDown}
-      className="absolute left-1/2 top-1 z-20 flex h-6 -translate-x-1/2 cursor-grab items-center justify-center rounded-md border border-white/15 bg-[#0d2a21]/90 px-1.5 text-muted-foreground shadow-lg backdrop-blur transition-colors hover:text-foreground active:cursor-grabbing"
+      className="absolute left-1/2 top-1 z-20 flex h-6 -translate-x-1/2 cursor-grab items-center justify-center rounded-md border border-white/15 bg-background/90 px-1.5 text-muted-foreground shadow-lg backdrop-blur transition-colors hover:text-foreground active:cursor-grabbing"
       title="拖动排序"
     >
       <DotsSixVertical className="size-4" />
@@ -574,7 +574,7 @@ function SaveIndicator({ state }: { state: SaveState }) {
   }
   return (
     <span className="flex shrink-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-      <CheckCircle className="size-3.5 text-emerald-400/80" weight="fill" />
+      <CheckCircle className="size-3.5 text-primary/80" weight="fill" />
       已保存
     </span>
   );

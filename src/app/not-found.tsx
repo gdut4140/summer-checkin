@@ -9,7 +9,7 @@ export default function NotFound() {
     <div className="min-h-[100dvh] flex items-center justify-center bg-[#06150f] p-4">
       <div className="surface max-w-md space-y-5 px-7 py-9 text-center">
         <div className="flex justify-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-md bg-[#d7ef83]/10 text-[#d7ef83]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Compass className="h-8 w-8" weight="fill" />
           </div>
         </div>

@@ -203,7 +203,7 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
         {isOpen && plan && (
           <motion.div initial={{ x: "100%" }} animate={{ x: "0%" }} exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-white/10 bg-[#080f0c] text-white shadow-2xl sm:w-[42%] lg:w-[34%]">
+            className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-white/10 bg-background text-white shadow-2xl sm:w-[42%] lg:w-[34%]">
 
             {/* 头部：标题可手动编辑 */}
             <div className="flex shrink-0 items-start gap-3 border-b border-white/8 px-5 py-4">
@@ -211,7 +211,7 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
                 {editing ? (
                   <input autoFocus value={editName} onChange={(e) => setEditName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") void savePlan(); if (e.key === "Escape") { setEditing(false); setEditName(plan.name); } }}
-                    className="w-full bg-transparent text-lg font-semibold outline-none border-b-2 border-[#d7ef83] pb-0.5" />
+                    className="w-full bg-transparent text-lg font-semibold outline-none border-b-2 border-primary pb-0.5" />
                 ) : (
                   <h2 className="text-lg font-semibold truncate">{plan.name}</h2>
                 )}
@@ -220,7 +220,7 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
                 {editing ? (
                   <>
                     <button onClick={() => void savePlan()} disabled={saving || !editName.trim()}
-                      className="rounded-lg p-1.5 text-[#d7ef83] hover:bg-white/10 transition disabled:opacity-30">
+                      className="rounded-lg p-1.5 text-primary hover:bg-white/10 transition disabled:opacity-30">
                       <Check className="h-5 w-5" weight="bold" />
                     </button>
                     <button onClick={() => { setEditing(false); setEditName(plan.name); }}
@@ -247,7 +247,7 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
                 <span className="text-xs tabular-nums">{completed}/{total} 项 · {progress}%</span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
-                <div className="h-full rounded-full bg-[#d7ef83] transition-all duration-500" style={{ width: `${progress}%` }} />
+                <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
               </div>
             </div>
 
@@ -263,13 +263,13 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
               {/* 任务刷新中：后台任务真正在修改任务（splitting）或手动刷新（refreshing）时显示。
                   注意 splitting 只在 AI 判断确认要改、实际开始重新拆分时才置上，所以大意没变的改动不会显示进度条。 */}
               {(splitting || refreshing) && (
-                <div className="mb-3 rounded-lg border border-[#d7ef83]/20 bg-[#d7ef83]/[0.06] px-3 py-2.5">
+                <div className="mb-3 rounded-lg border border-primary/20 bg-primary/[0.06] px-3 py-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="size-1.5 shrink-0 rounded-full bg-[#d7ef83] animate-pulse" />
-                    <p className="text-xs text-[#d7ef83]">任务刷新中，请稍候…</p>
+                    <span className="size-1.5 shrink-0 rounded-full bg-primary animate-pulse" />
+                    <p className="text-xs text-primary">任务刷新中，请稍候…</p>
                   </div>
                   <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full w-1/3 rounded-full bg-[#d7ef83] animate-indeterminate" />
+                    <div className="h-full w-1/3 rounded-full bg-primary animate-indeterminate" />
                   </div>
                 </div>
               )}
@@ -285,7 +285,7 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
               </div>
 
               {loading ? (
-                <div className="flex justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-[#d7ef83] border-t-transparent" /></div>
+                <div className="flex justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
               ) : tasks.length === 0 && !splitting && !refreshing ? (
                 <p className="py-8 text-center text-xs text-white/30">还没有任务，点上方「刷新任务」从文档拆分</p>
               ) : (
@@ -298,9 +298,9 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
                               <button onClick={() => !isToggling && toggleTask(task)} disabled={isToggling}
                                 className="shrink-0 mt-0.5 cursor-pointer disabled:opacity-50">
                                 {task.status === "done" ? (
-                                  <CheckCircle className="h-4 w-4 text-[#d7ef83]" weight="fill" />
+                                  <CheckCircle className="h-4 w-4 text-primary" weight="fill" />
                                 ) : task.status === "in_progress" ? (
-                                  <CircleDashed className="h-4 w-4 text-[#d7ef83]/60" weight="fill" />
+                                  <CircleDashed className="h-4 w-4 text-primary/60" weight="fill" />
                                 ) : (
                                   <Circle className="h-4 w-4 text-white/15" />
                                 )}

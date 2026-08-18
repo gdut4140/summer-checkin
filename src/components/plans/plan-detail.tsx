@@ -8,8 +8,8 @@ const statusLabel: Record<string, string> = {
 };
 
 const taskStatusMeta: Record<TaskStatus, { cls: string }> = {
-  done:        { cls: "text-[#d7ef83]" },
-  in_progress: { cls: "text-[#d7ef83]" },
+  done:        { cls: "text-primary" },
+  in_progress: { cls: "text-primary" },
   pending:     { cls: "text-muted-foreground/40" },
   skipped:     { cls: "text-muted-foreground/30" },
 };
@@ -19,8 +19,8 @@ const categoryLabel: Record<TaskCategory, string> = {
 };
 
 const priorityBorder: Record<string, string> = {
-  high:   "border-l-[#d7ef83]",
-  normal: "border-l-[#d7ef83]",
+  high:   "border-l-primary",
+  normal: "border-l-primary",
   low:    "border-l-muted",
 };
 
@@ -73,15 +73,15 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
     <div className="space-y-6">
       {/* 头部卡片 */}
       <div className="surface relative overflow-hidden">
-        <div className={`h-1 w-full ${isCompleted ? "bg-[#d7ef83]" : "bg-[#d7ef83]"}`} />
+        <div className={`h-1 w-full ${isCompleted ? "bg-primary" : "bg-primary"}`} />
 
         <div className="p-6 space-y-5">
           {/* 标题行 */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#d7ef83]">
-                  <span className={`h-1.5 w-1.5 rounded-full ${isCompleted ? "bg-[#d7ef83]" : "bg-[#d7ef83]"}`} />
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
+                  <span className={`h-1.5 w-1.5 rounded-full ${isCompleted ? "bg-primary" : "bg-primary"}`} />
                   {statusLabel[plan.status] ?? statusLabel.active}
                 </span>
                 {plan.startDate && (
@@ -109,8 +109,8 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
 
           {/* 目标 */}
           {plan.goal && (
-            <div className="flex items-start gap-2 rounded-md border border-[#d7ef83]/12 bg-[#d7ef83]/5 px-3 py-2.5">
-              <IconTarget className="h-4 w-4 text-[#d7ef83] mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-2 rounded-md border border-primary/12 bg-primary/5 px-3 py-2.5">
+              <IconTarget className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
               <p className="text-[13px] text-muted-foreground">{plan.goal}</p>
             </div>
           )}
@@ -125,12 +125,12 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
               <span className="font-mono font-medium">
                 {tasksStats.done}
                 <span className="text-muted-foreground font-normal"> / {tasksStats.total} 项</span>
-                <span className="ml-1.5 text-[#d7ef83]">{plan.progress}%</span>
+                <span className="ml-1.5 text-primary">{plan.progress}%</span>
               </span>
             </div>
             <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
               <div
-                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 bg-[#d7ef83]`}
+                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 bg-primary`}
                 style={{ width: `${plan.progress}%` }}
               />
             </div>
@@ -138,8 +138,8 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
 
           {/* 统计小格 */}
           <div className="grid grid-cols-2 border-y border-white/8">
-            <StatTile icon={IconCheckCircle} label="完成任务" value={`${tasksStats.done} / ${tasksStats.total}`} colorClass="bg-[#d7ef83]/10 text-[#d7ef83]" />
-            <StatTile icon={IconLightning} label="进行中" value={`${tasksStats.inProgress}`} colorClass="bg-[#d7ef83]/10 text-[#d7ef83]" />
+            <StatTile icon={IconCheckCircle} label="完成任务" value={`${tasksStats.done} / ${tasksStats.total}`} colorClass="bg-primary/10 text-primary" />
+            <StatTile icon={IconLightning} label="进行中" value={`${tasksStats.inProgress}`} colorClass="bg-primary/10 text-primary" />
           </div>
         </div>
       </div>
@@ -164,12 +164,12 @@ export function PlanDetail({ plan, tasks, tasksStats }: Props) {
                     return (
                       <div
                         key={task.id}
-                        className={`flex items-start gap-3 rounded-md border border-white/7 border-l-2 bg-black/10 px-3 py-2.5 ${priorityBorder[task.priority] ?? "border-l-[#d7ef83]"} ${task.status === "skipped" ? "opacity-50" : ""}`}
+                        className={`flex items-start gap-3 rounded-md border border-white/7 border-l-2 bg-black/10 px-3 py-2.5 ${priorityBorder[task.priority] ?? "border-l-primary"} ${task.status === "skipped" ? "opacity-50" : ""}`}
                       >
                         {task.status === "done" ? (
-                          <IconCheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-[#d7ef83]" />
+                          <IconCheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
                         ) : task.status === "in_progress" ? (
-                          <IconCircleDashed className="h-4 w-4 mt-0.5 flex-shrink-0 text-[#d7ef83]" />
+                          <IconCircleDashed className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
                         ) : (
                           <IconCircle className={`h-4 w-4 mt-0.5 flex-shrink-0 ${ts.cls}`} />
                         )}

@@ -3,6 +3,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import ClickSpark from "@/components/landing/ClickSpark";
 import { BackgroundVideo } from "@/components/layout/background-video";
+import { SceneOverlay } from "@/components/layout/scene-overlay";
+import { SceneProvider } from "@/context/scene-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,27 +21,30 @@ export default function RootLayout({
     <html
       lang="zh-CN"
       className="h-full antialiased"
+      // SSR 兜底：先给个默认场景，避免首帧闪白（SceneProvider 挂载后会用 localStorage 值覆盖）
+      data-scene="rain"
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <BackgroundVideo />
-        {/* 墨绿蒙层 */}
-        <div className="bg-video-overlay" />
+        <SceneProvider>
+          <BackgroundVideo />
+          <SceneOverlay />
 
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="relative z-10 flex flex-1 flex-col">
-            <ClickSpark sparkColor="#d7ef83" sparkCount={8} sparkSize={10} sparkRadius={18} duration={450}>
-              {children}
-            </ClickSpark>
-          </div>
-          {/* 提示气泡置于 body 层级：不被 z-10 层叠上下文困住，保证显示在智能体弹窗之上 */}
-          <Toaster closeButton />
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="relative z-10 flex flex-1 flex-col">
+              {/* 不硬编码 sparkColor → 由组件自行读取 --primary CSS 变量，跟随场景变色 */}
+              <ClickSpark sparkCount={8} sparkSize={10} sparkRadius={18} duration={450}>
+                {children}
+              </ClickSpark>
+            </div>
+            <Toaster closeButton />
+          </ThemeProvider>
+        </SceneProvider>
       </body>
     </html>
   );

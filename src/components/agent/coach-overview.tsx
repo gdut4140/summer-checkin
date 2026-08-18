@@ -66,13 +66,13 @@ const severityConfig: Record<
   string,
   { label: string; color: string; dot: string; bg: string }
 > = {
-  info: { label: "信息", color: "text-emerald-400", dot: "bg-emerald-400", bg: "bg-emerald-500/10" },
+  info: { label: "信息", color: "text-primary", dot: "bg-primary", bg: "bg-primary/10" },
   warning: { label: "注意", color: "text-amber-400", dot: "bg-amber-400", bg: "bg-amber-500/10" },
   critical: { label: "关键", color: "text-red-400", dot: "bg-red-400", bg: "bg-red-500/10" },
 };
 
 const statusMap: Record<string, { emoji: string; label: string; color: string; bg: string }> = {
-  on_track: { emoji: "✓", label: "运行良好", color: "text-emerald-400", bg: "bg-emerald-500/15" },
+  on_track: { emoji: "✓", label: "运行良好", color: "text-primary", bg: "bg-primary/15" },
   need_attention: { emoji: "!", label: "需要关注", color: "text-amber-400", bg: "bg-amber-500/15" },
   need_adjustment: { emoji: "…", label: "需要调整", color: "text-orange-400", bg: "bg-orange-500/15" },
   at_risk: { emoji: "!", label: "有风险", color: "text-red-400", bg: "bg-red-500/15" },

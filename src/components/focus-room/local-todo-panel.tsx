@@ -13,7 +13,7 @@ export function LocalTodoPanel() {
   if (!loaded) {
     return (
       <div className="flex h-full min-h-[28rem] items-center justify-center">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#d7ef83] border-t-transparent" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
@@ -65,7 +65,7 @@ export function LocalTodoPanel() {
         <button
           onClick={handleAdd}
           disabled={!value.trim()}
-          className="shrink-0 rounded-lg p-1.5 text-[#d7ef83] hover:bg-white/10 transition-colors disabled:opacity-30"
+          className="shrink-0 rounded-lg p-1.5 text-primary hover:bg-white/10 transition-colors disabled:opacity-30"
         >
           <Plus className="h-4 w-4" weight="bold" />
         </button>
@@ -91,10 +91,10 @@ export function LocalTodoPanel() {
             >
               <button
                 onClick={() => toggleTodo(todo.id)}
-                className="shrink-0 text-muted-foreground hover:text-[#d7ef83] transition-colors"
+                className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
               >
                 {todo.completed ? (
-                  <Check className="h-4 w-4 text-[#d7ef83]" weight="bold" />
+                  <Check className="h-4 w-4 text-primary" weight="bold" />
                 ) : (
                   <Circle className="h-4 w-4" />
                 )}

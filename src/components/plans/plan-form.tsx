@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ListChecks } from "@phosphor-icons/react";
+import { CalendarBlank, Flag, ListChecks } from "@phosphor-icons/react";
 
 interface PlanFormProps {
   plan?: {
@@ -45,15 +44,18 @@ export function PlanForm({ plan }: PlanFormProps) {
   const [, formAction, pending] = useActionState(handleAction, null);
 
   return (
-    <Card className="surface overflow-hidden">
-      <CardHeader className="border-b border-white/8 px-5 py-4">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <ListChecks className="h-5 w-5 text-[#d7ef83]" weight="duotone" />
-          {isEditing ? "编辑计划" : "新建计划"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-5 md:p-7">
-        <form action={formAction} className="space-y-6">
+    <section className="product-panel overflow-hidden">
+      <div className="grid md:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="border-b border-white/8 bg-black/10 p-5 md:border-b-0 md:border-r md:p-6">
+          <span className="flex size-9 items-center justify-center rounded-md border border-primary/16 bg-primary/7 text-primary"><ListChecks className="size-[18px]" weight="duotone" /></span>
+          <h2 className="mt-4 text-sm font-semibold text-white">{isEditing ? "编辑计划" : "新建计划"}</h2>
+          <p className="mt-2 text-xs leading-6 text-white/34">名称保持简短，目标写成可以验证的结果，后续更容易拆成每天的任务。</p>
+          <div className="mt-6 hidden space-y-3 border-t border-white/8 pt-5 text-xs text-white/30 md:block">
+            <p className="flex items-center gap-2"><Flag className="size-4 text-[#67b4c9]" />明确结果</p>
+            <p className="flex items-center gap-2"><CalendarBlank className="size-4 text-[#67b4c9]" />设定起点</p>
+          </div>
+        </aside>
+        <form action={formAction} className="space-y-6 p-5 md:p-7">
           <div className="space-y-2">
             <Label htmlFor="name">计划名称 <span className="text-destructive">*</span></Label>
             <Input
@@ -79,11 +81,12 @@ export function PlanForm({ plan }: PlanFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="goal">具体目标</Label>
-            <Input
+            <Textarea
               id="goal"
               name="goal"
               placeholder="例如：掌握 Next.js App Router，完成 3 个项目"
               defaultValue={plan?.goal ?? ""}
+              rows={3}
             />
           </div>
           </div>
@@ -102,11 +105,11 @@ export function PlanForm({ plan }: PlanFormProps) {
             />
           </div>
 
-          <div className="flex justify-end border-t border-white/8 pt-5"><Button type="submit" disabled={pending} size="lg">
+          <div className="flex justify-end border-t border-white/8 pt-5"><Button type="submit" disabled={pending} size="lg" className="min-w-28">
             {pending ? "保存中..." : isEditing ? "更新计划" : "创建计划"}
           </Button></div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -36,7 +36,7 @@ export function Hero() {
             <Button variant="ghost" className="text-white hover:bg-white/15 hover:text-white">登录</Button>
           </Link>
           <Link href="/register">
-            <Button className="bg-[#d7ef83] text-[#051612] hover:bg-[#e4f5a6]">开始打卡</Button>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">开始打卡</Button>
           </Link>
         </div>
       </nav>
@@ -49,12 +49,12 @@ export function Hero() {
           className="max-w-4xl"
         >
           <div className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-white/86">
-            <Sparkle className="h-4 w-4 text-[#d7ef83]" weight="fill" />
+            <Sparkle className="h-4 w-4 text-primary" weight="fill" />
             <ShinyText
               text="AI 驱动的学习节奏管理"
               speed={3}
               color="#ffffff"
-              shineColor="#d7ef83"
+              shineColor="hsl(var(--primary))"
               spread={120}
               direction="left"
             />
@@ -78,7 +78,7 @@ export function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href="/register">
-              <Button size="lg" className="bg-[#d7ef83] text-[#051612] shadow-lg shadow-black/10 hover:bg-[#e4f5a6]">
+              <Button size="lg" className="bg-primary text-primary-foreground shadow-lg shadow-black/10 hover:bg-primary/90">
                 免费开始
                 <ArrowRight className="ml-2 h-4 w-4" weight="bold" />
               </Button>
@@ -99,7 +99,7 @@ export function Hero() {
         >
           {pulseItems.map((item) => (
             <div key={item.label} className="flex min-h-24 items-center gap-4 bg-[#061a14]/42 px-5 py-4">
-              <item.icon className="h-6 w-6 shrink-0 text-[#d7ef83]" weight="duotone" />
+              <item.icon className="h-6 w-6 shrink-0 text-primary" weight="duotone" />
               <div>
                 <p className="text-lg font-semibold">{item.value}</p>
                 <p className="mt-0.5 text-sm text-white/65">{item.label}</p>
@@ -109,7 +109,7 @@ export function Hero() {
         </motion.div>
 
         <div className="mt-5 flex items-center gap-2 text-sm text-white/68">
-          <Check className="h-4 w-4 text-[#d7ef83]" weight="bold" />
+          <Check className="h-4 w-4 text-primary" weight="bold" />
           你的数据只属于你，随时开始，随时回看
         </div>
       </div>

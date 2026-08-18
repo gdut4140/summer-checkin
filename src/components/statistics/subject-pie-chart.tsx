@@ -9,7 +9,15 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const COLORS = ["#d7ef83", "#67b4c9", "#e0886a", "#5aaa90", "#f3c969", "#c58fe8"];
+// 从 CSS 主题变量读取调色板（切场景时雨林/雪景会自动变色）
+const COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "#c58fe8",
+];
 
 interface SubjectPieChartProps {
   data: { name: string; hours: number }[];

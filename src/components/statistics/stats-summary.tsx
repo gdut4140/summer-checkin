@@ -21,7 +21,7 @@ export function StatsSummary({ totalHours, totalDays, avgPerDay, bestSubject }: 
     <div className="metric-strip mb-5">
       {items.map((item) => (
         <div key={item.label} className="flex min-h-24 items-center gap-3 px-4 py-4 md:px-5">
-          <item.icon className="size-5 shrink-0 text-[#d7ef83]" weight="duotone" />
+          <item.icon className="size-5 shrink-0 text-primary" weight="duotone" />
           <div className="min-w-0"><p className="text-[11px] text-white/38">{item.label}</p><p className="mt-1 truncate text-xl font-semibold text-white">{item.value}</p></div>
         </div>
       ))}

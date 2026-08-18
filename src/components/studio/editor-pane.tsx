@@ -242,7 +242,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
 
         {/* 文档内搜索栏（Ctrl+F） */}
         {searchOpen && (
-          <div className="absolute right-4 top-3 z-30 flex items-center gap-1.5 rounded-lg border border-white/12 bg-[#0d2a21]/95 p-1.5 pl-2.5 shadow-xl backdrop-blur">
+          <div className="absolute right-4 top-3 z-30 flex items-center gap-1.5 rounded-lg border border-white/12 bg-background/95 p-1.5 pl-2.5 shadow-xl backdrop-blur">
             <MagnifyingGlass className="size-3.5 shrink-0 text-muted-foreground/70" />
             <input
               ref={searchInputRef}
@@ -285,7 +285,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
         {/* 选区浮动工具条 */}
         {selectionActionEnabled && selection && (
           <div
-            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-white/12 bg-[#0d2a21]/95 p-1 shadow-xl backdrop-blur"
+            className="fixed z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-white/12 bg-background/95 p-1 shadow-xl backdrop-blur"
             style={{ left: selection.x, top: selection.y - 46 }}
           >
             <button

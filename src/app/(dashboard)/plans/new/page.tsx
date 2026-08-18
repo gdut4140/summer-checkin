@@ -9,7 +9,7 @@ export default async function NewPlanPage() {
   await requireAuth();
 
   return (
-    <div className="product-page max-w-4xl">
+    <div className="product-page product-page--redesigned product-page--narrow">
       <Link
         href="/plans"
         className="mb-5 inline-flex items-center gap-1 text-xs text-white/44 transition-colors hover:text-white"

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Books,
+  ArrowUpRight,
   FilePlus,
   FileText,
   Plus,
@@ -12,6 +13,8 @@ import {
   UploadSimple,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface DocListItem {
   id: string;
@@ -40,6 +43,7 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
   const [creating, setCreating] = useState(false);
   const [indexingId, setIndexingId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<DocListItem | null>(null);
   const dragDepth = useRef(0);
 
   async function handleDrop(e: React.DragEvent) {
@@ -92,12 +96,12 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
   }
 
   async function removeDocument(id: string, title: string) {
-    if (!window.confirm(`删除文档「${title}」？`)) return;
     try {
       const res = await fetch(`/api/documents/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setDocs((prev) => prev.filter((d) => d.id !== id));
       toast.success("已删除");
+      setDeleteTarget(null);
     } catch {
       toast.error("删除失败");
     }
@@ -155,12 +159,12 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
       onDrop={handleDrop}
     >
       {/* 操作栏 */}
-      <div className="mb-5 flex items-center gap-2">
+      <div className="mb-5 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={createDocument}
           disabled={creating}
-          className="flex items-center gap-1.5 rounded-lg bg-[#d7ef83] px-3.5 py-2 text-xs font-semibold text-[#051612] transition hover:bg-[#e5f6a6] disabled:opacity-50"
+          className="flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
         >
           <Plus className="size-4" weight="bold" />
           {creating ? "创建中…" : "新建文档"}
@@ -168,7 +172,7 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-foreground transition hover:bg-white/[0.08]"
+          className="flex h-9 items-center gap-1.5 rounded-md border border-white/12 bg-white/[0.04] px-3.5 text-xs font-medium text-foreground transition hover:bg-white/[0.08]"
         >
           <UploadSimple className="size-4" />
           导入 .md
@@ -190,25 +194,36 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
       {/* 文档网格 */}
       {docs.length === 0 ? (
         <div className="mt-6 flex min-h-64 flex-col items-center justify-center border border-dashed border-white/16 bg-black/10 px-5 text-center">
-          <FileText className="size-8 text-[#d7ef83]" weight="duotone" />
+          <FileText className="size-8 text-primary" weight="duotone" />
           <h2 className="mt-4 text-base font-medium text-white">还没有文档</h2>
           <p className="mt-1 max-w-sm text-sm leading-6 text-white/42">
             新建一篇，或导入本地的 Markdown 文件，然后用 AI 帮你阅读和修改。
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <section className="overflow-hidden rounded-lg border border-white/9 bg-[var(--surface-panel-bg)] backdrop-blur-xl" aria-label="文档列表">
+          <div className="hidden grid-cols-[minmax(0,1fr)_10rem_9rem] border-b border-white/8 px-4 py-2.5 text-[10px] uppercase text-white/28 md:grid">
+            <span>文档</span>
+            <span>最后更新</span>
+            <span className="text-right">操作</span>
+          </div>
           {docs.map((doc) => (
             <article
               key={doc.id}
               onClick={() => router.push(`/docs/${doc.id}`)}
-              className="group relative flex min-h-36 cursor-pointer flex-col overflow-hidden rounded-lg border border-white/10 bg-[#0a2119]/72 p-5 shadow-[0_14px_35px_rgba(0,0,0,0.18)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#0c281f]/80"
+              className="group grid min-h-20 cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-white/7 px-4 py-3.5 transition-colors last:border-b-0 hover:bg-white/[0.035] md:grid-cols-[minmax(0,1fr)_10rem_9rem]"
             >
-              <div className="flex items-start justify-between gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-[#d7ef83]/10 text-[#d7ef83]">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-primary/14 bg-primary/7 text-primary transition group-hover:border-primary/28">
                   <FilePlus className="size-4" weight="fill" />
                 </span>
-                <div className="flex items-center gap-0.5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{doc.title}</p>
+                  <p className="mt-1 text-[11px] text-white/30 md:hidden">{formatTime(doc.updatedAt)}</p>
+                </div>
+              </div>
+              <p className="hidden text-xs text-white/36 md:block">{formatTime(doc.updatedAt)}</p>
+              <div className="flex items-center justify-end gap-0.5">
                   <button
                     type="button"
                     aria-label="加入知识库"
@@ -218,7 +233,7 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
                       e.stopPropagation();
                       void addToKnowledge(doc);
                     }}
-                    className="flex size-7 items-center justify-center rounded-md text-white/30 transition hover:bg-white/8 hover:text-[#d7ef83] disabled:opacity-50"
+                    className="flex size-8 items-center justify-center rounded-md text-white/28 transition hover:bg-white/8 hover:text-primary disabled:opacity-50"
                   >
                     {indexingId === doc.id ? (
                       <Spinner className="size-4 animate-spin" />
@@ -231,35 +246,42 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
                     aria-label="删除文档"
                     onClick={(e) => {
                       e.stopPropagation();
-                      void removeDocument(doc.id, doc.title);
+                      setDeleteTarget(doc);
                     }}
-                    className="flex size-7 items-center justify-center rounded-md text-white/30 transition hover:bg-white/8 hover:text-red-300"
+                    className="flex size-8 items-center justify-center rounded-md text-white/28 transition hover:bg-white/8 hover:text-red-300"
                   >
                     <Trash className="size-4" />
                   </button>
-                </div>
+                <ArrowUpRight className="ml-1 size-4 text-white/20 transition group-hover:text-primary" />
               </div>
-              <p className="mt-3 truncate text-base font-semibold text-white">
-                {doc.title}
-              </p>
-              <p className="mt-auto pt-3 text-[11px] text-white/36">
-                {formatTime(doc.updatedAt)}
-              </p>
             </article>
           ))}
-        </div>
+        </section>
       )}
 
       {/* 拖拽导入遮罩 */}
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="rounded-xl border-2 border-dashed border-[#d7ef83]/60 bg-[#0a1a15]/90 px-10 py-8 text-center">
-            <UploadSimple className="mx-auto mb-3 size-8 text-[#d7ef83]" />
+          <div className="rounded-xl border-2 border-dashed border-primary/60 bg-[#0a1a15]/90 px-10 py-8 text-center">
+            <UploadSimple className="mx-auto mb-3 size-8 text-primary" />
             <p className="text-sm font-medium text-white">松开以导入文档</p>
             <p className="mt-1 text-xs text-white/45">支持 .md .markdown .txt</p>
           </div>
         </div>
       )}
+
+      <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent className="border border-white/12 bg-background/96 text-white backdrop-blur-2xl">
+          <DialogHeader>
+            <DialogTitle>删除这篇文档？</DialogTitle>
+            <DialogDescription>“{deleteTarget?.title}”删除后无法恢复。</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
+            <Button variant="destructive" onClick={() => deleteTarget && void removeDocument(deleteTarget.id, deleteTarget.title)}>确认删除</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

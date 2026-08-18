@@ -143,7 +143,7 @@ export function PlanDocument({ plan, tasks, tasksStats, initialDocument }: Props
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl rounded-xl border border-white/[0.08] bg-[#0a1a15]/70 p-8">
+        <div className="mx-auto max-w-3xl rounded-xl border border-white/[0.08] bg-background/70 p-8">
           {editing ? (
             <textarea
               value={content}

@@ -50,10 +50,10 @@ export function DailyChart({ data }: DailyChartProps) {
               <Line
                 type="monotone"
                 dataKey="hours"
-                stroke="#d7ef83"
+                stroke="var(--chart-1)"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, fill: "#d7ef83" }}
+                activeDot={{ r: 4, fill: "var(--chart-1)" }}
               />
             </LineChart>
           </ResponsiveContainer>

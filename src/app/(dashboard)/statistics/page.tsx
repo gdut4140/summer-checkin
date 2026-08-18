@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, format } from "date-fns";
-import { CalendarCheck, ChartLineUp, Star, Lightning } from "@phosphor-icons/react/dist/ssr";
+import { CalendarCheck, ChartLineUp, Star, Lightning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { ProfileHeader } from "@/components/profile/profile-header";
 
 export default async function ProfilePage() {
@@ -53,7 +53,7 @@ export default async function ProfilePage() {
   ];
 
   return (
-    <div className="product-page space-y-6">
+    <div className="product-page product-page--redesigned space-y-6">
       <ProfileHeader
         user={{
           name: fullUser?.name ?? user.name,
@@ -65,43 +65,48 @@ export default async function ProfilePage() {
       />
 
       {/* 概览 */}
-      <section className="grid grid-cols-2 border-y border-white/10 bg-black/10 lg:grid-cols-4">
+      <section className="product-metrics grid grid-cols-1 sm:grid-cols-3">
         {overview.map((item, i) => (
-          <div key={item.label} className={`flex min-h-24 items-center gap-3 px-3 py-4 md:px-5 ${i % 2 === 1 ? "border-l border-white/10" : ""} ${i > 1 ? "border-t border-white/10 lg:border-t-0" : ""} ${i > 0 ? "lg:border-l lg:border-white/10" : ""}`}>
-            <item.icon className="size-5 shrink-0 text-[#d7ef83]" weight="duotone" />
-            <div>
-              <p className="text-xs text-white/42">{item.label}</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-white">{item.value}<span className="ml-1 text-xs font-normal text-white/36">{item.unit}</span></p>
+          <div key={item.label} className={`product-metric flex items-center gap-3 ${i > 0 ? "border-t border-white/10 sm:border-t-0" : ""}`}>
+            <span className="flex size-9 items-center justify-center rounded-md border border-white/8 bg-white/[0.035] text-primary"><item.icon className="size-[18px]" weight="duotone" /></span>
+            <div className="min-w-0">
+              <p className="text-[11px] text-white/38">{item.label}</p>
+              <p className="mt-1 text-[1.35rem] font-semibold tabular-nums text-white">{item.value}<span className="ml-1 text-xs font-normal text-white/34">{item.unit}</span></p>
             </div>
           </div>
         ))}
       </section>
 
-      {/* 进度条 */}
-      {totalTasks > 0 && (
-        <section className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-white/60">总任务进度</span>
-            <span className="tabular-nums text-[#d7ef83] font-medium">{doneTasks}/{totalTasks} · {progress}%</span>
+      <div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
+        <section className="product-panel p-5 md:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-medium text-white/72">学习完成度</p>
+              <p className="mt-1 text-xs text-white/32">所有计划的任务完成情况</p>
+            </div>
+            <span className="text-3xl font-semibold tabular-nums text-white">{progress}<span className="text-sm font-normal text-white/32">%</span></span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/8">
-            <div className="h-full rounded-full bg-[#d7ef83] transition-all duration-700" style={{ width: `${progress}%` }} />
+          <div className="mt-8 h-1 overflow-hidden bg-white/8">
+            <div className="h-full bg-primary transition-all duration-700" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="mt-3 flex items-center justify-between text-xs text-white/34">
+            <span>{doneTasks} 项已完成</span>
+            <span>{Math.max(totalTasks - doneTasks, 0)} 项待推进</span>
           </div>
         </section>
-      )}
 
-      {/* 今日 */}
-      <section className="rounded-lg border border-white/8 bg-[#0a2119]/50 px-5 py-4">
-        <div className="flex items-center gap-2">
-          <Star className="size-4 text-[#d7ef83]" weight="fill" />
-          <span className="text-sm font-medium text-white">今日动态</span>
-        </div>
-        <p className="mt-2 text-sm text-white/50">
-          {todayDone > 0
-            ? `已完成 ${todayDone} 个任务 · 连续 ${streakDays} 天活跃 · ${plans.length} 个计划`
-            : `还没有完成任务 · ${plans.length} 个计划等你继续`}
-        </p>
-      </section>
+        <section className="product-panel flex flex-col justify-between p-5 md:p-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-white/72">今日动态</span>
+            {todayDone > 0 ? <CheckCircle className="size-5 text-primary" weight="fill" /> : <Star className="size-5 text-[#67b4c9]" weight="duotone" />}
+          </div>
+          <p className="mt-6 text-sm leading-6 text-white/48">
+            {todayDone > 0
+              ? `已完成 ${todayDone} 个任务 · 连续 ${streakDays} 天活跃 · ${plans.length} 个计划`
+              : `还没有完成任务 · ${plans.length} 个计划等你继续`}
+          </p>
+        </section>
+      </div>
 
       {/* 空状态 */}
       {plans.length === 0 && (

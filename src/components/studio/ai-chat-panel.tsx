@@ -364,7 +364,7 @@ export function AiChatPanel({
       </div>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="sm:max-w-sm border border-white/12 bg-[#0d2a21]/95 text-white backdrop-blur-xl">
+        <DialogContent className="sm:max-w-sm border border-white/12 bg-background/95 text-white backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>开始新对话？</DialogTitle>
             <DialogDescription>当前对话记录会被清空，且无法恢复。</DialogDescription>

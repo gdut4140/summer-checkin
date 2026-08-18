@@ -1,6 +1,7 @@
 /* ============================================================
-   文档工作室 — Milkdown 编辑器主题（暗色雨林风）
-   与 globals.css 的墨绿主题一致：背景 #0c1f19 / 主色 #d7ef83
+   文档工作室 — Milkdown 编辑器主题（跟随 html[data-scene] 切换）
+   颜色全部引用 globals.css 中已定义的主题语义变量，
+   切场景时墨绿 ↔ 冰蓝 自动适配。
    ============================================================ */
 
 .milkdown {
@@ -17,15 +18,15 @@
   overflow-y: auto;
   padding: 1.75rem clamp(1.5rem, 4vw, 3.5rem) 45vh;
   outline: none;
-  color: rgba(242, 248, 244, 0.92);
-  caret-color: #d7ef83;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+  caret-color: var(--theme-primary);
   font-size: 0.95rem;
   line-height: 1.85;
   scroll-behavior: smooth;
 }
 
 .milkdown .editor ::selection {
-  background: rgba(215, 239, 131, 0.28);
+  background: color-mix(in srgb, var(--theme-primary) 28%, transparent);
 }
 
 .milkdown .editor > * + * {
@@ -37,8 +38,8 @@
   margin-top: 2.2rem;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #f5faf6;
+  border-bottom: 1px solid var(--surface-card-border);
+  color: var(--text-title);
   font-size: 1.75rem;
   font-weight: 650;
   line-height: 1.3;
@@ -47,7 +48,7 @@
 .milkdown .editor h2 {
   margin-top: 1.8rem;
   margin-bottom: 0.6rem;
-  color: #eef7e4;
+  color: color-mix(in srgb, var(--text-title) 94%, var(--theme-primary) 6%);
   font-size: 1.35rem;
   font-weight: 600;
   line-height: 1.35;
@@ -56,7 +57,7 @@
 .milkdown .editor h3 {
   margin-top: 1.4rem;
   margin-bottom: 0.5rem;
-  color: #dceddf;
+  color: var(--theme-secondary-foreground);
   font-size: 1.12rem;
   font-weight: 600;
 }
@@ -66,7 +67,7 @@
 .milkdown .editor h6 {
   margin-top: 1.1rem;
   margin-bottom: 0.4rem;
-  color: #dceddf;
+  color: var(--theme-secondary-foreground);
   font-weight: 600;
 }
 
@@ -80,28 +81,28 @@
 }
 
 .milkdown .editor strong {
-  color: #f2f8f4;
+  color: var(--foreground);
   font-weight: 650;
 }
 
 .milkdown .editor em {
-  color: rgba(232, 246, 237, 0.85);
+  color: color-mix(in srgb, var(--foreground) 85%, transparent);
 }
 
 .milkdown .editor del {
-  color: rgba(232, 246, 237, 0.4);
+  color: color-mix(in srgb, var(--foreground) 40%, transparent);
 }
 
 /* ── 链接 ── */
 .milkdown .editor a {
-  color: #d7ef83;
+  color: var(--theme-primary);
   text-decoration: underline;
-  text-decoration-color: rgba(215, 239, 131, 0.35);
+  text-decoration-color: color-mix(in srgb, var(--theme-primary) 35%, transparent);
   text-underline-offset: 3px;
 }
 
 .milkdown .editor a:hover {
-  text-decoration-color: #d7ef83;
+  text-decoration-color: var(--theme-primary);
 }
 
 /* ── 列表 ── */
@@ -115,7 +116,7 @@
 }
 
 .milkdown .editor li::marker {
-  color: rgba(215, 239, 131, 0.6);
+  color: color-mix(in srgb, var(--theme-primary) 60%, transparent);
 }
 
 .milkdown .editor li p {
@@ -141,14 +142,14 @@
   height: 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 0.25rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-input-bg);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .milkdown .editor li.task-list-item input[type="checkbox"]:checked {
-  background: #d7ef83;
-  border-color: #d7ef83;
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
 }
 
 .milkdown .editor li.task-list-item input[type="checkbox"]:checked::after {
@@ -157,13 +158,13 @@
   width: 0.35rem;
   height: 0.2rem;
   margin: 0.16rem 0 0 0.18rem;
-  border-left: 2px solid #051612;
-  border-bottom: 2px solid #051612;
+  border-left: 2px solid var(--theme-primary-foreground);
+  border-bottom: 2px solid var(--theme-primary-foreground);
   transform: rotate(-45deg);
 }
 
 .milkdown .editor li.task-list-item[data-checked="true"] > div > p {
-  color: rgba(232, 246, 237, 0.45);
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
   text-decoration: line-through;
 }
 
@@ -171,8 +172,8 @@
 .milkdown .editor code {
   padding: 0.15em 0.4em;
   border-radius: 0.35rem;
-  background: rgba(255, 255, 255, 0.07);
-  color: #d7ef83;
+  background: var(--surface-input-bg);
+  color: var(--theme-primary);
   font-family: var(--font-mono);
   font-size: 0.86em;
 }
@@ -180,25 +181,25 @@
 .milkdown .editor pre {
   overflow-x: auto;
   padding: 1rem 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-card-border);
   border-radius: 0.65rem;
-  background: rgba(5, 22, 18, 0.7);
+  background: var(--surface-darkglass-bg);
 }
 
 .milkdown .editor pre code {
   padding: 0;
   background: transparent;
-  color: rgba(232, 246, 237, 0.88);
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
 }
 
 /* ── 引用 ── */
 .milkdown .editor blockquote {
   margin: 0;
   padding: 0.4rem 1rem;
-  border-left: 3px solid rgba(215, 239, 131, 0.5);
-  background: rgba(215, 239, 131, 0.05);
+  border-left: 3px solid color-mix(in srgb, var(--theme-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--theme-primary) 5%, transparent);
   border-radius: 0 0.45rem 0.45rem 0;
-  color: rgba(220, 237, 223, 0.75);
+  color: color-mix(in srgb, var(--theme-secondary-foreground) 75%, transparent);
 }
 
 .milkdown .editor blockquote p {
@@ -209,7 +210,7 @@
 .milkdown .editor hr {
   margin: 1.5rem 0;
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--surface-card-border);
 }
 
 /* ── 表格 ── */
@@ -222,13 +223,13 @@
 .milkdown .editor th,
 .milkdown .editor td {
   padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--surface-card-border);
   text-align: left;
 }
 
 .milkdown .editor th {
-  background: rgba(255, 255, 255, 0.05);
-  color: #f2f8f4;
+  background: var(--surface-metric-bg);
+  color: var(--foreground);
   font-weight: 600;
 }
 
@@ -240,16 +241,16 @@
 
 /* ── 选中块（block 插件）与光标 ── */
 .milkdown .editor .ProseMirror-selectednode {
-  outline: 2px solid rgba(215, 239, 131, 0.6);
+  outline: 2px solid color-mix(in srgb, var(--theme-primary) 60%, transparent);
   border-radius: 0.4rem;
 }
 
 .milkdown .editor .ProseMirror-gapcursor::after {
-  border-top: 1px solid #d7ef83;
+  border-top: 1px solid var(--theme-primary);
 }
 
 .milkdown .editor .ProseMirror-gapcursor {
-  caret-color: #d7ef83;
+  caret-color: var(--theme-primary);
 }
 
 /* ── AI 修改后的高亮闪烁 ── */
@@ -259,16 +260,16 @@
 
 @keyframes studio-ai-flash {
   0% {
-    box-shadow: inset 0 0 0 2px rgba(215, 239, 131, 0.65);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--theme-primary) 65%, transparent);
   }
   100% {
-    box-shadow: inset 0 0 0 2px rgba(215, 239, 131, 0);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--theme-primary) 0%, transparent);
   }
 }
 
 /* ── 阅读模式（只读渲染）文档排版 ── */
 .studio-read {
-  color: rgba(242, 248, 244, 0.92);
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
   font-size: 0.95rem;
   line-height: 1.85;
 }
@@ -276,8 +277,8 @@
 .studio-read h1 {
   margin: 2.2rem 0 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #f5faf6;
+  border-bottom: 1px solid var(--surface-card-border);
+  color: var(--text-title);
   font-size: 1.9rem;
   font-weight: 650;
   line-height: 1.3;
@@ -289,7 +290,7 @@
 
 .studio-read h2 {
   margin: 1.8rem 0 0.6rem;
-  color: #eef7e4;
+  color: color-mix(in srgb, var(--text-title) 94%, var(--theme-primary) 6%);
   font-size: 1.4rem;
   font-weight: 600;
   line-height: 1.35;
@@ -297,7 +298,7 @@
 
 .studio-read h3 {
   margin: 1.4rem 0 0.5rem;
-  color: #dceddf;
+  color: var(--theme-secondary-foreground);
   font-size: 1.15rem;
   font-weight: 600;
 }
@@ -317,30 +318,30 @@
 }
 
 .studio-read li::marker {
-  color: rgba(215, 239, 131, 0.6);
+  color: color-mix(in srgb, var(--theme-primary) 60%, transparent);
 }
 
 .studio-read a {
-  color: #d7ef83;
+  color: var(--theme-primary);
   text-decoration: underline;
-  text-decoration-color: rgba(215, 239, 131, 0.35);
+  text-decoration-color: color-mix(in srgb, var(--theme-primary) 35%, transparent);
   text-underline-offset: 3px;
 }
 
 .studio-read blockquote {
   margin: 0.5rem 0;
   padding: 0.4rem 1rem;
-  border-left: 3px solid rgba(215, 239, 131, 0.5);
-  background: rgba(215, 239, 131, 0.05);
+  border-left: 3px solid color-mix(in srgb, var(--theme-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--theme-primary) 5%, transparent);
   border-radius: 0 0.45rem 0.45rem 0;
-  color: rgba(220, 237, 223, 0.75);
+  color: color-mix(in srgb, var(--theme-secondary-foreground) 75%, transparent);
 }
 
 .studio-read code {
   padding: 0.15em 0.4em;
   border-radius: 0.35rem;
-  background: rgba(255, 255, 255, 0.07);
-  color: #d7ef83;
+  background: var(--surface-input-bg);
+  color: var(--theme-primary);
   font-family: var(--font-mono);
   font-size: 0.86em;
 }
@@ -349,21 +350,21 @@
   margin: 0.5rem 0;
   overflow-x: auto;
   padding: 1rem 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-card-border);
   border-radius: 0.65rem;
-  background: rgba(5, 22, 18, 0.7);
+  background: var(--surface-darkglass-bg);
 }
 
 .studio-read pre code {
   padding: 0;
   background: transparent;
-  color: rgba(232, 246, 237, 0.88);
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
 }
 
 .studio-read hr {
   margin: 1.5rem 0;
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--surface-card-border);
 }
 
 .studio-read table {
@@ -375,20 +376,20 @@
 .studio-read th,
 .studio-read td {
   padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--surface-card-border);
   text-align: left;
 }
 
 .studio-read th {
-  background: rgba(255, 255, 255, 0.05);
-  color: #f2f8f4;
+  background: var(--surface-metric-bg);
+  color: var(--foreground);
   font-weight: 600;
 }
 
 /* ── 淡滚动条（阅读面板 + 编辑面板）── */
 .studio-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: var(--surface-card-border) transparent;
 }
 
 .studio-scroll::-webkit-scrollbar {
@@ -401,28 +402,28 @@
 }
 
 .studio-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--surface-card-border);
   border-radius: 3px;
 }
 
 .studio-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--surface-nav-hover-border);
 }
 
 /* ── 文档内搜索高亮（Ctrl+F）── */
-/* 用主题主色 #d7ef83（浅青柠），与文本选中/强调保持一致 */
+/* 跟随当前场景主题主色，与文本选中/强调保持一致 */
 .studio-read mark.studio-find {
-  background: rgba(215, 239, 131, 0.3);
+  background: color-mix(in srgb, var(--theme-primary) 30%, transparent);
   color: inherit;
   border-radius: 2px;
 }
 
 .studio-read mark.studio-find.is-current {
-  background: rgba(215, 239, 131, 0.52);
-  outline: 1px solid rgba(215, 239, 131, 0.8);
+  background: color-mix(in srgb, var(--theme-primary) 52%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--theme-primary) 80%, transparent);
 }
 
 /* 阅读面板文本选中：主题色 */
 .studio-read ::selection {
-  background: rgba(215, 239, 131, 0.28);
+  background: color-mix(in srgb, var(--theme-primary) 28%, transparent);
 }

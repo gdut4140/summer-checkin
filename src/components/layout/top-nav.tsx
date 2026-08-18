@@ -73,21 +73,21 @@ export function TopNav({ user }: TopNavProps) {
     <>
       <header className="dashboard-nav pointer-events-none sticky top-0 z-40 w-full text-white">
         <div className="dashboard-nav__inner mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-8">
-          <Link href="/dashboard" className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/12 bg-[#071711]/66 p-1.5 pr-3 text-xs font-semibold shadow-xl backdrop-blur-2xl lg:hidden"><span className="flex size-7 items-center justify-center rounded-full bg-[#d7ef83] text-[#051612]"><Leaf className="size-3.5" weight="fill" /></span>Summer Checkin</Link>
+          <Link href="/dashboard" className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/12 bg-[var(--surface-nav-bg)] p-1.5 pr-3 text-xs font-semibold shadow-xl backdrop-blur-2xl lg:hidden"><span className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground"><Leaf className="size-3.5" weight="fill" /></span>Summer Checkin</Link>
           <div className="atomic-nav pointer-events-auto hidden items-center lg:flex">
             <Link href="/dashboard" className="atomic-nav__brand flex shrink-0 items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-full bg-[#d7ef83] text-[#051612]"><Leaf className="size-4" weight="fill" /></span>
+              <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Leaf className="size-4" weight="fill" /></span>
               <span className="whitespace-nowrap text-sm font-semibold">Summer Checkin</span>
             </Link>
             <nav className="atomic-nav__links flex items-center gap-1" aria-label="主导航">
               {mainNav.map((item) => (
-                <Link key={item.href} href={item.href} className={cn("rounded-full px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors", isActive(item.href) ? "bg-[#d7ef83] text-[#051612]" : "text-white/52 hover:bg-white/8 hover:text-white")}>{item.label}</Link>
+                <Link key={item.href} href={item.href} className={cn("rounded-full px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors", isActive(item.href) ? "bg-primary text-primary-foreground" : "text-white/52 hover:bg-white/8 hover:text-white")}>{item.label}</Link>
               ))}
             </nav>
           </div>
 
           {/* 右侧：通知 + 用户菜单（桌面） */}
-          <div className="dashboard-nav__tools pointer-events-auto hidden items-center gap-1 rounded-full border border-white/12 bg-[#071711]/66 p-1.5 shadow-xl backdrop-blur-2xl lg:flex">
+          <div className="dashboard-nav__tools pointer-events-auto hidden items-center gap-1 rounded-full border border-white/12 bg-[var(--surface-nav-bg)] p-1.5 shadow-xl backdrop-blur-2xl lg:flex">
             <AmbientSound />
             <ChatRoom />
             <NotificationBell />
@@ -96,7 +96,7 @@ export function TopNav({ user }: TopNavProps) {
                 <List className="h-4 w-4 text-white" />
                 <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="sm" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl border border-white/10 bg-[#0a1a15]/98 p-1 shadow-2xl backdrop-blur-2xl">
+              <DropdownMenuContent align="end" className="w-56 rounded-xl border border-white/10 bg-background/98 p-1 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center gap-3 px-3 py-3">
                   <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="md" />
                   <div className="flex-1 min-w-0">

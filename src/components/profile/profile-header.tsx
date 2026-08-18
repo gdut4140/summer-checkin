@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PencilSimple, Gear } from "@phosphor-icons/react";
+import { PencilSimple, Gear, CalendarBlank } from "@phosphor-icons/react";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { AppAvatar } from "@/components/ui/app-avatar";
@@ -37,9 +36,9 @@ export function ProfileHeader({ user }: Props) {
 
   return (
     <>
-      <Card className="surface overflow-hidden">
-        <CardContent className="p-5 md:p-7">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <section className="product-panel relative overflow-hidden px-5 py-6 md:px-7 md:py-8">
+          <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary to-primary/70" />
+          <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
             <button
               onClick={() => setAvatarOpen(true)}
               className="group relative shrink-0"
@@ -51,19 +50,21 @@ export function ProfileHeader({ user }: Props) {
               </div>
             </button>
 
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-white">{user.name}</h2>
-              <p className="text-sm text-white/50">{user.email}</p>
+            <div className="min-w-0 flex-1">
+              <p className="product-eyebrow">Personal space</p>
+              <h1 className="mt-1 text-2xl font-semibold text-white">{user.name}</h1>
+              <p className="mt-0.5 truncate text-sm text-white/42">{user.email}</p>
               {user.bio ? (
-                <p className="text-base mt-1.5 max-w-[60ch] text-white/80">{user.bio}</p>
+                <p className="mt-3 max-w-[60ch] text-sm leading-6 text-white/72">{user.bio}</p>
               ) : (
-                <p className="text-base mt-1.5 text-white/30">还没有写简介</p>
+                <p className="mt-3 text-sm text-white/30">还没有写简介</p>
               )}
-              <p className="text-xs text-white/35 mt-2">
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-white/30">
+                <CalendarBlank className="size-3.5" />
                 于 {format(user.createdAt, "yyyy 年 M 月")} 加入
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex w-full gap-2 sm:w-auto sm:flex-col">
               <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
                 <PencilSimple className="h-4 w-4 mr-1.5" />
                 编辑资料
@@ -74,8 +75,7 @@ export function ProfileHeader({ user }: Props) {
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </section>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>

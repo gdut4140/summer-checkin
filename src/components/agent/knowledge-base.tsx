@@ -212,13 +212,13 @@ export function KnowledgeBase() {
           className={cn(
             "rounded-lg border-2 border-dashed p-4 text-center transition",
             dragOver
-              ? "border-[#d7ef83]/60 bg-[#d7ef83]/6"
+              ? "border-primary/60 bg-primary/6"
               : "border-white/12 hover:border-white/20"
           )}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2 py-2">
-              <Spinner className="size-5 animate-spin text-[#d7ef83]" />
+              <Spinner className="size-5 animate-spin text-primary" />
               <span className="text-xs text-white/50">处理中…</span>
             </div>
           ) : (
@@ -281,18 +281,18 @@ export function KnowledgeBase() {
               value={pasteName}
               onChange={(e) => setPasteName(e.target.value)}
               placeholder="文档名称（可选）"
-              className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-white/25 focus:border-[#d7ef83]/40 focus:outline-none"
+              className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-white/25 focus:border-primary/40 focus:outline-none"
             />
             <Textarea
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               placeholder="在此粘贴 Markdown 或纯文本…"
-              className="min-h-24 resize-none border-white/10 bg-white/5 text-xs focus-visible:ring-[#d7ef83]/30"
+              className="min-h-24 resize-none border-white/10 bg-white/5 text-xs focus-visible:ring-primary/30"
               disabled={uploading}
             />
             <Button
               size="sm"
-              className="h-7 w-full gap-1 bg-[#d7ef83] text-[11px] text-[#10271e] hover:bg-[#e5f6a6]"
+              className="h-7 w-full gap-1 bg-primary text-[11px] text-primary-foreground hover:bg-primary/90"
               onClick={submitPaste}
               disabled={uploading || !pasteText.trim()}
             >
@@ -350,7 +350,7 @@ export function KnowledgeBase() {
                   {canViewDoc(doc.sourceType, doc.sourceName) && (
                     <button
                       onClick={() => viewDoc(doc)}
-                      className="rounded p-1 text-white/25 opacity-0 transition hover:bg-white/10 hover:text-[#d7ef83] group-hover:opacity-100"
+                      className="rounded p-1 text-white/25 opacity-0 transition hover:bg-white/10 hover:text-primary group-hover:opacity-100"
                       title="查看文档"
                     >
                       <Eye className="size-3.5" />

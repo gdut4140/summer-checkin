@@ -336,12 +336,12 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
         <svg width={SVG_SIZE} height={SVG_SIZE} className="-rotate-90" viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}>
           <circle cx={SVG_CENTER} cy={SVG_CENTER} r={RING_RADIUS} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
           <motion.circle cx={SVG_CENTER} cy={SVG_CENTER} r={RING_RADIUS}
-            fill="none" stroke="#d7ef83" strokeWidth={5} strokeLinecap="round"
+            fill="none" stroke="var(--theme-primary)" strokeWidth={5} strokeLinecap="round"
             strokeDasharray={CIRCUMFERENCE}
             initial={false}
             animate={{ strokeDashoffset: dashOffset }}
             transition={{ duration: 0.5, ease: "linear" }}
-            style={{ filter: "drop-shadow(0 0 12px rgba(215,239,131,0.5))" }}
+            style={{ filter: "drop-shadow(0 0 12px color-mix(in srgb, var(--theme-primary) 50%, transparent))" }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -360,7 +360,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
           className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground"
           aria-label="重置"><ArrowCounterClockwise className="h-5 w-5" /></button>
         <button onClick={isRunning ? pause : start}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-[#d7ef83] text-[#051612] shadow-xl shadow-[#d7ef83]/25 transition-all hover:scale-105 active:scale-95"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:scale-105 active:scale-95"
           aria-label={isRunning ? "暂停" : "开始"}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={isRunning ? "pause" : "play"} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
@@ -374,7 +374,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
       </div>
       {completed > 0 && (
         <div className="mt-5 flex items-center gap-1.5">
-          {Array.from({ length: Math.min(completed, 8) }).map((_, i) => <span key={i} className="h-2.5 w-2.5 rounded-sm bg-[#d7ef83]/70" />)}
+          {Array.from({ length: Math.min(completed, 8) }).map((_, i) => <span key={i} className="h-2.5 w-2.5 rounded-sm bg-primary/70" />)}
           {completed > 8 && <span className="ml-1 text-xs text-muted-foreground">×{completed}</span>}
         </div>
       )}

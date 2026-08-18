@@ -8,9 +8,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-function checkedColor(checked: boolean): string {
-  if (!checked) return "bg-white/5";
-  return "bg-emerald-500/70";
+function checkedColor(checked: boolean, level?: 1 | 2 | 3): { cls: string; style?: React.CSSProperties } {
+  // 未打卡：统一灰底（没有数据的「洞」也用这个，避免点阵破洞）
+  if (!checked) return { cls: "bg-white/5" };
+
+  // 已打卡：用 CSS 变量直接读 theme-primary，雪景切冰蓝/雨林切墨绿自动生效
+  // level 支持 1/2/3/full 4 档浓度（图例用，日常数据按 checked=true 默认 full）
+  const opacity = level === 1 ? 0.22 : level === 2 ? 0.45 : level === 3 ? 0.7 : 1;
+  return {
+    cls: "",
+    style: {
+      backgroundColor: `color-mix(in oklab, var(--theme-primary) ${Math.round(opacity * 100)}%, transparent)`,
+    },
+  };
 }
 
 interface HeatmapProps {
@@ -96,16 +106,24 @@ export function Heatmap({ data, year, compact = false }: HeatmapProps) {
               <div key={wi} className="flex flex-col" style={{ gap }}>
                 {Array.from({ length: 7 }).map((_, di) => {
                   const day = week.find((d) => d.dayOfWeek === di);
+                  // 无论有没有这一天（月初/月末缺口）都渲染与未打卡一致的灰圈，消除点阵「破洞」
                   if (!day || !day.date) {
-                    return <div key={`${wi}-${di}`} style={{ width: cellSize, height: cellSize }} />;
+                    return (
+                      <div
+                        key={`${wi}-${di}`}
+                        className={`rounded-sm bg-white/5`}
+                        style={{ width: cellSize, height: cellSize }}
+                      />
+                    );
                   }
 
+                  const { cls, style } = checkedColor(day.checked);
                   return (
                     <Tooltip key={`${wi}-${di}`}>
                       <TooltipTrigger>
                         <div
-                          className={`rounded-sm ${checkedColor(day.checked)}`}
-                          style={{ width: cellSize, height: cellSize }}
+                          className={`rounded-sm ${cls}`}
+                          style={{ width: cellSize, height: cellSize, ...style }}
                         />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="text-xs">
@@ -126,9 +144,18 @@ export function Heatmap({ data, year, compact = false }: HeatmapProps) {
         <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground">
           <span>少</span>
           <div className="h-3 w-3 rounded-sm bg-white/5" />
-          <div className="h-3 w-3 rounded-sm bg-emerald-500/30" />
-          <div className="h-3 w-3 rounded-sm bg-emerald-500/50" />
-          <div className="h-3 w-3 rounded-sm bg-emerald-500/70" />
+          <div
+            className="h-3 w-3 rounded-sm"
+            style={checkedColor(true, 1).style}
+          />
+          <div
+            className="h-3 w-3 rounded-sm"
+            style={checkedColor(true, 2).style}
+          />
+          <div
+            className="h-3 w-3 rounded-sm"
+            style={checkedColor(true, 3).style}
+          />
           <span>多</span>
         </div>
       )}
