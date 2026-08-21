@@ -40,7 +40,12 @@ export async function GET(
     );
   }
 
-  const content = chunks.map((c) => c.content).join("\n\n");
+  // 优先返回上传时保存的原文；旧数据没有原文则回退用切片拼接
+  const original = await prisma.knowledgeDoc.findUnique({
+    where: { userId_sourceName: { userId: user.id, sourceName: decoded } },
+    select: { content: true },
+  });
+  const content = original?.content ?? chunks.map((c) => c.content).join("\n\n");
   return NextResponse.json({
     document: {
       sourceName: chunks[0].sourceName,
@@ -69,6 +74,11 @@ export async function DELETE(
   if (result.count === 0) {
     return NextResponse.json({ error: "文档不存在" }, { status: 404 });
   }
+
+  // 同步删除上传时保存的原文
+  await prisma.knowledgeDoc.deleteMany({
+    where: { userId: user.id, sourceName: decoded },
+  });
 
   console.log(`[Knowledge] 用户 ${user.id} 删除文档 "${decoded}" (${result.count} chunks)`);
   return NextResponse.json({ success: true, deletedChunks: result.count });

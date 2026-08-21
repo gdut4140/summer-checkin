@@ -36,8 +36,6 @@ export interface PlanInfo {
   id: string;
   name: string;
   goal: string | null;
-  targetHours: number;
-  completedHours?: number;
   progress?: number;
   status?: string;
 }

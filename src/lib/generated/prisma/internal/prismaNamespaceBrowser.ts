@@ -72,11 +72,12 @@ export const ModelName = {
   AIHistory: 'AIHistory',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
+  KnowledgeDoc: 'KnowledgeDoc',
   Notification: 'Notification',
   AgentSchedule: 'AgentSchedule',
-  ChatRoom: 'ChatRoom',
-  ChatRoomMember: 'ChatRoomMember',
-  ChatMessage: 'ChatMessage'
+  ChatMessage: 'ChatMessage',
+  PlanTemplate: 'PlanTemplate',
+  DocumentTemplate: 'DocumentTemplate'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -150,7 +151,6 @@ export const PlanScalarFieldEnum = {
   document: 'document',
   tasksSourceHash: 'tasksSourceHash',
   tasksSplittingAt: 'tasksSplittingAt',
-  targetHours: 'targetHours',
   startDate: 'startDate',
   status: 'status',
   createdAt: 'createdAt',
@@ -402,6 +402,18 @@ export const DocumentChunkScalarFieldEnum = {
 export type DocumentChunkScalarFieldEnum = (typeof DocumentChunkScalarFieldEnum)[keyof typeof DocumentChunkScalarFieldEnum]
 
 
+export const KnowledgeDocScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sourceName: 'sourceName',
+  sourceType: 'sourceType',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type KnowledgeDocScalarFieldEnum = (typeof KnowledgeDocScalarFieldEnum)[keyof typeof KnowledgeDocScalarFieldEnum]
+
+
 export const NotificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -431,29 +443,8 @@ export const AgentScheduleScalarFieldEnum = {
 export type AgentScheduleScalarFieldEnum = (typeof AgentScheduleScalarFieldEnum)[keyof typeof AgentScheduleScalarFieldEnum]
 
 
-export const ChatRoomScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ChatRoomScalarFieldEnum = (typeof ChatRoomScalarFieldEnum)[keyof typeof ChatRoomScalarFieldEnum]
-
-
-export const ChatRoomMemberScalarFieldEnum = {
-  id: 'id',
-  roomId: 'roomId',
-  userId: 'userId',
-  joinedAt: 'joinedAt'
-} as const
-
-export type ChatRoomMemberScalarFieldEnum = (typeof ChatRoomMemberScalarFieldEnum)[keyof typeof ChatRoomMemberScalarFieldEnum]
-
-
 export const ChatMessageScalarFieldEnum = {
   id: 'id',
-  roomId: 'roomId',
   userId: 'userId',
   role: 'role',
   content: 'content',
@@ -461,6 +452,28 @@ export const ChatMessageScalarFieldEnum = {
 } as const
 
 export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
+
+
+export const PlanTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  goal: 'goal',
+  document: 'document',
+  createdAt: 'createdAt'
+} as const
+
+export type PlanTemplateScalarFieldEnum = (typeof PlanTemplateScalarFieldEnum)[keyof typeof PlanTemplateScalarFieldEnum]
+
+
+export const DocumentTemplateScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentTemplateScalarFieldEnum = (typeof DocumentTemplateScalarFieldEnum)[keyof typeof DocumentTemplateScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -5,7 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { startOfDay, endOfDay } from "date-fns";
 import type { ActionResult } from "@/types";
-import { getSceneCopy, type SceneType } from "@/context/scene-context";
+// 注意：Server Action 绝对不能从带 "use client" 的文件导入值，
+// 所以这里从纯共享模块读取 getSceneCopy / SceneType。
+import {
+  getSceneCopy,
+  asSceneType,
+  type SceneType,
+} from "@/lib/scene-meta";
 
 export async function dailyCheckin(mood?: string, scene?: SceneType): Promise<ActionResult> {
   try {
@@ -26,8 +32,11 @@ export async function dailyCheckin(mood?: string, scene?: SceneType): Promise<Ac
       return { success: false, error: "今天已经来过了" };
     }
 
-    // 根据场景决定签到记录文案（没传就兜底雨林，不阻塞正常签到）
-    const visitRecordText = scene ? getSceneCopy(scene).visitRecordText : "到访雨林";
+    // 根据场景决定签到记录文案（没传或非法就兜底雨林，不阻塞正常签到）
+    const safeScene = scene ? asSceneType(scene) : null;
+    const visitRecordText = safeScene
+      ? getSceneCopy(safeScene).visitRecordText
+      : "到访雨林";
 
     await prisma.checkin.create({
       data: {

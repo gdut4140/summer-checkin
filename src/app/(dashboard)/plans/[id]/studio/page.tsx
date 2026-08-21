@@ -11,11 +11,14 @@ export const dynamic = "force-dynamic";
 
 export default async function PlanStudioPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ focusAi?: string }>;
 }) {
   const user = await requireAuth();
   const { id } = await params;
+  const { focusAi } = await searchParams;
 
   const plan = await prisma.plan.findUnique({
     where: { id },
@@ -58,6 +61,7 @@ export default async function PlanStudioPage({
       planId={plan.id}
       title={plan.name}
       initialContent={content}
+      autoFocusAi={focusAi === "1"}
     />
   );
 }

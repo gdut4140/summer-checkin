@@ -36,7 +36,7 @@ model User {
   todos           Todo[]
   docs            Document[]
   documents       DocumentChunk[]
-  chatRooms       ChatRoomMember[]
+  knowledgeDocs   KnowledgeDoc[]
   chatMessages    ChatMessage[]
 
   @@map("user")
@@ -86,7 +86,6 @@ model Plan {
   tasksSourceHash String?
   // 任务正在后台拆分的起始时间（非空 = 刷新中），供抽屉显示"任务刷新中"
   tasksSplittingAt DateTime?
-  targetHours     Float     @default(0)
   startDate       DateTime?
   status          String    @default("active")
   createdAt       DateTime  @default(now())
@@ -401,6 +400,21 @@ model DocumentChunk {
   @@map("documentchunk")
 }
 
+model KnowledgeDoc {
+  id         String   @id @default(cuid())
+  userId     String
+  sourceName String
+  sourceType String
+  content    String
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sourceName])
+  @@index([userId])
+  @@map("knowledgedoc")
+}
+
 model Notification {
   id        String   @id @default(cuid())
   userId    String
@@ -436,43 +450,36 @@ model AgentSchedule {
   @@map("agentschedule")
 }
 
-model ChatRoom {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  members  ChatRoomMember[]
-  messages ChatMessage[]
-
-  @@map("chatroom")
-}
-
-model ChatRoomMember {
-  id       String   @id @default(cuid())
-  roomId   String
-  userId   String
-  joinedAt DateTime @default(now())
-
-  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([roomId, userId])
-  @@index([userId])
-  @@map("chatroommember")
-}
-
 model ChatMessage {
   id        String   @id @default(cuid())
-  roomId    String
   userId    String?
   role      String   @default("user")
   content   String
   createdAt DateTime @default(now())
 
-  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  @@index([roomId, createdAt])
+  @@index([createdAt])
   @@map("chatmessage")
+}
+
+// ── 新用户引导模板（注册时克隆给新用户） ──
+model PlanTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  goal        String?
+  document    String? // Markdown，含「## 任务安排」段落；克隆后 syncTasksFromDocument 生成任务
+  createdAt   DateTime @default(now())
+
+  @@map("plantemplate")
+}
+
+model DocumentTemplate {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @default("")
+  createdAt DateTime @default(now())
+
+  @@map("documenttemplate")
 }

@@ -27,7 +27,7 @@ export function GithubLink({ className = "" }: { className?: string }) {
     return (
       <div className={cn("gh-icon-wrap group relative", className)}>
         <a
-          href="https://github.com/SoloDev666/summer-checkin"
+          href="https://github.com/gdut4140/summer-checkin"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="前往 GitHub 点亮 Star"
@@ -79,7 +79,7 @@ export function GithubLink({ className = "" }: { className?: string }) {
 
       {/* 圆形按钮：核心交互层 */}
       <a
-        href="https://github.com/SoloDev666/summer-checkin"
+        href="https://github.com/gdut4140/summer-checkin"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="前往 GitHub 点亮 Star"

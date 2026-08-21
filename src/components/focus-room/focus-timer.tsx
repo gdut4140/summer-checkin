@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Play, Pause, SkipForward, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 export type TimerMode = "focus" | "break";
 
@@ -20,6 +21,8 @@ interface FocusTimerProps {
   breakMinutes?: number;
   onRestoreFocusMinutes?: (minutes: number) => void;
   immersive?: boolean;
+  /** 非沉浸模式下点击"开始"时触发，用于让父组件进入沉浸模式 */
+  onStart?: () => void;
 }
 
 const RING_RADIUS = 108;
@@ -38,6 +41,14 @@ interface TimerSnapshot {
   isRunning: boolean;
   remaining: number;
   expiresAt: number | null;
+  sessionId: string;
+}
+
+function createSessionId() {
+  const id = typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `focus-${id}`;
 }
 
 function load(): TimerSnapshot | null {
@@ -70,6 +81,9 @@ function load(): TimerSnapshot | null {
       isRunning: snapshot.isRunning,
       remaining: Number(snapshot.remaining),
       expiresAt: typeof expiresAt === "number" ? expiresAt : null,
+      sessionId: typeof snapshot.sessionId === "string" && snapshot.sessionId.startsWith("focus-")
+        ? snapshot.sessionId
+        : createSessionId(),
     };
   } catch {
     return null;
@@ -98,8 +112,35 @@ function playBeep(f: number) {
   } catch {}
 }
 
+async function recordCompletedFocusSession(minutes: number, sessionId: string, source: "timer" | "restore") {
+  console.info("[focus-session] full focus duration reached; sending to backend", {
+    durationMinutes: minutes,
+    source,
+    sessionId,
+  });
+  try {
+    const response = await fetch("/api/focus/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ durationMinutes: minutes, sessionId }),
+    });
+    const result = await response.json().catch(() => null) as { ok?: boolean; recordId?: string; error?: string } | null;
+    if (!response.ok || result?.ok !== true) {
+      console.error("[focus-session] backend rejected completed session", { status: response.status, error: result?.error });
+      return;
+    }
+    console.info("[focus-session] backend saved completed session", {
+      durationMinutes: minutes,
+      recordId: result?.recordId,
+      sessionId,
+    });
+  } catch (error) {
+    console.error("[focus-session] failed to send completed session", error);
+  }
+}
+
 export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function FocusTimer(
-  { focusMinutes = 25, breakMinutes = 5, onRestoreFocusMinutes, immersive = false },
+  { focusMinutes = 25, breakMinutes = 5, onRestoreFocusMinutes, immersive = false, onStart },
   ref,
 ) {
   const [mode, setMode] = useState<TimerMode>("focus");
@@ -117,6 +158,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
   const roundRef = useRef(round); roundRef.current = round;
   const completedRef = useRef(completed); completedRef.current = completed;
   const expiresAtRef = useRef<number | null>(null);
+  const sessionIdRef = useRef(createSessionId());
   const appliedFocusMinutesRef = useRef(focusMinutes);
   const appliedBreakMinutesRef = useRef(breakMinutes);
   const onRestoreFocusMinutesRef = useRef(onRestoreFocusMinutes);
@@ -130,6 +172,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
       mode: modeRef.current, round: roundRef.current, completed: completedRef.current,
       focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current,
       isRunning: running, remaining: rem, expiresAt,
+      sessionId: sessionIdRef.current,
     });
   }
 
@@ -147,6 +190,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     modeRef.current = snapshot.mode;
     roundRef.current = snapshot.round;
     completedRef.current = snapshot.completed;
+    sessionIdRef.current = snapshot.sessionId;
     setMode(snapshot.mode);
     setRound(snapshot.round);
     setCompleted(snapshot.completed);
@@ -167,15 +211,20 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
         const nextRound = snapshot.mode === "break" ? snapshot.round + 1 : snapshot.round;
         const nextCompleted = snapshot.mode === "focus" ? snapshot.completed + 1 : snapshot.completed;
         const nextRemaining = (nextMode === "focus" ? snapshot.focusMinutes : snapshot.breakMinutes) * 60;
+        const nextSessionId = snapshot.mode === "break" ? createSessionId() : snapshot.sessionId;
         modeRef.current = nextMode;
         roundRef.current = nextRound;
         completedRef.current = nextCompleted;
         remainingRef.current = nextRemaining;
+        sessionIdRef.current = nextSessionId;
         setMode(nextMode);
         setRound(nextRound);
         setCompleted(nextCompleted);
         setRemaining(nextRemaining);
-        save({ ...snapshot, mode: nextMode, round: nextRound, completed: nextCompleted, isRunning: false, remaining: nextRemaining, expiresAt: null });
+        if (snapshot.mode === "focus") {
+          void recordCompletedFocusSession(snapshot.focusMinutes, snapshot.sessionId, "restore");
+        }
+        save({ ...snapshot, mode: nextMode, round: nextRound, completed: nextCompleted, isRunning: false, remaining: nextRemaining, expiresAt: null, sessionId: nextSessionId });
       }
     } else {
       remainingRef.current = snapshot.remaining;
@@ -191,8 +240,14 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     const nextRound = currentMode === "break" ? roundRef.current + 1 : roundRef.current;
     const nextCompleted = currentMode === "focus" ? completedRef.current + 1 : completedRef.current;
     const nextRemaining = (nextMode === "focus" ? focusMinRef.current : breakMinRef.current) * 60;
+    const completedSessionId = sessionIdRef.current;
 
     if (withSound) playBeep(800);
+    if (currentMode === "focus") {
+      void recordCompletedFocusSession(focusMinRef.current, completedSessionId, "timer");
+    } else {
+      sessionIdRef.current = createSessionId();
+    }
     expiresAtRef.current = null;
     isRunningRef.current = false;
     modeRef.current = nextMode;
@@ -204,7 +259,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     setRound(nextRound);
     setCompleted(nextCompleted);
     setRemaining(nextRemaining);
-    save({ mode: nextMode, round: nextRound, completed: nextCompleted, focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current, isRunning: false, remaining: nextRemaining, expiresAt: null });
+    save({ mode: nextMode, round: nextRound, completed: nextCompleted, focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current, isRunning: false, remaining: nextRemaining, expiresAt: null, sessionId: sessionIdRef.current });
   }
 
   // 使用绝对截止时间计算，刷新和浏览器后台节流都不会造成计时漂移。
@@ -242,6 +297,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     expiresAtRef.current = null;
     isRunningRef.current = false;
     remainingRef.current = seconds;
+    sessionIdRef.current = createSessionId();
     setIsRunning(false);
     setRemaining(seconds);
     persist(false, seconds, null);
@@ -264,6 +320,11 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     setRemaining(seconds);
     setIsRunning(true);
     persist(true, seconds, deadline);
+    console.info("[focus-session] started", {
+      mode: modeRef.current,
+      selectedMinutes: modeRef.current === "focus" ? focusMinRef.current : breakMinRef.current,
+      remainingSeconds: seconds,
+    });
   }
 
   function pause() {
@@ -276,10 +337,16 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     setRemaining(seconds);
     setIsRunning(false);
     persist(false, seconds, null);
+    console.info("[focus-session] paused; nothing sent to backend", {
+      mode: modeRef.current,
+      remainingSeconds: seconds,
+      completedMinutes: modeRef.current === "focus" ? focusMinRef.current - Math.ceil(seconds / 60) : 0,
+    });
   }
 
   function reset() {
     const seconds = focusMinRef.current * 60;
+    sessionIdRef.current = createSessionId();
     expiresAtRef.current = null;
     isRunningRef.current = false;
     modeRef.current = "focus";
@@ -291,7 +358,8 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     setRound(1);
     setCompleted(0);
     setRemaining(seconds);
-    save({ mode: "focus", round: 1, completed: 0, focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current, isRunning: false, remaining: seconds, expiresAt: null });
+    save({ mode: "focus", round: 1, completed: 0, focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current, isRunning: false, remaining: seconds, expiresAt: null, sessionId: sessionIdRef.current });
+    console.info("[focus-session] reset; nothing sent to backend");
   }
 
   function skip() {
@@ -299,6 +367,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     const nextMode: TimerMode = currentMode === "focus" ? "break" : "focus";
     const nextRound = currentMode === "break" ? roundRef.current + 1 : roundRef.current;
     const seconds = (nextMode === "focus" ? focusMinRef.current : breakMinRef.current) * 60;
+    if (nextMode === "focus") sessionIdRef.current = createSessionId();
     expiresAtRef.current = null;
     isRunningRef.current = false;
     modeRef.current = nextMode;
@@ -308,7 +377,8 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
     setMode(nextMode);
     setRound(nextRound);
     setRemaining(seconds);
-    save({ mode: nextMode, round: nextRound, completed: completedRef.current, focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current, isRunning: false, remaining: seconds, expiresAt: null });
+    save({ mode: nextMode, round: nextRound, completed: completedRef.current, focusMinutes: focusMinRef.current, breakMinutes: breakMinRef.current, isRunning: false, remaining: seconds, expiresAt: null, sessionId: sessionIdRef.current });
+    console.info("[focus-session] skipped; nothing sent to backend", { from: currentMode });
   }
 
   useImperativeHandle(ref, () => ({
@@ -356,21 +426,48 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
         </div>
       </div>
       <div className="mt-8 flex items-center gap-5">
-        <button onClick={reset}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground"
-          aria-label="重置"><ArrowCounterClockwise className="h-5 w-5" /></button>
-        <button onClick={isRunning ? pause : start}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:scale-105 active:scale-95"
-          aria-label={isRunning ? "暂停" : "开始"}>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={isRunning ? "pause" : "play"} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
-              {isRunning ? <Pause className="h-7 w-7" weight="fill" /> : <Play className="ml-1 h-7 w-7" weight="fill" />}
-            </motion.div>
-          </AnimatePresence>
-        </button>
-        <button onClick={skip}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground"
-          aria-label="跳过"><SkipForward className="h-5 w-5" /></button>
+        <Tooltip>
+          <TooltipTrigger render={
+            <button onClick={reset}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground"
+              aria-label="重置" />
+          }>
+            <ArrowCounterClockwise className="h-5 w-5" />
+          </TooltipTrigger>
+          <TooltipContent>重置</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger render={
+            <button onClick={() => {
+              if (isRunning) {
+                pause();
+              } else if (!immersive && onStart) {
+                onStart();
+              } else {
+                start();
+              }
+            }}
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:scale-105 active:scale-95"
+              aria-label={isRunning ? "暂停" : "开始"} />
+          }>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={isRunning ? "pause" : "play"} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}>
+                {isRunning ? <Pause className="h-7 w-7" weight="fill" /> : <Play className="ml-1 h-7 w-7" weight="fill" />}
+              </motion.div>
+            </AnimatePresence>
+          </TooltipTrigger>
+          <TooltipContent>{isRunning ? "暂停" : "开始"}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger render={
+            <button onClick={skip}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground"
+              aria-label="跳过" />
+          }>
+            <SkipForward className="h-5 w-5" />
+          </TooltipTrigger>
+          <TooltipContent>跳过</TooltipContent>
+        </Tooltip>
       </div>
       {completed > 0 && (
         <div className="mt-5 flex items-center gap-1.5">

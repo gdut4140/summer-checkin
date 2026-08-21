@@ -60,6 +60,13 @@ export async function processKnowledgeText(opts: ProcessOptions) {
     )
   );
 
+  // 4. 存原文（查看时直接展示，不做切片反推；旧数据无此行则回退切片拼接）
+  await prisma.knowledgeDoc.upsert({
+    where: { userId_sourceName: { userId, sourceName } },
+    update: { sourceType, content: text, createdAt: new Date() },
+    create: { userId, sourceName, sourceType, content: text },
+  });
+
   console.log(
     `[Knowledge] ✅ 已存储: user=${userId} "${sourceName}" (${chunks.length} chunks)`
   );

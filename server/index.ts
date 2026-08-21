@@ -1,6 +1,6 @@
 // ============================================================
 // WebSocket sidecar 入口（方案 B：独立进程，监听 3001）
-// 职责：实时多人聊天 + @AI 流式回复
+// 职责：实时聊天（单房间全局流）+ @AI 流式回复
 // 启动：tsx server/index.ts
 // ============================================================
 
@@ -10,16 +10,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { config } from "./config";
 import { authenticate, type AuthUser } from "./auth";
 import { prisma } from "./db";
-import {
-  addConnection,
-  removeConnection,
-  joinRoom,
-  leaveRoom,
-  broadcast,
-  roomOnline,
-  allConnections,
-  type Connection,
-} from "./room";
+import { addConnection, removeConnection, broadcast, allConnections, type Connection } from "./room";
 import { toDTO, type ClientMessage } from "./protocol";
 import { handleAI } from "./ai";
 
@@ -62,13 +53,14 @@ function setupConnection(ws: WebSocket, user: NonNullable<AuthUser>) {
     userId: user.id,
     userName: user.name ?? "匿名",
     image: user.image ?? null,
-    rooms: new Set(),
     isAlive: true,
     windowStart: Date.now(),
     messageCount: 0,
     seenClientIds: new Set(),
   };
   addConnection(conn);
+  // 通知所有在线连接：在线人数变化
+  broadcast({ type: "presence", online: allConnections().size });
 
   ws.send(
     JSON.stringify({
@@ -86,11 +78,8 @@ function setupConnection(ws: WebSocket, user: NonNullable<AuthUser>) {
   });
 
   ws.on("close", () => {
-    const rooms = [...conn.rooms];
     removeConnection(conn);
-    for (const roomId of rooms) {
-      broadcast(roomId, { type: "presence", roomId, online: roomOnline(roomId) });
-    }
+    broadcast({ type: "presence", online: allConnections().size });
   });
 
   ws.on("error", () => {
@@ -112,13 +101,6 @@ async function handleRawMessage(conn: Connection, data: WebSocket.RawData) {
     case "ping":
       conn.ws.send(JSON.stringify({ type: "pong" }));
       break;
-    case "join":
-      await handleJoin(conn, msg.roomId);
-      break;
-    case "leave":
-      leaveRoom(conn, msg.roomId);
-      conn.ws.send(JSON.stringify({ type: "left", roomId: msg.roomId }));
-      break;
     case "message":
       await handleUserMessage(conn, msg);
       break;
@@ -127,27 +109,7 @@ async function handleRawMessage(conn: Connection, data: WebSocket.RawData) {
   }
 }
 
-async function handleJoin(conn: Connection, roomId: string) {
-  const room = await prisma.chatRoom.findUnique({ where: { id: roomId } });
-  if (!room) {
-    sendError(conn, "room_not_found", "房间不存在");
-    return;
-  }
-  // 自动加入（未加入则创建成员关系）
-  await prisma.chatRoomMember.upsert({
-    where: { roomId_userId: { roomId, userId: conn.userId } },
-    update: {},
-    create: { roomId, userId: conn.userId },
-  });
-  joinRoom(conn, roomId);
-  conn.ws.send(JSON.stringify({ type: "joined", roomId }));
-  broadcast(roomId, { type: "presence", roomId, online: roomOnline(roomId) });
-}
-
-async function handleUserMessage(
-  conn: Connection,
-  msg: { roomId: string; clientId: string; content: string }
-) {
+async function handleUserMessage(conn: Connection, msg: { clientId: string; content: string }) {
   const content = msg.content.trim();
   if (!content) return;
   if (content.length > config.maxMessageLength) {
@@ -164,17 +126,29 @@ async function handleUserMessage(
   if (conn.seenClientIds.size > 200) {
     conn.seenClientIds.delete(conn.seenClientIds.values().next().value!);
   }
-  // 必须先加入房间
-  if (!conn.rooms.has(msg.roomId)) return;
 
   const saved = await prisma.chatMessage.create({
-    data: { roomId: msg.roomId, userId: conn.userId, role: "user", content },
+    data: { userId: conn.userId, role: "user", content },
   });
-  broadcast(msg.roomId, { type: "message", message: toDTO(saved, conn.userName) });
+  // 用数据库里的最新昵称/头像（用户可能中途换了头像，conn 里是连接时的旧值）
+  const sender = await prisma.user.findUnique({
+    where: { id: conn.userId },
+    select: { name: true, image: true },
+  });
+  const userName = sender?.name ?? conn.userName;
+  const image = sender?.image ?? conn.image;
+  conn.userName = userName;
+  conn.image = image;
+
+  console.log(
+    `[ws][消息] ${new Date().toLocaleTimeString("zh-CN", { hour12: false })} ${userName}: ${content.length > 100 ? content.slice(0, 100) + "…" : content}`
+  );
+
+  broadcast({ type: "message", message: toDTO(saved, userName, image) });
 
   // @AI 触发
   const aiPrompt = extractAIPrompt(content);
-  if (aiPrompt) void handleAI(msg.roomId, aiPrompt, conn.userId);
+  if (aiPrompt) void handleAI(aiPrompt);
 }
 
 function sendError(conn: Connection, code: string, reason: string) {
@@ -192,9 +166,16 @@ function checkRateLimit(conn: Connection): boolean {
 }
 
 function extractAIPrompt(content: string): string | null {
-  const m = content.match(/^@雨宝\s+|^@AI\s+|^\/ai\s+/i);
-  if (m) return content.slice(m[0].length).trim();
-  return null;
+  // @雨宝 / @AI 可在文中任意位置触发；/ai 是命令式，仍要求开头（避免命中 /api 之类）
+  const m = content.match(/@雨宝|@AI|^\s*\/ai(?=\s|$)/i);
+  if (!m) return null;
+  const idx = m.index!;
+  // 优先取提及之后的文字作为提问
+  const after = content.slice(idx + m[0].length).replace(/^\s+/, "").trim();
+  if (after) return after;
+  // 提及在末尾、后面没内容：把提及之前的文字作为提问
+  const before = content.slice(0, idx).trim();
+  return before || null;
 }
 
 function rawDataToString(data: WebSocket.RawData): string {

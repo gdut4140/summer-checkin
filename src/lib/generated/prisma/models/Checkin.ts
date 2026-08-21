@@ -601,6 +601,14 @@ export type CheckinUncheckedUpdateManyWithoutPlanNestedInput = {
   deleteMany?: Prisma.CheckinScalarWhereInput | Prisma.CheckinScalarWhereInput[]
 }
 
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type CheckinCreateWithoutUserInput = {
   id?: string
   sourceTaskId?: string | null

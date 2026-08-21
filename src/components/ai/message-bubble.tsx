@@ -11,24 +11,27 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
       <div
-        data-role={isUser ? "user" : "ai"}
+        data-bubble={isUser ? "user" : "ai"}
         className={cn(
-          "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed bg-primary text-primary-foreground",
-          isUser ? "rounded-br-md" : "rounded-bl-md"
+          "max-w-[80%] rounded-2xl border px-4 py-2.5 text-sm leading-relaxed",
+          "backdrop-blur-xl",
+          isUser
+            ? "rounded-br-md border-primary/40 bg-primary text-primary-foreground shadow-[0_2px_12px_color-mix(in_oklab,var(--color-primary)_25%,transparent)]"
+            : "rounded-bl-md border-white/10 bg-foreground/[0.06] text-foreground"
         )}
       >
-        {/* Day 4: 使用 Markdown 渲染器替代纯文本 */}
+        {/* 使用 Markdown 渲染器替代纯文本 */}
         {isUser ? (
           <p className="whitespace-pre-wrap">{message.content}</p>
         ) : message.content ? (
           <MarkdownRenderer content={message.content} />
         ) : (
-          <span className="flex items-center gap-1.5 text-primary-foreground/70">
-            <span className="inline-block size-1.5 animate-pulse rounded-full bg-primary-foreground/70" />
+          <span className="flex items-center gap-1.5 opacity-70">
+            <span className="inline-block size-1.5 animate-pulse rounded-full bg-current" />
             思考中…
           </span>
         )}
-        <p className={cn("mt-1 text-[10px] text-primary-foreground/60")}>
+        <p className={cn("mt-1 text-[10px] opacity-55")}>
           {format(message.createdAt, "HH:mm")}
         </p>
       </div>

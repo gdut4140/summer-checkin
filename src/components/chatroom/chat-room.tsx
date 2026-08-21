@@ -2,12 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  CaretLeft,
   ChatsCircle,
-  Hash,
   PaperPlaneTilt,
-  Plus,
-  Users,
+  Sparkle,
   X,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -19,45 +16,40 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { AppAvatar } from "@/components/ui/app-avatar";
+import { MarkdownRenderer } from "@/components/ai/markdown-renderer";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface ChatMessage {
   id: string;
-  roomId: string;
   userId: string | null;
   userName: string | null;
+  image: string | null;
   role: "user" | "assistant" | "system";
   content: string;
   createdAt: string;
 }
 
-interface Room {
-  id: string;
-  name: string;
-  _count?: { members: number; messages: number };
-}
-
-interface RoomHistoryMessage {
-  id: string;
-  roomId: string;
-  userId: string | null;
-  role: string;
-  content: string;
-  createdAt: string;
-  user: { name: string | null } | null;
-}
-
 type ServerMessage =
   | { type: "ready"; user: { id: string; name: string; image: string | null } }
-  | { type: "joined"; roomId: string }
   | { type: "message"; message: ChatMessage }
-  | { type: "ai:start"; roomId: string }
-  | { type: "ai:delta"; roomId: string; content: string }
-  | { type: "ai:done"; roomId: string; message: ChatMessage }
-  | { type: "presence"; roomId: string; online: number }
+  | { type: "ai:start" }
+  | { type: "ai:delta"; content: string }
+  | { type: "ai:done"; message: ChatMessage }
+  | { type: "presence"; online: number }
   | { type: "pong" }
   | { type: "error"; code: string; reason: string };
 
 const STREAMING_ID = "__ai_streaming__";
+
+// 合并历史快照与当前消息：按 id 去重、按时间排序。
+// 避免打开时整体替换把关闭期间/拉取期间的实时消息冲掉。
+function mergeMessages(existing: ChatMessage[], fetched: ChatMessage[]): ChatMessage[] {
+  const byId = new Map(existing.map((m) => [m.id, m]));
+  for (const m of fetched) byId.set(m.id, m);
+  return [...byId.values()].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+}
 
 function getWsUrl(): string {
   const host = window.location.hostname;
@@ -81,69 +73,118 @@ function senderKey(m: ChatMessage): string {
 
 export function ChatRoom() {
   const [open, setOpen] = useState(false);
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [newRoomName, setNewRoomName] = useState("");
   const [online, setOnline] = useState(0);
   const [connected, setConnected] = useState(false);
   const [aiStreaming, setAiStreaming] = useState(false);
   const [myId, setMyId] = useState<string | null>(null);
   const [reconnectKey, setReconnectKey] = useState(0);
-  const [unreadByRoom, setUnreadByRoom] = useState<Record<string, number>>({});
+  const [reconnecting, setReconnecting] = useState(false);
+  const [unread, setUnread] = useState(0);
+  // 是否钉在底部（自动滚动）；上滑阅读时为 false
+  const [atBottom, setAtBottom] = useState(true);
+  // 上滑阅读期间漏掉的新消息数
+  const [newCount, setNewCount] = useState(0);
 
   const wsRef = useRef<WebSocket | null>(null);
-  const activeRoomRef = useRef<string | null>(null);
   const openRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const totalUnread = Object.values(unreadByRoom).reduce((a, b) => a + b, 0);
-  const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const atBottomRef = useRef(true);
+  const myIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     openRef.current = open;
   }, [open]);
 
+  // 供事件回调（无依赖闭包）读取最新值
   useEffect(() => {
-    fetch("/api/rooms")
+    atBottomRef.current = atBottom;
+  }, [atBottom]);
+
+  useEffect(() => {
+    myIdRef.current = myId;
+  }, [myId]);
+
+  const loadHistory = useCallback(() => {
+    fetch("/api/chat/messages", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d) => setRooms(d.rooms ?? []))
-      .catch(() => toast.error("加载房间失败"));
+      .then((d) => {
+        const list = (d.messages ?? []).map(
+          (m: {
+            id: string;
+            userId: string | null;
+            role: string;
+            content: string;
+            createdAt: string;
+            user?: { name: string | null; image: string | null } | null;
+          }) => ({
+            id: m.id,
+            userId: m.userId,
+            userName: m.user?.name ?? null,
+            image: m.user?.image ?? null,
+            role: m.role as ChatMessage["role"],
+            content: m.content,
+            createdAt: m.createdAt,
+          })
+        );
+        // 合并而非替换：保留关闭期间/拉取期间实时收到的消息，并补上历史快照里的
+        setMessages((prev) => mergeMessages(prev, list));
+      })
+      .catch(() => toast.error("加载聊天记录失败"));
   }, []);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  // 打开聊天室时：清未读 + 钉到底部 + 刷新历史（把关闭期间漏掉的消息拉回来）。
+  // 顶栏按钮直接 setOpen(true) 不走 onOpenChange，所以两条打开路径都要执行这里的逻辑。
+  const prepareOpen = useCallback(() => {
+    setUnread(0);
+    setAtBottom(true);
+    setNewCount(0);
+    loadHistory();
+  }, [loadHistory]);
+
+  const openChat = useCallback(() => {
+    setOpen(true);
+    prepareOpen();
+  }, [prepareOpen]);
 
   const handleServerMessage = useCallback((msg: ServerMessage) => {
     switch (msg.type) {
       case "ready":
         setMyId(msg.user.id);
+        myIdRef.current = msg.user.id;
         break;
       case "presence":
-        if (msg.roomId === activeRoomRef.current) setOnline(msg.online);
+        setOnline(msg.online);
         break;
       case "message": {
         const m = msg.message;
-        if (openRef.current && m.roomId === activeRoomRef.current) {
+        if (openRef.current) {
           setMessages((prev) => [...prev, m]);
+          // 上滑阅读时：别人的新消息计入未读（自己发的除外）
+          const isMine = m.userId !== null && m.userId === myIdRef.current;
+          if (!isMine && !atBottomRef.current) setNewCount((c) => c + 1);
         } else {
-          setUnreadByRoom((prev) => ({
-            ...prev,
-            [m.roomId]: (prev[m.roomId] ?? 0) + 1,
-          }));
+          setUnread((prev) => prev + 1);
         }
         break;
       }
       case "ai:start":
-        if (openRef.current && msg.roomId === activeRoomRef.current) {
+        if (openRef.current) {
           setAiStreaming(true);
           setMessages((prev) => [
             ...prev,
             {
               id: STREAMING_ID,
-              roomId: msg.roomId,
               userId: null,
               userName: "雨宝",
+              image: null,
               role: "assistant",
               content: "",
               createdAt: new Date().toISOString(),
@@ -152,7 +193,7 @@ export function ChatRoom() {
         }
         break;
       case "ai:delta":
-        if (openRef.current && msg.roomId === activeRoomRef.current) {
+        if (openRef.current) {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === STREAMING_ID ? { ...m, content: m.content + msg.content } : m
@@ -161,11 +202,13 @@ export function ChatRoom() {
         }
         break;
       case "ai:done":
-        if (openRef.current && msg.roomId === activeRoomRef.current) {
+        if (openRef.current) {
           setAiStreaming(false);
           setMessages((prev) =>
             prev.map((m) => (m.id === STREAMING_ID ? msg.message : m))
           );
+          // 上滑阅读时：AI 完成回复也算一条新消息
+          if (!atBottomRef.current) setNewCount((c) => c + 1);
         }
         break;
       case "error":
@@ -179,12 +222,19 @@ export function ChatRoom() {
   useEffect(() => {
     const ws = new WebSocket(getWsUrl());
     wsRef.current = ws;
-    ws.onopen = () => setConnected(true);
+    ws.onopen = () => {
+      setConnected(true);
+      setReconnecting(false);
+    };
     ws.onclose = () => {
       setConnected(false);
+      setReconnecting(false);
       setOnline(0);
     };
-    ws.onerror = () => setConnected(false);
+    ws.onerror = () => {
+      setConnected(false);
+      setReconnecting(false);
+    };
     ws.onmessage = (e) => {
       try {
         handleServerMessage(JSON.parse(e.data) as ServerMessage);
@@ -195,8 +245,47 @@ export function ChatRoom() {
     return () => ws.close();
   }, [reconnectKey, handleServerMessage]);
 
+  function handleReconnect() {
+    setReconnecting(true);
+    setReconnectKey((k) => k + 1);
+  }
+
+  // 直接滚到容器底部（比 scrollIntoView 更可靠，不受弹窗动画/祖先滚动干扰）
+  function scrollToBottom(behavior: ScrollBehavior = "auto") {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (behavior === "smooth") {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
+  }
+
+  // 用户在消息区滚动：离开底部 → 停止自动滚动；回到底部 → 清空未读气泡
+  function handleScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (dist < 24) {
+      setAtBottom(true);
+      setNewCount(0);
+    } else {
+      setAtBottom(false);
+    }
+  }
+
+  // 每次打开弹窗：等入场动画结束、容器布局稳定后滚到底部
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!open) return;
+    const t = setTimeout(() => scrollToBottom(), 160);
+    return () => clearTimeout(t);
+  }, [open]);
+
+  // 有新消息且仍钉在底部时自动滚动；上滑阅读时不打断
+  useEffect(() => {
+    if (atBottomRef.current) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -206,64 +295,13 @@ export function ChatRoom() {
     el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
   }, [input]);
 
-  async function selectRoom(id: string) {
-    setActiveRoomId(id);
-    activeRoomRef.current = id;
-    setAiStreaming(false);
-    setMessages([]);
-    setUnreadByRoom((prev) => ({ ...prev, [id]: 0 }));
-    const res = await fetch(`/api/rooms/${id}`);
-    if (res.ok) {
-      const d = (await res.json()) as { room: { messages: RoomHistoryMessage[] } };
-      setMessages(
-        d.room.messages.map((m) => ({
-          id: m.id,
-          roomId: m.roomId,
-          userId: m.userId,
-          userName: m.user?.name ?? null,
-          role: m.role as ChatMessage["role"],
-          content: m.content,
-          createdAt: m.createdAt,
-        }))
-      );
-    }
-    wsRef.current?.send(JSON.stringify({ type: "join", roomId: id }));
-  }
-
-  function backToList() {
-    setActiveRoomId(null);
-    activeRoomRef.current = null;
-    setAiStreaming(false);
-    setMessages([]);
-  }
-
-  async function createRoom() {
-    const name = newRoomName.trim();
-    if (!name) return;
-    const res = await fetch("/api/rooms", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
-    if (res.ok) {
-      const d = await res.json();
-      setRooms((prev) => [d.room, ...prev]);
-      setNewRoomName("");
-      setCreating(false);
-      await selectRoom(d.room.id);
-    } else {
-      toast.error("创建失败");
-    }
-  }
-
   function send() {
     const content = input.trim();
-    if (!content || !activeRoomRef.current || !connected) return;
+    if (!content || !connected) return;
     const clientId = crypto.randomUUID();
     wsRef.current?.send(
       JSON.stringify({
         type: "message",
-        roomId: activeRoomRef.current,
         clientId,
         content,
       })
@@ -281,238 +319,159 @@ export function ChatRoom() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="打开聊天室"
-        className="relative flex size-8 items-center justify-center rounded-full text-foreground/55 transition-colors hover:bg-foreground/10 hover:text-foreground"
-      >
-        <ChatsCircle className="size-4" weight="fill" />
-        {totalUnread > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold leading-none text-destructive-foreground">
-            {totalUnread > 99 ? "99+" : totalUnread}
-          </span>
-        )}
-      </button>
+      <Tooltip>
+        <TooltipTrigger render={
+          <button
+            type="button"
+            onClick={openChat}
+            aria-label="打开聊天室"
+            className="relative flex size-8 items-center justify-center rounded-full text-foreground/55 transition-colors hover:bg-foreground/10 hover:text-foreground"
+          />
+        }>
+          <ChatsCircle className="size-4" weight="fill" />
+          {/* 主题色小圆点提示有新消息，不显示条数 */}
+          {unread > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-primary shadow-[0_0_6px_color-mix(in_srgb,var(--theme-primary)_50%,transparent)]" />
+          )}
+        </TooltipTrigger>
+        <TooltipContent>聊天室</TooltipContent>
+      </Tooltip>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (v) prepareOpen();
+        }}
+      >
         <DialogContent
           showCloseButton={false}
-          className="chatroom-dialog flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-background/90 p-0 text-foreground backdrop-blur-2xl"
+          className="chatroom-dialog flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-background p-0 text-foreground"
         >
           <DialogTitle className="sr-only">学习聊天室</DialogTitle>
           <DialogDescription className="sr-only">
             多人实时聊天，@雨宝 唤起 AI 助教
           </DialogDescription>
 
-          {/* 主题装饰层 */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-primary/8 blur-3xl" />
-            <div className="absolute -right-16 bottom-10 h-48 w-48 rounded-full bg-accent/12 blur-3xl" />
-          </div>
-
           {/* 头部 */}
-          <header className="relative flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/60 px-3 backdrop-blur-xl sm:px-4">
-            <button
-              onClick={backToList}
-              aria-label="返回房间列表"
-              className="-ml-1 flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground md:hidden"
-            >
-              <CaretLeft className="size-4" weight="bold" />
-            </button>
+          <header className="relative flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-3 sm:px-4">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary">
               <ChatsCircle className="size-4" weight="fill" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold leading-tight">
-                {activeRoom ? activeRoom.name : "学习聊天室"}
+                聊天室
               </p>
               <p className="truncate text-[11px] text-muted-foreground">
-                {activeRoom
-                  ? connected
-                    ? `${online} 人在线`
-                    : "连接中断"
-                  : "选择或创建一个房间开始聊天"}
+                {connected
+                  ? `${online} 人在线`
+                  : "连接中断"}
               </p>
             </div>
             <div className="flex items-center gap-1.5">
               {!connected && (
                 <button
-                  onClick={() => setReconnectKey((k) => k + 1)}
-                  className="rounded-md bg-primary/15 px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/25"
+                  onClick={handleReconnect}
+                  disabled={reconnecting}
+                  className="flex items-center gap-1.5 rounded-md bg-primary/15 px-2.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/25 disabled:opacity-60"
                 >
-                  重连
+                  {reconnecting ? (
+                    <>
+                      <span className="size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      重连中
+                    </>
+                  ) : (
+                    "重连"
+                  )}
                 </button>
               )}
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="关闭"
-                className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
+              <Tooltip>
+                <TooltipTrigger render={
+                  <button
+                    onClick={() => setOpen(false)}
+                    aria-label="关闭"
+                    className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
+                  />
+                }>
+                  <X className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent>关闭</TooltipContent>
+              </Tooltip>
             </div>
           </header>
 
-          {/* 主体：两栏（移动端按需切换） */}
-          <div className="relative flex min-h-0 flex-1">
-            {/* 左侧房间列表 */}
-            <aside
-              className={cn(
-                "flex-col border-r border-border/60 bg-muted/20 md:flex md:w-60 md:shrink-0",
-                activeRoomId ? "hidden" : "flex w-full"
-              )}
-            >
-              <div className="flex items-center justify-between px-4 pb-2 pt-3.5">
-                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  房间
-                </h2>
-                <span className="text-[10px] text-muted-foreground/60">{rooms.length}</span>
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-2">
-                {rooms.map((room) => {
-                  const unread = unreadByRoom[room.id] ?? 0;
-                  const active = activeRoomId === room.id;
-                  return (
-                    <button
-                      key={room.id}
-                      onClick={() => selectRoom(room.id)}
-                      className={cn(
-                        "group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-colors",
-                        active ? "bg-primary/12" : "hover:bg-foreground/[0.05]"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-                          active
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-foreground/[0.06] text-muted-foreground group-hover:text-foreground"
-                        )}
-                      >
-                        <Hash className="size-4" weight={active ? "fill" : "bold"} />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span
-                          className={cn(
-                            "block truncate text-sm font-medium",
-                            active ? "text-foreground" : "text-foreground/80"
-                          )}
-                        >
-                          {room.name}
-                        </span>
-                        <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <Users className="size-3" />
-                          {room._count?.members ?? 0} 位成员
-                        </span>
-                      </span>
-                      {unread > 0 && (
-                        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
-                          {unread > 99 ? "99+" : unread}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-                {rooms.length === 0 && (
-                  <div className="flex flex-col items-center px-4 py-12 text-center">
-                    <ChatsCircle className="size-7 text-muted-foreground/40" />
-                    <p className="mt-3 text-xs text-muted-foreground">还没有房间</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground/60">
-                      点击下方按钮创建第一个房间
-                    </p>
-                  </div>
-                )}
-              </div>
-              {/* 新建房间 */}
-              <div className="border-t border-border/60 p-2.5">
-                {creating ? (
-                  <input
-                    autoFocus
-                    value={newRoomName}
-                    onChange={(e) => setNewRoomName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") createRoom();
-                      if (e.key === "Escape") {
-                        setCreating(false);
-                        setNewRoomName("");
-                      }
-                    }}
-                    placeholder="房间名，回车创建"
-                    className="h-9 w-full rounded-lg border border-primary/40 bg-foreground/[0.04] px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
-                  />
-                ) : (
-                  <button
-                    onClick={() => setCreating(true)}
-                    className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                  >
-                    <Plus className="size-4" weight="bold" />
-                    新建房间
-                  </button>
-                )}
-              </div>
-            </aside>
-
-            {/* 右侧聊天区 */}
-            <section
-              className={cn(
-                "min-w-0 flex-1 flex-col md:flex",
-                activeRoomId ? "flex" : "hidden"
-              )}
-            >
-              <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5">
+          {/* 主体 */}
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            {/* 聊天区 */}
+            <section className="flex min-w-0 min-h-0 flex-1 flex-col">
+              <div
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-3 py-4 sm:px-5"
+              >
                 {messages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center px-6 text-center">
                     <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                       <ChatsCircle className="size-7" weight="fill" />
                     </div>
                     <h3 className="mt-4 text-base font-semibold">
-                      {activeRoomId ? "开始聊天吧" : "选择或创建一个房间"}
+                      开始聊天吧
                     </h3>
                     <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted-foreground">
-                      {activeRoomId
-                        ? "和伙伴一起交流，输入 @ 唤起 AI 助教雨宝"
-                        : "加入一个房间，或新建自己的学习小组"}
+                      和伙伴一起交流，输入 @ 唤起 AI 助教雨宝
                     </p>
-                    {activeRoomId && (
-                      <button
-                        onClick={() => {
-                          setInput("@雨宝 ");
-                          inputRef.current?.focus();
-                        }}
-                        className="mt-4 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
-                      >
-                        @雨宝 提问
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        setInput("@雨宝 ");
+                        inputRef.current?.focus();
+                      }}
+                      className="mt-4 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
+                    >
+                      @雨宝 提问
+                    </button>
                   </div>
                 ) : (
                   <div className="mx-auto flex max-w-3xl flex-col">
-                    {messages.map((m, i) => (
-                      <MessageRow
-                        key={m.id}
-                        message={m}
-                        isMine={m.userId !== null && m.userId === myId}
-                        grouped={
-                          i > 0 && senderKey(messages[i - 1]) === senderKey(m)
-                        }
-                        isFirst={i === 0}
-                      />
-                    ))}
+                    {messages.map((m, i) => {
+                      const prev = i > 0 ? messages[i - 1] : null;
+                      const sameSender = prev && senderKey(prev) === senderKey(m);
+                      // 间隔超过 5 分钟也不合并，显示独立时间戳
+                      const tooFarApart =
+                        prev &&
+                        new Date(m.createdAt).getTime() -
+                          new Date(prev.createdAt).getTime() >
+                          5 * 60 * 1000;
+                      return (
+                        <MessageRow
+                          key={m.id}
+                          message={m}
+                          isMine={m.userId !== null && m.userId === myId}
+                          grouped={Boolean(sameSender && !tooFarApart)}
+                          isFirst={i === 0}
+                        />
+                      );
+                    })}
                   </div>
                 )}
                 <div ref={bottomRef} />
               </div>
 
               {/* 输入框 + @提及 */}
-              <div className="shrink-0 border-t border-border/60 bg-background/40 p-3 backdrop-blur-xl sm:p-4">
+              <div className="shrink-0 border-t border-border/60 p-3 sm:p-4">
                 <div className="relative mx-auto max-w-3xl">
                   {showMention && (
                     <button
                       onClick={selectMention}
                       className="absolute -top-14 left-0 flex items-center gap-2.5 rounded-xl border border-border bg-popover px-3 py-2 shadow-xl transition-colors hover:bg-primary/12"
                     >
-                      <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-primary">
+                      <span className={cn(
+                        "flex size-7 items-center justify-center",
+                        "rounded-full",
+                        "bg-primary",
+                        "ring-1 ring-primary/40",
+                        "shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_12px_rgba(0,0,0,0.20),0_0_18px_color-mix(in_oklab,var(--color-primary)_30%,transparent)]",
+                        "text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]",
+                      )}>
                         <Sparkle className="size-4" weight="fill" />
                       </span>
                       <span className="text-left">
@@ -529,32 +488,99 @@ export function ChatRoom() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
-                          send();
+                          if (input.endsWith("@")) {
+                            // @ + Enter → 直接选中雨宝
+                            selectMention();
+                          } else {
+                            send();
+                          }
                         }
                       }}
                       rows={1}
-                      placeholder={
-                        activeRoomId ? "说点什么… 输入 @ 唤起雨宝" : "先选择或创建房间"
-                      }
-                      disabled={!activeRoomId}
-                      className="max-h-32 min-h-6 flex-1 resize-none border-0 bg-transparent py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
+                      placeholder="说点什么… 输入 @ 唤起雨宝"
+                      className="max-h-32 min-h-6 flex-1 resize-none border-0 bg-transparent py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
                     />
-                    <button
-                      onClick={send}
-                      disabled={!input.trim() || !connected || aiStreaming}
-                      className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-40"
-                      aria-label="发送"
-                    >
-                      <PaperPlaneTilt className="size-4" weight="fill" />
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger render={
+                        <button
+                          onClick={send}
+                          disabled={!input.trim() || !connected || aiStreaming}
+                          className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-40"
+                          aria-label="发送"
+                        />
+                      }>
+                        <PaperPlaneTilt className="size-4" weight="fill" />
+                      </TooltipTrigger>
+                      <TooltipContent>发送</TooltipContent>
+                    </Tooltip>
                   </div>
-                  <p className="mt-1.5 text-center text-[10px] text-muted-foreground/50">
-                    输入 @ 唤起雨宝 · Enter 发送 · Shift+Enter 换行
-                  </p>
                 </div>
               </div>
             </section>
+
+            {/* 上滑阅读期间漏掉新消息：主题色气泡，点击回到底部 */}
+            {!atBottom && newCount > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAtBottom(true);
+                  setNewCount(0);
+                  scrollToBottom("smooth");
+                }}
+                className="absolute bottom-18 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg ring-1 ring-black/10 transition-transform hover:scale-105"
+              >
+                {newCount} 条新消息
+              </button>
+            )}
           </div>
+
+          {/* 断线遮罩 */}
+          {!connected && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center">
+              <div
+                className="absolute inset-0 bg-background/80"
+              />
+              <div
+                className="relative mx-4 w-full max-w-xs overflow-hidden rounded-2xl border border-border p-6 text-center bg-background"
+              >
+                {/* 主题装饰 */}
+                <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-3xl" />
+                <div className="pointer-events-none absolute -right-8 -bottom-8 h-24 w-24 rounded-full bg-primary/10 blur-3xl" />
+
+                <div className="relative flex flex-col items-center">
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/12 mb-4">
+                    {reconnecting ? (
+                      <span className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    ) : (
+                      <X className="size-6 text-primary" weight="bold" />
+                    )}
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">
+                    {reconnecting ? "正在重连…" : "连接已断开"}
+                  </h3>
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    {reconnecting
+                      ? "请稍候，正在尝试重新连接服务器"
+                      : "网络连接已中断，重连后即可继续聊天"}
+                  </p>
+                  <button
+                    onClick={handleReconnect}
+                    disabled={reconnecting}
+                    className="mt-5 w-full rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                  >
+                    {reconnecting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="size-3.5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                        重连中…
+                      </span>
+                    ) : (
+                      "点击重连"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
@@ -588,17 +614,33 @@ function MessageRow({
   return (
     <div
       className={cn(
-        "flex items-end gap-2.5",
+        "flex items-start gap-2.5",
         isMine ? "flex-row-reverse" : "flex-row",
         isFirst ? "" : grouped ? "mt-1" : "mt-5"
       )}
     >
       {/* 头像 */}
       {isAI ? (
-        <AppAvatar ai name="雨宝" size="sm" className="size-8" />
+        // 雨宝 AI 专用图标：圆形实色底 + 对比色闪闪星
+        // self-start 覆盖父级 items-end，让头像对齐到内容顶部（名字行起点），避免错位
+        <div
+          aria-hidden="true"
+          className={cn(
+            "relative flex self-start size-8 shrink-0 items-center justify-center",
+            "rounded-full",
+            "bg-primary",
+            "ring-1 ring-primary/40",
+            "shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_14px_rgba(0,0,0,0.22),0_0_14px_color-mix(in_oklab,var(--color-primary)_35%,transparent)]",
+            "text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]",
+            "mt-1"
+          )}
+          title="雨宝"
+        >
+          <Sparkle className="size-[20px]" weight="fill" />
+        </div>
       ) : (
         <AppAvatar
-          image={null}
+          image={message.image}
           name={message.userName ?? "用户"}
           size="sm"
           className="size-8"
@@ -626,17 +668,18 @@ function MessageRow({
                   AI
                 </span>
               </>
-            ) : !isMine ? (
+            ) : (
               <span className="text-xs font-medium text-foreground/80">
                 {message.userName ?? "用户"}
               </span>
-            ) : null}
+            )}
             <span className="text-[10px] tabular-nums text-muted-foreground/60">
               {formatTime(message.createdAt)}
             </span>
           </div>
         )}
         <div
+          data-bubble={isAI ? "ai" : isMine ? "user" : "other"}
           className={cn(
             "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
             isAI
@@ -648,7 +691,11 @@ function MessageRow({
         >
           {message.content ? (
             <>
-              {message.content}
+              {isAI ? (
+                <MarkdownRenderer content={message.content} />
+              ) : (
+                message.content
+              )}
               {isStreaming && (
                 <span className="ml-0.5 inline-block h-3.5 w-[2px] animate-pulse bg-current align-text-bottom" />
               )}

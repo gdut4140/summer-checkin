@@ -1,371 +1,129 @@
+# Summer Checkin
+
+全栈学习打卡平台：每日打卡、学习计划、番茄钟专注、统计图表、AI 学习助手、知识库问答与多人聊天室。为假期和长期学习而设计，让努力变得可量化、可回顾。
+
 <div align="center">
 
-<img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white&labelColor=000" alt="Next.js 16" />
-<img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black&labelColor=20232A" alt="React 19" />
-<img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=2359" alt="TypeScript 5" />
-<img src="https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma&logoColor=white&labelColor=1A202C" alt="Prisma 5" />
-<img src="https://img.shields.io/badge/Tailwind-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0B1120" alt="Tailwind v4" />
-<img src="https://img.shields.io/badge/DeepSeek-AI-4F46E5?style=for-the-badge&logo=openai&logoColor=white&labelColor=1E1B4B" alt="DeepSeek AI" />
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
 </div>
 
-<br />
-
-<h1 align="center">
-  🌞 Summer Checkin
-  <br />
-  <sub>记录你的暑假学习之旅 📚✨</sub>
-</h1>
-
-<p align="center">
-  <b>每日打卡</b> · <b>学习计划</b> · <b>GitHub 热力图</b> · <b>AI 学习助手</b> · <b>排行榜</b>
-</p>
-
-<p align="center">
-  一个为暑假学习量身打造的 <b>全栈 Web 应用</b>——<br />
-  帮你追踪每一天的学习进度，让努力变得<b>可量化、可回顾、可炫耀</b> 🎯
-</p>
-
-<br />
-
 ---
 
-## ✨ 为什么选择 Summer Checkin？
+## 功能
 
-| | |
-|---|---|
-| 🎯 **目标驱动** | 创建学习计划，设定科目与时长目标，告别无目的学习 |
-| 📸 **每日打卡** | 记录学习内容、时长、心情，支持上传学习截图 |
-| 🔥 **连续打卡** | 保持每日 check-in，积累连续打卡天数，解锁稀有勋章 |
-| 📊 **多维统计** | 日 / 周 / 月趋势图表 + 学科分布饼图，一目了然 |
-| 🗺️ **学习热力图** | GitHub 贡献图风格，一整年的学习轨迹尽收眼底 |
-| 🏆 **排行榜** | 周榜 / 月榜 / 总榜，看看你在所有学习者中的排名 |
-| 🤖 **AI 学习助手** | DeepSeek 驱动，个性化学习建议、每日总结、智能答疑 |
-| 🏅 **成就勋章** | 达成里程碑自动获得，让坚持变得有回报 |
-| 🌙 **深色模式** | 支持亮色 / 深色 / 跟随系统，保护你的眼睛 |
+### 每日打卡
+- 记录学习内容、心情，支持上传截图
+- 连续打卡天数统计，达成里程碑自动获得成就徽章
 
----
+### 学习计划
+- 任务制进度：进度 = 已完成任务 / 总任务
+- 文档工作室：以 Markdown 撰写计划文档，AI 按文档自动拆分任务
+- 计划、任务与打卡数据联动
 
-## 🖼️ 页面一览
+### 专注与统计
+- 番茄钟：25 / 45 / 60 分钟专注计时，完成自动记录
+- 统计页：专注时长趋势（近 7 天）、学科分布、打卡日历
 
-```
-🏠  首页 Landing    →  产品介绍 + CTA
-🔐  登录 / 注册      →  Better Auth 邮箱密码登录
-📋  仪表盘 Dashboard  →  今日统计、本周趋势、快捷操作
-✏️  打卡 Checkin     →  记录学习内容、时长、心情、截图
-📅  日历 Calendar    →  GitHub 风格年度学习热力图
-📊  统计 Statistics  →  日 / 周 / 学科多维图表
-📝  计划 Plans       →  创建和管理学习计划，追踪进度
-🏆  排行榜 Ranking    →  学习时长排行榜（周 / 月 / 总）
-🤖  AI 助手          →  DeepSeek 智能对话，历史记录保存
-👤  个人主页 Profile  →  个人信息、统计、勋章、动态
-⚙️  设置 Settings    →  个人资料 · 修改密码 · 主题切换
-```
+### AI 智能体
+- 学习计划工作流：先分析你的学习数据，再生成个性化计划
+- 知识库 RAG：上传 md / pdf / docx / txt，向量检索后基于文档回答
+- 每日学习检查、进度追踪、个性化建议
 
----
+### 多人聊天室
+- WebSocket 实时群聊
+- @AI 唤起聊天室好友，流式回复，支持 Markdown 渲染
 
-## 🧰 技术栈
+### 其他
+- 多场景主题（雨林 / 雪林 / 云间）自动切换配色
+- Better Auth 注册 / 登录 / 会话管理
 
-| 类别 | 技术 | 说明 |
-|---|---|---|
-| 🖥️ 框架 | **Next.js 16** + **React 19** | App Router, RSC, Server Actions |
-| 🎨 样式 | **Tailwind CSS v4** + **shadcn/ui** | 原子化 CSS + 高质量组件库 |
-| 🎬 动画 | **Motion** (Framer Motion) | 丝滑的页面动效 |
-| 🗄️ ORM | **Prisma 5** | 类型安全的数据库操作 |
-| 🐬 数据库 | **MySQL** | 稳定可靠的关系型数据库 |
-| 🔐 认证 | **Better Auth** | 邮箱密码登录，Session 管理 |
-| 🤖 AI | **DeepSeek** | OpenAI 兼容 API，中文友好 |
-| 📈 图表 | **Recharts** | React 原生图表库 |
-| ✅ 表单 | **React Hook Form** + **Zod** | 高性能表单 + 类型校验 |
-| 🎭 图标 | **Phosphor Icons** + **Lucide** | 双图标库，风格统一 |
-| 🔔 通知 | **Sonner** | 优雅的 Toast 通知 |
-| 🌓 主题 | **next-themes** | 亮色 / 深色 / 系统自适应 |
+## 技术栈
 
----
+- **Next.js 16**（App Router）、**React 19**、**TypeScript**
+- **Prisma** + **PostgreSQL**（pgvector 向量检索）
+- **Tailwind CSS v4**、Motion、Recharts
+- **AI SDK**（OpenAI 兼容 API，默认 Agnes，可切换任意兼容服务商）
+- **WebSocket**（`ws`）独立 sidecar 进程承载聊天室与 AI 流式回复
 
-## 🚀 快速开始
+## 快速开始
 
-### 📋 前置要求
+### 环境要求
 
-- **Node.js** ≥ 18
-- **MySQL** ≥ 8.0
-- **npm** / **pnpm** / **yarn** / **bun**
+- Node.js 18+
+- PostgreSQL（建议使用 `pgvector/pgvector` 镜像，向量检索依赖 pgvector 扩展）
 
-### ⚙️ 环境配置
+### 本地开发
 
 ```bash
-# 1. 克隆项目
-git clone <your-repo-url>
-cd summer-checkin
-
-# 2. 安装依赖
+# 1. 安装依赖
 npm install
-```
 
-```bash
-# 3. 配置环境变量
-cp .env.local.example .env.local
-```
+# 2. 配置环境变量
+cp .env.example .env   # 填入真实 API Key 与数据库地址
 
-编辑 `.env.local`：
-
-```env
-# ── 数据库 ──
-DATABASE_URL="mysql://user:password@localhost:3306/summer_checkin"
-
-# ── Better Auth ──
-BETTER_AUTH_SECRET="your-secret-key-here"
-BETTER_AUTH_URL="http://localhost:3000"
-
-# ── DeepSeek AI ──
-DASHSCOPE_API_KEY="sk-your-deepseek-api-key"
-DASHSCOPE_MODEL="deepseek-chat"
-```
-
-### 🗄️ 初始化数据库
-
-```bash
-# 生成 Prisma Client
+# 3. 生成 Prisma Client
 npx prisma generate
 
-# 推送数据库结构
+# 4. 初始化数据库（创建表 + 写入勋章种子数据）
 npx prisma db push
-
-# （可选）填充种子数据
 npx prisma db seed
+
+# 5. 启动
+npm run dev        # 前端（端口 3000）
+npm run ws:dev     # WebSocket sidecar（端口 3001，聊天室 + AI 依赖它）
 ```
 
-### 🏃 启动开发服务器
+> 数据库升级：本项目使用手写 SQL 迁移，文件位于 `prisma/*.sql`，已有数据库请按需执行对应文件。
 
-```bash
-npm run dev
-```
+### 环境变量
 
-打开 [**http://localhost:3000**](http://localhost:3000) 开始使用 🎉
-
----
-
-## 📁 项目结构
-
-```
-src/
-├── app/
-│   ├── (auth)/                  # 🔐 认证页面
-│   │   ├── login/page.tsx       #    登录
-│   │   └── register/page.tsx    #    注册
-│   ├── (dashboard)/             # 📋 仪表盘（需登录）
-│   │   ├── dashboard/page.tsx   #    仪表盘首页
-│   │   ├── checkin/page.tsx     #    每日打卡
-│   │   ├── calendar/page.tsx    #    学习热力图
-│   │   ├── statistics/page.tsx  #    数据统计
-│   │   ├── plans/page.tsx       #    学习计划
-│   │   ├── plans/[id]/page.tsx  #    计划详情
-│   │   ├── ranking/page.tsx     #    排行榜
-│   │   ├── ai/page.tsx          #    AI 助手
-│   │   ├── profile/page.tsx     #    个人主页
-│   │   └── settings/page.tsx    #    设置
-│   ├── api/
-│   │   ├── ai/route.ts          #    AI 对话 API
-│   │   └── auth/[...all]/route.ts # 认证 API
-│   ├── layout.tsx               #   根布局
-│   └── page.tsx                 #   Landing 首页
-├── components/                  # 🧩 组件
-│   ├── ui/                      #    shadcn/ui 基础组件
-│   ├── landing/                 #    首页板块 (Hero, Features…)
-│   ├── dashboard/               #    仪表盘组件
-│   ├── checkin/                 #    打卡表单 & 心情选择器
-│   ├── calendar/                #    热力图组件
-│   ├── statistics/              #    统计图表
-│   ├── plans/                   #    计划卡片 & 表单
-│   ├── ranking/                 #    排行榜表格
-│   ├── ai/                      #    AI 聊天界面
-│   ├── profile/                 #    个人主页组件
-│   ├── settings/                #    设置表单
-│   └── layout/                  #    顶部导航栏
-├── lib/                         # 📚 工具库
-│   ├── auth.ts                  #    Better Auth 配置
-│   ├── auth-client.ts           #    客户端 Auth SDK
-│   ├── auth-utils.ts            #    requireAuth / getCurrentUser
-│   ├── prisma.ts                #    Prisma 单例
-│   ├── deepseek.ts              #    DeepSeek AI 封装
-│   ├── validations.ts           #    Zod 校验规则
-│   ├── constants.ts             #    常量定义
-│   └── utils.ts                 #    通用工具函数
-└── types/                       # 🏷️  TypeScript 类型定义
-```
-
----
-
-## 🗃️ 数据库模型
-
-```mermaid
-erDiagram
-    User ||--o{ Session : has
-    User ||--o{ Account : has
-    User ||--o{ Plan : creates
-    User ||--o{ Checkin : writes
-    User ||--o{ StudyRecord : tracks
-    User ||--o{ UserBadge : earns
-    User ||--o{ AIHistory : chats
-    Plan ||--o{ Checkin : contains
-    Badge ||--o{ UserBadge : awarded_to
-
-    User {
-        string id PK
-        string name
-        string email UK
-        string password
-        string bio
-        string image
-        datetime createdAt
-    }
-
-    Checkin {
-        string id PK
-        string userId FK
-        string planId FK
-        string content
-        float hours
-        string subject
-        string mood
-        string screenshot
-        datetime checkinDate
-    }
-
-    Plan {
-        string id PK
-        string userId FK
-        string name
-        string description
-        string goal
-        float targetHours
-        string status
-    }
-
-    Badge {
-        string id PK
-        string name
-        string description
-        string icon
-        string criteria
-    }
-```
-
----
-
-## 🎮 功能详解
-
-### 📝 每日打卡
-记录当天学到的内容、投入的小时数、学习科目和心情 😊😐😢。支持上传学习截图作为记录证明。每天只能打卡一次，但可以编辑。
-
-### 📋 学习计划
-设定暑假学习目标，每个计划可以指定：
-- 📛 计划名称 & 描述
-- 🎯 目标总时长
-- 📅 开始日期
-- 📊 自动计算完成进度
-
-### 🗺️ 打卡日历
-一整年的 GitHub 贡献图风格热力图，颜色越深 = 学得越久。一眼就能看出哪些日子在奋斗 🔥
-
-### 🤖 AI 学习助手
-基于 **DeepSeek** 大模型，你可以：
-- 📖 让它总结你今天的学习内容
-- 📝 帮你制定个性化学习计划
-- 💡 解答学习中的疑难问题
-- 🧠 分析你的学习模式给出改进建议
-
-所有对话历史都会被保存，随时回顾 👀
-
-### 📊 数据统计
-- **每日趋势图**：最近 30 天学习时长折线图
-- **每周汇总图**：最近 12 周学习时长柱状图
-- **学科分布图**：各科目学习时间占比饼图
-- **核心指标**：总时长、打卡天数、日均学习、最佳学科
-
-### 🏆 排行榜
-和所有用户比较学习时长！支持三种时间维度：
-- 🔥 **本周排行**
-- 📅 **本月排行**
-- 👑 **总榜排行**
-
-保持连续打卡还能冲击连胜榜首 ⚡
-
-### 🏅 成就勋章
-达成特定条件自动获得勋章，例如：
-- 🌱 **初次打卡** — 完成第一次 check-in
-- 🔥 **7 天连续** — 连续打卡 7 天
-- 💯 **学习百小时** — 累计学习 100 小时
-- 🎯 **计划大师** — 完成 3 个学习计划
-- ……更多待你发现！
-
----
-
-## 🔐 认证系统
-
-基于 **Better Auth**，支持：
-- ✉️ 邮箱 + 密码注册 / 登录
-- 🍪 Session Cookie（30 天有效期）
-- 🛡️ 路由中间件保护（未登录自动跳转）
-- 🔑 修改密码
-
----
-
-## 📦 可用命令
-
-| 命令 | 作用 |
+| 变量 | 说明 |
 |---|---|
-| `npm run dev` | 启动开发服务器 🚀 |
-| `npm run build` | 构建生产版本 📦 |
-| `npm run start` | 启动生产服务器 🏭 |
-| `npm run lint` | 代码检查 🔍 |
-| `npx prisma db push` | 推送数据库结构 🗄️ |
-| `npx prisma db seed` | 填充种子数据 🌱 |
-| `npx prisma studio` | 打开 Prisma 数据管理界面 🖥️ |
+| `DATABASE_URL` | PostgreSQL 连接串 |
+| `DASHSCOPE_API_KEY` | AI 对话 API Key（OpenAI 兼容，默认 Agnes） |
+| `DASHSCOPE_MODEL` | 对话模型（默认 `agnes-2.5-flash`） |
+| `DASHSCOPE_BASE_URL` | 对话 API 地址 |
+| `EMBEDDING_API_KEY` | 向量模型 API Key（默认阿里百炼） |
+| `EMBEDDING_MODEL` | 向量模型 |
+| `EMBEDDING_BASE_URL` | 向量 API 地址 |
+| `BETTER_AUTH_SECRET` | 会话签名密钥（`openssl rand -base64 32`） |
+| `BETTER_AUTH_URL` | 登录回调地址 |
+| `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | Server Actions 加密密钥（`openssl rand -hex 32`） |
 
----
+## 项目结构
 
-## 🚢 部署
-
-推荐使用 **Vercel** 一键部署：
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
-
-也可以自行部署到任何支持 Node.js 的服务器：
-
-```bash
-npm run build
-npm run start
+```
+├── src/
+│   ├── app/                 # App Router 页面与 API 路由
+│   │   ├── (auth)/          # 登录 / 注册
+│   │   ├── (dashboard)/     # 打卡 / 计划 / 统计 / 设置等
+│   │   └── api/             # 后端接口（chat / ai / knowledge / plans…）
+│   ├── components/          # UI 组件（聊天室 / 专注室 / 智能体 / 统计…）
+│   ├── lib/                 # 业务逻辑、AI 工具、RAG 检索、记忆
+│   └── types/               # 共享类型
+├── server/                  # WebSocket sidecar（聊天室 + AI 流式回复）
+├── prisma/                  # Schema、种子数据、SQL 迁移
+├── scripts/                 # 部署脚本、文档提取脚本
+└── nginx/                   # 反向代理配置
 ```
 
-⚠️ 记得在生产环境配置正确的 `DATABASE_URL` 和环境变量！
+## 部署（Docker）
 
----
+```bash
+# 设置环境变量后一键部署（前端 + WebSocket + PostgreSQL + Nginx）
+docker compose up -d --build
+```
 
-## 🤝 贡献
+部署时需提供 `DASHSCOPE_API_KEY`、`EMBEDDING_API_KEY`、`BETTER_AUTH_SECRET`、`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` 等环境变量。`BETTER_AUTH_URL` 应设置为服务器的公网地址。
 
-欢迎提交 Issue 和 Pull Request！在开始之前：
+> 注意：生产部署前请修改 `docker-compose.yml` 中的 PostgreSQL 默认密码。
 
-1. 🍴 Fork 本项目
-2. 🌿 创建你的功能分支 (`git checkout -b feat/amazing-feature`)
-3. ✅ 提交你的改动 (`git commit -m 'feat: add amazing feature'`)
-4. 📤 推送到分支 (`git push origin feat/amazing-feature`)
-5. 🔀 打开一个 Pull Request
+## License
 
----
-
-## 📄 开源协议
-
-本项目基于 [MIT License](LICENSE) 开源。
-
----
-
-<div align="center">
-
-<br />
-
-### 🌟 如果这个项目对你有帮助，请给它一个 Star！
-
-Made with 💖 &nbsp;·&nbsp; Powered by ☕ &nbsp;·&nbsp; Have a great summer! 🌞
-
-</div>
+[MIT](./LICENSE)

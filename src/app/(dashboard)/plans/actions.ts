@@ -9,6 +9,49 @@ import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/types";
+import { syncTasksFromDocument } from "@/lib/studio/plan-sync";
+
+/** 新计划的默认模板文档：带「## 任务安排」，同步成任务清单，避免一开始是空的 */
+function defaultPlanDocument(name: string, goal?: string | null): string {
+  return [
+    `# ${name}`,
+    "",
+    "## 目标",
+    goal || "（写下这个计划最终要达成的结果，越具体越好）",
+    "",
+    "## 计划说明",
+    "（整体安排、时间节奏）",
+    "",
+    "## 学习指导",
+    "（分阶段展开：每个阶段学什么、怎么学、推荐资源、完成标准）",
+    "",
+    "## 任务安排",
+    "- [ ] 明确目标：写下这个计划最终要达成的结果",
+    "- [ ] 收集资料：整理官方文档、教程与参考资源",
+    "- [ ] 学习核心知识：搭建整体框架",
+    "- [ ] 动手实践：完成练习或一个小项目",
+    "- [ ] 复习巩固并复盘：记录收获与待补强点",
+  ].join("\n");
+}
+
+/** 新建一个空白计划并返回 planId（前端随即跳进 studio，AI 框聚焦，引导用户直接在 AI 里生成内容） */
+export async function createBlankPlan(): Promise<ActionResult<{ planId: string }>> {
+  try {
+    const user = await requireAuth();
+    const doc = defaultPlanDocument("未命名计划");
+    const plan = await prisma.plan.create({
+      data: { userId: user.id, name: "未命名计划", document: doc },
+    });
+    await syncTasksFromDocument(plan.id, user.id, doc);
+    return { success: true, data: { planId: plan.id } };
+  } catch (error) {
+    console.error("[createBlankPlan] 失败:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "创建计划失败，请稍后重试",
+    };
+  }
+}
 
 export async function createPlan(formData: FormData): Promise<ActionResult> {
   try {
@@ -20,9 +63,11 @@ export async function createPlan(formData: FormData): Promise<ActionResult> {
       ? new Date(formData.get("startDate") as string)
       : null;
 
-    await prisma.plan.create({
-      data: { userId: user.id, name, description, goal, targetHours: 0, startDate },
+    const doc = defaultPlanDocument(name, goal);
+    const plan = await prisma.plan.create({
+      data: { userId: user.id, name, description, goal, startDate, document: doc },
     });
+    await syncTasksFromDocument(plan.id, user.id, doc);
 
     revalidatePath("/plans");
     return { success: true };

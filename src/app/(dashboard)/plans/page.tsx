@@ -48,7 +48,7 @@ export default async function PlansPage() {
         <header className="product-header">
           <div>
             <p className="product-eyebrow">Learning map</p>
-            <h1 className="product-title">学习计划</h1>
+            <h1 className="product-title">计划</h1>
             <p className="product-subtitle">把长期目标收拢成清晰、能执行的下一步。</p>
           </div>
           <NewPlanButton />
@@ -71,7 +71,7 @@ export default async function PlansPage() {
           <div className="mt-8 flex min-h-72 flex-col items-center justify-center border border-dashed border-white/16 bg-black/10 px-5 text-center">
             <Flag className="size-8 text-primary" weight="duotone" />
             <h2 className="mt-4 text-base font-medium text-foreground">从一个明确的目标开始</h2>
-            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">计划不需要复杂，先写下目标时长，再逐步补充任务。</p>
+            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">计划不需要复杂，先写下明确的目标，再逐步补充任务。</p>
             <CreateFirstPlanLink />
           </div>
         ) : (

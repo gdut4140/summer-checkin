@@ -20,7 +20,20 @@ function loadFromStorage(): LocalTodo[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as LocalTodo[]) : [];
+    if (!raw) return [];
+    const stored = JSON.parse(raw) as Array<Partial<LocalTodo>>;
+    if (!Array.isArray(stored)) return [];
+    return stored
+      .filter((todo): todo is Partial<LocalTodo> & { id: string; title: string } =>
+        typeof todo.id === "string" && typeof todo.title === "string"
+      )
+      .map((todo) => ({
+        id: todo.id,
+        title: todo.title,
+        completed: Boolean(todo.completed),
+        planName: todo.planName,
+        createdAt: todo.createdAt || new Date().toISOString(),
+      }));
   } catch {
     return [];
   }
@@ -38,6 +51,7 @@ function uid(): string {
 // ---- Hook ----
 
 let _syncing = false;
+let _pendingSync: LocalTodo[] | null = null;
 
 export function useLocalTodos() {
   const [todos, setTodos] = useState<LocalTodo[]>([]);
@@ -45,8 +59,11 @@ export function useLocalTodos() {
 
   // 初始化加载
   useEffect(() => {
-    setTodos(loadFromStorage());
-    setLoaded(true);
+    const timer = window.setTimeout(() => {
+      setTodos(loadFromStorage());
+      setLoaded(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // 变更时持久化 + 后台同步
@@ -58,12 +75,12 @@ export function useLocalTodos() {
   }, []);
 
   const addTodo = useCallback(
-    (title: string, planName?: string) => {
+    (title: string, options?: { planName?: string }) => {
       const todo: LocalTodo = {
         id: uid(),
         title: title.trim(),
         completed: false,
-        planName,
+        planName: options?.planName,
         createdAt: new Date().toISOString(),
       };
       persist([todo, ...todos]);
@@ -116,14 +133,19 @@ export function useLocalTodos() {
 // ---- 后台同步（fire-and-forget）----
 
 async function syncToBackend(todos: LocalTodo[]) {
+  _pendingSync = todos;
   if (_syncing) return;
   _syncing = true;
   try {
-    await fetch("/api/todos/sync", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ todos }),
-    });
+    while (_pendingSync) {
+      const next = _pendingSync;
+      _pendingSync = null;
+      await fetch("/api/todos/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ todos: next }),
+      });
+    }
   } catch {
     // 静默失败，下次变更时重试
   } finally {

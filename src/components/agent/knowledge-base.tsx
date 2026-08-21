@@ -304,7 +304,7 @@ export function KnowledgeBase() {
       </div>
 
       {/* ── 文档列表 ── */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar">
         <div className="flex items-center justify-between px-4 pb-2 pt-4">
           <p className="text-[11px] font-medium text-white/38">
             文档列表
@@ -338,11 +338,7 @@ export function KnowledgeBase() {
                   </p>
                   <p className="mt-0.5 flex items-center gap-2 text-[10px] text-white/35">
                     <span>{typeLabel[doc.sourceType] ?? doc.sourceType}</span>
-                    <span>·</span>
-                    <span>{doc.chunkCount} 分片</span>
-                    <span>·</span>
                     <span>{formatBytes(doc.totalChars)}</span>
-                    <span>·</span>
                     <span>{timeAgo(doc.createdAt)}</span>
                   </p>
                 </div>

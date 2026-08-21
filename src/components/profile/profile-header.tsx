@@ -57,7 +57,7 @@ export function ProfileHeader({ user }: Props) {
               {user.bio ? (
                 <p className="mt-3 max-w-[60ch] text-sm leading-6 text-white/72">{user.bio}</p>
               ) : (
-                <p className="mt-3 text-sm text-white/30">还没有写简介</p>
+                <p className="mt-3 text-sm text-white/30">这个人懒懒的，什么都没有写</p>
               )}
               <p className="mt-3 flex items-center gap-1.5 text-xs text-white/30">
                 <CalendarBlank className="size-3.5" />

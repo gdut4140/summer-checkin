@@ -85,3 +85,8 @@ docker-compose.override.yml
 
 # 截图 / 临时图片
 image.png
+
+# 个人开发配置（本地保留，不上传开源）
+.claude/
+.trae/
+.mcp.json

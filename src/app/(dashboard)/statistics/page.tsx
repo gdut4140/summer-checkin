@@ -1,8 +1,9 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
-import { startOfDay, endOfDay, format } from "date-fns";
+import { startOfDay, endOfDay, format, subDays } from "date-fns";
 import { CalendarCheck, ChartLineUp, Star, Lightning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { ProfileHeader } from "@/components/profile/profile-header";
+import { FocusDurationChart, type FocusDay } from "@/components/profile/focus-duration-chart";
 
 export default async function ProfilePage() {
   const user = await requireAuth();
@@ -31,6 +32,38 @@ export default async function ProfilePage() {
   const todayDone = plans.flatMap((p) =>
     p.tasks.filter((t) => t.status === "done" && t.completedAt && t.completedAt >= todayStart && t.completedAt <= todayEnd)
   ).length;
+
+  // 完整番茄钟记录：累计数据 + 最近 7 天趋势
+  const focusRangeStart = startOfDay(subDays(now, 6));
+  const focusWhere = { userId: user.id, checkinId: { startsWith: "focus-" } };
+  const [focusTotal, focusRecords] = await Promise.all([
+    prisma.studyRecord.aggregate({
+      where: focusWhere,
+      _sum: { totalMinutes: true },
+      _count: { _all: true },
+    }),
+    prisma.studyRecord.findMany({
+      where: { ...focusWhere, date: { gte: focusRangeStart } },
+      select: { date: true, totalMinutes: true },
+      orderBy: { date: "asc" },
+    }),
+  ]);
+  const focusByDate = new Map<string, number>();
+  for (const record of focusRecords) {
+    const key = format(record.date, "yyyy-MM-dd");
+    focusByDate.set(key, (focusByDate.get(key) ?? 0) + record.totalMinutes);
+  }
+  const weekdayLabels = ["日", "一", "二", "三", "四", "五", "六"];
+  const focusDays: FocusDay[] = Array.from({ length: 7 }, (_, index) => {
+    const date = subDays(now, 6 - index);
+    const key = format(date, "yyyy-MM-dd");
+    return {
+      date: key,
+      weekday: weekdayLabels[date.getDay()],
+      minutes: Math.round(focusByDate.get(key) ?? 0),
+      isToday: index === 6,
+    };
+  });
 
   // 连续活跃：合并打卡日期 + 任务完成日期
   const checkins = await prisma.checkin.findMany({
@@ -105,7 +138,7 @@ export default async function ProfilePage() {
         <section className="product-panel flex flex-col justify-between p-5 md:p-6">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-white/72">今日动态</span>
-            {todayDone > 0 ? <CheckCircle className="size-5 text-primary" weight="fill" /> : <Star className="size-5 text-[#67b4c9]" weight="duotone" />}
+            {todayDone > 0 ? <CheckCircle className="size-5 text-primary" weight="fill" /> : <Star className="size-5 text-primary" weight="duotone" />}
           </div>
           <p className="mt-6 text-sm leading-6 text-white/48">
             {todayDone > 0
@@ -115,11 +148,17 @@ export default async function ProfilePage() {
         </section>
       </div>
 
+      <FocusDurationChart
+        days={focusDays}
+        totalMinutes={Math.round(focusTotal._sum.totalMinutes ?? 0)}
+        sessionCount={focusTotal._count._all}
+      />
+
       {/* 空状态 */}
       {plans.length === 0 && (
         <section className="rounded-lg border border-dashed border-white/10 py-16 text-center">
           <p className="text-sm text-white/40">这里还空着</p>
-          <p className="mt-1 text-xs text-white/25">去学习计划页创建第一个计划，或者开始打卡吧</p>
+          <p className="mt-1 text-xs text-white/25">去计划页创建第一个计划，或者开始打卡吧</p>
         </section>
       )}
     </div>

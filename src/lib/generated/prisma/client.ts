@@ -147,6 +147,11 @@ export type Document = Prisma.DocumentModel
  */
 export type DocumentChunk = Prisma.DocumentChunkModel
 /**
+ * Model KnowledgeDoc
+ * 
+ */
+export type KnowledgeDoc = Prisma.KnowledgeDocModel
+/**
  * Model Notification
  * 
  */
@@ -157,17 +162,17 @@ export type Notification = Prisma.NotificationModel
  */
 export type AgentSchedule = Prisma.AgentScheduleModel
 /**
- * Model ChatRoom
- * 
- */
-export type ChatRoom = Prisma.ChatRoomModel
-/**
- * Model ChatRoomMember
- * 
- */
-export type ChatRoomMember = Prisma.ChatRoomMemberModel
-/**
  * Model ChatMessage
  * 
  */
 export type ChatMessage = Prisma.ChatMessageModel
+/**
+ * Model PlanTemplate
+ * 
+ */
+export type PlanTemplate = Prisma.PlanTemplateModel
+/**
+ * Model DocumentTemplate
+ * 
+ */
+export type DocumentTemplate = Prisma.DocumentTemplateModel

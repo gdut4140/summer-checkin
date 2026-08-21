@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Leaf } from "@phosphor-icons/react";
+import { Sparkle } from "@phosphor-icons/react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSceneCopy } from "@/context/scene-context";
 
@@ -99,7 +99,7 @@ export function AgentOrb() {
         }
       >
         <span className="rainforest-orb__halo" />
-        <span className="rainforest-orb__core"><Leaf weight="fill" /></span>
+        <span className="rainforest-orb__core"><Sparkle weight="fill" /></span>
         <span className="rainforest-orb__spark rainforest-orb__spark--one" />
         <span className="rainforest-orb__spark rainforest-orb__spark--two" />
       </TooltipTrigger>

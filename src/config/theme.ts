@@ -6,14 +6,24 @@
  *   1. 集中记录每个场景的配色设计意图，方便维护和新增场景
  *   2. TypeScript 侧可消费的主题元数据（如图表色、强调色）
  *
+ * 关于 SceneType / SceneCopy / SCENE_COPY 的归属
+ *   类型与文案都已统一移动到 @/lib/scene-meta（纯 TS 文件，无 'use client'），
+ *   以便 Server Action 与 Client 组件两端都能安全引用。
+ *   本文件从那里 re-export，保留历史引用路径。
+ *
  * 新增场景步骤：
- *   1. 在 SceneType 中加入新标识（如 "beach"）
- *   2. 在 SCENE_THEMES 补一套色板
- *   3. 在 globals.css 中加 [data-scene="beach"] { --xxx: ... }
- *   4. 在 scene-selector.tsx 中加对应缩略图卡片
+ *   1. 在 `@/lib/scene-meta` 的 SceneType 联合类型中加新标识（如 "beach"）
+ *   2. 在 `@/lib/scene-meta` 的 SCENE_COPY 补一套文案
+ *   3. 在本文件 SCENE_THEMES 补一套色板
+ *   4. 在 globals.css 中加 [data-scene="beach"] { --xxx: ... }
+ *   5. 在 scene-selector.tsx 中加对应缩略图卡片
  */
 
-export type SceneType = "rain" | "snow" | "cloud";
+import { SCENE_COPY, type SceneCopy, type SceneType } from "@/lib/scene-meta";
+
+// 向后兼容：仍允许从 @/config/theme 拿到 SceneType / SceneCopy / SCENE_COPY
+export type { SceneType, SceneCopy };
+export { SCENE_COPY };
 
 export interface SceneThemeMeta {
   /** 显示名 */
@@ -27,88 +37,6 @@ export interface SceneThemeMeta {
   /** 背景蒙层渐变（供参考，实际在 scene-overlay + globals.css） */
   overlayHint: string;
 }
-
-/**
- * 场景专属文案（所有 UI 上显示的"雨林/雪日/暖云"类字符串都从这里读，避免硬编码散落在页面里）
- *
- * 每个字段语义约定（新增场景时按同样句式填）：
- *  - labelShort        ：场景选择器 / 顶栏 Tab 等窄空间显示名（1~2 字）
- *  - labelLong         ：标题/文档内需要更明确的长名（2~4 字）
- *  - roomTitle         ：首页 / 自习室大标题（4~6 字）
- *  - roomSlogan        ：标题下的副标题（一句氛围感短文案）
- *  - explorerTitle     ：智能体面板标题（4 字以内）
- *  - explorerSubtitle  ：智能体面板副标题说明
- *  - explorerButtonLabel ：打开智能体按钮的 tooltip / aria-label
- *  - footprintLabel    ：打卡页的「足迹」标题（4 字以内，用于"xxx足迹"等合成处可单独用）
- *  - footprintHeading  ：打卡页 Heatmap 上方的完整标题（如 "雨林足迹" / "雪日足迹"）
- *  - visitButtonLabel  ：首页打卡按钮主文案（4 字）
- *  - visitSuccessToast ：打卡成功 toast 主文案
- *  - visitRecordText   ：打卡记录里的动作文字（4 字，"到访雨林"）
- *  - sceneHint         ：场景选择卡片里的 hint 文案
- */
-export interface SceneCopy {
-  labelShort: string;
-  labelLong: string;
-  roomTitle: string;
-  roomSlogan: string;
-  explorerTitle: string;
-  explorerSubtitle: string;
-  explorerButtonLabel: string;
-  footprintLabel: string;
-  footprintHeading: string;
-  visitButtonLabel: string;
-  visitSuccessToast: string;
-  visitRecordText: string;
-  sceneHint: string;
-}
-
-export const SCENE_COPY: Record<SceneType, SceneCopy> = {
-  rain: {
-    labelShort: "雨林",
-    labelLong: "雨林",
-    roomTitle: "雨林自习室",
-    roomSlogan: "在雨声中沉浸，让每一段专注都有节奏。",
-    explorerTitle: "探索雨林",
-    explorerSubtitle: "你的学习智能体",
-    explorerButtonLabel: "打开探索雨林",
-    footprintLabel: "足迹",
-    footprintHeading: "雨林足迹",
-    visitButtonLabel: "来访雨林",
-    visitSuccessToast: "雨林又多了你的足迹 🌿",
-    visitRecordText: "到访雨林",
-    sceneHint: "雨林视频背景",
-  },
-  snow: {
-    labelShort: "雪日",
-    labelLong: "雪日",
-    roomTitle: "雪日自习室",
-    roomSlogan: "在雪落中入定，让每一段专注都安静而坚定。",
-    explorerTitle: "漫步雪林",
-    explorerSubtitle: "你的学习智能体",
-    explorerButtonLabel: "打开漫步雪林",
-    footprintLabel: "足迹",
-    footprintHeading: "雪日足迹",
-    visitButtonLabel: "来访雪日",
-    visitSuccessToast: "雪地里又多了你的一串脚印 ❄️",
-    visitRecordText: "到访雪日",
-    sceneHint: "冬日雪景背景",
-  },
-  cloud: {
-    labelShort: "暖云",
-    labelLong: "暖云",
-    roomTitle: "暖云自习室",
-    roomSlogan: "在云影里舒展，让每一段专注都柔软而悠长。",
-    explorerTitle: "云间漫游",
-    explorerSubtitle: "你的学习智能体",
-    explorerButtonLabel: "打开云间漫游",
-    footprintLabel: "足迹",
-    footprintHeading: "暖云足迹",
-    visitButtonLabel: "来访暖云",
-    visitSuccessToast: "云朵里又留下了你的印记 ☁️",
-    visitRecordText: "到访暖云",
-    sceneHint: "云层阳光背景",
-  },
-};
 
 export const SCENE_THEMES: Record<SceneType, SceneThemeMeta> = {
   rain: {

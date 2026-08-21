@@ -754,7 +754,7 @@ export function LearningIsland({
       <div
         className="relative h-full w-full touch-none"
         role="img"
-        aria-label={`我的小岛，累计 ${totalCheckins} 次打卡，连续 ${streak} 天，学习 ${Math.round(totalHours * 10) / 10} 小时`}
+        aria-label={`小岛，累计 ${totalCheckins} 次打卡，连续 ${streak} 天，学习 ${Math.round(totalHours * 10) / 10} 小时`}
       >
         <Canvas
           dpr={[1, 1.65]}

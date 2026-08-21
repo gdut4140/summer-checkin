@@ -111,7 +111,7 @@ export default async function CheckinPage() {
               {todayDate}
             </p>
             <h1 className="mt-2 text-2xl font-semibold text-white md:text-3xl">
-              我的小岛
+              小岛
             </h1>
           </div>
           <SceneSelector />

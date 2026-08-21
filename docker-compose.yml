@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: REDACTED
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-summer_checkin_dev}
       POSTGRES_DB: summer_checkin
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -30,7 +30,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:REDACTED@postgres:5432/summer_checkin
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-summer_checkin_dev}@postgres:5432/summer_checkin
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-agnes-2.5-flash}
       DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://apihub.agnes-ai.com/v1}

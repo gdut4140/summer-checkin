@@ -62,8 +62,6 @@ export interface LearningContext {
   plans: {
     id: string;
     name: string;
-    targetHours: number;
-    completedHours: number;
     progress: number; // 0-100
     taskStats: {
       total: number;
@@ -235,9 +233,8 @@ export async function observe(userId: string): Promise<LearningContext> {
     } else if (i > 0) break;
   }
 
-  // ---- 计划进度 ----
+  // ---- 计划进度（任务完成度） ----
   const plans = activePlans.map((plan) => {
-    const completed = plan.checkins.reduce((s, c) => s + c.hours, 0);
     const taskStats = {
       total: plan.tasks.length,
       done: plan.tasks.filter((t) => t.status === "done").length,
@@ -248,14 +245,10 @@ export async function observe(userId: string): Promise<LearningContext> {
     return {
       id: plan.id,
       name: plan.name,
-      targetHours: plan.targetHours,
-      completedHours: Math.round(completed * 10) / 10,
       progress:
-        plan.targetHours > 0
-          ? Math.min(100, Math.round((completed / plan.targetHours) * 100))
-          : taskStats.total > 0
-            ? Math.round((taskStats.done / taskStats.total) * 100)
-            : 0,
+        taskStats.total > 0
+          ? Math.round((taskStats.done / taskStats.total) * 100)
+          : 0,
       taskStats,
     };
   });

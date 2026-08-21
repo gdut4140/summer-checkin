@@ -7,12 +7,15 @@ interface StudioClientProps {
   planId: string;
   title: string;
   initialContent: string;
+  /** 新建计划跳转（?focusAi=1）：进入后自动聚焦 AI 输入框并预填引导语 */
+  autoFocusAi?: boolean;
 }
 
 export function StudioClient({
   planId,
   title,
   initialContent,
+  autoFocusAi = false,
 }: StudioClientProps) {
   const handleSave = useCallback(
     async (content: string) => {
@@ -47,6 +50,7 @@ export function StudioClient({
         onExit={handleExit}
         backHref="/plans"
         backLabel="返回计划列表"
+        autoFocusAi={autoFocusAi}
         ai={{
           context: { kind: "plan", refId: planId },
           fetchLatest,

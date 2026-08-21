@@ -60,10 +60,10 @@ export function RainforestFocusRoom() {
       {/* 三栏：番茄钟 | 背景 | 待办 */}
       <div className="flex flex-1 items-center gap-0">
         <div className="flex w-1/4 shrink-0 items-center px-2">
-          <PomodoroStation />
+          <PomodoroStation onStart={enterImmersive} />
         </div>
         <div className="flex-1" />
-        <div className="w-1/4 shrink-0 px-2">
+        <div className="w-1/5 shrink-0 px-2">
           <LocalTodoPanel />
         </div>
       </div>

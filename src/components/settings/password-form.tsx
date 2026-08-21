@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { changePassword } from "@/app/(dashboard)/settings/actions";
+import { changePassword } from "@/components/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

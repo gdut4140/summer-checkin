@@ -6,12 +6,10 @@ import { useState } from "react";
 import { LogoutButton } from "@/app/(dashboard)/actions";
 import {
   ChartLine,
-  Gear,
   ListChecks,
   List,
   Note,
   X,
-  SignOut,
   Leaf,
   Tree,
 } from "@phosphor-icons/react";
@@ -26,8 +24,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/layout/notification-bell";
@@ -47,18 +43,17 @@ interface TopNavProps {
 
 // 次要导航：场景无关的固定文字
 const STATIC_NAV = [
-  { href: "/checkin", label: "我的小岛" },
-  { href: "/plans", label: "学习计划" },
+  { href: "/checkin", label: "小岛" },
+  { href: "/plans", label: "计划" },
   { href: "/docs", label: "文档" },
-  { href: "/statistics", label: "个人主页" },
+  { href: "/statistics", label: "主页" },
 ] as const;
 
 const STATIC_FULL_NAV = [
-  { href: "/checkin", label: "我的小岛", icon: Tree },
-  { href: "/plans", label: "学习计划", icon: ListChecks },
+  { href: "/checkin", label: "小岛", icon: Tree },
+  { href: "/plans", label: "计划", icon: ListChecks },
   { href: "/docs", label: "文档", icon: Note },
-  { href: "/statistics", label: "个人主页", icon: ChartLine },
-  { href: "/settings", label: "设置", icon: Gear },
+  { href: "/statistics", label: "主页", icon: ChartLine },
 ] as const;
 
 export function TopNav({ user }: TopNavProps) {

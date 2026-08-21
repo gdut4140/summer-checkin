@@ -20,6 +20,7 @@ import { MessageBubble } from "@/components/ai/message-bubble";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { KnowledgeBase } from "./knowledge-base";
 import type { ChatMessage } from "@/types";
 import { useSceneCopy } from "@/context/scene-context";
@@ -151,6 +152,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
     if (!content || loading) return;
     setInput("");
     setLoading(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
 
     const userMessage: ChatMessage = { id: `temp-${Date.now()}`, role: "user", content, createdAt: new Date() };
     const assistantId = `assistant-${Date.now()}`;
@@ -206,7 +208,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
     <div className="rainforest-workbench--page w-full text-white">
       <aside className={cn("rainforest-panel rainforest-panel--left", mobilePanel !== "history" && "rainforest-panel--mobile-hidden")}>
             <div className="flex h-16 items-center gap-3 border-b border-white/10 px-4">
-              <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><Leaf weight="fill" /></div>
+              <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground"><Sparkle weight="fill" /></div>
               <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{explorerTitle}</p><p className="text-[11px] text-white/46">{explorerSubtitle}</p></div>
             </div>
             <div className="p-3">
@@ -223,13 +225,20 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between px-5 pb-2"><p className="text-[11px] font-medium text-white/38">最近对话</p><span className="text-[10px] text-white/30">{conversations.length}</span></div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+            <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-3 pb-4">
               {conversations.map((conversation) => (
                 <div key={conversation.id} className={cn("group flex items-center rounded-md", activeId === conversation.id ? "bg-white/10" : "hover:bg-white/6")}>
                   <button onClick={() => loadConversation(conversation.id)} className="min-w-0 flex-1 px-2.5 py-2 text-left">
                     <p className="truncate text-xs text-white/78">{conversation.title}</p><p className="mt-0.5 text-[10px] text-white/30">{timeAgo(conversation.updatedAt)}</p>
                   </button>
-                  <button onClick={() => deleteConversation(conversation.id)} aria-label="删除对话" className="mr-1 hidden size-7 items-center justify-center rounded text-white/36 hover:bg-white/10 hover:text-red-300 group-hover:flex"><Trash /></button>
+                  <Tooltip>
+                    <TooltipTrigger render={
+                      <button onClick={() => deleteConversation(conversation.id)} aria-label="删除对话" className="mr-1 hidden size-7 items-center justify-center rounded text-white/36 hover:bg-white/10 hover:text-red-300 group-hover:flex" />
+                    }>
+                      <Trash />
+                    </TooltipTrigger>
+                    <TooltipContent>删除对话</TooltipContent>
+                  </Tooltip>
                 </div>
               ))}
             </div>
@@ -238,13 +247,18 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
           <section className={cn("rainforest-panel rainforest-panel--center", mobilePanel !== "chat" && "rainforest-panel--mobile-hidden")}>
             <header className="flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-5">
               <div className="flex items-center gap-3">
-                <button onClick={() => router.back()} aria-label="返回" className="flex size-8 items-center justify-center rounded-md text-white/60 transition hover:bg-white/10 hover:text-white">
-                  <CaretLeft className="size-5" weight="bold" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger render={
+                    <button onClick={() => router.back()} aria-label="返回" className="flex size-8 items-center justify-center rounded-md text-white/60 transition hover:bg-white/10 hover:text-white" />
+                  }>
+                    <CaretLeft className="size-5" weight="bold" />
+                  </TooltipTrigger>
+                  <TooltipContent>返回</TooltipContent>
+                </Tooltip>
                 <div><p className="text-sm font-semibold">学习对话</p><p className="text-[11px] text-white/40">询问、复盘与深入理解</p></div>
               </div>
             </header>
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-7">
+            <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-4 py-5 sm:px-7">
               {messages.length === 0 ? (
                 <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center text-center">
                   <div className="relative flex size-14 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary"><Sparkle className="size-6" weight="fill" /></div>
@@ -262,7 +276,14 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
               <div className="mx-auto max-w-3xl rounded-lg border border-white/12 bg-white/6 p-2 focus-within:border-primary/42">
                 <Textarea ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} placeholder="问一个问题，或说说你卡在哪里…" className="min-h-16 resize-none border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" disabled={loading} />
                 <div className="flex items-center justify-end gap-1 pt-1">
-                  <button onClick={() => setDeepThink((value) => !value)} aria-label="深度思考" className={cn("flex size-8 items-center justify-center rounded-md", deepThink ? "bg-primary/16 text-primary" : "text-white/40 hover:bg-white/8")}><Brain weight={deepThink ? "fill" : "regular"} /></button>
+                  <Tooltip>
+                    <TooltipTrigger render={
+                      <button onClick={() => setDeepThink((value) => !value)} aria-label="深度思考" className={cn("flex size-8 items-center justify-center rounded-md", deepThink ? "bg-primary/16 text-primary" : "text-white/40 hover:bg-white/8")} />
+                    }>
+                      <Brain weight={deepThink ? "fill" : "regular"} />
+                    </TooltipTrigger>
+                    <TooltipContent>深度思考</TooltipContent>
+                  </Tooltip>
                   <Button size="icon" onClick={loading ? stopMessage : sendMessage} disabled={!loading && !input.trim()} className="size-8 bg-primary text-primary-foreground hover:bg-primary/90">{loading ? <Stop weight="fill" /> : <PaperPlaneTilt weight="fill" />}</Button>
                 </div>
               </div>
@@ -277,7 +298,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
                 <span className="text-sm font-semibold">知识库</span>
               </div>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto" key="knowledge">
+            <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar" key="knowledge">
               <div className="rainforest-panel-content">
                 <KnowledgeBase />
               </div>

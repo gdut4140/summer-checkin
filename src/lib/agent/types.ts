@@ -27,7 +27,6 @@ export const planDraftSchema = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().trim().max(600).nullish(),
   goal: z.string().trim().min(1).max(600),
-  targetHours: z.number().min(0).max(2000).default(20),
   tasks: z.array(planTaskDraftSchema).max(40).default([]),
   assumptions: z.array(z.string().trim().min(1).max(200)).max(8).default([]),
 });

@@ -45,7 +45,12 @@ export default async function KnowledgeDocReadPage({
     }
   }
 
-  const content = chunks.map((c) => c.content).join("\n\n");
+  // 优先展示上传时保存的原文；旧数据没有原文则回退用切片拼接
+  const original = await prisma.knowledgeDoc.findUnique({
+    where: { userId_sourceName: { userId: user.id, sourceName: decoded } },
+    select: { content: true },
+  });
+  const content = original?.content ?? chunks.map((c) => c.content).join("\n\n");
 
   return (
     <DocStudioClient

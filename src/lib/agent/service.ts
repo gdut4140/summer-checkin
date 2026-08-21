@@ -21,7 +21,6 @@ function fallbackDraft(goal: string): PlanDraft {
     name: `${shortGoal}学习计划`,
     description: `围绕“${shortGoal}”建立一个可执行的 7 天学习闭环。`,
     goal: shortGoal,
-    targetHours: 14,
     assumptions: ["按每天约 2 小时安排", "先完成基础理解，再通过练习验证"],
     tasks: [
       {
@@ -103,8 +102,7 @@ async function collectContext(userId: string): Promise<AgentContextSnapshot> {
       select: {
         id: true,
         name: true,
-        targetHours: true,
-        checkins: { select: { hours: true } },
+        tasks: { select: { status: true } },
       },
       orderBy: { updatedAt: "desc" },
       take: 5,
@@ -117,14 +115,12 @@ async function collectContext(userId: string): Promise<AgentContextSnapshot> {
     totalHours: Math.round(allCheckins.reduce((sum, item) => sum + item.hours, 0) * 10) / 10,
     recentHours: Math.round(recentCheckins.reduce((sum, item) => sum + item.hours, 0) * 10) / 10,
     activePlans: plans.map((plan) => {
-      const completedHours = plan.checkins.reduce((sum, item) => sum + item.hours, 0);
+      const total = plan.tasks.length;
+      const done = plan.tasks.filter((t) => t.status === "done").length;
       return {
         id: plan.id,
         name: plan.name,
-        progress:
-          plan.targetHours > 0
-            ? Math.min(100, Math.round((completedHours / plan.targetHours) * 100))
-            : 0,
+        progress: total > 0 ? Math.round((done / total) * 100) : 0,
       };
     }),
     memoryCount,
@@ -170,7 +166,7 @@ async function generateDraft(
           {
             role: "system",
             content:
-              "你是学习计划规划 Agent。只返回 JSON，不要 Markdown。计划必须可执行，最多 40 个任务。字段为 name、description、goal、targetHours、assumptions、tasks；tasks 每项包含 title、description、dayNumber、weekNumber、category(study/project/review/exercise)、priority(high/normal/low)。",
+              "你是学习计划规划 Agent。只返回 JSON，不要 Markdown。计划必须可执行，最多 40 个任务。字段为 name、description、goal、assumptions、tasks；tasks 每项包含 title、description、dayNumber、weekNumber、category(study/project/review/exercise)、priority(high/normal/low)。",
           },
           {
             role: "user",
@@ -414,7 +410,6 @@ export async function decideAgentApproval(
         name: draft.name,
         description: draft.description ?? null,
         goal: draft.goal,
-        targetHours: draft.targetHours,
         status: "active",
         // 确认创建时直接生成详细计划文档（学习指导 + 任务安排），
         // 用户打开文档工作室即可看到详细的、有具体指导的计划

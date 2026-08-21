@@ -3,6 +3,7 @@
 // ============================================================
 // Day 10 优化：统一 Server Action 错误处理
 // 不再 throw，改为返回 ActionResult<T> 让调用方统一处理
+// （原在 /settings 页下；设置页已并入主页，actions 保留供表单组件使用）
 // ============================================================
 
 import { requireAuth } from "@/lib/auth-utils";
@@ -23,7 +24,6 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
       data: { name, bio },
     });
 
-    revalidatePath("/settings");
     revalidatePath("/profile");
     return { success: true };
   } catch (error) {

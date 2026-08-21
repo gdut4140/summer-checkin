@@ -29,7 +29,10 @@ import type {
 /**
  * Day 7 核心：创建针对特定用户的学习助手工具集
  */
-export function createStudyTools(userId: string) {
+export function createStudyTools(
+  userId: string,
+  opts?: { excludeCreatePlan?: boolean }
+) {
   // ============================================================
   // Tool 1: 创建学习计划
   // ============================================================
@@ -43,7 +46,6 @@ export function createStudyTools(userId: string) {
       name: z.string().describe("计划名称，例如：'30天React学习计划'"),
       description: z.string().optional().describe("计划的详细描述"),
       goal: z.string().optional().describe("最终目标"),
-      targetHours: z.number().optional().describe("目标总时长（小时）"),
       document: z
         .string()
         .optional()
@@ -55,7 +57,7 @@ export function createStudyTools(userId: string) {
         ),
     }),
 
-    execute: async ({ name, description, goal, targetHours, document }) => {
+    execute: async ({ name, description, goal, document }) => {
       return safeExecute("createPlan", async (): Promise<CreatePlanData> => {
         console.log(`[createPlan] 用户 ${userId} 创建计划: ${name}`);
 
@@ -65,7 +67,6 @@ export function createStudyTools(userId: string) {
             name,
             description: description ?? null,
             goal: goal ?? null,
-            targetHours: targetHours ?? 0,
             document: document ?? null,
             status: "active",
           },
@@ -98,7 +99,7 @@ export function createStudyTools(userId: string) {
         return {
           success: true,
           message: `学习计划「${name}」创建成功`,
-          plan: { id: plan.id, name: plan.name, goal: plan.goal, targetHours: plan.targetHours },
+          plan: { id: plan.id, name: plan.name, goal: plan.goal },
         };
       });
     },
@@ -125,24 +126,22 @@ export function createStudyTools(userId: string) {
         const plans = await prisma.plan.findMany({
           where,
           orderBy: { updatedAt: "desc" },
-          include: { checkins: { select: { hours: true } } },
+          include: { tasks: { select: { status: true } } },
         });
 
         if (plans.length === 0) {
           return { success: true, count: 0, plans: [], message: "还没有学习计划" };
         }
 
+        // 进度 = 完成任务数 / 总任务数（计划不再按时长计算）
         const plansWithProgress: PlanInfo[] = plans.map((plan) => {
-          const completedHours = plan.checkins.reduce((sum, c) => sum + c.hours, 0);
-          const progress = plan.targetHours > 0
-            ? Math.round((completedHours / plan.targetHours) * 100)
-            : 0;
+          const total = plan.tasks.length;
+          const done = plan.tasks.filter((t) => t.status === "done").length;
+          const progress = total > 0 ? Math.round((done / total) * 100) : 0;
           return {
             id: plan.id,
             name: plan.name,
             goal: plan.goal,
-            targetHours: plan.targetHours,
-            completedHours: Math.round(completedHours * 10) / 10,
             progress,
             status: plan.status,
           };
@@ -287,7 +286,7 @@ export function createStudyTools(userId: string) {
           }),
           prisma.plan.findMany({
             where: { userId, status: "active" },
-            include: { checkins: { select: { hours: true } } },
+            include: { tasks: { select: { status: true } } },
           }),
           prisma.checkin.findMany({
             where: {
@@ -351,18 +350,12 @@ export function createStudyTools(userId: string) {
           }
         }
 
-        // 计划完成情况
+        // 计划完成情况（进度 = 完成任务数 / 总任务数）
         const plansSummary = activePlans.map((plan) => {
-          const completed = plan.checkins.reduce((sum, c) => sum + c.hours, 0);
-          const progress = plan.targetHours > 0
-            ? Math.round((completed / plan.targetHours) * 100)
-            : 0;
-          return {
-            name: plan.name,
-            targetHours: plan.targetHours,
-            completedHours: Math.round(completed * 10) / 10,
-            progress,
-          };
+          const total = plan.tasks.length;
+          const done = plan.tasks.filter((t) => t.status === "done").length;
+          const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+          return { name: plan.name, progress };
         });
 
         // 近期心情趋势
@@ -399,7 +392,8 @@ export function createStudyTools(userId: string) {
   });
 
   return {
-    createPlan,
+    // 在文档工作室编辑已有计划时，不提供 createPlan，避免 AI 既改当前计划又新建一个
+    ...(opts?.excludeCreatePlan ? {} : { createPlan }),
     getMyPlans,
     getRecentCheckins,
     getMyMemories,

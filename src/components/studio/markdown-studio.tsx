@@ -55,6 +55,8 @@ export interface MarkdownStudioProps {
     context?: Record<string, string>;
     fetchLatest?: () => Promise<string>;
   };
+  /** 新建计划跳转（?focusAi=1）：进入后自动聚焦 AI 输入框并预填引导语 */
+  autoFocusAi?: boolean;
   readOnly?: boolean;
 }
 
@@ -74,6 +76,7 @@ export function MarkdownStudio({
   onRename,
   onExit,
   ai,
+  autoFocusAi = false,
   readOnly = false,
 }: MarkdownStudioProps) {
   const aiEnabled = !readOnly && Boolean(ai);
@@ -125,7 +128,9 @@ export function MarkdownStudio({
   const [renameValue, setRenameValue] = useState(document.title);
   const [showAiUndo, setShowAiUndo] = useState(false);
   const [aiFlash, setAiFlash] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"outline" | "doc" | "ai">("doc");
+  const [mobileTab, setMobileTab] = useState<"outline" | "doc" | "ai">(
+    autoFocusAi ? "ai" : "doc"
+  );
   const [quote, setQuote] = useState<string | null>(null);
   const editorRef = useRef<EditorPaneHandle>(null);
   const flashTimerRef = useRef<number | null>(null);
@@ -625,6 +630,8 @@ export function MarkdownStudio({
                   storageKey={ai?.context ? `${ai.context.kind ?? "doc"}:${ai.context.refId ?? ""}` : undefined}
                   aiExpanded={aiExpanded}
                   onToggleAiExpanded={() => setAiExpanded((v) => !v)}
+                  autoFocus={autoFocusAi}
+                  starterPrompt={autoFocusAi ? "帮我制定一个学习计划，我的目标是：" : undefined}
                 />
               </div>
             </div>

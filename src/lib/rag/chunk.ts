@@ -59,6 +59,11 @@ export function splitText(
 
       chunks.push(chunk);
 
+      // 已切到文本末尾：结束。
+      // 否则尾部（≤ overlap 的小尾巴）会让 advance ≤ 0、被强制成 1，
+      // 退化成"每次前进 1 字"的重复重叠分片。
+      if (end >= trimmed.length) break;
+
       // 确保 start 始终前进（防止死循环）
       const advance = chunk.length - overlap;
       start += advance > 0 ? advance : 1;

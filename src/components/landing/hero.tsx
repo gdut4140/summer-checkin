@@ -1,116 +1,150 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
 import {
   ArrowRight,
   CalendarCheck,
   ChartLineUp,
   Check,
+  CaretDown,
   Leaf,
   Robot,
   Sparkle,
 } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import SplitText from "./SplitText";
 import ShinyText from "./ShinyText";
+import VariableProximity from "@/components/ui/variable-proximity";
+import { GithubLink } from "@/components/layout/github-link";
 
 const pulseItems = [
   { icon: CalendarCheck, value: "12 天", label: "连续打卡" },
   { icon: ChartLineUp, value: "86%", label: "本周完成" },
-  { icon: Robot, value: "已生成", label: "AI 学习建议" },
+  { icon: Robot, value: "AI 已生成", label: "学习建议" },
 ];
 
 export function Hero() {
+  const heroRef = useRef<HTMLElement>(null);
+
   return (
-    <section className="relative flex min-h-[94dvh] flex-col overflow-hidden px-4 pb-14 pt-5 text-white md:px-8 md:pb-18">
-      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between" aria-label="首页导航">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/35 bg-white/18 backdrop-blur-xl">
-            <Leaf className="h-5 w-5" weight="fill" />
-          </span>
-          <span>Summer Checkin</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link href="/login">
-            <Button variant="ghost" className="text-white hover:bg-white/15 hover:text-white">登录</Button>
+    <section ref={heroRef} className="relative flex min-h-[100dvh] max-w-[100vw] flex-col overflow-hidden px-5 pb-8 pt-5 text-white md:px-10 md:pb-12">
+      {/* 渐变遮罩：左深右透 + 底部暗角 */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(95deg,rgba(3,17,12,0.68)_0%,rgba(3,17,12,0.38)_40%,rgba(3,17,12,0.06)_70%),linear-gradient(0deg,rgba(3,17,12,0.78)_0%,transparent_38%)]" />
+
+      {/* 向下滚动提示（贴右居中，纯视觉） */}
+      <div className="pointer-events-none absolute right-3 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-6 md:flex">
+        <span className="tracking-widest">向下滚动</span>
+        <CaretDown className="size-3.5 animate-bounce" />
+      </div>
+
+      {/* 顶栏 */}
+      <nav className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between" aria-label="首页导航">
+        <Link
+            href="/"
+            className="flex items-center gap-2.5 font-semibold"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#d7ef83]/35 bg-[#d7ef83]/15 backdrop-blur-md">
+              <Leaf className="h-5 w-5 text-[#d7ef83]" weight="fill" />
+            </span>
+            <span className="text-[15px] tracking-wide">Summer Checkin</span>
           </Link>
-          <Link href="/register">
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">开始打卡</Button>
-          </Link>
+        <div className="flex items-center gap-3">
+          <GithubLink />
         </div>
       </nav>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end pt-24 md:pt-32">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-4xl"
-        >
-          <div className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-white/86">
-            <Sparkle className="h-4 w-4 text-primary" weight="fill" />
+      {/* 主内容 */}
+      <div className="relative z-10 mx-auto flex min-w-0 w-full max-w-7xl flex-1 flex-col justify-end pt-24 md:pt-28">
+        <div className="w-full min-w-0 max-w-4xl animate-[product-enter_700ms_cubic-bezier(0.16,1,0.3,1)_both]">
+          {/* 小标签 */}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/8 px-3.5 py-1.5 text-[13px] font-medium text-white/85 backdrop-blur-md">
+            <Sparkle className="h-3.5 w-3.5 text-[#d7ef83]" weight="fill" />
             <ShinyText
               text="AI 驱动的学习节奏管理"
-              speed={3}
+              speed={2.5}
               color="#ffffff"
-              shineColor="hsl(var(--primary))"
-              spread={120}
+              shineColor="#d7ef83"
+              spread={45}
               direction="left"
             />
           </div>
-          <SplitText
-            text="Summer Checkin"
-            tag="h1"
-            className="text-5xl font-semibold leading-[1.03] md:text-7xl lg:text-8xl"
-            delay={80}
-            duration={0.8}
-            ease="power3.out"
-            splitType="chars"
-            from={{ opacity: 0, y: 60 }}
-            to={{ opacity: 1, y: 0 }}
-            threshold={0.1}
-            rootMargin="-50px"
-            textAlign="center"
+
+          {/* 主标题 — 双色：Summer 白 / Checkin 主题绿 */}
+          <h1 className="text-[44px] font-bold leading-[1.02] tracking-tight sm:text-5xl md:text-7xl lg:text-[88px]">
+            <span>Summer </span>
+            <span className="text-[#d7ef83]">Checkin</span>
+          </h1>
+
+          {/* 副标题 — VariableProximity 互动字体 */}
+          <VariableProximity
+            label="把每一次专注留在风景里。制定计划、完成打卡、观察成长，让 AI 帮你把这个夏天变成一段清晰可见的进步。"
+            fromFontVariationSettings="'wght' 400"
+            toFontVariationSettings="'wght' 700"
+            containerRef={heroRef}
+            radius={120}
+            falloff="exponential"
+            baseColor="rgba(255,255,255,0.8)"
+            highlightColor="#d7ef83"
+            className="mt-6 max-w-xl text-[15px] leading-relaxed sm:text-base md:text-lg"
           />
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/84 md:text-xl">
-            把每一次专注留在风景里。制定计划、完成打卡、观察成长，让 AI 帮你把这个夏天变成一段清晰可见的进步。
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/register">
-              <Button size="lg" className="bg-primary text-primary-foreground shadow-lg shadow-black/10 hover:bg-primary/90">
-                免费开始
-                <ArrowRight className="ml-2 h-4 w-4" weight="bold" />
-              </Button>
+
+          {/* 按钮组 — Uiverse 风格 + 主题色 */}
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <Link
+              href="/register"
+              className="group inline-flex items-center gap-2 rounded-full border-2 border-[#0a1f14] bg-[#d7ef83] px-8 py-3.5 text-[15px] font-bold text-[#0a1f14] shadow-[0_0_0_0_#0a1f14] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:translate-x-[-2px] hover:shadow-[4px_6px_0_0_#0a1f14] active:translate-y-0.5 active:translate-x-[1px] active:shadow-[0_0_0_0_#0a1f14]"
+            >
+              免费开始
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" weight="bold" />
             </Link>
-            <Link href="#features">
-              <Button size="lg" variant="outline" className="border-white/45 bg-white/10 text-white backdrop-blur-lg hover:bg-white/20 hover:text-white">
-                看看如何使用
-              </Button>
+
+            <Link
+              href="#features"
+              onClick={(e) => {
+                e.preventDefault();
+                const target = document.querySelector("#features");
+                if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-white/40 bg-[#d7ef83]/10 px-7 py-3.5 text-[15px] font-semibold text-[#d7ef83] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:translate-x-[-2px] hover:border-[#d7ef83]/70 hover:bg-[#d7ef83]/20 hover:shadow-[4px_6px_0_0_rgba(215,239,131,0.35)] active:translate-y-0.5 active:translate-x-[1px] active:shadow-none"
+            >
+              向下探索
+              <CaretDown className="size-4 animate-bounce" />
             </Link>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="mt-12 grid max-w-3xl grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/18 bg-white/10 backdrop-blur-2xl sm:grid-cols-3"
-        >
-          {pulseItems.map((item) => (
-            <div key={item.label} className="flex min-h-24 items-center gap-4 bg-[#061a14]/42 px-5 py-4">
-              <item.icon className="h-6 w-6 shrink-0 text-primary" weight="duotone" />
-              <div>
-                <p className="text-lg font-semibold">{item.value}</p>
-                <p className="mt-0.5 text-sm text-white/65">{item.label}</p>
+        {/* 数据栏 */}
+        <div className="mt-14 grid w-full min-w-0 max-w-2xl grid-cols-3 overflow-hidden rounded-2xl border border-white/15 bg-black/25 backdrop-blur-md">
+          {pulseItems.map((item, idx) => (
+            <div
+              key={item.label}
+              className={`flex min-h-[84px] min-w-0 items-center gap-3 px-4 py-4 sm:px-6 ${
+                idx !== 0 ? "border-l border-[#d7ef83]/20" : ""
+              }`}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#d7ef83]/20 ring-1 ring-[#d7ef83]/30">
+                <item.icon className="h-4.5 w-4.5 text-[#d7ef83]" weight="duotone" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-base font-bold sm:text-lg">{item.value}</p>
+                <p className="mt-0.5 text-[11px] text-white/55 sm:text-xs">{item.label}</p>
               </div>
             </div>
           ))}
-        </motion.div>
+        </div>
 
-        <div className="mt-5 flex items-center gap-2 text-sm text-white/68">
-          <Check className="h-4 w-4 text-primary" weight="bold" />
-          你的数据只属于你，随时开始，随时回看
+        {/* 底部信息 */}
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs text-white/60 sm:text-sm">
+            <Check className="h-4 w-4 text-[#d7ef83]" weight="bold" />
+            你的数据只属于你，随时开始，随时回看
+          </div>
+          <a
+            href="#workspace"
+            className="hidden items-center gap-1.5 text-xs text-white/45 transition-colors hover:text-white sm:flex"
+          >
+            向下探索
+            <CaretDown className="size-4 animate-bounce" />
+          </a>
         </div>
       </div>
     </section>

@@ -40,6 +40,10 @@ interface AiChatPanelProps {
   onToggleAiExpanded?: () => void;
   /** 外层 studio-root 元素：把对话框挂入其 DOM 树内以继承主题 CSS 变量 */
   studioRoot?: HTMLElement | null;
+  /** 新建计划跳转：挂载后聚焦输入框 */
+  autoFocus?: boolean;
+  /** autoFocus 时预填的引导语（提示用户直接在 AI 框里描述目标） */
+  starterPrompt?: string;
 }
 
 const STORAGE_PREFIX = "studio-chat:";
@@ -54,6 +58,8 @@ export function AiChatPanel({
   aiExpanded = false,
   onToggleAiExpanded,
   studioRoot: studioRootProp,
+  autoFocus = false,
+  starterPrompt,
 }: AiChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -128,6 +134,15 @@ export function AiChatPanel({
     };
   }, [storageKey]);
 
+  // 从「新建计划」进入（autoFocus）→ 预填引导语并聚焦输入框
+  useEffect(() => {
+    if (!autoFocus) return;
+    if (starterPrompt) setInput(starterPrompt);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => inputRef.current?.focus());
+    });
+  }, [autoFocus, starterPrompt]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -139,6 +154,7 @@ export function AiChatPanel({
     setInput("");
     if (quote) onClearQuote?.();
     setLoading(true);
+    requestAnimationFrame(() => inputRef.current?.focus());
 
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -281,7 +297,7 @@ export function AiChatPanel({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-3 py-3">
         {messages.length === 0 && historyLoading ? (
           <div className="flex h-full items-center justify-center">
             <div className="size-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />

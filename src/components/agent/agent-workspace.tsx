@@ -60,7 +60,6 @@ function isPlanDraft(value: unknown): value is {
   name: string;
   description?: string | null;
   goal: string;
-  targetHours: number;
   assumptions?: string[];
   tasks: {
     title: string;
@@ -437,7 +436,6 @@ export function AgentWorkspace({ initialRuns }: Props) {
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs font-semibold text-primary">
-                        <span>目标时长：{draft.targetHours} 小时</span>
                         <span>任务数：{draft.tasks.length}</span>
                       </div>
                       <Separator />

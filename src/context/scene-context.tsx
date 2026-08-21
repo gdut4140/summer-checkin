@@ -1,10 +1,21 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { SceneCopy, SceneType } from "@/config/theme";
-import { SCENE_COPY } from "@/config/theme";
+import {
+  SCENE_COPY,
+  DEFAULT_SCENE,
+  SCENE_STORAGE_KEY,
+  asSceneType,
+  getSceneCopy,
+  type SceneCopy,
+  type SceneType,
+} from "@/lib/scene-meta";
 
+// 把纯数据 / 纯函数 / 类型一起 re-export，让既有客户端文件里
+// `import { useSceneCopy, type SceneType, getSceneCopy } from "@/context/scene-context"`
+// 的导入路径不用改，保持单点共享。
 export type { SceneType, SceneCopy };
+export { SCENE_COPY, DEFAULT_SCENE, SCENE_STORAGE_KEY, asSceneType, getSceneCopy };
 
 interface SceneContextValue {
   scene: SceneType;
@@ -15,8 +26,7 @@ interface SceneContextValue {
 
 const SceneContext = createContext<SceneContextValue | undefined>(undefined);
 
-const STORAGE_KEY = "summer-checkin-scene";
-const DEFAULT_SCENE: SceneType = "rain";
+const STORAGE_KEY = SCENE_STORAGE_KEY;
 
 /** 把场景同步到 html[data-scene]，让 CSS 变量选择器生效 */
 function applySceneToDOM(scene: SceneType) {
@@ -25,11 +35,6 @@ function applySceneToDOM(scene: SceneType) {
   if (root.dataset.scene !== scene) {
     root.dataset.scene = scene;
   }
-}
-
-/** 从 localStorage 读取时的兜底，和 SceneType 字面量保持同步（rain | snow | cloud） */
-function asSceneType(v: unknown): SceneType {
-  return v === "rain" || v === "snow" || v === "cloud" ? v : DEFAULT_SCENE;
 }
 
 export function SceneProvider({ children }: { children: ReactNode }) {
@@ -77,11 +82,4 @@ export function useScene() {
  */
 export function useSceneCopy(): SceneCopy {
   return useScene().copy;
-}
-
-/**
- * 纯函数版：拿某个 scene 对应的文案（非 React 环境/工具函数里用，不能用 hook 时用）。
- */
-export function getSceneCopy(scene: SceneType): SceneCopy {
-  return SCENE_COPY[scene];
 }

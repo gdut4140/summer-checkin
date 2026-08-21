@@ -30,11 +30,6 @@ import {
   extractAndSaveMemories,
   touchMemories,
 } from "@/lib/memory";
-import {
-  searchKnowledge,
-  formatKnowledgeForPrompt,
-} from "@/lib/rag";
-
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser();
@@ -113,17 +108,10 @@ export async function POST(request: NextRequest) {
     touchMemories(memories.map((m) => m.id)).catch(() => {});
 
     // ============================================================
-    // Day 16 新增：主动检索知识库
-    // 对用户的最后一条消息做知识库搜索，结果注入 system prompt
+    // Day 16 知识库检索：不再主动注入
+    // 交给 AI 通过 searchKnowledgeBase 工具自行判断是否检索，
+    // 避免寒暄/闲聊消息也白白做向量检索拖慢回复
     // ============================================================
-    let ragPrompt = "";
-    try {
-      const ragResult = await searchKnowledge(lastUserMsg.content, user.id);
-      ragPrompt = formatKnowledgeForPrompt(ragResult);
-    } catch (err) {
-      // RAG 检索失败不阻塞对话
-      console.warn("[AI] RAG 检索跳过（服务不可用）:", err);
-    }
 
     // ============================================================
     // Phase 3/4 文档工作室：注入当前文档上下文 + 文档修改工具
@@ -174,7 +162,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const fullSystem = [SYSTEM_PROMPT, studioPrompt, ragPrompt, memoryPrompt]
+    const fullSystem = [SYSTEM_PROMPT, studioPrompt, memoryPrompt]
       .filter(Boolean)
       .join("\n\n");
 
@@ -200,7 +188,8 @@ export async function POST(request: NextRequest) {
       // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
       // Phase 1: Coach 工具（学习分析 + 计划调整）
       tools: {
-        ...createStudyTools(user.id),
+        // 在文档工作室里编辑已有计划/文档时，不给 createPlan，避免 AI 新建重复计划
+        ...createStudyTools(user.id, studioContext ? { excludeCreatePlan: true } : undefined),
         ...createRAGTool(user.id),
         ...createAgentTools(user.id),
         ...createCoachTools(user.id),
