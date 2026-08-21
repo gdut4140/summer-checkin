@@ -3,6 +3,9 @@ services:
     image: pgvector/pgvector:pg16
     container_name: postgresServer
     restart: unless-stopped
+    # 本 VM 内核上 Docker 默认 seccomp 会拦 postgres initdb 的 fork（报 Cannot allocate memory），放开
+    security_opt:
+      - seccomp=unconfined
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-summer_checkin_dev}

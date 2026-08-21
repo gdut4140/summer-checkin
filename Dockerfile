@@ -58,21 +58,16 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 
 # 复制 Prisma CLI 完整依赖（standalone 不含 devDependencies，但启动时需要它们）
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
-COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
-COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
-COPY --from=builder /app/node_modules/@esbuild ./node_modules/@esbuild
-COPY --from=builder /app/node_modules/get-tsconfig ./node_modules/get-tsconfig
-COPY --from=builder /app/node_modules/resolve-pkg-maps ./node_modules/resolve-pkg-maps
+COPY --from=builder /app/node_modules ./node_modules
 
 # 复制知识库文档（RAG 需要）
-COPY --from=builder /app/knowledge ./knowledge
+# 知识库为运行时 volume（compose 挂 knowledge_data 到 /app/knowledge），无需随镜像 COPY
+RUN mkdir -p /app/knowledge
 
 # 复制 WebSocket sidecar（独立进程，复用应用依赖 + ws）
 COPY --from=builder /app/server ./server
-COPY --from=builder /app/src/lib/generated ./src/lib/generated
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/node_modules/ws ./node_modules/ws
 
 # 设置文件权限
