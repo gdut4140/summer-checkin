@@ -30,11 +30,6 @@ export function Hero() {
       {/* 渐变遮罩：左深右透 + 底部暗角 */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(95deg,rgba(3,17,12,0.68)_0%,rgba(3,17,12,0.38)_40%,rgba(3,17,12,0.06)_70%),linear-gradient(0deg,rgba(3,17,12,0.78)_0%,transparent_38%)]" />
 
-      {/* 向下滚动提示（贴右居中，纯视觉） */}
-      <div className="pointer-events-none absolute right-3 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-6 md:flex">
-        <span className="tracking-widest">向下滚动</span>
-        <CaretDown className="size-3.5 animate-bounce" />
-      </div>
 
       {/* 顶栏 */}
       <nav className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between" aria-label="首页导航">
@@ -138,13 +133,6 @@ export function Hero() {
             <Check className="h-4 w-4 text-[#d7ef83]" weight="bold" />
             你的数据只属于你，随时开始，随时回看
           </div>
-          <a
-            href="#workspace"
-            className="hidden items-center gap-1.5 text-xs text-white/45 transition-colors hover:text-white sm:flex"
-          >
-            向下探索
-            <CaretDown className="size-4 animate-bounce" />
-          </a>
         </div>
       </div>
     </section>

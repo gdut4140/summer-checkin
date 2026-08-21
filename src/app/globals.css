@@ -1490,3 +1490,80 @@
 [data-sonner-toaster] [data-close-button]:hover {
   background: color-mix(in srgb, var(--primary-foreground) 12%, transparent);
 }
+
+/* ── 雨宝精力条 ── */
+.energy-fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary) 65%, transparent),
+    var(--primary),
+    color-mix(in srgb, var(--primary) 55%, var(--primary-foreground) 45%),
+    var(--primary),
+    color-mix(in srgb, var(--primary) 65%, transparent)
+  );
+  background-size: 200% auto;
+  animation: energy-flow 1.2s linear infinite;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+@keyframes energy-flow {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.energy-orb {
+  position: absolute;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--primary-foreground),
+    var(--primary) 55%,
+    color-mix(in srgb, var(--primary) 60%, #000 40%)
+  );
+  box-shadow: 0 0 12px 3px color-mix(in srgb, var(--primary) 65%, transparent),
+    0 0 4px 1px color-mix(in srgb, var(--primary) 40%, transparent);
+  animation: energy-bob 1.0s ease-in-out infinite;
+}
+
+@keyframes energy-bob {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translateY(-4px);
+  }
+}
+
+.energy-sparkle {
+  position: absolute;
+  bottom: 100%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--primary) 60%, transparent);
+  opacity: 0;
+  animation: energy-sparkle-float 2.4s ease-out infinite;
+}
+
+@keyframes energy-sparkle-float {
+  0% {
+    transform: translateY(0) scale(0.4);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateY(-14px) scale(1);
+    opacity: 0;
+  }
+}

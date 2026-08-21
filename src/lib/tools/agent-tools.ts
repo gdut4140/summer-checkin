@@ -73,33 +73,27 @@ export function createAgentTools(userId: string) {
   // ============================================================
   const breakdownPlanTasks = tool({
     description:
-      "将一个学习计划拆分为具体的、平铺的可执行任务。当用户创建学习计划后，需要将大目标分解为可执行的小任务时使用。" +
-      "你必须先通过 getMyPlans 或 createPlan 获取 planId，" +
-      "然后根据计划的目标、总时长来生成任务列表。" +
-      "任务应该具体、可量化、有明确的完成标准。" +
-      "不要按周/天分组，不要输出 Day/Week 编号，平铺成一条条任务即可。",
+      "把学习计划拆分为平铺的具体可执行任务。拆分前先通过 getMyPlans 拿到 planId。" +
+      "任务要具体、可量化、有完成标准；不要按周/天分组。",
 
     inputSchema: z.object({
-      planId: z.string().describe("要拆分的计划ID"),
+      planId: z.string().describe("计划ID"),
       tasks: z
         .array(
           z.object({
-            title: z.string().describe("任务标题，简洁明确，如'环境搭建与 JSX 基础'"),
-            description: z
-              .string()
-              .optional()
-              .describe("任务详细描述，包含具体学习内容、资源链接、完成标准"),
+            title: z.string().describe("任务标题，简洁明确"),
+            description: z.string().optional().describe("任务详情：内容、资源、完成标准"),
             category: z
               .enum(["study", "project", "review", "exercise"])
               .optional()
-              .describe("任务类别：study=学习新知识, project=项目练习, review=复习巩固, exercise=习题练习"),
+              .describe("study=学新/project=项目/review=复习/exercise=练习"),
             priority: z
               .enum(["high", "normal", "low"])
               .optional()
-              .describe("优先级：high=核心必做, normal=常规任务, low=选做"),
+              .describe("high=核心/normal=常规/low=选做"),
           })
         )
-        .describe("要创建的任务列表，AI 应根据计划目标拆分为平铺的具体任务"),
+        .describe("按计划目标拆分的平铺任务列表"),
     }),
 
     execute: async ({ planId, tasks }) => {
@@ -168,16 +162,14 @@ export function createAgentTools(userId: string) {
   // 查看计划的任务列表和进度统计，判断是否需要调整
   // ============================================================
   const getPlanTasks = tool({
-    description:
-      "查询某个学习计划的所有任务及其完成情况。返回任务列表和进度统计（总数、已完成、进行中、待开始）。" +
-      "当用户询问'我的计划进度'、'还有哪些任务没完成'、'下一步该做什么'时使用。",
+    description: "查询计划的任务列表和进度统计（总数/已完成/进行中/待开始）。",
 
     inputSchema: z.object({
       planId: z.string().describe("计划ID"),
       status: z
         .enum(["pending", "in_progress", "done", "skipped"])
         .optional()
-        .describe("按状态筛选，不传则查全部"),
+        .describe("按状态筛选，不传查全部"),
     }),
 
     execute: async ({ planId, status }) => {
@@ -238,19 +230,15 @@ export function createAgentTools(userId: string) {
   // ============================================================
   const updateTaskStatus = tool({
     description:
-      "更新某个任务的状态。当用户说'完成了某任务'、'跳过这个'、'今天学了XXX'时使用。" +
-      "AI 应先调用 getPlanTasks 了解当前任务，然后调用此工具更新状态。" +
-      "设置为 done 时会自动记录完成时间并创建打卡记录（可选的 hours 参数记录学习时长）。",
+      "更新任务状态（pending/in_progress/done/skipped）。用户说完成/跳过/开始某任务时用；" +
+      "done 时自动打卡并可用 hours 记录学习时长。",
 
     inputSchema: z.object({
       taskId: z.string().describe("任务ID"),
       status: z
         .enum(["pending", "in_progress", "done", "skipped"])
         .describe("新状态"),
-      hours: z
-        .number()
-        .optional()
-        .describe("学习时长（小时），仅在 status=done 时有效。如果用户提到学了多久，请传入此参数"),
+      hours: z.number().optional().describe("学习时长（小时），仅 status=done 时用"),
     }),
 
     execute: async ({ taskId, status, hours }) => {
@@ -362,9 +350,7 @@ export function createAgentTools(userId: string) {
   // 查询今日应该完成的任务，帮助用户聚焦当日目标
   // ============================================================
   const getTodayTasks = tool({
-    description:
-      "获取用户今天应该完成的任务。当用户说'今天学什么？''今日任务''今天有什么要做的'时使用。" +
-      "AI 应基于此工具的结果给用户清晰的今日学习清单，并关注进度落后的任务。",
+    description: "获取用户今日应完成的任务清单。用户问'今天学什么''今日任务'时用。",
 
     inputSchema: z.object({}),
 

@@ -14,7 +14,7 @@
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
-import { createAIClient } from "@/lib/deepseek";
+import { completionsWithFallback } from "@/lib/model-pool";
 import { embedText } from "@/lib/rag/client";
 import { cosineSimilarity, parseEmbedding } from "@/lib/rag/retriever";
 
@@ -291,7 +291,8 @@ export async function extractAndSaveMemories(
     const extracted = await extractMemoriesWithAI(
       userMessage,
       aiResponse,
-      existing.map((m) => ({ id: m.id, content: m.content }))
+      existing.map((m) => ({ id: m.id, content: m.content })),
+      userId
     );
     if (extracted.length === 0) {
       console.log("[Memory] AI 未提取到信息，跳过");
@@ -438,27 +439,30 @@ const EXTRACTION_PROMPT = `你是信息提取助手。根据以下对话，提�
 async function extractMemoriesWithAI(
   userMessage: string,
   aiResponse: string,
-  existingMemories: { id: string; content: string }[] = []
+  existingMemories: { id: string; content: string }[] = [],
+  userId: string
 ): Promise<MemoryExtraction[]> {
-  const client = createAIClient();
-
   const existingList = existingMemories.length > 0
     ? `\n## 已有记忆（用于语义匹配）\n${existingMemories.map((m) => `- id:${m.id} | ${m.content}`).join("\n")}`
     : "";
 
-  const response = await client.chat.completions.create({
-    model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-    messages: [
-      { role: "system", content: EXTRACTION_PROMPT },
-      {
-        role: "user",
-        content: `用户说：${userMessage}\n\nAI 回复：${aiResponse}${existingList}`,
-      },
-    ],
-    temperature: 0.3,
-    max_tokens: 500,
-    response_format: { type: "json_object" },
-  });
+  const { data: response } = await completionsWithFallback("low", (entry, client, extraBody) =>
+    client.chat.completions.create({
+      model: entry.modelName,
+      messages: [
+        { role: "system", content: EXTRACTION_PROMPT },
+        {
+          role: "user",
+          content: `用户说：${userMessage}\n\nAI 回复：${aiResponse}${existingList}`,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 500,
+      response_format: { type: "json_object" },
+      ...extraBody,
+    }),
+    { userId, surface: "memory" }
+  );
 
   const text = response.choices[0]?.message?.content?.trim();
   if (!text) return [];

@@ -35,8 +35,6 @@ export type PlanDraft = z.infer<typeof planDraftSchema>;
 
 export interface AgentContextSnapshot {
   totalCheckins: number;
-  totalHours: number;
-  recentHours: number;
   activePlans: { id: string; name: string; progress: number }[];
   memoryCount: number;
 }

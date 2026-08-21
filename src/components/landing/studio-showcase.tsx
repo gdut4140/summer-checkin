@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { BookOpen, Books, Calculator, Code, ListBullets, NotePencil, Sparkle, Table } from "@phosphor-icons/react";
+import { BookOpen, Books, Calculator, CaretDown, Code, ListBullets, NotePencil, Sparkle, Table } from "@phosphor-icons/react";
 
 const features = [
   { icon: ListBullets, label: "标题大纲", desc: "自动生成文档目录，点击跳转" },
@@ -24,7 +24,12 @@ const docOutline = [
 
 export function StudioShowcase() {
   return (
-    <section className="bg-[#0a2618]/60 px-4 py-20 text-white md:px-8 md:py-28">
+    <section className="relative bg-[#0a2618]/60 px-4 py-20 text-white md:px-8 md:py-28">
+      {/* 向下滚动提示（贴右居中，纯视觉） */}
+      <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
+        <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
+        <CaretDown className="size-3.5 animate-bounce" />
+      </div>
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
           

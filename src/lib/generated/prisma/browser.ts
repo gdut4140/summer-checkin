@@ -152,3 +152,8 @@ export type PlanTemplate = Prisma.PlanTemplateModel
  * 
  */
 export type DocumentTemplate = Prisma.DocumentTemplateModel
+/**
+ * Model TokenUsage
+ * 
+ */
+export type TokenUsage = Prisma.TokenUsageModel

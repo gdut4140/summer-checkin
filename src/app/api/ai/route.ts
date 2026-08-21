@@ -19,10 +19,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
-import { getAIModel, getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
+import { getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
-import { streamText, toTextStream, createTextStreamResponse, isStepCount } from "ai";
-import { createStudyTools, createRAGTool, createAgentTools, createCoachTools } from "@/lib/tools";
+import { createTextStreamResponse, isStepCount } from "ai";
+import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
+import { assertInteractiveUsageAllowed, UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
+import { createStudyTools, createRAGTool, createAgentTools } from "@/lib/tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
 import {
   getRelevantMemories,
@@ -36,6 +38,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // 交互式面：每日限额早检（超限抛 UsageLimitError，由外层 catch 流式返回友好文本；不建会话不写库）
+    await assertInteractiveUsageAllowed(user.id);
 
     const body = await request.json();
     const messages = body.messages as {
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
     let activeConversationId = conversationId;
     if (!activeConversationId) {
       const lastMessage = messages[messages.length - 1];
-      const title = await generateChatTitle(lastMessage.content);
+      const title = await generateChatTitle(lastMessage.content, user.id);
 
       const conversation = await prisma.conversation.create({
         data: {
@@ -106,6 +111,12 @@ export async function POST(request: NextRequest) {
 
     // 标记记忆被检索使用（用于冷淘汰：不用的记忆会被清理）
     touchMemories(memories.map((m) => m.id)).catch(() => {});
+
+    // 最近对话摘要：createPlan 后台生成计划文档时作为个性化上下文（截断，控制成本）
+    const conversationHint = truncatedMessages
+      .slice(-6)
+      .map((m) => `${m.role === "user" ? "用户" : "雨宝"}: ${m.content.slice(0, 200)}`)
+      .join("\n");
 
     // ============================================================
     // Day 16 知识库检索：不再主动注入
@@ -180,19 +191,25 @@ export async function POST(request: NextRequest) {
     //                 Step 2: LLM 基于 tool 结果 → 生成自然语言回复
     //                 （默认 isStepCount(1) 无法完成 Tool Calling 闭环）
     // ============================================================
-    const result = streamText({
-      model: getAIModel(),
+    // 走模型池 HIGH 档（agent/文档），免费额度耗尽自动降级到下一个模型
+    const { stream } = await streamTextWithFallback("high", (_entry, model) => ({
+      model,
       system: fullSystem,
       providerOptions: getDeepThinkOptions(deepThink ?? false),
       messages: truncatedMessages,
       // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
       // Phase 1: Coach 工具（学习分析 + 计划调整）
       tools: {
-        // 在文档工作室里编辑已有计划/文档时，不给 createPlan，避免 AI 新建重复计划
-        ...createStudyTools(user.id, studioContext ? { excludeCreatePlan: true } : undefined),
+        // 在文档工作室里编辑已有计划/文档时，不给 createPlan，避免 AI 新建重复计划；
+        // 聊天场景把最近对话 + 长期记忆带给 createPlan，用于后台生成个性化计划文档
+        ...createStudyTools(
+          user.id,
+          studioContext
+            ? { excludeCreatePlan: true }
+            : { conversation: conversationHint, memories: memoryPrompt }
+        ),
         ...createRAGTool(user.id),
         ...createAgentTools(user.id),
-        ...createCoachTools(user.id),
         ...studioTools,
       },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
@@ -266,24 +283,40 @@ export async function POST(request: NextRequest) {
           console.error("[AI] onEnd: 数据库写入失败", err);
         }
       },
+    }), {
+      userId: user.id,
+      surface: studioContext ? "studio" : "agent",
+      enforce: true,
     });
 
-    // Day 3: 用独立 helper 函数创建流式响应（非弃用方法）
-    // ① toTextStream — 将 streamText 的原始流转为纯文本流
-    // ② createTextStreamResponse — 包装成 HTTP Response，设置自定义 header
-    const textStream = toTextStream({ stream: result.stream });
     return createTextStreamResponse({
-      stream: textStream,
+      stream,
       headers: {
         "X-Conversation-Id": activeConversationId,
         "Access-Control-Expose-Headers": "X-Conversation-Id",
       },
     });
   } catch (error) {
+    // 每日精力用完（UsageLimitError）或余额/配额不足（isQuotaError）：
+    // 统一流式返回「我宕机了，呃啊」，前端照常渲染为雨宝的回复
+    if (error instanceof UsageLimitError || isQuotaError(error)) {
+      return limitStreamResponse(ENERGY_DOWN_MESSAGE);
+    }
     console.error("AI API error:", error);
     return NextResponse.json(
       { error: "Failed to get AI response" },
       { status: 500 }
     );
   }
+}
+
+/** 把一段文本包装成流式响应（雨宝没精力时的友好提示） */
+function limitStreamResponse(message: string) {
+  const stream = new ReadableStream<string>({
+    start(controller) {
+      controller.enqueue(message);
+      controller.close();
+    },
+  });
+  return createTextStreamResponse({ stream });
 }

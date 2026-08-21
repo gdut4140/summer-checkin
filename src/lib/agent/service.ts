@@ -1,4 +1,4 @@
-import { createAIClient } from "@/lib/deepseek";
+import { completionsWithFallback } from "@/lib/model-pool";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import {
@@ -84,19 +84,8 @@ function fallbackDraft(goal: string): PlanDraft {
 }
 
 async function collectContext(userId: string): Promise<AgentContextSnapshot> {
-  const now = new Date();
-  const recentSince = new Date(now);
-  recentSince.setDate(recentSince.getDate() - 7);
-
-  const [allCheckins, recentCheckins, plans, memoryCount] = await Promise.all([
-    prisma.checkin.findMany({
-      where: { userId },
-      select: { hours: true },
-    }),
-    prisma.checkin.findMany({
-      where: { userId, checkinDate: { gte: recentSince } },
-      select: { hours: true },
-    }),
+  const [totalCheckins, plans, memoryCount] = await Promise.all([
+    prisma.checkin.count({ where: { userId } }),
     prisma.plan.findMany({
       where: { userId, status: "active" },
       select: {
@@ -111,9 +100,7 @@ async function collectContext(userId: string): Promise<AgentContextSnapshot> {
   ]);
 
   return {
-    totalCheckins: allCheckins.length,
-    totalHours: Math.round(allCheckins.reduce((sum, item) => sum + item.hours, 0) * 10) / 10,
-    recentHours: Math.round(recentCheckins.reduce((sum, item) => sum + item.hours, 0) * 10) / 10,
+    totalCheckins,
     activePlans: plans.map((plan) => {
       const total = plan.tasks.length;
       const done = plan.tasks.filter((t) => t.status === "done").length;
@@ -149,35 +136,53 @@ function parseDraft(value: unknown): PlanDraft | null {
   };
 }
 
+interface GenerateDraftExtras {
+  description?: string | null;
+  /** 最近对话摘要（createPlan 场景传入，保留个性化） */
+  conversation?: string;
+  /** 长期记忆正文（createPlan 场景传入） */
+  memories?: string;
+}
+
 async function generateDraft(
   goal: string,
-  context: AgentContextSnapshot
+  context: AgentContextSnapshot,
+  userId: string,
+  extras?: GenerateDraftExtras
 ): Promise<{ draft: PlanDraft; source: "model" | "fallback" }> {
   try {
-    const client = createAIClient();
     // 模型偶尔输出损坏/截断的 JSON（如未加引号的属性名），解析失败时重试一次
     for (let attempt = 0; attempt < 2; attempt++) {
-      const response = await client.chat.completions.create({
-        model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-        temperature: 0.3,
-        max_tokens: 8192,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "你是学习计划规划 Agent。只返回 JSON，不要 Markdown。计划必须可执行，最多 40 个任务。字段为 name、description、goal、assumptions、tasks；tasks 每项包含 title、description、dayNumber、weekNumber、category(study/project/review/exercise)、priority(high/normal/low)。",
-          },
-          {
-            role: "user",
-            content: JSON.stringify({
-              goal,
-              context,
-              instruction: "根据用户目标和真实学习数据生成 7-30 天的计划草案，优先给出清晰的阶段产出。",
-            }),
-          },
-        ],
-      });
+      const { data: response } = await completionsWithFallback(
+        "high",
+        (entry, client, extraBody) =>
+          client.chat.completions.create({
+            model: entry.modelName,
+            temperature: 0.3,
+            max_tokens: 8192,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content:
+                  "你是学习计划规划 Agent。只返回 JSON，不要 Markdown。计划必须可执行，最多 40 个任务。字段为 name、description、goal、assumptions、tasks；tasks 每项包含 title、description、dayNumber、weekNumber、category(study/project/review/exercise)、priority(high/normal/low)。任务 description 用一两句话写清要做什么和完成标准，简明扼要。",
+              },
+              {
+                role: "user",
+                content: JSON.stringify({
+                  goal,
+                  context,
+                  ...(extras?.description ? { description: extras.description } : {}),
+                  ...(extras?.conversation ? { conversation: extras.conversation } : {}),
+                  ...(extras?.memories ? { memories: extras.memories } : {}),
+                  instruction: "根据用户目标和真实学习数据生成 7-30 天的计划草案，优先给出清晰的阶段产出。",
+                }),
+              },
+            ],
+            ...extraBody,
+          }),
+        { userId, surface: "agent-bg" }
+      );
       const text = response.choices[0]?.message?.content?.trim();
       if (!text) continue;
       try {
@@ -195,6 +200,60 @@ async function generateDraft(
   }
 
   return { draft: fallbackDraft(goal), source: "fallback" };
+}
+
+export interface GeneratePlanInput {
+  goal?: string | null;
+  description?: string | null;
+  /** 最近对话摘要，保留聊天上下文里的个性化 */
+  conversation?: string;
+  /** 长期记忆正文 */
+  memories?: string;
+}
+
+/**
+ * 为已创建的计划生成完整内容：详细文档（Markdown）+ 每日任务。
+ * 供聊天 createPlan 工具使用；模型不可用时自动回落基础草案（fallbackDraft），不会失败。
+ */
+export async function generatePlanForPlan(
+  planId: string,
+  userId: string,
+  input: GeneratePlanInput
+): Promise<{ planId: string; name: string; tasksCreated: number }> {
+  const plan = await prisma.plan.findFirst({ where: { id: planId, userId } });
+  if (!plan) throw new Error(`计划不存在: ${planId}`);
+
+  const goal = input.goal?.trim() || plan.goal || plan.name || "学习计划";
+  const context = await collectContext(userId);
+  const { draft } = await generateDraft(goal, context, userId, {
+    description: input.description,
+    conversation: input.conversation,
+    memories: input.memories,
+  });
+
+  // 文档标题与计划名保持一致；任务直接来自 draft（结构化，比解析文档更可靠）
+  const document = planDraftToMarkdown({ ...draft, name: plan.name });
+  await prisma.plan.update({ where: { id: planId }, data: { document } });
+
+  const tasksToCreate = draft.tasks.slice(0, MAX_TASKS);
+  await Promise.all(
+    tasksToCreate.map((task) =>
+      prisma.planTask.create({
+        data: {
+          userId,
+          planId,
+          title: task.title,
+          description: task.description ?? null,
+          dayNumber: task.dayNumber ?? null,
+          weekNumber: task.weekNumber ?? null,
+          category: task.category,
+          priority: task.priority,
+        },
+      })
+    )
+  );
+
+  return { planId, name: plan.name, tasksCreated: tasksToCreate.length };
 }
 
 const runDetails = {
@@ -273,7 +332,7 @@ export async function createAgentRun(
         startedAt: new Date(),
       },
     });
-    const { draft, source } = await generateDraft(goal, context);
+    const { draft, source } = await generateDraft(goal, context, userId);
 
     await prisma.$transaction([
       prisma.agentStep.update({

@@ -274,7 +274,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
             </div>
             <div className="border-t border-white/10 bg-black/10 p-3 sm:p-4">
               <div className="mx-auto max-w-3xl rounded-lg border border-white/12 bg-white/6 p-2 focus-within:border-primary/42">
-                <Textarea ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} placeholder="问一个问题，或说说你卡在哪里…" className="min-h-16 resize-none border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" disabled={loading} />
+                <Textarea ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void sendMessage(); } }} placeholder="问一个问题，或说说你卡在哪里…" className="min-h-16 max-h-40 resize-none overflow-y-auto border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" disabled={loading} />
                 <div className="flex items-center justify-end gap-1 pt-1">
                   <Tooltip>
                     <TooltipTrigger render={

@@ -62,10 +62,10 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
     setRefreshing(true);
     try {
       const res = await fetch(`/api/plans/${plan.id}/split`, { method: "POST" });
-      const data = (await res.json().catch(() => null)) as { changed?: boolean } | null;
+      const data = (await res.json().catch(() => null)) as { changed?: boolean; error?: string } | null;
       if (silent) return;
       if (!res.ok) {
-        toast.error("拆分失败，请重试");
+        toast.error(data?.error || "拆分失败，请重试");
       } else if (data?.changed === true) {
         toast.success("任务已按文档更新");
       } else if (data?.changed === false) {

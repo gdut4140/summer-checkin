@@ -195,7 +195,7 @@ export function AmbientSound() {
             }`}
           aria-label="调节音量"
           aria-expanded={open}
-          aria-haspopup="slider"
+          aria-haspopup="true"
         >
           {isSilent ? <LowIcon /> : <SpeakerIcon />}
         </button>

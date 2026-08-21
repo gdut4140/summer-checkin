@@ -38,6 +38,7 @@ model User {
   documents       DocumentChunk[]
   knowledgeDocs   KnowledgeDoc[]
   chatMessages    ChatMessage[]
+  tokenUsages     TokenUsage[]
 
   @@map("user")
 }
@@ -482,4 +483,22 @@ model DocumentTemplate {
   createdAt DateTime @default(now())
 
   @@map("documenttemplate")
+}
+
+// ── 用户 AI token 用量（每日限额；模型池统一记账） ──
+model TokenUsage {
+  id           String   @id @default(cuid())
+  userId       String
+  surface      String // agent | studio | chatroom | title | memory | split | agent-bg
+  tier         String // low | high
+  model        String // 实际使用模型
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  totalTokens  Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("tokenusage")
 }

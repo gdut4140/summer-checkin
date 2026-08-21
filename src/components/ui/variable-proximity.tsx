@@ -44,7 +44,6 @@ interface Props {
   style?: React.CSSProperties;
   highlightColor?: string;
   baseColor?: string;
-  [key: string]: unknown;
 }
 
 const VariableProximity = forwardRef<HTMLSpanElement, Props>((props, ref) => {
@@ -57,7 +56,7 @@ const VariableProximity = forwardRef<HTMLSpanElement, Props>((props, ref) => {
   const letterRefs = useRef<(HTMLElement | null)[]>([]);
   const interpolatedSettingsRef = useRef<string[]>([]);
   const mousePositionRef = useMousePositionRef(containerRef);
-  const lastPosRef = useRef({ x: null, y: null });
+  const lastPosRef = useRef<{ x: number | null; y: number | null }>({ x: null, y: null });
 
   const parsedSettings = useMemo(() => {
     const parseS = (s: string) =>

@@ -8,5 +8,4 @@
 export { createStudyTools } from "./study-tools";
 export { createRAGTool } from "./rag-tools";
 export { createAgentTools } from "./agent-tools";
-export { createCoachTools } from "./coach-tools";
 export { safeExecute } from "./utils";

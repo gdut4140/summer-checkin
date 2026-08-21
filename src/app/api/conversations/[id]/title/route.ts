@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
-import { createAIClient } from "@/lib/deepseek";
+import { completionsWithFallback } from "@/lib/model-pool";
 
 // PATCH /api/conversations/[id]/title — 根据完整对话历史重新生成标题
 export async function PATCH(
@@ -40,19 +40,23 @@ export async function PATCH(
       .map((m) => `${m.role === "user" ? "用户" : "AI"}：${m.content}`)
       .join("\n");
 
-    const client = createAIClient();
-
-    const response = await client.chat.completions.create({
-      model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-      messages: [
-        {
-          role: "system",
-          content: `根据对话历史生成标题，不超过20字，只输出标题本身。`,
-        },
-        { role: "user", content: `请为以下对话生成标题：\n\n${messagesSummary}` },
-      ],
-      temperature: 0.5,
-    });
+    const { data: response } = await completionsWithFallback(
+      "low",
+      (entry, client, extraBody) =>
+        client.chat.completions.create({
+          model: entry.modelName,
+          messages: [
+            {
+              role: "system",
+              content: `根据对话历史生成标题，不超过20字，只输出标题本身。`,
+            },
+            { role: "user", content: `请为以下对话生成标题：\n\n${messagesSummary}` },
+          ],
+          temperature: 0.5,
+          ...extraBody,
+        }),
+      { userId: user.id, surface: "title" }
+    );
 
     const rawContent = response.choices[0]?.message?.content;
     console.log(`[Title PATCH] API返回: "${rawContent}"`);

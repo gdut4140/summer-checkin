@@ -42,9 +42,6 @@ export interface PlanInfo {
 
 export interface CheckinInfo {
   content: string;
-  hours: number;
-  subject: string | null;
-  mood: string | null;
   planName: string | null;
   date: string;
 }
@@ -66,8 +63,26 @@ export interface CheckinsListData {
   success: true;
   count: number;
   checkins: CheckinInfo[];
+}
+
+// ---- 学习模式分析（原 coach-tools）----
+export interface StudyPattern {
+  weakSubjects: string[];
+  strongSubjects: string[];
+  trend: "improving" | "stable" | "declining" | "insufficient_data";
+  streakDays: number;
+  avgDailyHours: number;
+  completionRate: number; // 0-1
+  totalUnfinishedTasks: number;
+  suggestion: string;
+}
+
+export interface SubjectDetail {
+  subject: string;
   totalHours: number;
-  subjects?: string[];
+  recentHours: number; // 近7天
+  trend: "up" | "stable" | "down";
+  taskCompletionRate: number;
 }
 
 // ---- 页面/组件类型 ----
@@ -234,10 +249,10 @@ export interface DailyReport {
   status: "on_track" | "need_attention" | "need_adjustment" | "at_risk";
   summary: string;
   stats: {
-    todayHours: number;
-    weekHours: number;
     streak: number;
     completionRate: number;
+    todayFocusMinutes: number;
+    todayFocusSessions: number;
   };
   strengths: string[];
   weaknesses: string[];

@@ -8,33 +8,22 @@
 // ============================================================
 
 import { cosineSimilarity } from "./retriever";
-
-const EMBEDDING_API_KEY = process.env.EMBEDDING_API_KEY ?? "";
-const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? "deepseek-embed";
-const EMBEDDING_BASE_URL =
-  process.env.EMBEDDING_BASE_URL ?? "https://api.deepseek.com";
-
-interface EmbeddingResponse {
-  object: string;
-  data: { object: string; index: number; embedding: number[] }[];
-  model: string;
-  usage: { prompt_tokens: number; total_tokens: number };
-}
+import { embeddingWithFallback } from "@/lib/model-pool";
 
 /**
  * 批量文本 → 向量
- * 调用 OpenAI 兼容的 /v1/embeddings 端点
- * 自动分批，每批最多 25 条（DashScope 限制）
+ * 走模型池 embedding 档（text-embedding-v4 优先，v2 兜底），不计入用户 token 精力条。
+ * 自动分批，每批最多 25 条（DashScope 限制）。
  */
 export async function embedTexts(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
 
   const BATCH_SIZE = 25;
-  const url = `${EMBEDDING_BASE_URL}/v1/embeddings`;
 
   // 小批量直接请求
   if (texts.length <= BATCH_SIZE) {
-    return await embedBatch(url, texts);
+    const { data } = await embeddingWithFallback(texts);
+    return data;
   }
 
   // 大批量分批请求
@@ -44,9 +33,9 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
 
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
     const batch = texts.slice(i, i + BATCH_SIZE);
-    const batchResult = await embedBatch(url, batch);
+    const { data } = await embeddingWithFallback(batch);
     // 恢复全局 index
-    batchResult.forEach((emb, j) => {
+    data.forEach((emb, j) => {
       allResults.push({ index: offset + j, embedding: emb });
     });
     offset += batch.length;
@@ -54,31 +43,6 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
 
   allResults.sort((a, b) => a.index - b.index);
   return allResults.map((item) => item.embedding);
-}
-
-async function embedBatch(url: string, texts: string[]): Promise<number[][]> {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${EMBEDDING_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: EMBEDDING_MODEL,
-      input: texts,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(
-      `Embedding API error ${res.status}: ${err.slice(0, 300)}`
-    );
-  }
-
-  const data: EmbeddingResponse = await res.json();
-  const sorted = [...data.data].sort((a, b) => a.index - b.index);
-  return sorted.map((item) => item.embedding);
 }
 
 /**

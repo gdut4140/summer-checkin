@@ -112,7 +112,12 @@ export function CheckinShowcase() {
 
   return (
     // section 外壳固定雨林色，与 landing 其他 section（Hero / FeaturesGrid 等）色调一致
-    <section id="checkin" className="border-y border-white/10 bg-[#051a13]/90 px-4 py-20 md:px-8 md:py-28 text-white">
+    <section id="checkin" className="relative border-y border-white/10 bg-[#051a13]/90 px-4 py-20 md:px-8 md:py-28 text-white">
+      {/* 向下滚动提示（贴右居中，纯视觉） */}
+      <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
+        <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
+        <CaretDown className="size-3.5 animate-bounce" />
+      </div>
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           {/* 左侧 — 岛屿预览 + 场景预览演示 */}

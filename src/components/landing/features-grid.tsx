@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import {
   Brain,
   CalendarCheck,
+  CaretDown,
   CheckCircle,
   ClockCountdown,
   FileText,
@@ -26,7 +27,12 @@ const loopItems = [
 
 export function FeaturesGrid() {
   return (
-    <section id="features" className="border-y border-white/10 bg-[#061611]/88 px-4 py-20 text-white backdrop-blur-2xl md:px-8 md:py-28">
+    <section id="features" className="relative border-y border-white/10 bg-[#061611]/88 px-4 py-20 text-white backdrop-blur-2xl md:px-8 md:py-28">
+      {/* 向下滚动提示（贴右居中，纯视觉） */}
+      <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
+        <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
+        <CaretDown className="size-3.5 animate-bounce" />
+      </div>
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>

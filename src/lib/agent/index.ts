@@ -5,7 +5,9 @@ export {
   getAgentRunForUser,
   listAgentRuns,
   serializeAgentRun,
+  generatePlanForPlan,
 } from "./service";
+export type { GeneratePlanInput } from "./service";
 export {
   agentRunStatuses,
   planDraftSchema,

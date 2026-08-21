@@ -1,17 +1,12 @@
 // @AI 聊天：复用项目同款 AI SDK，token 流式回推到房间
 // 聊天室里的雨宝是纯聊天好友；agent 类功能统一引导去智能体
 
-import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, toTextStream } from "ai";
+import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
+import { UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { prisma } from "./db";
 import { broadcast } from "./room";
 import { toDTO } from "./protocol";
 import { config } from "./config";
-
-const aiProvider = createOpenAI({
-  apiKey: process.env.DASHSCOPE_API_KEY,
-  baseURL: process.env.DASHSCOPE_BASE_URL ?? "https://apihub.agnes-ai.com/v1",
-});
 
 const CHATROOM_SYSTEM_PROMPT = `
 不要使用emoji，不要说两段话，一下子说完不要使用"~"符号和双引号
@@ -28,7 +23,7 @@ const CHATROOM_SYSTEM_PROMPT = `
 /**
  * 处理 @雨宝 触发：取最近全局消息作上下文 → 流式生成 → 落库 → 广播
  */
-export async function handleAI(prompt: string) {
+export async function handleAI(prompt: string, userId?: string) {
   // 取最近 N 条消息作上下文（单房间全局流）
   // 群聊：给每条用户消息标注发送者【名字】，让雨宝能区分不同的人
   const recent = await prisma.chatMessage.findMany({
@@ -46,15 +41,36 @@ export async function handleAI(prompt: string) {
 
   broadcast({ type: "ai:start" });
 
-  const result = streamText({
-    model: aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash"),
-    system: CHATROOM_SYSTEM_PROMPT,
-    messages: [...context, { role: "user" as const, content: prompt }],
-  });
+  // 聊天室走模型池 LOW 档：agnes-2.5-flash 优先，免费额度耗尽自动降级阿里云 flash
+  let stream: ReadableStream<string>;
+  try {
+    const pooled = await streamTextWithFallback(
+      "low",
+      (_entry, model) => ({
+        model,
+        system: CHATROOM_SYSTEM_PROMPT,
+        messages: [...context, { role: "user" as const, content: prompt }],
+      }),
+      // 聊天室是交互式面：有 userId 才记账 + 限流；匿名不拦不记
+      userId ? { userId, surface: "chatroom", enforce: true } : undefined
+    );
+    stream = pooled.stream;
+    console.log(`[chatroom] 雨宝使用模型: ${pooled.model}`);
+  } catch (err) {
+    if (err instanceof UsageLimitError || isQuotaError(err)) {
+      // 精力用完 / 余额不足：把「我宕机了，呃啊」当普通回复广播出去
+      broadcast({ type: "ai:delta", content: ENERGY_DOWN_MESSAGE });
+      const saved = await prisma.chatMessage.create({
+        data: { role: "assistant", content: ENERGY_DOWN_MESSAGE },
+      });
+      broadcast({ type: "ai:done", message: toDTO(saved, null) });
+      return;
+    }
+    throw err;
+  }
 
   let full = "";
-  const textStream = toTextStream({ stream: result.stream });
-  const reader = textStream.getReader();
+  const reader = stream.getReader();
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;

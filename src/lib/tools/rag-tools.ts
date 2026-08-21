@@ -12,11 +12,10 @@ import { safeExecute } from "./utils";
 export function createRAGTool(userId: string) {
   const searchKnowledgeBase = tool({
     description:
-      "搜索当前用户的个人知识库。当用户询问关于其上传的文档、资料内容时，调用此工具。" +
-      "知识库中的内容是该用户上传的文档（Markdown、PDF、文本等）。",
+      "搜索用户个人知识库（其上传的文档/资料）。用户询问自己的文档内容时用。",
 
     inputSchema: z.object({
-      query: z.string().describe("搜索查询，用自然语言描述你想查找的内容"),
+      query: z.string().describe("自然语言搜索内容"),
     }),
 
     execute: async ({ query }) => {

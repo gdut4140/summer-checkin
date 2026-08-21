@@ -77,7 +77,8 @@ export const ModelName = {
   AgentSchedule: 'AgentSchedule',
   ChatMessage: 'ChatMessage',
   PlanTemplate: 'PlanTemplate',
-  DocumentTemplate: 'DocumentTemplate'
+  DocumentTemplate: 'DocumentTemplate',
+  TokenUsage: 'TokenUsage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -474,6 +475,21 @@ export const DocumentTemplateScalarFieldEnum = {
 } as const
 
 export type DocumentTemplateScalarFieldEnum = (typeof DocumentTemplateScalarFieldEnum)[keyof typeof DocumentTemplateScalarFieldEnum]
+
+
+export const TokenUsageScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  surface: 'surface',
+  tier: 'tier',
+  model: 'model',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  totalTokens: 'totalTokens',
+  createdAt: 'createdAt'
+} as const
+
+export type TokenUsageScalarFieldEnum = (typeof TokenUsageScalarFieldEnum)[keyof typeof TokenUsageScalarFieldEnum]
 
 
 export const SortOrder = {

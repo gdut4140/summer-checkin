@@ -146,9 +146,9 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
 
   broadcast({ type: "message", message: toDTO(saved, userName, image) });
 
-  // @AI 触发
+  // @AI 触发（传 userId，聊天室按用户记账 + 每日限额）
   const aiPrompt = extractAIPrompt(content);
-  if (aiPrompt) void handleAI(aiPrompt);
+  if (aiPrompt) void handleAI(aiPrompt, conn.userId ?? undefined);
 }
 
 function sendError(conn: Connection, code: string, reason: string) {

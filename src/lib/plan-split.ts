@@ -5,7 +5,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createAIClient } from "@/lib/deepseek";
+import { completionsWithFallback } from "@/lib/model-pool";
 import { prisma } from "@/lib/prisma";
 import { planTaskSource, planTaskSourceHash } from "@/lib/plan-tasks";
 
@@ -58,25 +58,29 @@ const CHECK_TASKS_PROMPT = `你是学习计划任务同步判断器。对比"当
 
 async function tasksNeedUpdate(
   source: string,
-  tasks: { title: string }[]
+  tasks: { title: string }[],
+  userId: string
 ): Promise<boolean> {
-  const client = createAIClient();
-  const response = await client.chat.completions.create({
-    model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-    temperature: 0,
-    max_tokens: 300,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: CHECK_TASKS_PROMPT },
-      {
-        role: "user",
-        content: JSON.stringify({
-          document: source,
-          tasks: tasks.map((t) => t.title),
-        }),
-      },
-    ],
-  });
+  const { data: response } = await completionsWithFallback("low", (entry, client, extraBody) =>
+    client.chat.completions.create({
+      model: entry.modelName,
+      temperature: 0,
+      max_tokens: 300,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: CHECK_TASKS_PROMPT },
+        {
+          role: "user",
+          content: JSON.stringify({
+            document: source,
+            tasks: tasks.map((t) => t.title),
+          }),
+        },
+      ],
+      ...extraBody,
+    }),
+    { userId, surface: "split", enforce: true }
+  );
   const text = response.choices[0]?.message?.content?.trim();
   if (!text) return true; // 拿不到判断结果时保守处理：当作需要更新
   try {
@@ -128,7 +132,7 @@ export async function splitPlanTasks(
       where: { planId },
       select: { title: true },
     });
-    const needsUpdate = await tasksNeedUpdate(source, existingForCheck);
+    const needsUpdate = await tasksNeedUpdate(source, existingForCheck, userId);
     if (!needsUpdate) {
       // 大意没变：不拆分任务，只把文档哈希更新为"已评估"，抽屉不再提示过期
       await prisma.plan.update({
@@ -143,20 +147,25 @@ export async function splitPlanTasks(
     await prisma.plan.update({ where: { id: planId }, data: { tasksSplittingAt: new Date() } });
 
     // 结构化输出用 json_object：DeepSeek 不支持 json_schema（generateObject 会发 json_schema 导致 400）
-    const client = createAIClient();
     // 模型偶尔会输出截断/损坏的 JSON，解析失败时重试一次；仍失败则不改动任务、返回错误
     let object: z.infer<typeof SplitSchema> | null = null;
     for (let attempt = 0; attempt < 2 && !object; attempt++) {
-      const response = await client.chat.completions.create({
-        model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-        temperature: 0.3,
-        max_tokens: 8192,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SPLIT_SYSTEM_PROMPT },
-          { role: "user", content: source },
-        ],
-      });
+      const { data: response } = await completionsWithFallback(
+        "low",
+        (entry, client, extraBody) =>
+          client.chat.completions.create({
+            model: entry.modelName,
+            temperature: 0.3,
+            max_tokens: 8192,
+            response_format: { type: "json_object" },
+            messages: [
+              { role: "system", content: SPLIT_SYSTEM_PROMPT },
+              { role: "user", content: source },
+            ],
+            ...extraBody,
+          }),
+        { userId, surface: "split", enforce: true }
+      );
       const text = response.choices[0]?.message?.content?.trim();
       if (!text) continue;
       try {

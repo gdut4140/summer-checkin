@@ -241,6 +241,7 @@ export type UserWhereInput = {
   documents?: Prisma.DocumentChunkListRelationFilter
   knowledgeDocs?: Prisma.KnowledgeDocListRelationFilter
   chatMessages?: Prisma.ChatMessageListRelationFilter
+  tokenUsages?: Prisma.TokenUsageListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -273,6 +274,7 @@ export type UserOrderByWithRelationInput = {
   documents?: Prisma.DocumentChunkOrderByRelationAggregateInput
   knowledgeDocs?: Prisma.KnowledgeDocOrderByRelationAggregateInput
   chatMessages?: Prisma.ChatMessageOrderByRelationAggregateInput
+  tokenUsages?: Prisma.TokenUsageOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -308,6 +310,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   documents?: Prisma.DocumentChunkListRelationFilter
   knowledgeDocs?: Prisma.KnowledgeDocListRelationFilter
   chatMessages?: Prisma.ChatMessageListRelationFilter
+  tokenUsages?: Prisma.TokenUsageListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -372,6 +375,7 @@ export type UserCreateInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -404,6 +408,7 @@ export type UserUncheckedCreateInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -436,6 +441,7 @@ export type UserUpdateInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -468,6 +474,7 @@ export type UserUncheckedUpdateInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -830,6 +837,20 @@ export type UserUpdateOneWithoutChatMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChatMessagesInput, Prisma.UserUpdateWithoutChatMessagesInput>, Prisma.UserUncheckedUpdateWithoutChatMessagesInput>
 }
 
+export type UserCreateNestedOneWithoutTokenUsagesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTokenUsagesInput, Prisma.UserUncheckedCreateWithoutTokenUsagesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTokenUsagesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTokenUsagesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTokenUsagesInput, Prisma.UserUncheckedCreateWithoutTokenUsagesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTokenUsagesInput
+  upsert?: Prisma.UserUpsertWithoutTokenUsagesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTokenUsagesInput, Prisma.UserUpdateWithoutTokenUsagesInput>, Prisma.UserUncheckedUpdateWithoutTokenUsagesInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   name: string
@@ -859,6 +880,7 @@ export type UserCreateWithoutSessionsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -890,6 +912,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -937,6 +960,7 @@ export type UserUpdateWithoutSessionsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -968,6 +992,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -999,6 +1024,7 @@ export type UserCreateWithoutAccountsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -1030,6 +1056,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -1077,6 +1104,7 @@ export type UserUpdateWithoutAccountsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -1108,6 +1136,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlansInput = {
@@ -1139,6 +1168,7 @@ export type UserCreateWithoutPlansInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlansInput = {
@@ -1170,6 +1200,7 @@ export type UserUncheckedCreateWithoutPlansInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlansInput = {
@@ -1217,6 +1248,7 @@ export type UserUpdateWithoutPlansInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlansInput = {
@@ -1248,6 +1280,7 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlanTasksInput = {
@@ -1279,6 +1312,7 @@ export type UserCreateWithoutPlanTasksInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlanTasksInput = {
@@ -1310,6 +1344,7 @@ export type UserUncheckedCreateWithoutPlanTasksInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlanTasksInput = {
@@ -1357,6 +1392,7 @@ export type UserUpdateWithoutPlanTasksInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlanTasksInput = {
@@ -1388,6 +1424,7 @@ export type UserUncheckedUpdateWithoutPlanTasksInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTodosInput = {
@@ -1419,6 +1456,7 @@ export type UserCreateWithoutTodosInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTodosInput = {
@@ -1450,6 +1488,7 @@ export type UserUncheckedCreateWithoutTodosInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTodosInput = {
@@ -1497,6 +1536,7 @@ export type UserUpdateWithoutTodosInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTodosInput = {
@@ -1528,6 +1568,7 @@ export type UserUncheckedUpdateWithoutTodosInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCheckinsInput = {
@@ -1559,6 +1600,7 @@ export type UserCreateWithoutCheckinsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckinsInput = {
@@ -1590,6 +1632,7 @@ export type UserUncheckedCreateWithoutCheckinsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckinsInput = {
@@ -1637,6 +1680,7 @@ export type UserUpdateWithoutCheckinsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckinsInput = {
@@ -1668,6 +1712,7 @@ export type UserUncheckedUpdateWithoutCheckinsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStudyRecordsInput = {
@@ -1699,6 +1744,7 @@ export type UserCreateWithoutStudyRecordsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudyRecordsInput = {
@@ -1730,6 +1776,7 @@ export type UserUncheckedCreateWithoutStudyRecordsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudyRecordsInput = {
@@ -1777,6 +1824,7 @@ export type UserUpdateWithoutStudyRecordsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudyRecordsInput = {
@@ -1808,6 +1856,7 @@ export type UserUncheckedUpdateWithoutStudyRecordsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserBadgesInput = {
@@ -1839,6 +1888,7 @@ export type UserCreateWithoutUserBadgesInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserBadgesInput = {
@@ -1870,6 +1920,7 @@ export type UserUncheckedCreateWithoutUserBadgesInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserBadgesInput = {
@@ -1917,6 +1968,7 @@ export type UserUpdateWithoutUserBadgesInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserBadgesInput = {
@@ -1948,6 +2000,7 @@ export type UserUncheckedUpdateWithoutUserBadgesInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutConversationsInput = {
@@ -1979,6 +2032,7 @@ export type UserCreateWithoutConversationsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsInput = {
@@ -2010,6 +2064,7 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsInput = {
@@ -2057,6 +2112,7 @@ export type UserUpdateWithoutConversationsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsInput = {
@@ -2088,6 +2144,7 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAgentRunsInput = {
@@ -2119,6 +2176,7 @@ export type UserCreateWithoutAgentRunsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAgentRunsInput = {
@@ -2150,6 +2208,7 @@ export type UserUncheckedCreateWithoutAgentRunsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAgentRunsInput = {
@@ -2197,6 +2256,7 @@ export type UserUpdateWithoutAgentRunsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAgentRunsInput = {
@@ -2228,6 +2288,7 @@ export type UserUncheckedUpdateWithoutAgentRunsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDecisionsInput = {
@@ -2259,6 +2320,7 @@ export type UserCreateWithoutDecisionsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDecisionsInput = {
@@ -2290,6 +2352,7 @@ export type UserUncheckedCreateWithoutDecisionsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDecisionsInput = {
@@ -2337,6 +2400,7 @@ export type UserUpdateWithoutDecisionsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDecisionsInput = {
@@ -2368,6 +2432,7 @@ export type UserUncheckedUpdateWithoutDecisionsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMemoriesInput = {
@@ -2399,6 +2464,7 @@ export type UserCreateWithoutMemoriesInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMemoriesInput = {
@@ -2430,6 +2496,7 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMemoriesInput = {
@@ -2477,6 +2544,7 @@ export type UserUpdateWithoutMemoriesInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMemoriesInput = {
@@ -2508,6 +2576,7 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiHistoriesInput = {
@@ -2539,6 +2608,7 @@ export type UserCreateWithoutAiHistoriesInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiHistoriesInput = {
@@ -2570,6 +2640,7 @@ export type UserUncheckedCreateWithoutAiHistoriesInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiHistoriesInput = {
@@ -2617,6 +2688,7 @@ export type UserUpdateWithoutAiHistoriesInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiHistoriesInput = {
@@ -2648,6 +2720,7 @@ export type UserUncheckedUpdateWithoutAiHistoriesInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDocsInput = {
@@ -2679,6 +2752,7 @@ export type UserCreateWithoutDocsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDocsInput = {
@@ -2710,6 +2784,7 @@ export type UserUncheckedCreateWithoutDocsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDocsInput = {
@@ -2757,6 +2832,7 @@ export type UserUpdateWithoutDocsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocsInput = {
@@ -2788,6 +2864,7 @@ export type UserUncheckedUpdateWithoutDocsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDocumentsInput = {
@@ -2819,6 +2896,7 @@ export type UserCreateWithoutDocumentsInput = {
   docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDocumentsInput = {
@@ -2850,6 +2928,7 @@ export type UserUncheckedCreateWithoutDocumentsInput = {
   docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDocumentsInput = {
@@ -2897,6 +2976,7 @@ export type UserUpdateWithoutDocumentsInput = {
   docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocumentsInput = {
@@ -2928,6 +3008,7 @@ export type UserUncheckedUpdateWithoutDocumentsInput = {
   docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutKnowledgeDocsInput = {
@@ -2959,6 +3040,7 @@ export type UserCreateWithoutKnowledgeDocsInput = {
   docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutKnowledgeDocsInput = {
@@ -2990,6 +3072,7 @@ export type UserUncheckedCreateWithoutKnowledgeDocsInput = {
   docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutKnowledgeDocsInput = {
@@ -3037,6 +3120,7 @@ export type UserUpdateWithoutKnowledgeDocsInput = {
   docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutKnowledgeDocsInput = {
@@ -3068,6 +3152,7 @@ export type UserUncheckedUpdateWithoutKnowledgeDocsInput = {
   docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -3099,6 +3184,7 @@ export type UserCreateWithoutNotificationsInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -3130,6 +3216,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -3177,6 +3264,7 @@ export type UserUpdateWithoutNotificationsInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -3208,6 +3296,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSchedulesInput = {
@@ -3239,6 +3328,7 @@ export type UserCreateWithoutSchedulesInput = {
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSchedulesInput = {
@@ -3270,6 +3360,7 @@ export type UserUncheckedCreateWithoutSchedulesInput = {
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
   chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSchedulesInput = {
@@ -3317,6 +3408,7 @@ export type UserUpdateWithoutSchedulesInput = {
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSchedulesInput = {
@@ -3348,6 +3440,7 @@ export type UserUncheckedUpdateWithoutSchedulesInput = {
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
   chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -3379,6 +3472,7 @@ export type UserCreateWithoutChatMessagesInput = {
   docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -3410,6 +3504,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
+  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -3457,6 +3552,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -3488,6 +3584,151 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
   knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
+  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTokenUsagesInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
+  todos?: Prisma.TodoCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
+  knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
+  chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutTokenUsagesInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  bio?: string | null
+  theme?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
+  checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
+  studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
+  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
+  agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
+  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
+  todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
+  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
+  knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
+  chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutTokenUsagesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTokenUsagesInput, Prisma.UserUncheckedCreateWithoutTokenUsagesInput>
+}
+
+export type UserUpsertWithoutTokenUsagesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTokenUsagesInput, Prisma.UserUncheckedUpdateWithoutTokenUsagesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTokenUsagesInput, Prisma.UserUncheckedCreateWithoutTokenUsagesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTokenUsagesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTokenUsagesInput, Prisma.UserUncheckedUpdateWithoutTokenUsagesInput>
+}
+
+export type UserUpdateWithoutTokenUsagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
+  todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
+  knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
+  chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTokenUsagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
+  checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
+  studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
+  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
+  agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
+  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
+  todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
+  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
+  chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -3515,6 +3756,7 @@ export type UserCountOutputType = {
   documents: number
   knowledgeDocs: number
   chatMessages: number
+  tokenUsages: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3537,6 +3779,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   documents?: boolean | UserCountOutputTypeCountDocumentsArgs
   knowledgeDocs?: boolean | UserCountOutputTypeCountKnowledgeDocsArgs
   chatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs
+  tokenUsages?: boolean | UserCountOutputTypeCountTokenUsagesArgs
 }
 
 /**
@@ -3682,6 +3925,13 @@ export type UserCountOutputTypeCountChatMessagesArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ChatMessageWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTokenUsagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TokenUsageWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3713,6 +3963,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
   knowledgeDocs?: boolean | Prisma.User$knowledgeDocsArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
+  tokenUsages?: boolean | Prisma.User$tokenUsagesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3776,6 +4027,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
   knowledgeDocs?: boolean | Prisma.User$knowledgeDocsArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
+  tokenUsages?: boolean | Prisma.User$tokenUsagesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3803,6 +4055,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     documents: Prisma.$DocumentChunkPayload<ExtArgs>[]
     knowledgeDocs: Prisma.$KnowledgeDocPayload<ExtArgs>[]
     chatMessages: Prisma.$ChatMessagePayload<ExtArgs>[]
+    tokenUsages: Prisma.$TokenUsagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4228,6 +4481,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   documents<T extends Prisma.User$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   knowledgeDocs<T extends Prisma.User$knowledgeDocsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$knowledgeDocsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeDocPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tokenUsages<T extends Prisma.User$tokenUsagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tokenUsagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TokenUsagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5113,6 +5367,30 @@ export type User$chatMessagesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ChatMessageScalarFieldEnum | Prisma.ChatMessageScalarFieldEnum[]
+}
+
+/**
+ * User.tokenUsages
+ */
+export type User$tokenUsagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TokenUsage
+   */
+  select?: Prisma.TokenUsageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TokenUsage
+   */
+  omit?: Prisma.TokenUsageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TokenUsageInclude<ExtArgs> | null
+  where?: Prisma.TokenUsageWhereInput
+  orderBy?: Prisma.TokenUsageOrderByWithRelationInput | Prisma.TokenUsageOrderByWithRelationInput[]
+  cursor?: Prisma.TokenUsageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TokenUsageScalarFieldEnum | Prisma.TokenUsageScalarFieldEnum[]
 }
 
 /**

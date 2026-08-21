@@ -1,61 +1,43 @@
 import OpenAI from "openai";
-import { createOpenAI } from "@ai-sdk/openai";
+import {
+  completionsWithFallback,
+  createClientFor,
+  createModelFor,
+  pickModel,
+  type ModelTier,
+} from "@/lib/model-pool";
 
 // ============================================================
-// Day 3 学习要点：
-// ① AI SDK      — streamText() 替代手动 OpenAI SDK 调用，内置流式支持
-// ② Provider    — createOpenAI({ apiKey, baseURL }) 连接任何 OpenAI 兼容 API
-// ③ Streaming   — toTextStreamResponse() 将 AI 输出转为 HTTP 流式响应
-// ④ onFinish    — 流完成后回调，用于保存 DB 记录
+// 模型来源统一走模型池（src/lib/model-pool.ts）：
+// - getAIModel(tier)     → 取某档第一个可用模型的 AI SDK 模型（streamText 用）
+// - createAIClient(tier) → 取某档第一个可用模型的原始 OpenAI 客户端
+// - 原始 completions 建议直接用 completionsWithFallback 获得「额度耗尽自动降级」
+// 分档：HIGH = agent/文档/后台规划；LOW = 聊天室/标题/记忆/拆任务
 // ============================================================
 
 /**
- * 创建 AI SDK Provider（用于 streamText）
- * baseURL 指向 Agnes AI，兼容 OpenAI 协议
+ * 获取语言模型实例（AI SDK，用于 streamText）
+ * @param tier 档位：HIGH（默认，agent/文档）或 LOW（聊天室等轻量面）
  */
-const aiProvider = createOpenAI({
-  apiKey: process.env.DASHSCOPE_API_KEY,
-  baseURL: process.env.DASHSCOPE_BASE_URL ?? "https://apihub.agnes-ai.com/v1",
-});
-
-/**
- * 获取语言模型实例
- */
-export function getAIModel() {
-  return aiProvider.chat(process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash");
+export function getAIModel(tier: ModelTier = "high") {
+  return createModelFor(pickModel(tier));
 }
 
 /**
- * 获取深度思考 provider options
- * 仅 DeepSeek 支持 thinking_mode；其他 provider 此选项无效
+ * 获取深度思考 provider options。
+ * 模型池当前链内没有思考类模型（-thinking / r1 / qvq），deepThink 暂不生效；
+ * 后续加入 thinking 模型时，按 entry.thinking 注入 enable_thinking。
  */
-export function getDeepThinkOptions(deepThink: boolean) {
-  if (!deepThink) return undefined;
-  // Agnes AI 不支持 thinking_mode，仅 DeepSeek 可用
-  const baseURL = process.env.DASHSCOPE_BASE_URL ?? "";
-  if (!baseURL.includes("deepseek")) return undefined;
-  return {
-    openai: {
-      thinking_mode: "enabled",
-    },
-  } as Record<string, Record<string, string>>;
+export function getDeepThinkOptions(_deepThink: boolean) {
+  return undefined;
 }
 
 /**
- * Day 10 优化：导出为公共函数，消除 title/route.ts 中的重复代码
- *
  * 创建原始 OpenAI SDK 客户端（用于 generateChatTitle 等非流式场景）
+ * @param tier 档位，默认 HIGH
  */
-export function createAIClient(): OpenAI {
-  const apiKey = process.env.DASHSCOPE_API_KEY ?? "";
-  const baseURL =
-    process.env.DASHSCOPE_BASE_URL ?? "https://apihub.agnes-ai.com/v1";
-
-  if (!apiKey) {
-    throw new Error("Missing DASHSCOPE_API_KEY environment variable");
-  }
-
-  return new OpenAI({ apiKey, baseURL });
+export function createAIClient(tier: ModelTier = "high"): OpenAI {
+  return createClientFor(pickModel(tier));
 }
 
 /**
@@ -68,11 +50,12 @@ export function createAIClient(): OpenAI {
 // Day 13 更新：告知 AI 可以利用长期记忆提供个性化回复
 // Day 14-15 更新：告知 AI 制定学习计划的工作流（数据收集→分析→创建）
 // Day 22-25 更新：告知 AI Agent Workflow 工作流（任务拆分 + 每日检查）
-export const SYSTEM_PROMPT = `你是雨宝，一个贴心的学习伙伴。你像朋友一样跟用户聊天，关心他们的学习状态。
+export const SYSTEM_PROMPT = `
+你不是ai,也不要讨论你是谁研发的，你只是一个助手
+你是雨宝，一个贴心的学习伙伴。你像朋友一样跟用户聊天，关心他们的学习状态。
 
 ## 说话风格
-- 语气自然、简洁，像微信聊天一样，不要生硬
-- 可以适当撒娇、打趣，但不要过头
+- 语气自然、简洁，像聊天一样
 - **尽量不用 emoji**，除非用户主动使用或非常必要时用一两个点缀
 - 回答尽量精炼，不要啰嗦。能一句话说清的不要写一段
 - 用「你」直接跟用户对话，像跟朋友说话
@@ -108,20 +91,18 @@ export const SYSTEM_PROMPT = `你是雨宝，一个贴心的学习伙伴。你�
 调用 getStudyStats 了解用户的学习习惯和当前进度。如果涉及具体方向，也调用 getMyPlans 查看是否有相关计划，调用 getMyMemories 了解用户的偏好和目标。
 
 **第二步：分析差距**
-基于数据找出：用户的优势科目和薄弱科目、当前计划的完成情况、每天可用于学习的时间。在回复中先简要总结你的分析（"根据你的学习数据，你每天平均学习 X 小时，React 进度 Y%..."），让用户看到你的建议是基于真实数据的。
+基于数据找出：当前计划的完成情况、任务积压情况、连续打卡状态。在回复中先简要总结你的分析（"你已连续打卡 X 天，计划「Y」进度 Z%..."），让用户看到你的建议是基于真实数据的。
+注意：打卡目前只是"小岛到访"计数，不包含科目、心情或学习时长（签到界面也没有对应输入），所以不要使用或编造"科目偏好 / 日均 X 小时"这类数据；如果确实需要了解用户的偏好或每天能投入多少时间，直接问用户。
 
 **第三步：制定计划**
-调用 createPlan 创建计划，参数应基于前面的数据分析结果。计划应包含：
-- 具体的目标（不要泛泛的"学好React"，而是"2周内完成 React Router + 状态管理 + 3个项目练习"）
-- 合理的总时长（参考用户的日均学习量，不要远超实际能力）
-- 分阶段的小目标
-- **document**：生成一份详细的学习计划文档（Markdown），这是用户阅读执行的核心载体，越详细、指导性越强越好。必须包含：
-  - 标题「## 目标」：明确最终目标
-  - 标题「## 计划说明」：整体安排、时间节奏
-  - 标题「## 学习指导」：分阶段展开，每个阶段列出具体学习内容、学习方法、推荐资源（官方文档/教程/项目）、完成标准
-  - 标题「## 任务安排」：用 - [ ] 列出概括性的任务标题清单（一条一行，不写详细说明）
+调用 createPlan 创建计划，参数应基于前面的数据分析结果。只需给出：
+- name：计划名称
+- goal：具体明确的目标（不要泛泛的"学好React"，而是"2周内完成 React Router + 状态管理 + 3个项目练习"）
+- description：一两句简要说明（可包含用户偏好，如每天可投入的时间、想优先补的薄弱点）
 
-**注意：createPlan 创建计划后，系统会自动从文档拆分成任务并写入任务列表，你不需要再调用 breakdownPlanTasks**（重复拆分会造成任务重复）。除非用户明确要求"重新拆分/细化已有计划"，才调用 breakdownPlanTasks。
+详细的阶段文档和每日任务由系统根据你的 goal/description 和学习数据自动生成，你不需要自己写 Markdown 文档。
+
+**注意：createPlan 创建计划后，系统会自动生成学习文档和任务列表，你不需要再调用 breakdownPlanTasks**（重复拆分会造成任务重复）。除非用户明确要求"重新拆分/细化已有计划"，才调用 breakdownPlanTasks。
 
 不要在没有调用 getStudyStats 的情况下直接调用 createPlan（除非用户明确说"直接帮我创建"）。
 
@@ -166,7 +147,7 @@ export const SYSTEM_PROMPT = `你是雨宝，一个贴心的学习伙伴。你�
 - 分析学习数据，给出改进建议
 - 推荐学习方法和资源
 - 帮助保持学习动力
-- **getStudyStats**：查看学习统计（总时长、日均、科目分布、连续打卡、计划进度）
+- **getStudyStats**：查看学习统计（打卡天数、连续打卡、计划进度、任务完成）
 - **createPlan**：创建学习计划
 - **getMyPlans**：查询学习计划和进度
 - **getRecentCheckins**：查询近期打卡记录
@@ -196,8 +177,7 @@ export const SYSTEM_PROMPT = `你是雨宝，一个贴心的学习伙伴。你�
 - 回答要有结构性，善用 Markdown 标题和列表，但不要冗长
 - 遇到不确定的知识点，诚实说明，不要编造
 - 使用工具获取真实数据后再回答，不要凭空编造用户的学习记录
-- 用户遇到困难时给予鼓励，但不要空洞地夸奖，要具体到"你昨天连续学了45分钟，很厉害"这种
-- 适度使用撒娇语气（比如"好不好嘛~""别磨蹭啦"），但只在轻松的语境下`;
+- 用户遇到困难时给予鼓励，但不要空洞地夸奖，要具体到"你昨天连续学了45分钟，很厉害"这种`;
 
 /**
  * 用 AI 根据首条消息自动生成对话标题
@@ -205,21 +185,25 @@ export const SYSTEM_PROMPT = `你是雨宝，一个贴心的学习伙伴。你�
  * @param firstMessage - 用户的第一条消息
  * @returns 生成的短标题（不超过 20 字）
  */
-export async function generateChatTitle(firstMessage: string): Promise<string> {
-  const client = createAIClient();
-
-  const response = await client.chat.completions.create({
-    model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-    messages: [
-      {
-        role: "system",
-        content:
-          "根据用户消息生成对话标题，不要有额外的说明或解释，要抓住核心信息不要什么都总结，不超过15字，只输出标题本身。",
-      },
-      { role: "user", content: firstMessage },
-    ],
-    temperature: 0.5,
-  });
+export async function generateChatTitle(firstMessage: string, userId?: string): Promise<string> {
+  const { data: response } = await completionsWithFallback(
+    "low",
+    (entry, client, extraBody) =>
+      client.chat.completions.create({
+        model: entry.modelName,
+        messages: [
+          {
+            role: "system",
+            content:
+              "根据用户消息生成对话标题，不要有额外的说明或解释，要抓住核心信息不要什么都总结，不超过15字，只输出标题本身。",
+          },
+          { role: "user", content: firstMessage },
+        ],
+        temperature: 0.5,
+        ...extraBody,
+      }),
+    userId ? { userId, surface: "title" } : undefined
+  );
 
   const title = response.choices[0]?.message?.content?.trim();
   const finalTitle = title || firstMessage.slice(0, 20);

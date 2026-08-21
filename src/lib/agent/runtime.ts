@@ -25,7 +25,7 @@
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
-import { createAIClient } from "@/lib/deepseek";
+import { completionsWithFallback } from "@/lib/model-pool";
 import { AGENT_COACH_PROMPT } from "./prompts";
 import { createDecision } from "./decisions";
 import { getRelevantMemories, formatMemoriesForPrompt, touchMemories } from "@/lib/memory";
@@ -47,15 +47,16 @@ export interface LearningContext {
     activePlanNames: string[];
   };
 
-  /** 学习统计 */
+  /** 学习统计（打卡仅为小岛计数：不含时长/科目/心情） */
   stats: {
-    totalHours: number;
-    dailyAvg: number;
-    weekHours: number;
-    todayHours: number;
     streak: number;
     totalCheckins: number;
-    topSubjects: { subject: string; hours: number }[];
+  };
+
+  /** 今日专注（番茄钟，来自 StudyRecord） */
+  focus: {
+    todayMinutes: number;
+    todaySessions: number;
   };
 
   /** 计划进度 */
@@ -82,12 +83,9 @@ export interface LearningContext {
     dayNumber: number | null;
   }[];
 
-  /** 近期打卡（最近 7 天） */
+  /** 近期打卡（最近 7 次，仅日期） */
   recentCheckins: {
     date: string;
-    hours: number;
-    subject: string | null;
-    mood: string | null;
   }[];
 }
 
@@ -137,38 +135,26 @@ function asJson(value: unknown): Prisma.InputJsonValue {
 
 export async function observe(userId: string): Promise<LearningContext> {
   const now = new Date();
-  const weekStart = new Date(now);
-  weekStart.setDate(weekStart.getDate() - 7);
   const todayStart = new Date(now);
   todayStart.setHours(0, 0, 0, 0);
 
   // 并行收集所有数据
   const [
     allCheckins,
-    weekCheckins,
-    todayCheckins,
     activePlans,
     pendingTasks,
     goalMemories,
+    todayFocusRecords,
   ] = await Promise.all([
     // 全部打卡
     prisma.checkin.findMany({
       where: { userId },
       orderBy: { checkinDate: "desc" },
     }),
-    // 本周打卡
-    prisma.checkin.findMany({
-      where: { userId, checkinDate: { gte: weekStart } },
-    }),
-    // 今日打卡
-    prisma.checkin.findMany({
-      where: { userId, checkinDate: { gte: todayStart } },
-    }),
-    // 活跃计划（含打卡和任务统计）
+    // 活跃计划（含任务统计）
     prisma.plan.findMany({
       where: { userId, status: "active" },
       include: {
-        checkins: { select: { hours: true } },
         tasks: {
           select: { status: true },
         },
@@ -186,38 +172,14 @@ export async function observe(userId: string): Promise<LearningContext> {
       where: { userId, type: "goal" },
       select: { content: true },
     }),
+    // 今日专注记录（番茄钟）
+    prisma.studyRecord.findMany({
+      where: { userId, date: { gte: todayStart } },
+      select: { totalMinutes: true },
+    }),
   ]);
 
-  // ---- 统计 ----
-  const totalHours = allCheckins.reduce((s, c) => s + c.hours, 0);
-  const weekHours = weekCheckins.reduce((s, c) => s + c.hours, 0);
-  const todayHours = todayCheckins.reduce((s, c) => s + c.hours, 0);
-
-  // 日均
-  const firstCheckin = allCheckins[allCheckins.length - 1];
-  const totalDays =
-    allCheckins.length > 0 && firstCheckin
-      ? Math.max(
-          1,
-          Math.ceil(
-            (now.getTime() - firstCheckin.checkinDate.getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        )
-      : 1;
-  const dailyAvg = Math.round((totalHours / totalDays) * 100) / 100;
-
-  // 科目分布
-  const subjectMap = new Map<string, number>();
-  for (const c of allCheckins) {
-    const s = c.subject || "未分类";
-    subjectMap.set(s, (subjectMap.get(s) || 0) + c.hours);
-  }
-  const topSubjects = [...subjectMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([subject, hours]) => ({ subject, hours: Math.round(hours * 10) / 10 }));
-
+  // ---- 统计（打卡仅为小岛计数：不含时长/科目/心情） ----
   // 连续打卡
   const checkDates = new Set(
     allCheckins.map((c) => c.checkinDate.toISOString().slice(0, 10))
@@ -253,13 +215,16 @@ export async function observe(userId: string): Promise<LearningContext> {
     };
   });
 
-  // ---- 近期打卡 ----
-  const recentCheckins = weekCheckins.map((c) => ({
+  // ---- 近期打卡（最近 7 次，仅日期） ----
+  const recentCheckins = allCheckins.slice(0, 7).map((c) => ({
     date: c.checkinDate.toISOString().slice(0, 10),
-    hours: c.hours,
-    subject: c.subject,
-    mood: c.mood,
   }));
+
+  // ---- 今日专注（番茄钟，来自 StudyRecord） ----
+  const todayFocusMinutes = Math.round(
+    todayFocusRecords.reduce((s, r) => s + r.totalMinutes, 0)
+  );
+  const todayFocusSessions = todayFocusRecords.length;
 
   return {
     userId,
@@ -270,13 +235,12 @@ export async function observe(userId: string): Promise<LearningContext> {
       activePlanNames: activePlans.map((p) => p.name),
     },
     stats: {
-      totalHours: Math.round(totalHours * 10) / 10,
-      dailyAvg,
-      weekHours: Math.round(weekHours * 10) / 10,
-      todayHours: Math.round(todayHours * 10) / 10,
       streak,
       totalCheckins: allCheckins.length,
-      topSubjects,
+    },
+    focus: {
+      todayMinutes: todayFocusMinutes,
+      todaySessions: todayFocusSessions,
     },
     plans,
     pendingTasks: pendingTasks.map((t) => ({
@@ -297,10 +261,9 @@ export async function observe(userId: string): Promise<LearningContext> {
 
 export async function analyze(
   context: LearningContext,
-  memories: { content: string; type: string }[]
+  memories: { content: string; type: string }[],
+  userId: string
 ): Promise<AgentAnalysis> {
-  const client = createAIClient();
-
   // 构建分析 prompt
   const memoryText = memories.length > 0
     ? memories.map((m) => `- [${m.type}] ${m.content}`).join("\n")
@@ -312,20 +275,18 @@ export async function analyze(
     progress: `${p.progress}%`,
     tasks: `${p.taskStats.done}/${p.taskStats.total} done`,
   }));
-  const recentActivity = context.recentCheckins.slice(0, 7).map((c) =>
-    `${c.date}: ${c.subject ?? "?"} ${c.hours}h`
-  );
+  const recentActivity = context.recentCheckins.slice(0, 7).map((c) => c.date);
 
   const userMessage = JSON.stringify({
     instruction: "分析用户学习数据，输出 JSON。简明扼要，findings 不超过 5 条，actions 不超过 3 条。",
     profile: context.profile,
     stats: {
-      totalHours: context.stats.totalHours,
-      dailyAvg: context.stats.dailyAvg,
-      weekHours: context.stats.weekHours,
-      todayHours: context.stats.todayHours,
       streak: context.stats.streak,
-      topSubjects: context.stats.topSubjects.slice(0, 3).map((s) => `${s.subject}:${s.hours}h`),
+      totalCheckins: context.stats.totalCheckins,
+    },
+    focus: {
+      todayMinutes: context.focus.todayMinutes,
+      todaySessions: context.focus.todaySessions,
     },
     plans: planSummary,
     pendingCount: context.pendingTasks.length,
@@ -334,19 +295,25 @@ export async function analyze(
   });
 
   try {
-    const response = await client.chat.completions.create({
-      model: process.env.DASHSCOPE_MODEL ?? "agnes-2.5-flash",
-      temperature: 0.3,
-      max_tokens: 16384,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: `${AGENT_COACH_PROMPT}\n\n请严格按照输出格式返回 JSON。不要包含 Markdown 代码块标记。`,
-        },
-        { role: "user", content: userMessage },
-      ],
-    });
+    const { data: response } = await completionsWithFallback(
+      "high",
+      (entry, client, extraBody) =>
+        client.chat.completions.create({
+          model: entry.modelName,
+          temperature: 0.3,
+          max_tokens: 16384,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: `${AGENT_COACH_PROMPT}\n\n请严格按照输出格式返回 JSON。不要包含 Markdown 代码块标记。`,
+            },
+            { role: "user", content: userMessage },
+          ],
+          ...extraBody,
+        }),
+      { userId, surface: "agent-bg" }
+    );
 
     const text = response.choices[0]?.message?.content?.trim();
     if (!text) {
@@ -418,16 +385,6 @@ export function fallbackAnalysis(context: LearningContext): AgentAnalysis {
       severity: "info",
       detail: "今天还没打卡呢，别忘了记录你今天学了什么～",
       evidence: { streak: 0 },
-    });
-  }
-
-  // 4. 检查学习时长
-  if (context.stats.dailyAvg < 0.5 && context.stats.totalCheckins > 3) {
-    findings.push({
-      category: "habit",
-      severity: "info",
-      detail: `最近每天平均只学了 ${context.stats.dailyAvg} 小时，要不要试试每天至少挤出 1 小时的整块时间？`,
-      evidence: { dailyAvg: context.stats.dailyAvg },
     });
   }
 
@@ -749,7 +706,7 @@ export async function runLearningAgent(
           title: "Analyze + Plan: LLM 分析与规划",
           detail: "正在用 LLM 分析学习状态并生成行动建议。",
           input: asJson({
-            statsSummary: `${context.stats.totalHours}h total, ${context.stats.dailyAvg}h/day avg`,
+            statsSummary: `连续打卡${context.stats.streak}天，共打卡${context.stats.totalCheckins}次`,
             plansCount: context.plans.length,
             pendingTasks: context.pendingTasks.length,
           }),
@@ -758,7 +715,7 @@ export async function runLearningAgent(
       });
     }
 
-    const analysis = await analyze(context, memories);
+    const analysis = await analyze(context, memories, userId);
 
     // 更新分析步骤
     if (run) {

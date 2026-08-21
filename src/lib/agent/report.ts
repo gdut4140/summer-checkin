@@ -17,8 +17,7 @@
 // ============================================================
 
 import type { LearningContext, AgentAnalysis } from "./runtime";
-import type { StudyPattern, SubjectDetail } from "@/lib/tools/coach-tools";
-import type { DailyReport } from "@/types";
+import type { DailyReport, StudyPattern, SubjectDetail } from "@/types";
 
 // ---- 生成每日简报 ----
 
@@ -72,10 +71,10 @@ export function generateDailyReport(input: DailyReportInput): DailyReport {
     status: analysis.status,
     summary: analysis.summary,
     stats: {
-      todayHours: context.stats.todayHours,
-      weekHours: context.stats.weekHours,
       streak: context.stats.streak,
       completionRate: pattern?.completionRate ?? 0,
+      todayFocusMinutes: context.focus.todayMinutes,
+      todayFocusSessions: context.focus.todaySessions,
     },
     strengths: strengths.slice(0, 5),
     weaknesses: weaknesses.slice(0, 5),
@@ -100,8 +99,12 @@ export function formatReportAsMarkdown(report: DailyReport): string {
     "",
     report.summary,
     "",
-    `今天学了 **${report.stats.todayHours}h**，这周累计 **${report.stats.weekHours}h**，已经连续打卡 **${report.stats.streak} 天**`,
+    `已经连续打卡 **${report.stats.streak} 天**，继续保持！`,
     "",
+    ...(report.stats.todayFocusSessions > 0 ? [
+      `今天完成了 **${report.stats.todayFocusSessions} 个番茄钟**，专注了 **${report.stats.todayFocusMinutes} 分钟** 🍅`,
+      "",
+    ] : []),
     ...(report.strengths.length > 0 ? [
       `做得好的地方：`,
       ...report.strengths.map((s) => `- ${s}`),

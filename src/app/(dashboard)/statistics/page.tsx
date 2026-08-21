@@ -4,6 +4,7 @@ import { startOfDay, endOfDay, format, subDays } from "date-fns";
 import { CalendarCheck, ChartLineUp, Star, Lightning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { FocusDurationChart, type FocusDay } from "@/components/profile/focus-duration-chart";
+import { YubaoEnergy } from "@/components/profile/yubao-energy";
 
 export default async function ProfilePage() {
   const user = await requireAuth();
@@ -140,7 +141,11 @@ export default async function ProfilePage() {
             <span className="text-xs font-medium text-white/72">今日动态</span>
             {todayDone > 0 ? <CheckCircle className="size-5 text-primary" weight="fill" /> : <Star className="size-5 text-primary" weight="duotone" />}
           </div>
-          <p className="mt-6 text-sm leading-6 text-white/48">
+          {/* 雨宝精力条：填满卡片中部空白 */}
+          <div className="my-3 flex flex-1 flex-col justify-center">
+            <YubaoEnergy />
+          </div>
+          <p className="text-sm leading-6 text-white/48">
             {todayDone > 0
               ? `已完成 ${todayDone} 个任务 · 连续 ${streakDays} 天活跃 · ${plans.length} 个计划`
               : `还没有完成任务 · ${plans.length} 个计划等你继续`}

@@ -26,6 +26,7 @@ import {
   WarningCircle,
   CloudSun,
   Leaf,
+  type IconWeight,
 } from "@phosphor-icons/react";
 import { EditorPane, type EditorPaneHandle, type EditorPaneMode } from "./editor-pane";
 import { OutlinePanel } from "./outline-panel";
@@ -113,8 +114,8 @@ export function MarkdownStudio({
       if (popoverRef.current.contains(e.target as Node)) return;
       setPopoverOpen(false);
     }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
+    window.addEventListener("mousedown", onDocClick);
+    return () => window.removeEventListener("mousedown", onDocClick);
   }, [popoverOpen]);
   const [panelOrder, setPanelOrder] = useState<PanelKey[]>(
     aiEnabled ? ["outline", "editor", "ai"] : ["outline", "editor"]
@@ -238,7 +239,7 @@ export function MarkdownStudio({
     setShowAiUndo(false);
   }, []);
 
-  // 返回：保存未落盘的改动后，后台触发一次性退出动作（如重新拆分任务），不阻塞跳转。
+  // 返回：有未保存改动 → 直接保存后离开；后台触发一次性退出动作（如重新拆分任务），不阻塞跳转。
   // 注意不能用 dirtyRef 判断：AI 改文档时服务端已落库、dirtyRef 为 false，但文档确实变了。
   const handleBack = useCallback(async () => {
     const changed = contentRef.current !== document.content;
@@ -663,7 +664,7 @@ interface PresetToolGroupProps {
 const PRESET_OPTIONS: {
   value: StudioPreset;
   label: string;
-  icon: React.ComponentType<{ className?: string; weight?: string }>;
+  icon: React.ComponentType<{ className?: string; weight?: IconWeight }>;
   group: "scene" | "pure";
 }[] = [
   { value: "dark-rain", label: "雨林", icon: TreeEvergreen, group: "scene" },
@@ -848,19 +849,21 @@ function StudioOpacityRange({
   const fillPercent = max > min ? ((value - min) / (max - min)) * 100 : 0;
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={1}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="studio-opacity-range"
-          style={{ ["--val" as any]: `${fillPercent}%` }}
-          aria-label={label}
-        />
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={1}
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+            className="studio-opacity-range"
+            style={{ ["--val" as any]: `${fillPercent}%` }}
+            aria-label={label}
+          />
+        }
+      />
       <TooltipContent side="top" className="text-xs font-medium">
         {label}
       </TooltipContent>

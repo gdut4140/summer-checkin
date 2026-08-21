@@ -10,7 +10,12 @@ const weeks = [
 
 export function HowItWorks() {
   return (
-    <section id="how" className="bg-[#0a281f]/70 px-4 py-14 text-white backdrop-blur-md md:px-8 md:py-18">
+    <section id="how" className="relative bg-[#0a281f]/70 px-4 py-14 text-white backdrop-blur-md md:px-8 md:py-18">
+      {/* 向下滚动提示（贴右居中，纯视觉） */}
+      <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
+        <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
+        <CaretDown className="size-3.5 animate-bounce" />
+      </div>
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
           <motion.div initial={{ opacity: 0, x: -18 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}>

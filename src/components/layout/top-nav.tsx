@@ -45,14 +45,14 @@ interface TopNavProps {
 const STATIC_NAV = [
   { href: "/checkin", label: "小岛" },
   { href: "/plans", label: "计划" },
-  { href: "/docs", label: "文档" },
+  { href: "/docs", label: "阅读" },
   { href: "/statistics", label: "主页" },
 ] as const;
 
 const STATIC_FULL_NAV = [
   { href: "/checkin", label: "小岛", icon: Tree },
   { href: "/plans", label: "计划", icon: ListChecks },
-  { href: "/docs", label: "文档", icon: Note },
+  { href: "/docs", label: "阅读", icon: Note },
   { href: "/statistics", label: "主页", icon: ChartLine },
 ] as const;
 
@@ -84,7 +84,7 @@ export function TopNav({ user }: TopNavProps) {
               <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Leaf className="size-4" weight="fill" /></span>
               <span className="whitespace-nowrap text-sm font-semibold">Summer Checkin</span>
             </Link>
-            <nav className="atomic-nav__links flex items-center gap-1" aria-label="主导航">
+            <nav className="atomic-nav__links flex items-center gap-1 justify-around" aria-label="主导航">
               {mainNav.map((item) => (
                 <Link key={item.href} href={item.href} className={cn("rounded-full px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors", isActive(item.href) ? "bg-primary text-primary-foreground" : "text-white/52 hover:bg-white/8 hover:text-white")}>{item.label}</Link>
               ))}
@@ -97,8 +97,7 @@ export function TopNav({ user }: TopNavProps) {
             <ChatRoom />
             <NotificationBell />
             <DropdownMenu>
-              <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 py-1 pl-2 pr-1 backdrop-blur-sm transition-all hover:bg-white/12">
-                <List className="h-4 w-4 text-white" />
+              <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 p-1 backdrop-blur-sm transition-all hover:bg-white/12">
                 <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="sm" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-xl border border-white/10 bg-background/98 p-1 shadow-2xl backdrop-blur-2xl">
@@ -157,7 +156,7 @@ export function TopNav({ user }: TopNavProps) {
                   ))}
                 </nav>
                 <div className="absolute bottom-4 left-0 right-0 px-4">
-                  <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">
                         {user.name ?? "用户"}
