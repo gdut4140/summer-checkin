@@ -1567,3 +1567,23 @@
     opacity: 0;
   }
 }
+
+/* ── 落地页渐变遮罩：跟随场景背景色（--background），切换场景整页统一色调 ── */
+.landing-hero-overlay {
+  background-image: linear-gradient(
+      95deg,
+      color-mix(in srgb, var(--background) 68%, transparent) 0%,
+      color-mix(in srgb, var(--background) 38%, transparent) 40%,
+      color-mix(in srgb, var(--background) 6%, transparent) 70%
+    ),
+    linear-gradient(0deg, color-mix(in srgb, var(--background) 78%, transparent) 0%, transparent 38%);
+}
+
+.landing-cta-overlay {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--background) 88%, transparent),
+    color-mix(in srgb, var(--background) 34%, transparent),
+    color-mix(in srgb, var(--background) 72%, transparent)
+  );
+}

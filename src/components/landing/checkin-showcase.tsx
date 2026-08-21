@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "motion/react";
 import {
   CaretDown,
@@ -13,6 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import type { SceneType } from "@/lib/scene-meta";
 import { SCENE_COPY } from "@/lib/scene-meta";
+import { useScene } from "@/context/scene-context";
 
 /* ---------- 三场景亮点卡片 ---------- */
 interface SceneHighlight {
@@ -102,17 +102,15 @@ const PREVIEW_STYLES: Record<
 };
 
 export function CheckinShowcase() {
-  // ⚠️ 方案二：局部 previewScene，不与全局 SceneContext 同步
-  //    → landing/登录注册页保持雨林主题不变（rain.mp4 背景）
-  //    → 只在这个 showcase 的预览演示区切换三种场景视觉
-  const [previewScene, setPreviewScene] = useState<SceneType>("rain");
+  // 场景切换直接驱动全局 SceneContext → data-scene 变化，整页（landing 全部区块）跟随对应主题
+  const { scene: previewScene, setScene } = useScene();
   const pv = PREVIEW_STYLES[previewScene];
   const BottomIcon = pv.bottomIcon;
   const accent = accentOf(previewScene);
 
   return (
-    // section 外壳固定雨林色，与 landing 其他 section（Hero / FeaturesGrid 等）色调一致
-    <section id="checkin" className="relative border-y border-white/10 bg-[#051a13]/90 px-4 py-20 md:px-8 md:py-28 text-white">
+    // section 外壳跟随场景背景色，与 landing 其他 section（Hero / FeaturesGrid 等）色调一致
+    <section id="checkin" className="relative border-y border-white/10 bg-background/90 px-4 py-20 md:px-8 md:py-28 text-white">
       {/* 向下滚动提示（贴右居中，纯视觉） */}
       <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
         <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
@@ -145,8 +143,8 @@ export function CheckinShowcase() {
               都能找到一个让你愿意坐下来的角落。
             </p>
 
-            {/* 预览卡片：外框固定雨林色，内部 16:10 区域切换场景图片 */}
-            <div className="mt-10 overflow-hidden rounded-lg border border-white/10 bg-[#07221a]">
+            {/* 预览卡片：外框跟随主题，内部 16:10 区域展示当前场景图片 */}
+            <div className="mt-10 overflow-hidden rounded-lg border border-white/10 bg-background">
               <div className="relative aspect-[16/10] w-full overflow-hidden">
                 {/* 场景背景图，铺满盒子 */}
                 <img
@@ -159,11 +157,11 @@ export function CheckinShowcase() {
                   className={`pointer-events-none absolute inset-0 ${pv.overlay}`}
                 />
 
-                {/* 场景选择器（左上角）— 方案二：缩略图用 rain.png / snow.png / cloud.png */}
+                {/* 场景选择器（左上角）：缩略图 rain.png / snow.png / cloud.png，切换即驱动全局主题 */}
                 <div className="absolute left-4 top-4 pointer-events-auto">
                   <InlineSceneSwitcher
                     current={previewScene}
-                    onChange={setPreviewScene}
+                    onChange={setScene}
                   />
                 </div>
 
@@ -207,7 +205,7 @@ export function CheckinShowcase() {
             </div>
           </motion.div>
 
-          {/* 右侧 — 三场景亮点卡片（点击只切换局部 preview） */}
+          {/* 右侧 — 三场景亮点卡片（点击切换全局场景主题） */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -226,7 +224,7 @@ export function CheckinShowcase() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.35, delay: i * 0.08 }}
-                    onClick={() => setPreviewScene(h.id)}
+                    onClick={() => setScene(h.id)}
                     className={`group w-full rounded-lg border p-5 text-left transition-all duration-300 ${
                       active
                         ? "border-white/20 bg-white/[0.06] shadow-lg"
@@ -279,7 +277,7 @@ export function CheckinShowcase() {
             </div>
 
             <p className="mt-6 text-center text-xs text-white/28">
-              进入学习空间后，你可以在顶栏随时切换这三种场景。
+              在这里切换，整页都会换成对应主题；进入学习空间后也能在顶栏随时切换。
             </p>
           </motion.div>
         </div>

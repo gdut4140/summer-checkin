@@ -41,9 +41,8 @@ export function AvatarPicker({ current, onSelect }: Props) {
             key={p.id}
             onClick={() => handleSelect(p)}
             disabled={!!saving}
-            title={p.label}
             className={
-              "group relative aspect-square overflow-hidden rounded-2xl bg-foreground/[0.06] transition-all duration-200 ease-out " +
+              "aspect-square overflow-hidden rounded-2xl bg-foreground/[0.06] transition-all duration-200 ease-out " +
               (isActive
                 ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.04] shadow-lg "
                 : "hover:scale-[1.06] hover:ring-1 hover:ring-foreground/25 shadow-sm hover:shadow-md ") +
@@ -52,15 +51,11 @@ export function AvatarPicker({ current, onSelect }: Props) {
           >
             <img
               src={p.src}
-              alt={p.label}
+              alt="头像"
               draggable={false}
               loading="lazy"
               className="h-full w-full rounded-2xl object-cover"
             />
-            {/* 标签：hover 时底部渐显 */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex translate-y-1 items-center justify-center bg-gradient-to-t from-black/55 via-black/20 to-transparent py-1 text-[11px] font-semibold text-white opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-              {p.label}
-            </div>
           </button>
         );
       })}

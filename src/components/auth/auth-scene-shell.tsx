@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Leaf, ShieldCheck, TrendUp, Sparkle } from "@phosphor-icons/react";
+import { ArrowLeft, Leaf, ShieldCheck, TrendUp, Sparkle } from "@phosphor-icons/react";
 import { SCENE_STORAGE_KEY, DEFAULT_SCENE, asSceneType, type SceneType } from "@/lib/scene-meta";
 
 // ─── 每个场景的登录页专属视觉配置 ───
@@ -83,11 +83,8 @@ const SCENE_HERO_COPY: Record<
 };
 
 export function AuthSceneShell({ children }: { children: React.ReactNode }) {
-  // 同步读取 localStorage，避免首帧闪错色（与 SceneProvider 约定一致）
-  const [scene, setSceneState] = useState<SceneType>(() => {
-    if (typeof window === "undefined") return DEFAULT_SCENE;
-    return asSceneType(window.localStorage.getItem(SCENE_STORAGE_KEY));
-  });
+  // 首帧与服务端一致渲染默认场景，挂载后再从 localStorage 同步（与 SceneProvider 一致，避免 hydration 不匹配）
+  const [scene, setSceneState] = useState<SceneType>(DEFAULT_SCENE);
 
   // 1) 监听 localStorage 变化（别的 Tab 改了，此处也跟着变）
   // 2) 首次挂载如果 data-scene 不一致，主动同步（保证 CSS 变量生效）
@@ -159,16 +156,25 @@ export function AuthSceneShell({ children }: { children: React.ReactNode }) {
             </p>
           </div>
 
-          {/* 底部特性 */}
-          <div className={`flex gap-6 text-[12px] ${vis.heroMutedClass}`}>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="size-4 text-primary" />
-              {copy.mutedA}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <TrendUp className="size-4 text-primary/70" />
-              {copy.mutedB}
-            </span>
+          {/* 底部：返回产品进入页 + 特性 */}
+          <div className="flex flex-col gap-5">
+            <Link
+              href="/"
+              className="group inline-flex w-fit items-center gap-2 rounded-full border-2 border-primary-foreground bg-primary px-5 py-2 text-[13px] font-bold text-primary-foreground shadow-[0_0_0_0_var(--primary-foreground,#051612)] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:translate-x-[-2px] hover:shadow-[4px_6px_0_0_var(--primary-foreground,#051612)] active:translate-y-0.5 active:translate-x-[1px] active:shadow-[0_0_0_0_var(--primary-foreground,#051612)]"
+            >
+              <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" weight="bold" />
+              返回产品进入页
+            </Link>
+            <div className={`flex gap-6 text-[12px] ${vis.heroMutedClass}`}>
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="size-4 text-primary" />
+                {copy.mutedA}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <TrendUp className="size-4 text-primary/70" />
+                {copy.mutedB}
+              </span>
+            </div>
           </div>
         </div>
       </section>

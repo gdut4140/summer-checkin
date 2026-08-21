@@ -10,7 +10,7 @@ const weeks = [
 
 export function HowItWorks() {
   return (
-    <section id="how" className="relative bg-[#0a281f]/70 px-4 py-14 text-white backdrop-blur-md md:px-8 md:py-18">
+    <section id="how" className="relative bg-background/70 px-4 py-14 text-white backdrop-blur-md md:px-8 md:py-18">
       {/* 向下滚动提示（贴右居中，纯视觉） */}
       <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
         <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
@@ -19,8 +19,8 @@ export function HowItWorks() {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
           <motion.div initial={{ opacity: 0, x: -18 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}>
-            <p className="text-sm font-semibold text-[#d7ef83]">成长不是一个数字</p>
-            <h2 className="mt-3 text-3xl font-semibold leading-tight md:text-5xl">看见节奏，<br />才能<span className="text-[#d7ef83]">持续调整</span></h2>
+            <p className="text-sm font-semibold text-primary">成长不是一个数字</p>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight md:text-5xl">看见节奏，<br />才能<span className="text-primary">持续调整</span></h2>
             <p className="mt-6 max-w-lg text-base leading-7 text-white/56">
               Summer Checkin 不用排行榜制造焦虑。它把任务完成、专注时长和连续行动整理成属于你的趋势，再由雨宝解释变化背后的原因。
             </p>
@@ -39,16 +39,16 @@ export function HowItWorks() {
               {weeks.map((day, index) => (
                 <div key={day.label} className="text-center">
                   <div className="flex h-36 items-end justify-center bg-white/[0.025] px-2">
-                    <div className={`w-full ${day.active ? "bg-[#d7ef83]/80" : "bg-white/10"}`} style={{ height: `${[54, 72, 48, 22, 84, 64, 78][index]}%` }} />
+                    <div className={`w-full ${day.active ? "bg-primary/80" : "bg-white/10"}`} style={{ height: `${[54, 72, 48, 22, 84, 64, 78][index]}%` }} />
                   </div>
                   <p className="mt-2 text-[10px] text-white/32">{day.label}</p>
                 </div>
               ))}
             </div>
             <div className="mt-7 grid gap-px bg-white/10 sm:grid-cols-3">
-              <div className="bg-[#0a281f] p-4"><Fire className="size-5 text-primary" weight="duotone" /><p className="mt-3 text-sm font-medium">连续行动</p><p className="mt-1 text-[11px] text-white/36">比上周多 2 天</p></div>
-              <div className="bg-[#0a281f] p-4"><Target className="size-5 text-primary" weight="duotone" /><p className="mt-3 text-sm font-medium">计划完成</p><p className="mt-1 text-[11px] text-white/36">本周完成率 86%</p></div>
-              <div className="bg-[#0a281f] p-4"><Brain className="size-5 text-primary" weight="duotone" /><p className="mt-3 text-sm font-medium">雨宝复盘</p><p className="mt-1 text-[11px] text-white/36">节奏稳定，建议适度休息</p></div>
+              <div className="bg-background p-4"><Fire className="size-5 text-primary" weight="duotone" /><p className="mt-3 text-sm font-medium">连续行动</p><p className="mt-1 text-[11px] text-white/36">比上周多 2 天</p></div>
+              <div className="bg-background p-4"><Target className="size-5 text-primary" weight="duotone" /><p className="mt-3 text-sm font-medium">计划完成</p><p className="mt-1 text-[11px] text-white/36">本周完成率 86%</p></div>
+              <div className="bg-background p-4"><Brain className="size-5 text-primary" weight="duotone" /><p className="mt-3 text-sm font-medium">雨宝复盘</p><p className="mt-1 text-[11px] text-white/36">节奏稳定，建议适度休息</p></div>
             </div>
           </motion.div>
         </div>
@@ -60,7 +60,7 @@ export function HowItWorks() {
             ["03", "回看调整", "让记录和 AI 告诉你下一步怎么走。"],
           ].map(([number, title, description]) => (
             <div key={number} className="md:border-l md:border-white/12 md:px-8 first:md:border-l-0 first:md:pl-0">
-              <span className="text-xs text-[#d7ef83]">{number}</span>
+              <span className="text-xs text-primary">{number}</span>
               <h3 className="mt-4 text-lg font-semibold">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-white/45">{description}</p>
             </div>

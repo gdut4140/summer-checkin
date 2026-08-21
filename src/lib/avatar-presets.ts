@@ -1,16 +1,14 @@
 /* ============================================================
  * 用户头像 —— 统一采用 public/user 目录下的真实图片
- *  · 目录内放了 7 张：1.png / 2.png / 3.jpg / 4.jpg / 5.webp / 6.jpg / 7.jpg
- *  · 头像的"id"就是序号（"1"..."7"），存到 user.image 字段，选了哪张就写哪张 id
- *  · 未选头像 / 未知 id：按名字 hash 到 1~7 中一张（保证"同一个人永远对应同一张"）
+ *  · 目录内放了 12 张：1.png ~ 12.png
+ *  · 头像的"id"就是序号（"1"..."12"），存到 user.image 字段，选了哪张就写哪张 id
+ *  · 未选头像 / 未知 id：按名字 hash 到 1~12 中一张（保证"同一个人永远对应同一张"）
  *  · AI 专属头像：复用序号 1，或按需单独配一张——这里用 IDX_AI = 1 兜底
  * ============================================================ */
 
 export interface UserAvatarPreset {
-  /** 存库的 id，就是 public/user 下的文件名编号："1" ~ "7" */
+  /** 存库的 id，就是 public/user 下的文件名编号："1" ~ "12" */
   id: string;
-  /** 给选择器显示用的标签（比如"暖萌 #1"） */
-  label: string;
   /** 图片 URL（public 下静态资源，直接 /user/x.ext 引用） */
   src: string;
   /** 文件扩展名，保留给需要按类型特殊处理的场景 */
@@ -19,13 +17,18 @@ export interface UserAvatarPreset {
 
 // ── 与 public/user 目录严格对应，顺序就是展示顺序 ──
 export const USER_AVATAR_PRESETS: UserAvatarPreset[] = [
-  { id: "1", label: "暖阳 #1",  src: "/user/1.png",  ext: "png"  },
-  { id: "2", label: "青柠 #2",  src: "/user/2.png",  ext: "png"  },
-  { id: "3", label: "海盐 #3",  src: "/user/3.jpg",  ext: "jpg"  },
-  { id: "4", label: "莓莓 #4",  src: "/user/4.jpg",  ext: "jpg"  },
-  { id: "5", label: "薄雾 #5",  src: "/user/5.webp", ext: "webp" },
-  { id: "6", label: "可可 #6",  src: "/user/6.jpg",  ext: "jpg"  },
-  { id: "7", label: "琥珀 #7",  src: "/user/7.jpg",  ext: "jpg"  },
+  { id: "1",  src: "/user/1.png",  ext: "png" },
+  { id: "2",  src: "/user/2.png",  ext: "png" },
+  { id: "3",  src: "/user/3.png",  ext: "png" },
+  { id: "4",  src: "/user/4.png",  ext: "png" },
+  { id: "5",  src: "/user/5.png",  ext: "png" },
+  { id: "6",  src: "/user/6.png",  ext: "png" },
+  { id: "7",  src: "/user/7.png",  ext: "png" },
+  { id: "8",  src: "/user/8.png",  ext: "png" },
+  { id: "9",  src: "/user/9.png",  ext: "png" },
+  { id: "10", src: "/user/10.png", ext: "png" },
+  { id: "11", src: "/user/11.png", ext: "png" },
+  { id: "12", src: "/user/12.png", ext: "png" },
 ];
 
 /* 旧代码还在用的 AVATAR_PRESETS / AI_AVATAR 等兼容导出，
@@ -38,7 +41,6 @@ export const AVATAR_PRESETS: UserAvatarPreset[] = USER_AVATAR_PRESETS;
 export const AI_AVATAR_ID = "ai";
 export const AI_AVATAR: UserAvatarPreset = {
   id: AI_AVATAR_ID,
-  label: "星尘 AI",
   src: "/user/1.png",
   ext: "png",
 };
@@ -92,7 +94,7 @@ export function resolveAvatarSrc(input: {
     if (/^(https?:|\/|data:)/i.test(image)) return { src: image, id: "url" };
   }
 
-  // 未知/空 → 按名字 hash 回落到 1~7 中一张
+  // 未知/空 → 按名字 hash 回落到 1~12 中一张
   const { preset } = fallbackAvatar(name);
   return { src: preset.src, id: preset.id };
 }

@@ -387,9 +387,9 @@ export function MarkdownStudio({
         <button
           type="button"
           onClick={() => void handleBack()}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+          className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border-2 border-primary-foreground bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-[0_0_0_0_var(--primary-foreground,#051612)] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 hover:translate-x-[-2px] hover:shadow-[4px_6px_0_0_var(--primary-foreground,#051612)] active:translate-y-0.5 active:translate-x-[1px] active:shadow-[0_0_0_0_var(--primary-foreground,#051612)]"
         >
-          <CaretLeft className="size-3.5" weight="bold" />
+          <CaretLeft className="size-4 transition-transform group-hover:-translate-x-0.5" weight="bold" />
           {backLabel}
         </button>
         <div className="h-4 w-px shrink-0 bg-foreground/10" />

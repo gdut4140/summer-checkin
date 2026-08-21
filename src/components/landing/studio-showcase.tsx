@@ -24,7 +24,7 @@ const docOutline = [
 
 export function StudioShowcase() {
   return (
-    <section className="relative bg-[#0a2618]/60 px-4 py-20 text-white md:px-8 md:py-28">
+    <section className="relative bg-background/60 px-4 py-20 text-white md:px-8 md:py-28">
       {/* 向下滚动提示（贴右居中，纯视觉） */}
       <div className="pointer-events-none absolute right-1 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2 text-[11px] font-medium text-white/30 sm:text-xs md:right-2 md:flex">
         <span className="[writing-mode:vertical-rl] tracking-widest">向下滚动</span>
@@ -39,10 +39,10 @@ export function StudioShowcase() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-sm font-semibold text-[#d7ef83]">Markdown 阅读器</p>
+            <p className="text-sm font-semibold text-primary">Markdown 阅读器</p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight md:text-5xl">
               一份笔记，<br />
-              就是你的<span className="text-[#d7ef83]">知识花园</span>
+              就是你的<span className="text-primary">知识花园</span>
             </h2>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-white/56">
               Summer Checkin 内置完整的 Markdown 阅读器与编辑器，支持代码高亮、数学公式、
@@ -57,9 +57,9 @@ export function StudioShowcase() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.06 }}
-                  className="rounded-lg border border-white/8 bg-[#071d16]/70 p-4"
+                  className="rounded-lg border border-white/8 bg-background/70 p-4"
                 >
-                  <Icon className="size-5 text-[#d7ef83]" weight="duotone" />
+                  <Icon className="size-5 text-primary" weight="duotone" />
                   <p className="mt-3 text-sm font-medium">{label}</p>
                   <p className="mt-1 text-[11px] leading-4 text-white/40">{desc}</p>
                 </motion.div>
@@ -74,14 +74,14 @@ export function StudioShowcase() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="lg:pl-8"
           >
-            <div className="overflow-hidden rounded-lg border border-white/10 bg-[#061510] shadow-xl">
+            <div className="overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <BookOpen className="size-4 text-white/40" />
                   <span className="text-xs text-white/60">React 核心原理笔记.md</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="flex items-center gap-1 rounded-full bg-[#d7ef83]/15 px-2 py-0.5 text-[10px] text-[#d7ef83]">
+                  <div className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] text-primary">
                     <Sparkle className="size-2.5" weight="fill" />
                     AI 已就绪
                   </div>
@@ -114,7 +114,7 @@ export function StudioShowcase() {
                   <h3 className="text-lg font-bold text-white/90">虚拟 DOM 与 Diff 算法</h3>
                   <p className="mt-2 text-xs leading-5 text-white/50">
                     React 通过在内存中维护一棵虚拟 DOM 树，当状态变化时
-                    对比<strong className="text-[#d7ef83]">新旧两棵树的差异</strong>，
+                    对比<strong className="text-primary">新旧两棵树的差异</strong>，
                     最小化真实 DOM 操作。
                   </p>
 
@@ -128,8 +128,8 @@ export function StudioShowcase() {
                     </pre>
                   </div>
 
-                  <div className="mt-3 flex items-start gap-2 rounded border-l-2 border-[#d7ef83] bg-[#d7ef83]/5 px-3 py-2">
-                    <Sparkle className="mt-0.5 size-3.5 shrink-0 text-[#d7ef83]" weight="fill" />
+                  <div className="mt-3 flex items-start gap-2 rounded border-l-2 border-primary bg-primary/5 px-3 py-2">
+                    <Sparkle className="mt-0.5 size-3.5 shrink-0 text-primary" weight="fill" />
                     <p className="text-[11px] leading-4 text-white/55">
                       <span className="font-medium text-white/75">AI 批注：</span>
                       时间复杂度 O(n)，利用同层比较 + key 策略优化。
@@ -139,7 +139,7 @@ export function StudioShowcase() {
                   <div className="mt-4 flex items-center justify-between text-[10px] text-white/25">
                     <span>第 2 章 / 共 6 章</span>
                     <div className="h-1 w-24 overflow-hidden rounded-full bg-white/8">
-                      <div className="h-full w-[33%] rounded-full bg-[#d7ef83]" />
+                      <div className="h-full w-[33%] rounded-full bg-primary" />
                     </div>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export function StudioShowcase() {
               <span className="flex items-center gap-1"><Code className="size-3" />代码高亮</span>
               <span className="flex items-center gap-1"><Table className="size-3" />表格渲染</span>
               <span className="flex items-center gap-1"><Calculator className="size-3" />LaTeX 公式</span>
-              <span className="flex items-center gap-1"><Sparkle className="size-3 text-[#d7ef83]" weight="fill" />AI 即时协助</span>
+              <span className="flex items-center gap-1"><Sparkle className="size-3 text-primary" weight="fill" />AI 即时协助</span>
             </div>
           </motion.div>
         </div>
