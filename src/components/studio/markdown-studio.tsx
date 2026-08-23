@@ -11,7 +11,6 @@ import {
   Check,
   CheckCircle,
   CaretDown,
-  Columns,
   DotsSixVertical,
   DownloadSimple,
   Eye,
@@ -20,6 +19,7 @@ import {
   PencilSimple,
   Sliders,
   Snowflake,
+  Sparkle,
   Spinner,
   Sun,
   TreeEvergreen,
@@ -36,6 +36,68 @@ import { useStudioTheme, type StudioPreset } from "./use-studio-theme";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AccordionGallery, { type GalleryItem } from "./accordion-gallery";
 import type { BgGalleryItem } from "./bg-accordion-gallery";
+import { driver, type DriveStep } from "driver.js";
+import "driver.js/dist/driver.css";
+import "@/styles/onboarding.css";
+
+// ── 文档工作台独立引导（三栏拖拽换位）──────────────────────────────
+// 与站外全站引导（OnboardingProvider）完全独立：进入文档工作台自动播放，
+// 看过一次不再弹（localStorage 按版本记忆），改版时 bump DOC_TOUR_VERSION 即可重播。
+const DOC_TOUR_VERSION = "v2";
+const DOC_TOUR_KEY = `summer-checkin.doc-tour.${DOC_TOUR_VERSION}`;
+
+function hasSeenDocTour(): boolean {
+  try {
+    return window.localStorage.getItem(DOC_TOUR_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markDocTourSeen(): void {
+  try {
+    window.localStorage.setItem(DOC_TOUR_KEY, "1");
+  } catch {
+    // 隐私模式等场景忽略
+  }
+}
+
+/** 高亮目标不在 DOM 或不可见（如移动端隐藏的面板）→ undefined，退化为居中弹层 */
+function resolveTourElement(selector: string): Element | undefined {
+  const el = document.querySelector(selector);
+  if (!el) return undefined;
+  const rect = el.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) return undefined;
+  return el;
+}
+
+/** 把当前文档工作台主题的 CSS 变量提升到 body（driver 弹层挂在 body 下，读不到
+ *  .studio-root 作用域内的 --studio-* 变量），引导外观即贴合所选文档主题。 */
+function applyDocTourThemeToBody() {
+  const root = document.querySelector(".studio-root");
+  if (!root) return;
+  const cs = getComputedStyle(root);
+  const set = (name: string, val: string) => document.body.style.setProperty(name, val);
+  set("--tour-doc-bg", cs.getPropertyValue("--studio-base").trim() || "#000000");
+  set("--tour-doc-heading", cs.getPropertyValue("--studio-heading").trim() || "#ffffff");
+  set("--tour-doc-text", cs.getPropertyValue("--studio-text").trim() || "#e6e6e6");
+  set("--tour-doc-muted", cs.getPropertyValue("--studio-text-muted").trim() || "#9aa4b2");
+  set("--tour-doc-accent", cs.getPropertyValue("--studio-link").trim() || "#7dd3fc");
+  document.body.classList.add("doc-tour-active");
+}
+
+function clearDocTourThemeFromBody() {
+  document.body.classList.remove("doc-tour-active");
+  for (const name of [
+    "--tour-doc-bg",
+    "--tour-doc-heading",
+    "--tour-doc-text",
+    "--tour-doc-muted",
+    "--tour-doc-accent",
+  ]) {
+    document.body.style.removeProperty(name);
+  }
+}
 
 export interface MarkdownStudioDocument {
   id: string;
@@ -59,6 +121,8 @@ export interface MarkdownStudioProps {
   /** 新建计划跳转（?focusAi=1）：进入后自动聚焦 AI 输入框并预填引导语 */
   autoFocusAi?: boolean;
   readOnly?: boolean;
+  /** 进入时的默认视图模式；缺省沿用 readOnly ? 专注阅读 : 左右对照 */
+  defaultMode?: EditorPaneMode;
 }
 
 type SaveState = "saved" | "dirty" | "saving" | "error";
@@ -79,11 +143,12 @@ export function MarkdownStudio({
   ai,
   autoFocusAi = false,
   readOnly = false,
+  defaultMode,
 }: MarkdownStudioProps) {
   const aiEnabled = !readOnly && Boolean(ai);
   const router = useRouter();
   const [content, setContent] = useState(document.content);
-  const [mode, setMode] = useState<EditorPaneMode>(readOnly ? "focus" : "split");
+  const [mode, setMode] = useState<EditorPaneMode>(defaultMode ?? (readOnly ? "focus" : "split"));
   const [outlineOpen, setOutlineOpen] = useState(true);
   const [aiOpen, setAiOpen] = useState(aiEnabled);
   const [aiExpanded, setAiExpanded] = useState(false);
@@ -134,6 +199,7 @@ export function MarkdownStudio({
   );
   const [quote, setQuote] = useState<string | null>(null);
   const editorRef = useRef<EditorPaneHandle>(null);
+  const docTourRef = useRef<ReturnType<typeof driver> | null>(null);
   const flashTimerRef = useRef<number | null>(null);
   const aiUndoContentRef = useRef<string | null>(null);
 
@@ -153,6 +219,134 @@ export function MarkdownStudio({
       if (mobileTab === "ai") setMobileTab("doc");
     }
   }, [aiEnabled, mobileTab]);
+
+  // ── 文档工作台小指南：介绍工具栏/目录/AI 三栏与拖拽换位 ──
+  // 独立于站外全站引导；进入自动播放一次，顶栏「小指南」可随时重看。
+  const buildDocTourDriver = useCallback(() => {
+    // 动态组装步骤：只读/无 AI 的工作台跳过"AI 助手"步。进度用 driver 模板占位符自动替换。
+    const steps: DriveStep[] = [
+      {
+        popover: {
+          title: "文档工作台小指南 ✍️",
+          description:
+            "这里是你的文档工作台：顶栏管主题与视图，下方分栏承载 目录 / 正文 / AI 助手，三栏位置还能自由调整。几步带你上手。",
+          showProgress: true,
+          progressText: "{{current}} / {{total}}",
+        },
+      },
+      {
+        element: resolveTourElement("[data-tour='studio-toolbar']"),
+        popover: {
+          title: "工具栏",
+          description:
+            "返回、标题重命名、主题预设（雨林/雪日/暖云…）与透明度、以及 目录 / AI / 编辑模式 的开关都在这里。",
+          side: "bottom",
+          align: "start",
+          showProgress: true,
+          progressText: "{{current}} / {{total}}",
+        },
+      },
+      {
+        element: resolveTourElement("[data-tour='studio-outline']"),
+        popover: {
+          title: "目录栏",
+          description:
+            "左边是文档目录，点标题可以快速跳到对应章节，长文档导航很方便。",
+          side: "right",
+          align: "start",
+          showProgress: true,
+          progressText: "{{current}} / {{total}}",
+        },
+      },
+      {
+        element: resolveTourElement("[data-tour='studio-editor']"),
+        popover: {
+          title: "正文区",
+          description:
+            "中间这块是文档正文，默认进来是专注阅读；想看对照编辑，点顶栏「编辑模式」切换。",
+          side: "top",
+          align: "center",
+          showProgress: true,
+          progressText: "{{current}} / {{total}}",
+        },
+      },
+    ];
+    if (aiEnabled) {
+      steps.push({
+        element: resolveTourElement("[data-tour='studio-ai']"),
+        popover: {
+          title: "AI 助手",
+          description:
+            "右边是 AI 面板，选中文字提问、让它帮你改写文档都在这里，改完还能一键撤销。",
+          side: "left",
+          align: "start",
+          showProgress: true,
+          progressText: "{{current}} / {{total}}",
+        },
+      });
+    }
+    steps.push({
+      element: resolveTourElement("[data-tour='studio-panel-grip']"),
+      popover: {
+        title: "拖拽换位",
+        description:
+          "每个模块顶部都有这个小把手，按住它左右拖动，就能把 目录 / 正文 / AI 的顺序自由调换。",
+        side: "bottom",
+        align: "center",
+        showProgress: true,
+        progressText: "{{current}} / {{total}}",
+      },
+    });
+
+    // 文档引导外观跟随文档工作台主题（遮罩 / 弹层 / 高亮）
+    // 注意：组件 prop 名为 document，会遮蔽全局，必须用 window.document
+    applyDocTourThemeToBody();
+    const overlayColor =
+      getComputedStyle(window.document.body).getPropertyValue("--tour-doc-bg").trim() || "#000000";
+    return driver({
+      steps,
+      animate: true,
+      overlayColor,
+      overlayOpacity: 0.72,
+      smoothScroll: true,
+      allowClose: true,
+      disableActiveInteraction: true,
+      showButtons: ["next", "previous", "close"],
+      showProgress: true,
+      nextBtnText: "下一步",
+      prevBtnText: "上一步",
+      doneBtnText: "完成",
+      popoverClass: "tour-popover studio-tour-popover",
+      // 点"完成"：真正销毁引导（不能依赖 onDestroyStarted，它会拦截销毁导致按钮无反应）
+      onDoneClick: () => {
+        docTourRef.current?.destroy();
+      },
+      onDestroyed: () => {
+        clearDocTourThemeFromBody();
+        markDocTourSeen();
+      },
+    });
+  }, [aiEnabled]);
+
+  // 自动播放：新建计划流程（?focusAi=1）聚焦 AI 输入，不打断；已看过则不重复打扰。
+  useEffect(() => {
+    if (autoFocusAi || hasSeenDocTour()) return;
+    const t = window.setTimeout(() => {
+      docTourRef.current = buildDocTourDriver();
+      docTourRef.current.drive();
+    }, 700);
+    return () => {
+      window.clearTimeout(t);
+      docTourRef.current?.destroy();
+    };
+  }, [autoFocusAi, buildDocTourDriver]);
+
+  // 手动重看：顶栏「小指南」入口（无论是否已看过都直接播放）
+  const startDocTour = useCallback(() => {
+    docTourRef.current?.destroy();
+    docTourRef.current = buildDocTourDriver();
+    docTourRef.current.drive();
+  }, [buildDocTourDriver]);
 
   const doSave = useCallback(async () => {
     dirtyRef.current = false;
@@ -383,7 +577,10 @@ export function MarkdownStudio({
       <div className="studio-header-mask" aria-hidden />
 
       {/* 顶栏：返回 + 标题 + （桌面=主题胶囊+tab组合）/（移动=tab+Sliders Popover）+ 保存状态 */}
-      <header className="relative z-30 flex h-14 shrink-0 items-center gap-3 border-b border-foreground/8 px-3 text-foreground sm:px-4">
+      <header
+        data-tour="studio-toolbar"
+        className="relative z-30 flex h-14 shrink-0 items-center gap-3 border-b border-foreground/8 px-3 text-foreground sm:px-4"
+      >
         <button
           type="button"
           onClick={() => void handleBack()}
@@ -477,17 +674,8 @@ export function MarkdownStudio({
                   mode === "focus" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-foreground/[0.08] hover:text-foreground"
                 }`}
               >
-                {mode === "split" ? (
-                  <>
-                    <Eye className="size-3.5" />
-                    专注阅读
-                  </>
-                ) : (
-                  <>
-                    <Columns className="size-3.5" />
-                    左右对照
-                  </>
-                )}
+                <Eye className="size-3.5" />
+                {mode === "focus" ? "编辑模式" : "专注阅读"}
               </button>
             )}
           </div>
@@ -520,6 +708,14 @@ export function MarkdownStudio({
           )}
         </div>
 
+        <button
+          type="button"
+          onClick={startDocTour}
+          className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.04] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground sm:flex"
+        >
+          <Sparkle className="size-3.5" />
+          小指南
+        </button>
         {!readOnly && (
           <button
             type="button"
@@ -569,6 +765,7 @@ export function MarkdownStudio({
             return (
               <div
                 key={key}
+                data-tour="studio-outline"
                 ref={(el) => {
                   panelElRefs.current["outline"] = el;
                 }}
@@ -587,6 +784,7 @@ export function MarkdownStudio({
             return (
               <main
                 key={key}
+                data-tour="studio-editor"
                 ref={(el) => {
                   panelElRefs.current["editor"] = el;
                 }}
@@ -610,6 +808,7 @@ export function MarkdownStudio({
           return (
             <div
               key={key}
+              data-tour="studio-ai"
               ref={(el) => {
                 panelElRefs.current["ai"] = el;
               }}
@@ -874,6 +1073,7 @@ function StudioOpacityRange({
 function PanelGrip({ onPointerDown }: { onPointerDown: (e: ReactPointerEvent) => void }) {
   return (
     <div
+      data-tour="studio-panel-grip"
       onPointerDown={onPointerDown}
       className="absolute left-1/2 top-1 z-20 flex h-6 -translate-x-1/2 cursor-grab items-center justify-center rounded-md border border-foreground/15 bg-background/90 px-1.5 text-muted-foreground shadow-lg backdrop-blur transition-colors hover:text-foreground active:cursor-grabbing"
     >

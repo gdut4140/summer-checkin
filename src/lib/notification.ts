@@ -50,6 +50,28 @@ export async function createNotification(
   input: CreateNotificationInput
 ): Promise<NotificationRecord | null> {
   try {
+    // 每日节流：同一用户当天同类型通知只保留一条。
+    // 通知全部由 Agent 自动生成（每日 cron 可能被多次调用/多次运行），
+    // 去重保证用户每天每种提醒最多收到一条，避免重复打扰。
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const existingToday = await prisma.notification.findFirst({
+      where: {
+        userId: input.userId,
+        type: input.type,
+        createdAt: { gte: startOfDay },
+      },
+      select: { id: true },
+    });
+
+    if (existingToday) {
+      console.log(
+        `[Notification] 今日同类型通知已存在，跳过: type=${input.type} user=${input.userId}`
+      );
+      return null;
+    }
+
     const notification = await prisma.notification.create({
       data: {
         userId: input.userId,

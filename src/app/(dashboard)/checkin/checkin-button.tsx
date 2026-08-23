@@ -29,6 +29,7 @@ export function CheckinButton() {
     <button
       onClick={handleCheckin}
       disabled={loading}
+      data-tour="checkin-button"
       className="group relative inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-black/20 transition-all hover:bg-primary/92 active:scale-95 disabled:opacity-60"
     >
       <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/0 via-white/10 to-primary/0 opacity-0 transition-opacity group-hover:opacity-100" />

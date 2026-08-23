@@ -28,7 +28,7 @@ interface SceneAuthVisual {
 const SCENE_VISUALS: Record<SceneType, SceneAuthVisual> = {
   rain: {
     wrapperBg: "bg-[#06150f]",
-    videoSrc: "/rain.mp4",
+    imageSrc: "/rain.png",
     overlayGradient: "from-[#06150f]/72 via-[#06150f]/48 to-[#06150f]/82",
     mobileOverlayClass: "bg-[#06150f]/85",
     heroHeadingAccent: "text-primary",

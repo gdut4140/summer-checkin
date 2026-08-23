@@ -9,6 +9,7 @@ import {
   ListChecks,
   List,
   Note,
+  Question,
   X,
   Leaf,
   Tree,
@@ -24,6 +25,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/layout/notification-bell";
@@ -31,6 +33,7 @@ import { AmbientSound } from "@/components/dashboard/ambient-sound";
 import { ChatRoom } from "@/components/chatroom/chat-room";
 import { GithubLink } from "@/components/layout/github-link";
 import { useSceneCopy } from "@/context/scene-context";
+import { useOnboarding } from "@/components/onboarding/onboarding-provider";
 
 interface TopNavProps {
   user: {
@@ -60,6 +63,7 @@ export function TopNav({ user }: TopNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { labelShort } = useSceneCopy();
+  const { startTour } = useOnboarding();
 
   // 主要导航（顶部居中显示）：第一项按场景动态，其余静态
   const mainNav = [
@@ -108,6 +112,14 @@ export function TopNav({ user }: TopNavProps) {
                     <p className="text-[11px] text-white/35 truncate">{user.email ?? ""}</p>
                   </div>
                 </div>
+                <div className="h-px bg-white/5 mx-2" />
+                <DropdownMenuItem
+                  onClick={startTour}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-4 py-2 text-sm text-white/75 transition-colors focus:bg-white/6 hover:bg-white/6 focus:text-white hover:text-white"
+                >
+                  <Question weight="fill" className="size-4 text-primary" />
+                  新手引导
+                </DropdownMenuItem>
                 <div className="h-px bg-white/5 mx-2" />
                 <LogoutButton />
               </DropdownMenuContent>

@@ -1,0 +1,192 @@
+/* ============================================================
+   新手引导（driver.js）主题覆盖
+   所有颜色跟随场景 CSS 变量：雨林墨绿 / 雪景冰蓝 / 暖云米灰
+   由 components/onboarding/onboarding-provider.tsx 引入
+   ============================================================ */
+
+/* ── 高亮元素：主题色描边 + 光晕 ── */
+.driver-active-element {
+  border-radius: var(--radius) !important;
+  box-shadow:
+    0 0 0 2px var(--theme-primary),
+    0 0 26px color-mix(in srgb, var(--theme-primary) 38%, transparent) !important;
+  transition: none !important;
+}
+
+/* ── 弹层：深色玻璃，贴合场景玻璃面板质感 ── */
+.tour-popover.driver-popover {
+  --tour-popover-bg: color-mix(in srgb, var(--theme-background) 82%, #05080a);
+  background: var(--tour-popover-bg);
+  border: 1px solid var(--surface-glass-strong-border);
+  border-radius: var(--radius);
+  box-shadow: var(--surface-glass-strong-shadow), 0 0 0 1px color-mix(in srgb, var(--theme-primary) 10%, transparent);
+  backdrop-filter: blur(28px) saturate(130%);
+  color: var(--foreground);
+  font-family: var(--app-font-sans);
+  min-width: 264px;
+  max-width: 316px;
+  padding: 16px 18px 14px;
+}
+
+/* 弹层箭头：跟随弹层底色 */
+.driver-popover-arrow {
+  border-color: var(--tour-popover-bg);
+}
+/* 保持 driver.js 的三边透明，仅替换可见边颜色 */
+.driver-popover-arrow-side-top {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.driver-popover-arrow-side-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.driver-popover-arrow-side-left {
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-right-color: transparent;
+}
+.driver-popover-arrow-side-right {
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* ── 标题 / 说明 ── */
+.tour-popover .driver-popover-title {
+  color: var(--text-title);
+  font-size: 15.5px;
+  font-weight: 650;
+  line-height: 1.45;
+  padding-right: 22px;
+}
+.tour-popover .driver-popover-description {
+  color: var(--text-subtitle);
+  font-size: 13px;
+  line-height: 1.75;
+  margin-top: 6px;
+}
+
+/* ── 关闭按钮 ── */
+.tour-popover .driver-popover-close-btn {
+  top: 7px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  color: var(--text-heading-muted);
+  font-size: 15px;
+  transition: color 0.2s;
+}
+.tour-popover .driver-popover-close-btn:hover,
+.tour-popover .driver-popover-close-btn:focus {
+  color: var(--foreground);
+}
+
+/* ── 进度文字 ── */
+.tour-popover .driver-popover-progress-text {
+  color: var(--text-heading-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 底部按钮 ── */
+.tour-popover .driver-popover-footer {
+  margin-top: 14px;
+  align-items: center;
+}
+.tour-popover .driver-popover-footer-btn {
+  font-family: var(--app-font-sans);
+  border-radius: 999px;
+  border: 1px solid var(--surface-card-border);
+  background: transparent;
+  color: var(--muted-foreground);
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+}
+.tour-popover .driver-popover-footer-btn:hover,
+.tour-popover .driver-popover-footer-btn:focus {
+  background: var(--surface-input-bg);
+  color: var(--foreground);
+}
+.tour-popover .driver-popover-footer-btn:active {
+  transform: scale(0.97);
+}
+
+/* 下一步 / 完成：主题主色按钮 */
+.tour-popover .driver-popover-next-btn,
+.tour-popover .driver-popover-done-btn {
+  background: var(--theme-primary);
+  border-color: transparent;
+  color: var(--theme-primary-foreground);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+.tour-popover .driver-popover-next-btn:hover,
+.tour-popover .driver-popover-next-btn:focus,
+.tour-popover .driver-popover-done-btn:hover,
+.tour-popover .driver-popover-done-btn:focus {
+  background: var(--theme-primary);
+  color: var(--theme-primary-foreground);
+  filter: brightness(1.06);
+}
+.tour-popover .driver-popover-btn-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── 引导期间展开顶部原子导航（把隐藏的五个页面链接露出来） ── */
+.atomic-nav--tour {
+  width: 510px;
+  border-color: var(--surface-nav-hover-border);
+  background: var(--surface-nav-hover-bg);
+  transition: none; /* 展开即时生效，保证高亮裁切位置与元素一致 */
+}
+.atomic-nav--tour .atomic-nav__links {
+  width: 326px;
+  margin-left: 8px;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* ── 文档工作台引导：外观跟随文档主题（--tour-doc-* 由 MarkdownStudio 启动时
+   从 .studio-root 提升到 body，弹层挂在 body 下也能读到；站外引导不受影响） ── */
+.studio-tour-popover.driver-popover {
+  --tour-popover-bg: color-mix(in srgb, var(--tour-doc-bg, var(--theme-background)) 82%, #05080a);
+}
+.studio-tour-popover .driver-popover-title {
+  color: var(--tour-doc-heading, var(--text-title));
+}
+.studio-tour-popover .driver-popover-description {
+  color: var(--tour-doc-text, var(--text-subtitle));
+}
+.studio-tour-popover .driver-popover-progress-text,
+.studio-tour-popover .driver-popover-close-btn {
+  color: var(--tour-doc-muted, var(--text-heading-muted));
+}
+.studio-tour-popover .driver-popover-next-btn,
+.studio-tour-popover .driver-popover-done-btn {
+  background: var(--tour-doc-accent, var(--theme-primary));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--tour-doc-accent, var(--theme-primary)) 30%, transparent);
+}
+.studio-tour-popover .driver-popover-next-btn:hover,
+.studio-tour-popover .driver-popover-next-btn:focus,
+.studio-tour-popover .driver-popover-done-btn:hover,
+.studio-tour-popover .driver-popover-done-btn:focus {
+  background: var(--tour-doc-accent, var(--theme-primary));
+  color: #fff;
+  filter: brightness(1.06);
+}
+body.doc-tour-active .driver-active-element {
+  border-radius: var(--radius) !important;
+  box-shadow:
+    0 0 0 2px var(--tour-doc-accent, var(--theme-primary)),
+    0 0 26px color-mix(in srgb, var(--tour-doc-accent, var(--theme-primary)) 38%, transparent) !important;
+  transition: none !important;
+}

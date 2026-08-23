@@ -162,6 +162,7 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <button
           type="button"
+          data-tour="docs-new"
           onClick={createDocument}
           disabled={creating}
           className="flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"

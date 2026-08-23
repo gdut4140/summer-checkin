@@ -1587,3 +1587,39 @@
     color-mix(in srgb, var(--background) 72%, transparent)
   );
 }
+
+/* ── 贴纸主按钮：套用产品页「免费开始」样式（实心主色 + 深描边 + 硬阴影抬升） ──
+   放 @layer 之外（unlayered），保证压过 shadcn Button 默认工具类；
+   颜色全部跟随场景主题色。仅用于主要操作按钮，小图标/ghost 按钮不套用。 */
+.btn-sticker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: auto;
+  border-radius: 9999px;
+  border: 2px solid var(--primary-foreground);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 0.8rem 1.6rem;
+  white-space: nowrap;
+  box-shadow: 0 0 0 0 var(--primary-foreground);
+  transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+}
+.btn-sticker:hover {
+  transform: translate(-2px, -4px);
+  box-shadow: 4px 6px 0 0 var(--primary-foreground);
+}
+.btn-sticker:active {
+  transform: translate(1px, 2px);
+  box-shadow: 0 0 0 0 var(--primary-foreground);
+}
+.btn-sticker:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}

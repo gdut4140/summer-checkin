@@ -14,7 +14,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runLearningAgent } from "@/lib/agent";
-import { createNotification, cleanupOldNotifications } from "@/lib/notification";
+import { createWeeklyReportNotification } from "@/lib/agent/weekly";
+import { cleanupOldNotifications } from "@/lib/notification";
 import { cleanupColdMemories } from "@/lib/memory";
 
 export async function GET(request: NextRequest) {
@@ -89,6 +90,12 @@ export async function GET(request: NextRequest) {
     // ============================================================
     for (const userId of userIds) {
       try {
+        // 周日：先生成本周学习周报（真实周度汇总，不依赖 LLM 是否产出报告动作）
+        if (isSunday) {
+          const weekly = await createWeeklyReportNotification(userId);
+          if (weekly) reportsGenerated++;
+        }
+
         const result = await runLearningAgent(userId, {
           mode: isSunday ? "review" : "daily",
           persist: true,
@@ -142,29 +149,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ============================================================
-    // 4. 周日：生成周度总结报告（给所有活跃用户）
-    // ============================================================
-    if (isSunday) {
-      console.log("[Cron] 周日：生成周度学习报告");
-      for (const userId of userIds.slice(0, 50)) {
-        // 限制 50 个用户，防止超时
-        try {
-          await createNotification({
-            userId,
-            type: "report",
-            title: "这周的学习总结来了",
-            content: `嘿，这周的学习周报已经整理好了，去 Agent Center 看看吧～`,
-            actionUrl: "/agent",
-          });
-          reportsGenerated++;
-        } catch {
-          // 跳过失败的用户
-        }
-      }
-    }
-
-    // ============================================================
-    // 5. 清理旧通知（30 天前的已读通知）
+    // 4. 清理旧通知（30 天前的已读通知）
     // ============================================================
     for (const userId of userIds.slice(0, 50)) {
       try {
@@ -176,7 +161,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ============================================================
-    // 6. 冷记忆淘汰（长期未使用 + 低重要性的记忆）
+    // 5. 冷记忆淘汰（长期未使用 + 低重要性的记忆）
     // ============================================================
     for (const userId of userIds.slice(0, 50)) {
       try {

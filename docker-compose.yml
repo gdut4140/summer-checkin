@@ -47,7 +47,8 @@ services:
     volumes:
       - knowledge_data:/app/knowledge
     ports:
-      - "3000:3000"
+      # 只绑本机：nginx 走内部网络访问 app，公网必须经 nginx（80）入口
+      - "127.0.0.1:3000:3000"
     networks:
       - app-network
 

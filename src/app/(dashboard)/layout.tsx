@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth-utils";
 import { TopNav } from "@/components/layout/top-nav";
 import { DailyAgentCheck } from "@/components/dashboard/daily-agent-check";
 import { AgentOrb } from "@/components/agent/agent-orb";
+import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 
 export default async function DashboardLayout({
   children,
@@ -15,12 +16,14 @@ export default async function DashboardLayout({
 
   return (
     <div className="scenic-shell relative flex min-h-[100dvh] flex-col">
-      <TopNav user={user} />
-      <main className="relative flex flex-1 flex-col px-0 py-0">
-        {children}
-      </main>
-      <DailyAgentCheck />
-      <AgentOrb />
+      <OnboardingProvider userId={user.id}>
+        <TopNav user={user} />
+        <main className="relative flex flex-1 flex-col px-0 py-0">
+          {children}
+        </main>
+        <DailyAgentCheck />
+        <AgentOrb />
+      </OnboardingProvider>
     </div>
   );
 }

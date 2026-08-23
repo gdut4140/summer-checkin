@@ -31,7 +31,7 @@ interface PresetConfig {
 }
 
 const PRESET_MAP: Record<StudioPreset, PresetConfig> = {
-  "dark-rain": { theme: "dark", bgType: "video", bgSrc: "/rain.mp4", label: "雨林", hasBg: true },
+  "dark-rain": { theme: "dark", bgType: "image", bgSrc: "/rain.png", label: "雨林", hasBg: true },
   "light-snow": { theme: "dark", bgType: "image", bgSrc: "/snow.png", label: "雪日", hasBg: true },
   "khaki-cloud": { theme: "dark", bgType: "image", bgSrc: "/cloud.png", label: "暖云", hasBg: true }, // 黑底白字
   "dark-pure": { theme: "dark", bgType: "none", bgSrc: null, label: "暗色", hasBg: false },

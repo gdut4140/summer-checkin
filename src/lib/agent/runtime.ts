@@ -543,10 +543,11 @@ export async function executeAction(
             message: `已生成提醒通知：${action.detail}`,
           };
         }
+        // 今日提醒已发送过（每日节流去重），视为成功但不重复打扰
         return {
           type: action.type,
-          success: false,
-          message: `提醒生成失败：通知创建返回空`,
+          success: true,
+          message: `今日提醒已发送过，已跳过重复提醒`,
         };
       } catch {
         return {

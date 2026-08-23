@@ -298,7 +298,11 @@ export function ChatRoom() {
   function send() {
     const content = input.trim();
     if (!content || !connected) return;
-    const clientId = crypto.randomUUID();
+    // 纯 HTTP（非安全上下文）下 crypto.randomUUID 不可用，需兜底（与 focus-timer 一致）
+    const clientId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
     wsRef.current?.send(
       JSON.stringify({
         type: "message",

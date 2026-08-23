@@ -60,7 +60,7 @@ export function SceneSelector() {
   const { scene, setScene } = useScene();
 
   return (
-    <div className="pointer-events-auto">
+    <div className="pointer-events-auto" data-tour="scene-selector">
       <div className="mb-2 flex items-center gap-2">
         <span className="text-[11px] font-medium text-white/60 md:text-xs">
           场景选择

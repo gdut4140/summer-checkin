@@ -75,6 +75,8 @@ export function DocStudioClient({
           fetchLatest,
         }}
         readOnly={readOnly}
+        // 进入文档工作台直接是专注阅读模式；想对照编辑时点顶栏"专注阅读"切换
+        defaultMode="focus"
       />
     </div>
   );

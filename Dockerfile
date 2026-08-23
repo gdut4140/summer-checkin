@@ -42,6 +42,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# 知识库 PDF/Word 文本提取需要 Python（route.ts 调 python scripts/extract_*.py）
+RUN apk add --no-cache python3 py3-pip && \
+    pip3 install --break-system-packages --no-cache-dir PyPDF2 python-docx && \
+    ln -sf /usr/bin/python3 /usr/bin/python
+
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs

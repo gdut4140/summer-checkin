@@ -43,6 +43,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
     const editRef = useRef<HTMLTextAreaElement>(null);
     const scrollSyncingRef = useRef(false);
     const [selection, setSelection] = useState<SelectionState | null>(null);
+    const activeSelectionRef = useRef<{ range: Range; text: string } | null>(null);
     const onSelectionActionRef = useRef(onSelectionAction);
     useEffect(() => {
       onSelectionActionRef.current = onSelectionAction;
@@ -120,7 +121,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
       });
     }
 
-    // 阅读面板选区 → 弹出「问 AI」
+    // 阅读面板选区 → 弹出「问 AI」；选区滚动时工具条跟随（selectionchange 在滚动时不触发）
     useEffect(() => {
       if (!selectionActionEnabled) {
         setSelection(null);
@@ -130,27 +131,57 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
         const sel = window.getSelection();
         const read = readRef.current;
         if (!sel || sel.isCollapsed || !read) {
+          activeSelectionRef.current = null;
           setSelection(null);
           return;
         }
         if (!read.contains(sel.anchorNode) && !read.contains(sel.focusNode)) {
+          activeSelectionRef.current = null;
           setSelection(null);
           return;
         }
         const text = sel.toString().trim();
         if (!text || text.length > 2000) {
+          activeSelectionRef.current = null;
           setSelection(null);
           return;
         }
-        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        const range = sel.getRangeAt(0);
+        activeSelectionRef.current = { range, text };
+        const rect = range.getBoundingClientRect();
         setSelection({
           text,
           x: Math.min(Math.max(rect.left + rect.width / 2, 150), window.innerWidth - 150),
           y: Math.max(rect.top, 88),
         });
       }
+      // 阅读面板滚动：重算工具条位置；选区滚出视口则收起，滚回可见时恢复
+      function handleReadScroll() {
+        const active = activeSelectionRef.current;
+        if (!active) return;
+        const rect = active.range.getBoundingClientRect();
+        if (
+          rect.width === 0 ||
+          rect.height === 0 ||
+          rect.bottom < 0 ||
+          rect.top > window.innerHeight
+        ) {
+          setSelection(null);
+          return;
+        }
+        setSelection({
+          text: active.text,
+          x: Math.min(Math.max(rect.left + rect.width / 2, 150), window.innerWidth - 150),
+          y: Math.max(rect.top, 88),
+        });
+      }
       document.addEventListener("selectionchange", handleSelectionChange);
-      return () => document.removeEventListener("selectionchange", handleSelectionChange);
+      const read = readRef.current;
+      read?.addEventListener("scroll", handleReadScroll, { passive: true });
+      return () => {
+        document.removeEventListener("selectionchange", handleSelectionChange);
+        read?.removeEventListener("scroll", handleReadScroll);
+      };
     }, [selectionActionEnabled]);
 
     function handleAction() {

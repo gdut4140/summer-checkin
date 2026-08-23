@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
+  ArrowRight,
   Bell,
   BellRinging,
   ChartBar,
@@ -42,6 +44,7 @@ const filterTypes: { key: NotificationType | "all"; label: string }[] = [
 // ---- Main Component ----
 
 export function NotificationCenter() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<NotificationType | "all">("all");
@@ -257,7 +260,7 @@ export function NotificationCenter() {
                       {!isExpanded && (
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
                           {isReport
-                            ? notification.content.replace(/^#.*$/m, "").trim().slice(0, 120)
+                            ? stripMarkdown(notification.content).slice(0, 120)
                             : notification.content.slice(0, 120)}
                         </p>
                       )}
@@ -279,7 +282,17 @@ export function NotificationCenter() {
                           {notification.content}
                         </p>
                       )}
-                      <div className="mt-2 flex justify-end">
+                      <div className="mt-2 flex items-center justify-end gap-1">
+                        {notification.actionUrl && (
+                          <button
+                            type="button"
+                            onClick={() => router.push(notification.actionUrl!)}
+                            className="mr-auto flex items-center gap-1 text-[11px] text-primary transition-colors hover:underline"
+                          >
+                            <ArrowRight className="size-3" />
+                            前往查看
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-destructive"
@@ -302,6 +315,21 @@ export function NotificationCenter() {
 }
 
 // ---- Helpers ----
+
+/** 去除常见 Markdown 标记，用于折叠态纯文本预览（避免露出 **、## 等源码符号） */
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 function formatRelativeTime(iso: string): string {
   const date = new Date(iso);

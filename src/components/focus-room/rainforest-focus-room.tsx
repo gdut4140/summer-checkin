@@ -49,6 +49,7 @@ export function RainforestFocusRoom() {
         </div>
         <button
           type="button"
+          data-tour="focus-immersive"
           onClick={enterImmersive}
           className="flex shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition hover:scale-[1.03] hover:bg-primary/90 active:scale-95"
         >
