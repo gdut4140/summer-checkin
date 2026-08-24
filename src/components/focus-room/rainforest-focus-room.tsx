@@ -32,9 +32,9 @@ export function RainforestFocusRoom() {
 
   if (immersive) {
     return (
-      <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center px-6">
+      <div className="fixed inset-0 z-[60] flex select-none flex-col items-center justify-center px-6">
         <PomodoroStation immersive />
-        <p className="mt-10 max-w-md text-center text-sm font-light leading-relaxed tracking-wide text-primary/55">
+        <p className="mt-10 max-w-md cursor-default text-center text-sm font-light leading-relaxed tracking-wide text-primary/55">
           「{quote}」
         </p>
         <LongPressExit onExit={() => setImmersive(false)} />

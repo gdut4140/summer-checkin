@@ -397,7 +397,7 @@ export const FocusTimer = forwardRef<PomodoroHandle, FocusTimerProps>(function F
   const timeDisplay = `${String(displayMin).padStart(2, "0")}:${String(displaySec).padStart(2, "0")}`;
 
   if (immersive) {
-    return <span className="immersive-timer tabular-nums">{timeDisplay}</span>;
+    return <span className="immersive-timer tabular-nums select-none cursor-default">{timeDisplay}</span>;
   }
 
   return (
