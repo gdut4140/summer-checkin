@@ -173,7 +173,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const fullSystem = [SYSTEM_PROMPT, studioPrompt, memoryPrompt]
+    // ============================================================
+    // 用户个人资料名字注入
+    // 聊天系统提示词带上用户设置的名字，设置页改名立即生效；
+    // 用户在当前对话里明确要求换称呼时，以用户最新说的为准。
+    // ============================================================
+    const userNamePrompt = user.name
+      ? [
+          `## 用户名字`,
+          `用户设置里的名字是「${user.name}」，称呼用户时优先用这个名字。`,
+          `如果用户在这段对话中明确说要换别的称呼，以用户最新说的为准。`,
+        ].join("\n")
+      : "";
+
+    const fullSystem = [SYSTEM_PROMPT, userNamePrompt, studioPrompt, memoryPrompt]
       .filter(Boolean)
       .join("\n\n");
 
