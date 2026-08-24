@@ -71,9 +71,9 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    function onScroll() {
+    const onScroll = () => {
       nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-    }
+    };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
