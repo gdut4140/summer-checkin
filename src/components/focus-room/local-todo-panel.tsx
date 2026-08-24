@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ListChecks, Plus, Sparkle, Trash } from "@phosphor-icons/react";
+import { Check, ListChecks, PencilSimple, Plus, Sparkle, Trash } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { useLocalTodos, type LocalTodo } from "@/lib/use-local-todos";
 import { cn } from "@/lib/utils";
 
 export function LocalTodoPanel() {
-  const { todos, loaded, addTodo, toggleTodo, removeTodo } = useLocalTodos();
+  const { todos, loaded, addTodo, toggleTodo, removeTodo, updateTitle } = useLocalTodos();
   const [value, setValue] = useState("");
 
   if (!loaded) {
@@ -123,6 +123,7 @@ export function LocalTodoPanel() {
               todo={todo}
               onToggle={() => toggleTodo(todo.id)}
               onRemove={() => removeTodo(todo.id)}
+              onUpdateTitle={(title) => updateTitle(todo.id, title)}
             />
           ))}
         </AnimatePresence>
@@ -135,12 +136,30 @@ function TodoItem({
   todo,
   onToggle,
   onRemove,
+  onUpdateTitle,
 }: {
   todo: LocalTodo;
   onToggle: () => void;
   onRemove: () => void;
+  onUpdateTitle: (title: string) => void;
 }) {
   const completed = todo.completed;
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+
+  const startEdit = () => {
+    setEditValue(todo.title);
+    setEditing(true);
+  };
+  const saveEdit = () => {
+    const trimmed = editValue.trim();
+    setEditing(false);
+    if (trimmed && trimmed !== todo.title) onUpdateTitle(trimmed);
+  };
+  const cancelEdit = () => {
+    setEditing(false);
+    setEditValue(todo.title);
+  };
 
   return (
     <motion.div
@@ -155,10 +174,11 @@ function TodoItem({
       }}
       role="checkbox"
       aria-checked={completed}
-      tabIndex={0}
-      onClick={onToggle}
+      tabIndex={editing ? -1 : 0}
+      onClick={editing ? undefined : onToggle}
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return;
+        if (editing) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           onToggle();
@@ -169,40 +189,77 @@ function TodoItem({
         "hover:bg-white/[0.045] focus-visible:bg-white/[0.05] focus-visible:ring-1 focus-visible:ring-primary/25"
       )}
     >
-      {/* 勾选 */}
-      <span className={cn(
-        "flex size-4 shrink-0 items-center justify-center rounded-full border transition-all",
-        completed
-          ? "border-primary bg-primary text-primary-foreground shadow-[0_0_7px_color-mix(in_srgb,var(--theme-primary)_50%,transparent)]"
-          : "border-muted-foreground/35 text-transparent group-hover:border-primary/65"
-      )}>
-        {completed ? (
-          <Check className="size-3" weight="bold" />
-        ) : null}
-      </span>
+      {editing ? (
+        // 编辑态：直接改标题
+        <input
+          autoFocus
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              saveEdit();
+            }
+            if (e.key === "Escape") {
+              e.preventDefault();
+              cancelEdit();
+            }
+          }}
+          onBlur={saveEdit}
+          aria-label={`编辑待办：${todo.title}`}
+          className="min-w-0 flex-1 rounded-md border border-primary/30 bg-black/[0.12] px-2 py-1 text-xs text-foreground outline-none focus:border-primary/50"
+        />
+      ) : (
+        <>
+          {/* 勾选 */}
+          <span className={cn(
+            "flex size-4 shrink-0 items-center justify-center rounded-full border transition-all",
+            completed
+              ? "border-primary bg-primary text-primary-foreground shadow-[0_0_7px_color-mix(in_srgb,var(--theme-primary)_50%,transparent)]"
+              : "border-muted-foreground/35 text-transparent group-hover:border-primary/65"
+          )}>
+            {completed ? (
+              <Check className="size-3" weight="bold" />
+            ) : null}
+          </span>
 
-      {/* 标题 */}
-      <span
-        className={cn(
-          "min-w-0 flex-1 truncate text-xs leading-5",
-          completed ? "text-muted-foreground/45 line-through" : "text-foreground/82"
-        )}
-      >
-        {todo.title}
-      </span>
+          {/* 标题 */}
+          <span
+            className={cn(
+              "min-w-0 flex-1 truncate text-xs leading-5",
+              completed ? "text-muted-foreground/45 line-through" : "text-foreground/82"
+            )}
+          >
+            {todo.title}
+          </span>
 
-      {/* 删除 */}
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onRemove();
-        }}
-        aria-label={`删除待办：${todo.title}`}
-        className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/20 opacity-0 transition-all hover:bg-white/[0.05] hover:text-foreground/60 group-hover:opacity-100 focus-visible:opacity-100"
-      >
-        <Trash className="size-3" />
-      </button>
+          {/* 编辑 */}
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              startEdit();
+            }}
+            aria-label={`编辑待办：${todo.title}`}
+            className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/20 opacity-0 transition-all hover:bg-white/[0.05] hover:text-foreground/60 group-hover:opacity-100 focus-visible:opacity-100"
+          >
+            <PencilSimple className="size-3" />
+          </button>
+
+          {/* 删除 */}
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onRemove();
+            }}
+            aria-label={`删除待办：${todo.title}`}
+            className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/20 opacity-0 transition-all hover:bg-white/[0.05] hover:text-foreground/60 group-hover:opacity-100 focus-visible:opacity-100"
+          >
+            <Trash className="size-3" />
+          </button>
+        </>
+      )}
     </motion.div>
   );
 }
