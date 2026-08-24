@@ -456,6 +456,8 @@ model ChatMessage {
   userId    String?
   role      String   @default("user")
   content   String
+  /** 聊天室 AI 角色（温柔宝/嘴欠宝）；AI 消息用于区分，让上下文标注不串风格 */
+  aiRole    String?
   createdAt DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)

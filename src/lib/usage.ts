@@ -8,7 +8,7 @@ import { startOfDay } from "date-fns";
 // ============================================================
 
 /** 余额不足或每日精力用完时的统一回复文案 */
-export const ENERGY_DOWN_MESSAGE = "没精力了，宕机了，呃啊";
+export const ENERGY_DOWN_MESSAGE = "没精力了，宕机了";
 
 /** 交互式面超限（每日精力用完）时抛出的错误，路由据此流式返回友好文本 */
 export class UsageLimitError extends Error {
@@ -26,9 +26,9 @@ export interface TodayUsage {
   unlimited: boolean;
 }
 
-/** 每日限额（env AI_TOKEN_LIMIT，0 = 不限） */
+/** 每日限额（env AI_TOKEN_LIMIT，0 = 不限），默认 20 万 token */
 export function usageLimit(): number {
-  const raw = Number(process.env.AI_TOKEN_LIMIT ?? 100000);
+  const raw = Number(process.env.AI_TOKEN_LIMIT ?? 200000);
   return Number.isFinite(raw) && raw > 0 ? raw : 0;
 }
 

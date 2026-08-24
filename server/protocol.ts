@@ -6,6 +6,9 @@
 
 export type MessageRole = "user" | "assistant" | "system";
 
+/** 聊天室 AI 角色：温柔宝 / 嘴欠宝 */
+export type AiRole = "gentle" | "snarky";
+
 // ---- 客户端 → 服务端 ----
 export type ClientMessage =
   | { type: "message"; clientId: string; content: string }
@@ -15,9 +18,9 @@ export type ClientMessage =
 export type ServerMessage =
   | { type: "ready"; user: { id: string; name: string; image: string | null } }
   | { type: "message"; message: ChatMessageDTO }
-  | { type: "ai:start" }
-  | { type: "ai:delta"; content: string }
-  | { type: "ai:done"; message: ChatMessageDTO }
+  | { type: "ai:start"; requestId: string; aiRole: AiRole }
+  | { type: "ai:delta"; requestId: string; content: string }
+  | { type: "ai:done"; requestId: string; message: ChatMessageDTO }
   | { type: "presence"; online: number }
   | { type: "pong" }
   | { type: "error"; code: string; reason: string };

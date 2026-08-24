@@ -68,6 +68,8 @@ export function AiChatPanel({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const nearBottomRef = useRef(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const conversationIdRef = useRef<string | null>(null);
   const panelRef = useRef<ElementRef<"aside">>(null);
@@ -143,8 +145,19 @@ export function AiChatPanel({
     });
   }, [autoFocus, starterPrompt]);
 
+  // 记录用户是否贴底：AI 生成时上滑查看历史不被拉回，只有贴近底部才自动跟随
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    function onScroll() {
+      nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (nearBottomRef.current) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   async function send() {
@@ -297,7 +310,7 @@ export function AiChatPanel({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-3 py-3">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-3 py-3">
         {messages.length === 0 && historyLoading ? (
           <div className="flex h-full items-center justify-center">
             <div className="size-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />

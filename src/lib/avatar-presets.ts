@@ -1,8 +1,8 @@
 /* ============================================================
  * 用户头像 —— 统一采用 public/user 目录下的真实图片
- *  · 目录内放了 12 张：1.png ~ 12.png
- *  · 头像的"id"就是序号（"1"..."12"），存到 user.image 字段，选了哪张就写哪张 id
- *  · 未选头像 / 未知 id：按名字 hash 到 1~12 中一张（保证"同一个人永远对应同一张"）
+ *  · 目录内放了 16 张：1.png ~ 16.png
+ *  · 头像的"id"就是序号（"1"..."16"），存到 user.image 字段，选了哪张就写哪张 id
+ *  · 未选头像 / 未知 id：按名字 hash 到 1~16 中一张（保证"同一个人永远对应同一张"）
  *  · AI 专属头像：复用序号 1，或按需单独配一张——这里用 IDX_AI = 1 兜底
  * ============================================================ */
 
@@ -29,6 +29,10 @@ export const USER_AVATAR_PRESETS: UserAvatarPreset[] = [
   { id: "10", src: "/user/10.png", ext: "png" },
   { id: "11", src: "/user/11.png", ext: "png" },
   { id: "12", src: "/user/12.png", ext: "png" },
+  { id: "13", src: "/user/13.png", ext: "png" },
+  { id: "14", src: "/user/14.png", ext: "png" },
+  { id: "15", src: "/user/15.png", ext: "png" },
+  { id: "16", src: "/user/16.png", ext: "png" },
 ];
 
 /* 旧代码还在用的 AVATAR_PRESETS / AI_AVATAR 等兼容导出，

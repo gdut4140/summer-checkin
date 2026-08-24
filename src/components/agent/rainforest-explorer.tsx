@@ -60,13 +60,26 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
   const [loading, setLoading] = useState(false);
   const [deepThink, setDeepThink] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const nearBottomRef = useRef(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const loadedRef = useRef(false);
   const initialMsgCountRef = useRef<number>(0);
 
+  // 记录用户是否贴底：AI 生成时上滑查看历史不被拉回，只有贴近底部才自动跟随
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    function onScroll() {
+      nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (nearBottomRef.current) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // 从「新建计划」跳转过来（initialPlanner）→ 聚焦输入框（状态已由 initialPlanner 初始化）
@@ -258,7 +271,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
                 <div><p className="text-sm font-semibold">学习对话</p><p className="text-[11px] text-white/40">询问、复盘与深入理解</p></div>
               </div>
             </header>
-            <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-4 py-5 sm:px-7">
+            <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-4 py-5 sm:px-7">
               {messages.length === 0 ? (
                 <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center text-center">
                   <div className="relative flex size-14 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary"><Sparkle className="size-6" weight="fill" /></div>

@@ -449,6 +449,7 @@ export const ChatMessageScalarFieldEnum = {
   userId: 'userId',
   role: 'role',
   content: 'content',
+  aiRole: 'aiRole',
   createdAt: 'createdAt'
 } as const
 

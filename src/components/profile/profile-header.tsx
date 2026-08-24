@@ -31,6 +31,8 @@ export function ProfileHeader({ user }: Props) {
   const handleAvatarSelect = useCallback((id: string) => {
     setAvatarId(id);
     setAvatarOpen(false);
+    // 通知全局（右上角 TopNav 等）立即刷新头像，不依赖 layout 刷新时机
+    window.dispatchEvent(new CustomEvent("avatar:changed", { detail: id }));
     router.refresh();
   }, [router]);
 

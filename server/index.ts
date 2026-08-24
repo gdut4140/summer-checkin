@@ -11,7 +11,7 @@ import { config } from "./config";
 import { authenticate, type AuthUser } from "./auth";
 import { prisma } from "./db";
 import { addConnection, removeConnection, broadcast, allConnections, type Connection } from "./room";
-import { toDTO, type ClientMessage } from "./protocol";
+import { toDTO, type AiRole, type ClientMessage } from "./protocol";
 import { handleAI } from "./ai";
 
 // ---- HTTP 服务（仅用于健康检查 + WS 升级） ----
@@ -146,9 +146,10 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
 
   broadcast({ type: "message", message: toDTO(saved, userName, image) });
 
-  // @AI 触发（传 userId，聊天室按用户记账 + 每日限额）
-  const aiPrompt = extractAIPrompt(content);
-  if (aiPrompt) void handleAI(aiPrompt, conn.userId ?? undefined);
+  // @AI 触发（传 userId，聊天室按用户记账 + 每日限额）；一条消息可同时 @温柔宝 + @嘴欠宝，各自流式
+  for (const ai of extractAIPrompts(content)) {
+    void handleAI(ai.prompt, conn.userId ?? undefined, ai.aiRole);
+  }
 }
 
 function sendError(conn: Connection, code: string, reason: string) {
@@ -165,17 +166,23 @@ function checkRateLimit(conn: Connection): boolean {
   return conn.messageCount <= config.rateLimit.max;
 }
 
-function extractAIPrompt(content: string): string | null {
-  // @雨宝 / @AI 可在文中任意位置触发；/ai 是命令式，仍要求开头（避免命中 /api 之类）
-  const m = content.match(/@雨宝|@AI|^\s*\/ai(?=\s|$)/i);
-  if (!m) return null;
-  const idx = m.index!;
-  // 优先取提及之后的文字作为提问
-  const after = content.slice(idx + m[0].length).replace(/^\s+/, "").trim();
-  if (after) return after;
-  // 提及在末尾、后面没内容：把提及之前的文字作为提问
-  const before = content.slice(0, idx).trim();
-  return before || null;
+function extractAIPrompts(content: string): { prompt: string; aiRole: AiRole }[] {
+  // @温柔宝 → 温柔宝；@雨宝 / @嘴欠宝 / @AI → 嘴欠宝；/ai 是命令式，仍要求开头（避免命中 /api 之类）
+  const results: { prompt: string; aiRole: AiRole }[] = [];
+  const re = /@温柔宝|@嘴欠宝|@雨宝|@AI|^\s*\/ai(?=\s|$)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content)) !== null) {
+    const aiRole: AiRole = m[0].toLowerCase().includes("温柔") ? "gentle" : "snarky";
+    // 优先取提及之后的文字作为提问
+    const after = content.slice(m.index + m[0].length).replace(/^\s+/, "").trim();
+    const prompt = after || content.slice(0, m.index).trim() || null;
+    if (prompt) results.push({ prompt, aiRole });
+    if (m[0].length === 0) re.lastIndex++; // 防死循环
+  }
+  // 同角色只触发一次（一条消息 @ 同一个人两次不重复回复）
+  return results.filter(
+    (r, i, arr) => arr.findIndex((x) => x.aiRole === r.aiRole) === i
+  );
 }
 
 function rawDataToString(data: WebSocket.RawData): string {

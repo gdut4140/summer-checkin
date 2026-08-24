@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogoutButton } from "@/app/(dashboard)/actions";
 import {
   ChartLine,
@@ -62,6 +62,16 @@ const STATIC_FULL_NAV = [
 export function TopNav({ user }: TopNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [avatarId, setAvatarId] = useState(user.image ?? null);
+  // 头像更新事件（profile 页换头像后派发）：右上角头像立即同步，不依赖 layout 刷新时机
+  useEffect(() => {
+    function onAvatarChanged(e: Event) {
+      const detail = (e as CustomEvent<string>).detail;
+      if (detail) setAvatarId(detail);
+    }
+    window.addEventListener("avatar:changed", onAvatarChanged);
+    return () => window.removeEventListener("avatar:changed", onAvatarChanged);
+  }, []);
   const { labelShort } = useSceneCopy();
   const { startTour } = useOnboarding();
 
@@ -102,11 +112,11 @@ export function TopNav({ user }: TopNavProps) {
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 p-1 backdrop-blur-sm transition-all hover:bg-white/12">
-                <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="sm" />
+                <AppAvatar image={avatarId} name={user.name ?? "U"} size="sm" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-xl border border-white/10 bg-background/98 p-1 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center gap-3 px-3 py-3">
-                  <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="md" />
+                  <AppAvatar image={avatarId} name={user.name ?? "U"} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{user.name ?? "用户"}</p>
                     <p className="text-[11px] text-white/35 truncate">{user.email ?? ""}</p>
@@ -132,7 +142,7 @@ export function TopNav({ user }: TopNavProps) {
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger className="flex items-center gap-2 rounded-md border border-white/25 bg-white/10 p-1.5 pr-3 text-white">
                 <List className="h-4 w-4" />
-                <AppAvatar image={user.image ?? null} name={user.name ?? "U"} size="sm" />
+                <AppAvatar image={avatarId} name={user.name ?? "U"} size="sm" />
               </SheetTrigger>
               <SheetContent side="right" className="w-72 p-0">
                 <div className="flex h-16 items-center justify-between border-b border-border px-4">

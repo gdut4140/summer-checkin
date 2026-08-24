@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ArrowRight,
   ChatsCircle,
   PaperPlaneTilt,
   Sparkle,
@@ -27,29 +28,22 @@ interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
   createdAt: string;
+  /** 两个雨宝：gentle = 温柔宝（粉色头像），snarky = 嘴欠宝（雨宝） */
+  aiRole?: "gentle" | "snarky";
 }
 
 type ServerMessage =
   | { type: "ready"; user: { id: string; name: string; image: string | null } }
   | { type: "message"; message: ChatMessage }
-  | { type: "ai:start" }
-  | { type: "ai:delta"; content: string }
-  | { type: "ai:done"; message: ChatMessage }
+  | { type: "ai:start"; requestId: string; aiRole: "gentle" | "snarky" }
+  | { type: "ai:delta"; requestId: string; content: string }
+  | { type: "ai:done"; requestId: string; message: ChatMessage }
   | { type: "presence"; online: number }
   | { type: "pong" }
   | { type: "error"; code: string; reason: string };
 
-const STREAMING_ID = "__ai_streaming__";
-
-// 合并历史快照与当前消息：按 id 去重、按时间排序。
-// 避免打开时整体替换把关闭期间/拉取期间的实时消息冲掉。
-function mergeMessages(existing: ChatMessage[], fetched: ChatMessage[]): ChatMessage[] {
-  const byId = new Map(existing.map((m) => [m.id, m]));
-  for (const m of fetched) byId.set(m.id, m);
-  return [...byId.values()].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
-}
+// 两个雨宝当成两个不同"用户"：固定的虚拟 userId，消息按各自用户分组渲染
+const AI_IDS = { gentle: "ai-gentle", snarky: "ai-snarky" } as const;
 
 function getWsUrl(): string {
   const host = window.location.hostname;
@@ -66,7 +60,11 @@ function formatTime(iso: string): string {
 }
 
 function senderKey(m: ChatMessage): string {
-  if (m.role === "assistant") return "ai";
+  // 温柔宝/嘴欠宝按各自虚拟用户分组，当成两个不同用户，不互相合并
+  if (m.role === "assistant") {
+    const isGentle = m.userId === AI_IDS.gentle || m.userName === "温柔宝";
+    return isGentle ? "ai:gentle" : "ai:snarky";
+  }
   if (m.role === "system") return "sys";
   return `u:${m.userId ?? "anon"}`;
 }
@@ -75,9 +73,9 @@ export function ChatRoom() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [mentionIndex, setMentionIndex] = useState(0);
   const [online, setOnline] = useState(0);
   const [connected, setConnected] = useState(false);
-  const [aiStreaming, setAiStreaming] = useState(false);
   const [myId, setMyId] = useState<string | null>(null);
   const [reconnectKey, setReconnectKey] = useState(0);
   const [reconnecting, setReconnecting] = useState(false);
@@ -88,6 +86,8 @@ export function ChatRoom() {
   const [newCount, setNewCount] = useState(0);
 
   const wsRef = useRef<WebSocket | null>(null);
+  // 拉取历史期间通过 WebSocket 实时到达的消息，整体替换后补回，避免被冲掉
+  const liveWindow = useRef<ChatMessage[] | null>(null);
   const openRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -109,31 +109,71 @@ export function ChatRoom() {
   }, [myId]);
 
   const loadHistory = useCallback(() => {
+    // 打开本次拉取窗口：期间实时到达的消息缓存起来，替换快照时补回
+    liveWindow.current = [];
     fetch("/api/chat/messages", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
-        const list = (d.messages ?? []).map(
+        const list: ChatMessage[] = (d.messages ?? []).map(
           (m: {
             id: string;
             userId: string | null;
             role: string;
             content: string;
             createdAt: string;
+            aiRole?: string | null;
             user?: { name: string | null; image: string | null } | null;
-          }) => ({
-            id: m.id,
-            userId: m.userId,
-            userName: m.user?.name ?? null,
-            image: m.user?.image ?? null,
-            role: m.role as ChatMessage["role"],
-            content: m.content,
-            createdAt: m.createdAt,
-          })
+          }) => {
+            const role = m.role as ChatMessage["role"];
+            if (role !== "assistant") {
+              return {
+                id: m.id,
+                userId: m.userId,
+                userName: m.user?.name ?? null,
+                image: m.user?.image ?? null,
+                role,
+                content: m.content,
+                createdAt: m.createdAt,
+              };
+            }
+            // AI 消息：优先用数据库的虚拟 userId（新消息已落库）；旧消息按 aiRole / 用户名兜底
+            const isGentle =
+              m.userId === AI_IDS.gentle ||
+              m.aiRole === "gentle" ||
+              m.user?.name === "温柔宝";
+            return {
+              id: m.id,
+              userId: m.userId ?? (isGentle ? AI_IDS.gentle : AI_IDS.snarky),
+              userName: isGentle ? "温柔宝" : "嘴欠宝",
+              image: m.user?.image ?? null,
+              role,
+              content: m.content,
+              createdAt: m.createdAt,
+              aiRole: isGentle ? "gentle" : "snarky",
+            };
+          }
         );
-        // 合并而非替换：保留关闭期间/拉取期间实时收到的消息，并补上历史快照里的
-        setMessages((prev) => mergeMessages(prev, list));
+        setMessages((prev) => {
+          // 快照是权威数据，整体替换——数据库删掉的消息随之从页面消失；
+          // 补回拉取窗口内实时到达的消息，以及正在流式输出的 AI 占位气泡
+          const windowed = liveWindow.current ?? [];
+          liveWindow.current = null;
+          const byId = new Map(list.map((m) => [m.id, m]));
+          for (const m of windowed) byId.set(m.id, m);
+          // 保留所有正在流式的 AI 占位气泡（id 以 ai- 开头，避免被历史快照冲掉）
+          for (const m of prev) {
+            if (m.id.startsWith("ai-")) byId.set(m.id, m);
+          }
+          return [...byId.values()].sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
       })
-      .catch(() => toast.error("加载聊天记录失败"));
+      .catch(() => {
+        liveWindow.current = null;
+        toast.error("加载聊天记录失败");
+      });
   }, []);
 
   useEffect(() => {
@@ -165,6 +205,8 @@ export function ChatRoom() {
         break;
       case "message": {
         const m = msg.message;
+        // 拉取历史期间到达的实时消息：先缓存，等 loadHistory 整体替换时补回
+        if (liveWindow.current) liveWindow.current.push(m);
         if (openRef.current) {
           setMessages((prev) => [...prev, m]);
           // 上滑阅读时：别人的新消息计入未读（自己发的除外）
@@ -177,15 +219,17 @@ export function ChatRoom() {
       }
       case "ai:start":
         if (openRef.current) {
-          setAiStreaming(true);
+          const aiRole = msg.aiRole ?? "snarky";
+          // 每个 AI 请求一个独立占位气泡（id=requestId），支持同时 @ 两个雨宝各自流式
           setMessages((prev) => [
             ...prev,
             {
-              id: STREAMING_ID,
-              userId: null,
-              userName: "雨宝",
+              id: msg.requestId,
+              userId: AI_IDS[aiRole],
+              userName: aiRole === "gentle" ? "温柔宝" : "嘴欠宝",
               image: null,
               role: "assistant",
+              aiRole,
               content: "",
               createdAt: new Date().toISOString(),
             },
@@ -196,17 +240,28 @@ export function ChatRoom() {
         if (openRef.current) {
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === STREAMING_ID ? { ...m, content: m.content + msg.content } : m
+              m.id === msg.requestId ? { ...m, content: m.content + msg.content } : m
             )
           );
         }
         break;
       case "ai:done":
         if (openRef.current) {
-          setAiStreaming(false);
-          setMessages((prev) =>
-            prev.map((m) => (m.id === STREAMING_ID ? msg.message : m))
-          );
+          // server DTO 不带 userId：按名字补上虚拟 userId，让两个宝像两个不同用户
+          const doneMsg: ChatMessage = msg.message.userId
+            ? msg.message
+            : {
+                ...msg.message,
+                userId:
+                  msg.message.userName === "温柔宝" ? AI_IDS.gentle : AI_IDS.snarky,
+              };
+          setMessages((prev) => {
+            // 该消息已在列表（历史快照拉到）：只移除占位，避免同 id 重复
+            if (prev.some((m) => m.id === doneMsg.id)) {
+              return prev.filter((m) => m.id !== msg.requestId);
+            }
+            return prev.map((m) => (m.id === msg.requestId ? doneMsg : m));
+          });
           // 上滑阅读时：AI 完成回复也算一条新消息
           if (!atBottomRef.current) setNewCount((c) => c + 1);
         }
@@ -314,8 +369,10 @@ export function ChatRoom() {
     inputRef.current?.focus();
   }
 
-  function selectMention() {
-    setInput((prev) => prev.replace(/@$/, "@雨宝 "));
+  function selectMention(target: "gentle" | "snarky") {
+    setInput((prev) =>
+      prev.replace(/@$/, target === "gentle" ? "@温柔宝 " : "@嘴欠宝 ")
+    );
     inputRef.current?.focus();
   }
 
@@ -329,7 +386,7 @@ export function ChatRoom() {
             type="button"
             onClick={openChat}
             aria-label="打开聊天室"
-            className="relative flex size-8 items-center justify-center rounded-full text-foreground/55 transition-colors hover:bg-foreground/10 hover:text-foreground"
+            className="relative flex size-8 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10 hover:text-primary"
           />
         }>
           <ChatsCircle className="size-4" weight="fill" />
@@ -354,7 +411,7 @@ export function ChatRoom() {
         >
           <DialogTitle className="sr-only">学习聊天室</DialogTitle>
           <DialogDescription className="sr-only">
-            多人实时聊天，@雨宝 唤起 AI 助教
+            多人实时聊天，@雨宝 唤起 雨宝
           </DialogDescription>
 
           {/* 头部 */}
@@ -422,16 +479,16 @@ export function ChatRoom() {
                       开始聊天吧
                     </h3>
                     <p className="mt-1.5 max-w-xs text-sm leading-6 text-muted-foreground">
-                      和伙伴一起交流，输入 @ 唤起 AI 助教雨宝
+                      和伙伴一起交流，输入 @ 唤起嘴欠宝 / 温柔宝
                     </p>
                     <button
                       onClick={() => {
-                        setInput("@雨宝 ");
+                        setInput("@温柔宝 ");
                         inputRef.current?.focus();
                       }}
                       className="mt-4 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
                     >
-                      @雨宝 提问
+                      @温柔宝 提问
                     </button>
                   </div>
                 ) : (
@@ -464,25 +521,58 @@ export function ChatRoom() {
               <div className="shrink-0 border-t border-border/60 p-3 sm:p-4">
                 <div className="relative mx-auto max-w-3xl">
                   {showMention && (
-                    <button
-                      onClick={selectMention}
-                      className="absolute -top-14 left-0 flex items-center gap-2.5 rounded-xl border border-border bg-popover px-3 py-2 shadow-xl transition-colors hover:bg-primary/12"
-                    >
-                      <span className={cn(
-                        "flex size-7 items-center justify-center",
-                        "rounded-full",
-                        "bg-primary",
-                        "ring-1 ring-primary/40",
-                        "shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_12px_rgba(0,0,0,0.20),0_0_18px_color-mix(in_oklab,var(--color-primary)_30%,transparent)]",
-                        "text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]",
-                      )}>
-                        <Sparkle className="size-4" weight="fill" />
-                      </span>
-                      <span className="text-left">
-                        <span className="block text-xs font-medium text-foreground">雨宝</span>
-                        <span className="block text-[10px] text-muted-foreground">AI 助教</span>
-                      </span>
-                    </button>
+                    <div className="absolute -top-14 left-0 flex flex-col gap-0.5 rounded-xl border border-border bg-popover p-1 shadow-xl">
+                      <button
+                        type="button"
+                        onClick={() => selectMention("gentle")}
+                        onMouseEnter={() => setMentionIndex(0)}
+                        className={cn(
+                          "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-colors",
+                          mentionIndex === 0 ? "bg-primary/12" : "hover:bg-primary/8"
+                        )}
+                      >
+                        <span className={cn(
+                          "flex size-7 items-center justify-center",
+                          "rounded-full",
+                          "bg-pink-200",
+                          "ring-1 ring-pink-200/60",
+                          "shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset,0_4px_12px_rgba(244,114,182,0.25)]",
+                          "text-pink-900",
+                        )}>
+                          <Sparkle className="size-4" weight="fill" />
+                        </span>
+                        <span className="text-left">
+                          <span className="block text-xs font-medium text-foreground">温柔宝</span>
+                          <span className="block text-[10px] text-muted-foreground">温柔版</span>
+                        </span>
+                        {mentionIndex === 0 && <ArrowRight className="ml-1 size-3 shrink-0 text-primary" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => selectMention("snarky")}
+                        onMouseEnter={() => setMentionIndex(1)}
+                        className={cn(
+                          "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition-colors",
+                          mentionIndex === 1 ? "bg-primary/12" : "hover:bg-primary/8"
+                        )}
+                      >
+                        <span className={cn(
+                          "flex size-7 items-center justify-center",
+                          "rounded-full",
+                          "bg-primary",
+                          "ring-1 ring-primary/40",
+                          "shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_12px_rgba(0,0,0,0.20),0_0_18px_color-mix(in_oklab,var(--color-primary)_30%,transparent)]",
+                          "text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]",
+                        )}>
+                          <Sparkle className="size-4" weight="fill" />
+                        </span>
+                        <span className="text-left">
+                          <span className="block text-xs font-medium text-foreground">嘴欠宝</span>
+                          <span className="block text-[10px] text-muted-foreground">嘴欠版</span>
+                        </span>
+                        {mentionIndex === 1 && <ArrowRight className="ml-1 size-3 shrink-0 text-primary" />}
+                      </button>
+                    </div>
                   )}
                   <div className="flex items-end gap-2 rounded-2xl border border-border bg-foreground/[0.04] px-3 py-2 transition-colors focus-within:border-primary/40">
                     <textarea
@@ -490,25 +580,38 @@ export function ChatRoom() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => {
+                        if (input.endsWith("@")) {
+                          // @ 面板：↑/↓ 切换高亮，Enter 选中当前项
+                          if (e.key === "ArrowDown") {
+                            e.preventDefault();
+                            setMentionIndex((i) => (i + 1) % 2);
+                            return;
+                          }
+                          if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            setMentionIndex((i) => (i - 1 + 2) % 2);
+                            return;
+                          }
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            selectMention(mentionIndex === 0 ? "gentle" : "snarky");
+                            return;
+                          }
+                        }
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
-                          if (input.endsWith("@")) {
-                            // @ + Enter → 直接选中雨宝
-                            selectMention();
-                          } else {
-                            send();
-                          }
+                          send();
                         }
                       }}
                       rows={1}
-                      placeholder="说点什么… 输入 @ 唤起雨宝"
+                      placeholder="说点什么… 输入 @ 唤起嘴欠宝 / 温柔宝"
                       className="max-h-32 min-h-6 flex-1 resize-none border-0 bg-transparent py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
                     />
                     <Tooltip>
                       <TooltipTrigger render={
                         <button
                           onClick={send}
-                          disabled={!input.trim() || !connected || aiStreaming}
+                          disabled={!input.trim() || !connected}
                           className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-40"
                           aria-label="发送"
                         />
@@ -613,7 +716,8 @@ function MessageRow({
   }
 
   const isAI = message.role === "assistant";
-  const isStreaming = message.id === STREAMING_ID;
+  const isGentle = isAI && (message.aiRole === "gentle" || message.userName === "温柔宝");
+  const isStreaming = message.id.startsWith("ai-");
 
   return (
     <div
@@ -632,13 +736,13 @@ function MessageRow({
           className={cn(
             "relative flex self-start size-8 shrink-0 items-center justify-center",
             "rounded-full",
-            "bg-primary",
-            "ring-1 ring-primary/40",
-            "shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_14px_rgba(0,0,0,0.22),0_0_14px_color-mix(in_oklab,var(--color-primary)_35%,transparent)]",
-            "text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]",
-            "mt-1"
+            "mt-1",
+            isGentle
+              ? // 温柔宝：头像背景固定淡粉，不随主题变化
+                "bg-pink-200 ring-1 ring-pink-200/60 shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset,0_4px_14px_rgba(0,0,0,0.16),0_0_14px_rgba(244,114,182,0.3)] text-pink-900"
+              : "bg-primary ring-1 ring-primary/40 shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_14px_rgba(0,0,0,0.22),0_0_14px_color-mix(in_oklab,var(--color-primary)_35%,transparent)] text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]"
           )}
-          title="雨宝"
+          title={isGentle ? "温柔宝" : "嘴欠宝"}
         >
           <Sparkle className="size-[20px]" weight="fill" />
         </div>
@@ -666,12 +770,9 @@ function MessageRow({
             )}
           >
             {isAI ? (
-              <>
-                <span className="text-xs font-semibold text-primary">雨宝</span>
-                <span className="rounded-sm bg-primary/12 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-primary">
-                  AI
-                </span>
-              </>
+              <span className={cn("text-xs font-semibold", isGentle ? "text-pink-400" : "text-primary")}>
+                {isGentle ? "温柔宝" : "嘴欠宝"}
+              </span>
             ) : (
               <span className="text-xs font-medium text-foreground/80">
                 {message.userName ?? "用户"}

@@ -29,6 +29,7 @@ export type ChatMessageMinAggregateOutputType = {
   userId: string | null
   role: string | null
   content: string | null
+  aiRole: string | null
   createdAt: Date | null
 }
 
@@ -37,6 +38,7 @@ export type ChatMessageMaxAggregateOutputType = {
   userId: string | null
   role: string | null
   content: string | null
+  aiRole: string | null
   createdAt: Date | null
 }
 
@@ -45,6 +47,7 @@ export type ChatMessageCountAggregateOutputType = {
   userId: number
   role: number
   content: number
+  aiRole: number
   createdAt: number
   _all: number
 }
@@ -55,6 +58,7 @@ export type ChatMessageMinAggregateInputType = {
   userId?: true
   role?: true
   content?: true
+  aiRole?: true
   createdAt?: true
 }
 
@@ -63,6 +67,7 @@ export type ChatMessageMaxAggregateInputType = {
   userId?: true
   role?: true
   content?: true
+  aiRole?: true
   createdAt?: true
 }
 
@@ -71,6 +76,7 @@ export type ChatMessageCountAggregateInputType = {
   userId?: true
   role?: true
   content?: true
+  aiRole?: true
   createdAt?: true
   _all?: true
 }
@@ -152,6 +158,7 @@ export type ChatMessageGroupByOutputType = {
   userId: string | null
   role: string
   content: string
+  aiRole: string | null
   createdAt: Date
   _count: ChatMessageCountAggregateOutputType | null
   _min: ChatMessageMinAggregateOutputType | null
@@ -181,6 +188,7 @@ export type ChatMessageWhereInput = {
   userId?: Prisma.StringNullableFilter<"ChatMessage"> | string | null
   role?: Prisma.StringFilter<"ChatMessage"> | string
   content?: Prisma.StringFilter<"ChatMessage"> | string
+  aiRole?: Prisma.StringNullableFilter<"ChatMessage"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ChatMessage"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
@@ -190,6 +198,7 @@ export type ChatMessageOrderByWithRelationInput = {
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  aiRole?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
@@ -202,6 +211,7 @@ export type ChatMessageWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringNullableFilter<"ChatMessage"> | string | null
   role?: Prisma.StringFilter<"ChatMessage"> | string
   content?: Prisma.StringFilter<"ChatMessage"> | string
+  aiRole?: Prisma.StringNullableFilter<"ChatMessage"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ChatMessage"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
@@ -211,6 +221,7 @@ export type ChatMessageOrderByWithAggregationInput = {
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  aiRole?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ChatMessageCountOrderByAggregateInput
   _max?: Prisma.ChatMessageMaxOrderByAggregateInput
@@ -225,6 +236,7 @@ export type ChatMessageScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
   role?: Prisma.StringWithAggregatesFilter<"ChatMessage"> | string
   content?: Prisma.StringWithAggregatesFilter<"ChatMessage"> | string
+  aiRole?: Prisma.StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ChatMessage"> | Date | string
 }
 
@@ -232,6 +244,7 @@ export type ChatMessageCreateInput = {
   id?: string
   role?: string
   content: string
+  aiRole?: string | null
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutChatMessagesInput
 }
@@ -241,6 +254,7 @@ export type ChatMessageUncheckedCreateInput = {
   userId?: string | null
   role?: string
   content: string
+  aiRole?: string | null
   createdAt?: Date | string
 }
 
@@ -248,6 +262,7 @@ export type ChatMessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutChatMessagesNestedInput
 }
@@ -257,6 +272,7 @@ export type ChatMessageUncheckedUpdateInput = {
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -265,6 +281,7 @@ export type ChatMessageCreateManyInput = {
   userId?: string | null
   role?: string
   content: string
+  aiRole?: string | null
   createdAt?: Date | string
 }
 
@@ -272,6 +289,7 @@ export type ChatMessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -280,6 +298,7 @@ export type ChatMessageUncheckedUpdateManyInput = {
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -298,6 +317,7 @@ export type ChatMessageCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  aiRole?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -306,6 +326,7 @@ export type ChatMessageMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  aiRole?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -314,6 +335,7 @@ export type ChatMessageMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  aiRole?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -363,6 +385,7 @@ export type ChatMessageCreateWithoutUserInput = {
   id?: string
   role?: string
   content: string
+  aiRole?: string | null
   createdAt?: Date | string
 }
 
@@ -370,6 +393,7 @@ export type ChatMessageUncheckedCreateWithoutUserInput = {
   id?: string
   role?: string
   content: string
+  aiRole?: string | null
   createdAt?: Date | string
 }
 
@@ -407,6 +431,7 @@ export type ChatMessageScalarWhereInput = {
   userId?: Prisma.StringNullableFilter<"ChatMessage"> | string | null
   role?: Prisma.StringFilter<"ChatMessage"> | string
   content?: Prisma.StringFilter<"ChatMessage"> | string
+  aiRole?: Prisma.StringNullableFilter<"ChatMessage"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ChatMessage"> | Date | string
 }
 
@@ -414,6 +439,7 @@ export type ChatMessageCreateManyUserInput = {
   id?: string
   role?: string
   content: string
+  aiRole?: string | null
   createdAt?: Date | string
 }
 
@@ -421,6 +447,7 @@ export type ChatMessageUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -428,6 +455,7 @@ export type ChatMessageUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -435,6 +463,7 @@ export type ChatMessageUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
+  aiRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -445,6 +474,7 @@ export type ChatMessageSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   userId?: boolean
   role?: boolean
   content?: boolean
+  aiRole?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ChatMessage$userArgs<ExtArgs>
 }, ExtArgs["result"]["chatMessage"]>
@@ -454,6 +484,7 @@ export type ChatMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   userId?: boolean
   role?: boolean
   content?: boolean
+  aiRole?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ChatMessage$userArgs<ExtArgs>
 }, ExtArgs["result"]["chatMessage"]>
@@ -463,6 +494,7 @@ export type ChatMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   userId?: boolean
   role?: boolean
   content?: boolean
+  aiRole?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ChatMessage$userArgs<ExtArgs>
 }, ExtArgs["result"]["chatMessage"]>
@@ -472,10 +504,11 @@ export type ChatMessageSelectScalar = {
   userId?: boolean
   role?: boolean
   content?: boolean
+  aiRole?: boolean
   createdAt?: boolean
 }
 
-export type ChatMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "role" | "content" | "createdAt", ExtArgs["result"]["chatMessage"]>
+export type ChatMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "role" | "content" | "aiRole" | "createdAt", ExtArgs["result"]["chatMessage"]>
 export type ChatMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ChatMessage$userArgs<ExtArgs>
 }
@@ -496,6 +529,10 @@ export type $ChatMessagePayload<ExtArgs extends runtime.Types.Extensions.Interna
     userId: string | null
     role: string
     content: string
+    /**
+     * * 聊天室 AI 角色（温柔宝/嘴欠宝）；AI 消息用于区分，让上下文标注不串风格
+     */
+    aiRole: string | null
     createdAt: Date
   }, ExtArgs["result"]["chatMessage"]>
   composites: {}
@@ -925,6 +962,7 @@ export interface ChatMessageFieldRefs {
   readonly userId: Prisma.FieldRef<"ChatMessage", 'String'>
   readonly role: Prisma.FieldRef<"ChatMessage", 'String'>
   readonly content: Prisma.FieldRef<"ChatMessage", 'String'>
+  readonly aiRole: Prisma.FieldRef<"ChatMessage", 'String'>
   readonly createdAt: Prisma.FieldRef<"ChatMessage", 'DateTime'>
 }
     

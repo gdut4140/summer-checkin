@@ -13,12 +13,12 @@ import { embeddingWithFallback } from "@/lib/model-pool";
 /**
  * 批量文本 → 向量
  * 走模型池 embedding 档（text-embedding-v4 优先，v2 兜底），不计入用户 token 精力条。
- * 自动分批，每批最多 25 条（DashScope 限制）。
+ * 自动分批，每批最多 10 条（DashScope text-embedding-v4 单次 batch 上限为 10）。
  */
 export async function embedTexts(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
 
-  const BATCH_SIZE = 25;
+  const BATCH_SIZE = 10;
 
   // 小批量直接请求
   if (texts.length <= BATCH_SIZE) {
