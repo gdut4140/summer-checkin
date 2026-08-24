@@ -23,6 +23,10 @@ export function RainforestFocusRoom() {
 
   function enterImmersive() {
     setQuote(randomQuote(scene));
+    // 沉浸覆盖层是透明的，进入前先让当前输入框失焦，避免页面光标的闪烁透过覆盖层显示
+    if (typeof document !== "undefined") {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    }
     setImmersive(true);
   }
 
