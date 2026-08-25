@@ -82,6 +82,8 @@ __pycache__/
 
 # Docker
 docker-compose.override.yml
+# Docker 镜像部署包（build 产物，~800MB，不提交）
+/app.tar.gz
 
 # 截图 / 临时图片
 image.png
