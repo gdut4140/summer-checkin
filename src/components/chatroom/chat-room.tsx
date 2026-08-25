@@ -386,13 +386,13 @@ export function ChatRoom() {
             type="button"
             onClick={openChat}
             aria-label="打开聊天室"
-            className="relative flex size-8 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10 hover:text-primary"
+            className="relative flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_16px_color-mix(in_srgb,var(--theme-primary)_45%,transparent)] transition-all hover:scale-105 hover:brightness-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           />
         }>
           <ChatsCircle className="size-4" weight="fill" />
-          {/* 主题色小圆点提示有新消息，不显示条数 */}
+          {/* 深色小圆点提示有新消息（配白晕，在主题色填充底上区分开），不显示条数 */}
           {unread > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-primary shadow-[0_0_6px_color-mix(in_srgb,var(--theme-primary)_50%,transparent)]" />
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-primary-foreground shadow-[0_0_0_2px_rgba(255,255,255,0.7)]" />
           )}
         </TooltipTrigger>
         <TooltipContent>聊天室</TooltipContent>
