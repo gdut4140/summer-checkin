@@ -11,6 +11,9 @@ out
 build
 .turbo
 
+# Docker deployment tarball (~800MB，绝不能进构建上下文)
+app.tar.gz
+
 # Database (SQLite dev only)
 *.db
 *.sqlite
