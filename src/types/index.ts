@@ -175,6 +175,21 @@ export interface BreakdownTasksResult {
   tasks: PlanTaskInfo[];
 }
 
+// ---- 今日待办 (Todo) ----
+export interface TodoInfo {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: string; // ISO
+}
+
+export interface TodosListData {
+  success: true;
+  count: number;
+  todos: TodoInfo[];
+  message?: string;
+}
+
 // ============================================================
 // Phase 2: Memory + AgentDecision 类型
 // ============================================================

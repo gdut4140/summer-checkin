@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { Check, ListChecks, PencilSimple, Plus, Sparkle, Trash } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
-import { useLocalTodos, type LocalTodo } from "@/lib/use-local-todos";
+import { useTodos } from "@/lib/use-todos";
+import type { TodoInfo } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function LocalTodoPanel() {
-  const { todos, loaded, addTodo, toggleTodo, removeTodo, updateTitle } = useLocalTodos();
+  const { todos, loaded, addTodo, toggleTodo, removeTodo, updateTitle } = useTodos();
   const [value, setValue] = useState("");
 
   if (!loaded) {
@@ -138,7 +139,7 @@ function TodoItem({
   onRemove,
   onUpdateTitle,
 }: {
-  todo: LocalTodo;
+  todo: TodoInfo;
   onToggle: () => void;
   onRemove: () => void;
   onUpdateTitle: (title: string) => void;

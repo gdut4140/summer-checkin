@@ -24,7 +24,7 @@ import { prisma } from "@/lib/prisma";
 import { createTextStreamResponse, isStepCount } from "ai";
 import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
 import { assertInteractiveUsageAllowed, UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
-import { createStudyTools, createRAGTool, createAgentTools } from "@/lib/tools";
+import { createStudyTools, createRAGTool, createAgentTools, createTodoTools } from "@/lib/tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
 import {
   getRelevantMemories,
@@ -223,6 +223,7 @@ export async function POST(request: NextRequest) {
         ),
         ...createRAGTool(user.id),
         ...createAgentTools(user.id),
+        ...createTodoTools(user.id),
         ...studioTools,
       },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
