@@ -30,6 +30,7 @@ app.tar.gz
 .env.local
 .env*.local
 .env.production
+_oss-env.txt
 
 # Git
 .git

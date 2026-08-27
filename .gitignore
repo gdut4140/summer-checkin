@@ -43,6 +43,8 @@ yarn-error.log*
 # local env files (只提交 .example，真实 key 不上传)
 .env
 .env*.local
+# OSS AccessKey 密钥文件（真实凭据，绝不提交）
+_oss-env.txt
 
 # vercel
 .vercel
@@ -96,3 +98,4 @@ image.png
 阿里云向量模型.txt
 DEPLOYMENT-NOTES.md
 txt文件/
+简历.html
