@@ -28,7 +28,7 @@ interface SceneAuthVisual {
 const SCENE_VISUALS: Record<SceneType, SceneAuthVisual> = {
   rain: {
     wrapperBg: "bg-[#06150f]",
-    imageSrc: "/rain.png",
+    imageSrc: "/rain.webp",
     overlayGradient: "from-[#06150f]/72 via-[#06150f]/48 to-[#06150f]/82",
     mobileOverlayClass: "bg-[#06150f]/85",
     heroHeadingAccent: "text-primary",
@@ -37,7 +37,7 @@ const SCENE_VISUALS: Record<SceneType, SceneAuthVisual> = {
   },
   snow: {
     wrapperBg: "bg-[#0c1a28]",
-    imageSrc: "/snow.png",
+    imageSrc: "/snow.webp",
     overlayGradient: "from-[#0c1a28]/70 via-[#0c1a28]/42 to-[#0c1a28]/86",
     mobileOverlayClass: "bg-[#0c1a28]/88",
     heroHeadingAccent: "text-[#d4e2f0]",
@@ -46,7 +46,7 @@ const SCENE_VISUALS: Record<SceneType, SceneAuthVisual> = {
   },
   cloud: {
     wrapperBg: "bg-[#1f2736]",
-    imageSrc: "/cloud.png",
+    imageSrc: "/cloud.webp",
     overlayGradient: "from-[#1f2736]/70 via-[#1f2736]/44 to-[#1f2736]/84",
     mobileOverlayClass: "bg-[#1f2736]/88",
     heroHeadingAccent: "text-[#e0d4b8]",

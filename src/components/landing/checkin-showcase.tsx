@@ -73,7 +73,7 @@ const PREVIEW_STYLES: Record<
   }
 > = {
   rain: {
-    sceneImage: "/rain.png",
+    sceneImage: "/rain.webp",
     overlay:
       "bg-gradient-to-t from-[#051a13]/55 via-transparent to-[#092519]/30",
     bottomTag: "bg-white/5 text-white/30",
@@ -82,7 +82,7 @@ const PREVIEW_STYLES: Record<
     sceneName: "雨林",
   },
   snow: {
-    sceneImage: "/snow.png",
+    sceneImage: "/snow.webp",
     overlay:
       "bg-gradient-to-t from-[#0c1a28]/55 via-transparent to-[#14283c]/25",
     bottomTag: "bg-white/5 text-[#c8d8e8]/50",
@@ -91,7 +91,7 @@ const PREVIEW_STYLES: Record<
     sceneName: "雪日",
   },
   cloud: {
-    sceneImage: "/cloud.png",
+    sceneImage: "/cloud.webp",
     overlay:
       "bg-gradient-to-t from-[#3a2a14]/55 via-transparent to-[#4a3720]/25",
     bottomTag: "bg-[#e6d3a8]/10 text-[#e6d3a8]/60",
@@ -157,7 +157,7 @@ export function CheckinShowcase() {
                   className={`pointer-events-none absolute inset-0 ${pv.overlay}`}
                 />
 
-                {/* 场景选择器（左上角）：缩略图 rain.png / snow.png / cloud.png，切换即驱动全局主题 */}
+                {/* 场景选择器（左上角）：缩略图 rain.webp / snow.webp / cloud.webp，切换即驱动全局主题 */}
                 <div className="absolute left-4 top-4 pointer-events-auto">
                   <InlineSceneSwitcher
                     current={previewScene}
@@ -298,7 +298,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-/* ---------- 小组件：预览卡左上角的场景切换器（用 rain.png / snow.png / cloud.png 缩略图） ---------- */
+/* ---------- 小组件：预览卡左上角的场景切换器（用 rain.webp / snow.webp / cloud.webp 缩略图） ---------- */
 function InlineSceneSwitcher({
   current,
   onChange,
@@ -307,9 +307,9 @@ function InlineSceneSwitcher({
   onChange: (s: SceneType) => void;
 }) {
   const items: { id: SceneType; thumb: string; label: string }[] = [
-    { id: "rain", thumb: "/rain.png", label: SCENE_COPY.rain.labelShort },
-    { id: "snow", thumb: "/snow.png", label: SCENE_COPY.snow.labelShort },
-    { id: "cloud", thumb: "/cloud.png", label: SCENE_COPY.cloud.labelShort },
+    { id: "rain", thumb: "/rain.webp", label: SCENE_COPY.rain.labelShort },
+    { id: "snow", thumb: "/snow.webp", label: SCENE_COPY.snow.labelShort },
+    { id: "cloud", thumb: "/cloud.webp", label: SCENE_COPY.cloud.labelShort },
   ];
 
   return (

@@ -30,7 +30,7 @@
   transition: opacity 700ms ease, background-image 700ms ease, filter 300ms ease;
 }
 
-/* 背景图层（rain.png 等）：与 .studio-bg-layer 同位，z-0
+/* 背景图层（rain.webp 等）：与 .studio-bg-layer 同位，z-0
    background-color 纯黑兜底：防止首帧/未加载时透出下方全局背景 */
 .studio-root>.studio-bg-video {
   position: absolute;

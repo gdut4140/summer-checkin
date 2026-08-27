@@ -5,11 +5,11 @@ import { useScene, type SceneType } from "@/context/scene-context";
 import AccordionGallery, { type GalleryItem } from "@/components/studio/accordion-gallery";
 import { TreeEvergreen } from "@phosphor-icons/react/dist/ssr";
 
-// 场景手风琴画廊（与文档工作台切换场景动画同源：/rain.png /snow.png /cloud.png）
+// 场景手风琴画廊（与文档工作台切换场景动画同源：/rain.webp /snow.webp /cloud.webp）
 const SCENE_GALLERY: GalleryItem[] = [
-  { image: "/rain.png", label: "雨林", value: "rain" },
-  { image: "/snow.png", label: "雪日", value: "snow" },
-  { image: "/cloud.png", label: "暖云", value: "cloud" },
+  { image: "/rain.webp", label: "雨林", value: "rain" },
+  { image: "/snow.webp", label: "雪日", value: "snow" },
+  { image: "/cloud.webp", label: "暖云", value: "cloud" },
 ];
 
 export function SceneSelector() {

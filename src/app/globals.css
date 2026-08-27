@@ -568,6 +568,17 @@
   pointer-events: none;
 }
 
+/* 背景图切换时的淡入（BackgroundVideo 按场景重挂 div 触发；
+   prefers-reduced-motion 下会被全局规则压到 0.01ms） */
+@keyframes bg-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* 视频背景上的场景蒙层（场景语义变量，雨墨绿 / 雪白蓝） */
 .bg-video-overlay {
   position: fixed;
@@ -601,7 +612,7 @@
       rgba(6, 22, 40, 0.55) 100%);
 }
 
-/* 暖云：黑底白字 — 中性暗灰四角柔压，cloud.png 保留但整体偏暗 */
+/* 暖云：黑底白字 — 中性暗灰四角柔压，cloud.webp 保留但整体偏暗 */
 [data-scene="cloud"] .bg-video-overlay,
 [data-scene="cloud"] {
   --scene-overlay-gradient: radial-gradient(ellipse at 50% 35%,
