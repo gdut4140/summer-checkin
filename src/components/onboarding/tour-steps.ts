@@ -37,7 +37,7 @@ export const TOUR_ROUTE_ORDER = [
  * 步骤按页面分组；key 与 (dashboard) 路由路径一致。
  * 调整内容时把 TOUR_VERSION 升级（v2...），已看过旧版的用户会再看一遍新引导。
  */
-export const TOUR_VERSION = "v1";
+export const TOUR_VERSION = "v2";
 
 export const TOUR_SEGMENTS: Record<string, TourStepConfig[]> = {
   "/dashboard": [
@@ -53,6 +53,20 @@ export const TOUR_SEGMENTS: Record<string, TourStepConfig[]> = {
       selector: ".atomic-nav",
       side: "bottom",
       data: { expandNav: true },
+    },
+    {
+      title: "聊天室",
+      description:
+        "顶栏右边那个实心彩色圆按钮就是聊天室入口——进去是多人实时群聊，在输入框 @AI 还能把温柔宝 / 嘴欠宝叫出来陪你聊天。",
+      selector: '[data-tour="chatroom-entry"]',
+      side: "bottom",
+    },
+    {
+      title: "点亮 Star ⭐",
+      description:
+        "喜欢这个项目的话，点一下右上角的 GitHub 按钮去「点亮 Star」——你的每一个 star，都是创作者最大的动力。",
+      selector: ".gh-icon-wrap",
+      side: "bottom",
     },
     {
       title: "沉浸专注",

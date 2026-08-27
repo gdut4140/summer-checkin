@@ -386,6 +386,7 @@ export function ChatRoom() {
             type="button"
             onClick={openChat}
             aria-label="打开聊天室"
+            data-tour="chatroom-entry"
             className="relative flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_16px_color-mix(in_srgb,var(--theme-primary)_45%,transparent)] transition-all hover:scale-105 hover:brightness-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           />
         }>
