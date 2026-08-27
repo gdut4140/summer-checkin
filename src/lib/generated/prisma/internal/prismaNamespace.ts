@@ -392,8 +392,7 @@ export const ModelName = {
   Todo: 'Todo',
   Checkin: 'Checkin',
   StudyRecord: 'StudyRecord',
-  Badge: 'Badge',
-  UserBadge: 'UserBadge',
+  AvatarChange: 'AvatarChange',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
   AgentRun: 'AgentRun',
@@ -427,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "badge" | "userBadge" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentToolCall" | "agentDecision" | "userMemory" | "aIHistory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "agentSchedule" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentToolCall" | "agentDecision" | "userMemory" | "aIHistory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "agentSchedule" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1023,151 +1022,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Badge: {
-      payload: Prisma.$BadgePayload<ExtArgs>
-      fields: Prisma.BadgeFieldRefs
+    AvatarChange: {
+      payload: Prisma.$AvatarChangePayload<ExtArgs>
+      fields: Prisma.AvatarChangeFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.BadgeFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload> | null
+          args: Prisma.AvatarChangeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.BadgeFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>
+          args: Prisma.AvatarChangeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>
         }
         findFirst: {
-          args: Prisma.BadgeFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload> | null
+          args: Prisma.AvatarChangeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.BadgeFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>
+          args: Prisma.AvatarChangeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>
         }
         findMany: {
-          args: Prisma.BadgeFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>[]
+          args: Prisma.AvatarChangeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>[]
         }
         create: {
-          args: Prisma.BadgeCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>
+          args: Prisma.AvatarChangeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>
         }
         createMany: {
-          args: Prisma.BadgeCreateManyArgs<ExtArgs>
+          args: Prisma.AvatarChangeCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.BadgeCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>[]
+          args: Prisma.AvatarChangeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>[]
         }
         delete: {
-          args: Prisma.BadgeDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>
+          args: Prisma.AvatarChangeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>
         }
         update: {
-          args: Prisma.BadgeUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>
+          args: Prisma.AvatarChangeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>
         }
         deleteMany: {
-          args: Prisma.BadgeDeleteManyArgs<ExtArgs>
+          args: Prisma.AvatarChangeDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.BadgeUpdateManyArgs<ExtArgs>
+          args: Prisma.AvatarChangeUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.BadgeUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>[]
+          args: Prisma.AvatarChangeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>[]
         }
         upsert: {
-          args: Prisma.BadgeUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$BadgePayload>
+          args: Prisma.AvatarChangeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AvatarChangePayload>
         }
         aggregate: {
-          args: Prisma.BadgeAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateBadge>
+          args: Prisma.AvatarChangeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAvatarChange>
         }
         groupBy: {
-          args: Prisma.BadgeGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.BadgeGroupByOutputType>[]
+          args: Prisma.AvatarChangeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AvatarChangeGroupByOutputType>[]
         }
         count: {
-          args: Prisma.BadgeCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.BadgeCountAggregateOutputType> | number
-        }
-      }
-    }
-    UserBadge: {
-      payload: Prisma.$UserBadgePayload<ExtArgs>
-      fields: Prisma.UserBadgeFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.UserBadgeFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.UserBadgeFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>
-        }
-        findFirst: {
-          args: Prisma.UserBadgeFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.UserBadgeFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>
-        }
-        findMany: {
-          args: Prisma.UserBadgeFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>[]
-        }
-        create: {
-          args: Prisma.UserBadgeCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>
-        }
-        createMany: {
-          args: Prisma.UserBadgeCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.UserBadgeCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>[]
-        }
-        delete: {
-          args: Prisma.UserBadgeDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>
-        }
-        update: {
-          args: Prisma.UserBadgeUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>
-        }
-        deleteMany: {
-          args: Prisma.UserBadgeDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.UserBadgeUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.UserBadgeUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>[]
-        }
-        upsert: {
-          args: Prisma.UserBadgeUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBadgePayload>
-        }
-        aggregate: {
-          args: Prisma.UserBadgeAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateUserBadge>
-        }
-        groupBy: {
-          args: Prisma.UserBadgeGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.UserBadgeGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.UserBadgeCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.UserBadgeCountAggregateOutputType> | number
+          args: Prisma.AvatarChangeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AvatarChangeCountAggregateOutputType> | number
         }
       }
     }
@@ -2636,26 +2561,13 @@ export const StudyRecordScalarFieldEnum = {
 export type StudyRecordScalarFieldEnum = (typeof StudyRecordScalarFieldEnum)[keyof typeof StudyRecordScalarFieldEnum]
 
 
-export const BadgeScalarFieldEnum = {
+export const AvatarChangeScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  description: 'description',
-  icon: 'icon',
-  criteria: 'criteria',
+  userId: 'userId',
   createdAt: 'createdAt'
 } as const
 
-export type BadgeScalarFieldEnum = (typeof BadgeScalarFieldEnum)[keyof typeof BadgeScalarFieldEnum]
-
-
-export const UserBadgeScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  badgeId: 'badgeId',
-  earnedAt: 'earnedAt'
-} as const
-
-export type UserBadgeScalarFieldEnum = (typeof UserBadgeScalarFieldEnum)[keyof typeof UserBadgeScalarFieldEnum]
+export type AvatarChangeScalarFieldEnum = (typeof AvatarChangeScalarFieldEnum)[keyof typeof AvatarChangeScalarFieldEnum]
 
 
 export const ConversationScalarFieldEnum = {
@@ -3154,8 +3066,7 @@ export type GlobalOmitConfig = {
   todo?: Prisma.TodoOmit
   checkin?: Prisma.CheckinOmit
   studyRecord?: Prisma.StudyRecordOmit
-  badge?: Prisma.BadgeOmit
-  userBadge?: Prisma.UserBadgeOmit
+  avatarChange?: Prisma.AvatarChangeOmit
   conversation?: Prisma.ConversationOmit
   conversationMessage?: Prisma.ConversationMessageOmit
   agentRun?: Prisma.AgentRunOmit

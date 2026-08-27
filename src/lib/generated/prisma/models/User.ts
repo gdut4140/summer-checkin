@@ -227,7 +227,6 @@ export type UserWhereInput = {
   plans?: Prisma.PlanListRelationFilter
   checkins?: Prisma.CheckinListRelationFilter
   studyRecords?: Prisma.StudyRecordListRelationFilter
-  userBadges?: Prisma.UserBadgeListRelationFilter
   aiHistories?: Prisma.AIHistoryListRelationFilter
   memories?: Prisma.UserMemoryListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
@@ -260,7 +259,6 @@ export type UserOrderByWithRelationInput = {
   plans?: Prisma.PlanOrderByRelationAggregateInput
   checkins?: Prisma.CheckinOrderByRelationAggregateInput
   studyRecords?: Prisma.StudyRecordOrderByRelationAggregateInput
-  userBadges?: Prisma.UserBadgeOrderByRelationAggregateInput
   aiHistories?: Prisma.AIHistoryOrderByRelationAggregateInput
   memories?: Prisma.UserMemoryOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
@@ -296,7 +294,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   plans?: Prisma.PlanListRelationFilter
   checkins?: Prisma.CheckinListRelationFilter
   studyRecords?: Prisma.StudyRecordListRelationFilter
-  userBadges?: Prisma.UserBadgeListRelationFilter
   aiHistories?: Prisma.AIHistoryListRelationFilter
   memories?: Prisma.UserMemoryListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
@@ -361,7 +358,6 @@ export type UserCreateInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -394,7 +390,6 @@ export type UserUncheckedCreateInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -427,7 +422,6 @@ export type UserUpdateInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -460,7 +454,6 @@ export type UserUncheckedUpdateInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -679,20 +672,6 @@ export type UserUpdateOneRequiredWithoutStudyRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudyRecordsInput, Prisma.UserUpdateWithoutStudyRecordsInput>, Prisma.UserUncheckedUpdateWithoutStudyRecordsInput>
 }
 
-export type UserCreateNestedOneWithoutUserBadgesInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutUserBadgesInput, Prisma.UserUncheckedCreateWithoutUserBadgesInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUserBadgesInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutUserBadgesNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutUserBadgesInput, Prisma.UserUncheckedCreateWithoutUserBadgesInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUserBadgesInput
-  upsert?: Prisma.UserUpsertWithoutUserBadgesInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUserBadgesInput, Prisma.UserUpdateWithoutUserBadgesInput>, Prisma.UserUncheckedUpdateWithoutUserBadgesInput>
-}
-
 export type UserCreateNestedOneWithoutConversationsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutConversationsInput, Prisma.UserUncheckedCreateWithoutConversationsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationsInput
@@ -866,7 +845,6 @@ export type UserCreateWithoutSessionsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -898,7 +876,6 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -946,7 +923,6 @@ export type UserUpdateWithoutSessionsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -978,7 +954,6 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -1010,7 +985,6 @@ export type UserCreateWithoutAccountsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -1042,7 +1016,6 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -1090,7 +1063,6 @@ export type UserUpdateWithoutAccountsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -1122,7 +1094,6 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -1154,7 +1125,6 @@ export type UserCreateWithoutPlansInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -1186,7 +1156,6 @@ export type UserUncheckedCreateWithoutPlansInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -1234,7 +1203,6 @@ export type UserUpdateWithoutPlansInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -1266,7 +1234,6 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -1299,7 +1266,6 @@ export type UserCreateWithoutPlanTasksInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -1331,7 +1297,6 @@ export type UserUncheckedCreateWithoutPlanTasksInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -1379,7 +1344,6 @@ export type UserUpdateWithoutPlanTasksInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -1411,7 +1375,6 @@ export type UserUncheckedUpdateWithoutPlanTasksInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -1443,7 +1406,6 @@ export type UserCreateWithoutTodosInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -1475,7 +1437,6 @@ export type UserUncheckedCreateWithoutTodosInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -1523,7 +1484,6 @@ export type UserUpdateWithoutTodosInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -1555,7 +1515,6 @@ export type UserUncheckedUpdateWithoutTodosInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -1586,7 +1545,6 @@ export type UserCreateWithoutCheckinsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -1618,7 +1576,6 @@ export type UserUncheckedCreateWithoutCheckinsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -1666,7 +1623,6 @@ export type UserUpdateWithoutCheckinsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -1698,7 +1654,6 @@ export type UserUncheckedUpdateWithoutCheckinsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -1730,7 +1685,6 @@ export type UserCreateWithoutStudyRecordsInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -1762,7 +1716,6 @@ export type UserUncheckedCreateWithoutStudyRecordsInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -1810,7 +1763,6 @@ export type UserUpdateWithoutStudyRecordsInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -1842,151 +1794,6 @@ export type UserUncheckedUpdateWithoutStudyRecordsInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
-  aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
-  memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
-  planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
-  agentRuns?: Prisma.AgentRunUncheckedUpdateManyWithoutUserNestedInput
-  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutUserNestedInput
-  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
-  schedules?: Prisma.AgentScheduleUncheckedUpdateManyWithoutUserNestedInput
-  todos?: Prisma.TodoUncheckedUpdateManyWithoutUserNestedInput
-  docs?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
-  documents?: Prisma.DocumentChunkUncheckedUpdateManyWithoutUserNestedInput
-  knowledgeDocs?: Prisma.KnowledgeDocUncheckedUpdateManyWithoutUserNestedInput
-  chatMessages?: Prisma.ChatMessageUncheckedUpdateManyWithoutUserNestedInput
-  tokenUsages?: Prisma.TokenUsageUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutUserBadgesInput = {
-  id?: string
-  name: string
-  email: string
-  emailVerified?: boolean
-  image?: string | null
-  password?: string | null
-  bio?: string | null
-  theme?: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
-  checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
-  studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
-  memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
-  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
-  planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
-  agentRuns?: Prisma.AgentRunCreateNestedManyWithoutUserInput
-  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutUserInput
-  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
-  schedules?: Prisma.AgentScheduleCreateNestedManyWithoutUserInput
-  todos?: Prisma.TodoCreateNestedManyWithoutUserInput
-  docs?: Prisma.DocumentCreateNestedManyWithoutUserInput
-  documents?: Prisma.DocumentChunkCreateNestedManyWithoutUserInput
-  knowledgeDocs?: Prisma.KnowledgeDocCreateNestedManyWithoutUserInput
-  chatMessages?: Prisma.ChatMessageCreateNestedManyWithoutUserInput
-  tokenUsages?: Prisma.TokenUsageCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutUserBadgesInput = {
-  id?: string
-  name: string
-  email: string
-  emailVerified?: boolean
-  image?: string | null
-  password?: string | null
-  bio?: string | null
-  theme?: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
-  checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
-  studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
-  memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
-  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
-  planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
-  agentRuns?: Prisma.AgentRunUncheckedCreateNestedManyWithoutUserInput
-  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutUserInput
-  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
-  schedules?: Prisma.AgentScheduleUncheckedCreateNestedManyWithoutUserInput
-  todos?: Prisma.TodoUncheckedCreateNestedManyWithoutUserInput
-  docs?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
-  documents?: Prisma.DocumentChunkUncheckedCreateNestedManyWithoutUserInput
-  knowledgeDocs?: Prisma.KnowledgeDocUncheckedCreateNestedManyWithoutUserInput
-  chatMessages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutUserInput
-  tokenUsages?: Prisma.TokenUsageUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutUserBadgesInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutUserBadgesInput, Prisma.UserUncheckedCreateWithoutUserBadgesInput>
-}
-
-export type UserUpsertWithoutUserBadgesInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutUserBadgesInput, Prisma.UserUncheckedUpdateWithoutUserBadgesInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutUserBadgesInput, Prisma.UserUncheckedCreateWithoutUserBadgesInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutUserBadgesInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutUserBadgesInput, Prisma.UserUncheckedUpdateWithoutUserBadgesInput>
-}
-
-export type UserUpdateWithoutUserBadgesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  theme?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
-  checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
-  studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
-  memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
-  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
-  planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
-  agentRuns?: Prisma.AgentRunUpdateManyWithoutUserNestedInput
-  decisions?: Prisma.AgentDecisionUpdateManyWithoutUserNestedInput
-  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
-  schedules?: Prisma.AgentScheduleUpdateManyWithoutUserNestedInput
-  todos?: Prisma.TodoUpdateManyWithoutUserNestedInput
-  docs?: Prisma.DocumentUpdateManyWithoutUserNestedInput
-  documents?: Prisma.DocumentChunkUpdateManyWithoutUserNestedInput
-  knowledgeDocs?: Prisma.KnowledgeDocUpdateManyWithoutUserNestedInput
-  chatMessages?: Prisma.ChatMessageUpdateManyWithoutUserNestedInput
-  tokenUsages?: Prisma.TokenUsageUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutUserBadgesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  theme?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
-  checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
-  studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -2019,7 +1826,6 @@ export type UserCreateWithoutConversationsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
@@ -2051,7 +1857,6 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
@@ -2099,7 +1904,6 @@ export type UserUpdateWithoutConversationsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
@@ -2131,7 +1935,6 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
@@ -2163,7 +1966,6 @@ export type UserCreateWithoutAgentRunsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -2195,7 +1997,6 @@ export type UserUncheckedCreateWithoutAgentRunsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -2243,7 +2044,6 @@ export type UserUpdateWithoutAgentRunsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -2275,7 +2075,6 @@ export type UserUncheckedUpdateWithoutAgentRunsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -2307,7 +2106,6 @@ export type UserCreateWithoutDecisionsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -2339,7 +2137,6 @@ export type UserUncheckedCreateWithoutDecisionsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -2387,7 +2184,6 @@ export type UserUpdateWithoutDecisionsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -2419,7 +2215,6 @@ export type UserUncheckedUpdateWithoutDecisionsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -2451,7 +2246,6 @@ export type UserCreateWithoutMemoriesInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
@@ -2483,7 +2277,6 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
@@ -2531,7 +2324,6 @@ export type UserUpdateWithoutMemoriesInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
@@ -2563,7 +2355,6 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
@@ -2595,7 +2386,6 @@ export type UserCreateWithoutAiHistoriesInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskCreateNestedManyWithoutUserInput
@@ -2627,7 +2417,6 @@ export type UserUncheckedCreateWithoutAiHistoriesInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
   planTasks?: Prisma.PlanTaskUncheckedCreateNestedManyWithoutUserInput
@@ -2675,7 +2464,6 @@ export type UserUpdateWithoutAiHistoriesInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUpdateManyWithoutUserNestedInput
@@ -2707,7 +2495,6 @@ export type UserUncheckedUpdateWithoutAiHistoriesInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
   planTasks?: Prisma.PlanTaskUncheckedUpdateManyWithoutUserNestedInput
@@ -2739,7 +2526,6 @@ export type UserCreateWithoutDocsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -2771,7 +2557,6 @@ export type UserUncheckedCreateWithoutDocsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -2819,7 +2604,6 @@ export type UserUpdateWithoutDocsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -2851,7 +2635,6 @@ export type UserUncheckedUpdateWithoutDocsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -2883,7 +2666,6 @@ export type UserCreateWithoutDocumentsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -2915,7 +2697,6 @@ export type UserUncheckedCreateWithoutDocumentsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -2963,7 +2744,6 @@ export type UserUpdateWithoutDocumentsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -2995,7 +2775,6 @@ export type UserUncheckedUpdateWithoutDocumentsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -3027,7 +2806,6 @@ export type UserCreateWithoutKnowledgeDocsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -3059,7 +2837,6 @@ export type UserUncheckedCreateWithoutKnowledgeDocsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -3107,7 +2884,6 @@ export type UserUpdateWithoutKnowledgeDocsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -3139,7 +2915,6 @@ export type UserUncheckedUpdateWithoutKnowledgeDocsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -3171,7 +2946,6 @@ export type UserCreateWithoutNotificationsInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -3203,7 +2977,6 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -3251,7 +3024,6 @@ export type UserUpdateWithoutNotificationsInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -3283,7 +3055,6 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -3315,7 +3086,6 @@ export type UserCreateWithoutSchedulesInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -3347,7 +3117,6 @@ export type UserUncheckedCreateWithoutSchedulesInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -3395,7 +3164,6 @@ export type UserUpdateWithoutSchedulesInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -3427,7 +3195,6 @@ export type UserUncheckedUpdateWithoutSchedulesInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -3459,7 +3226,6 @@ export type UserCreateWithoutChatMessagesInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -3491,7 +3257,6 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -3539,7 +3304,6 @@ export type UserUpdateWithoutChatMessagesInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -3571,7 +3335,6 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -3603,7 +3366,6 @@ export type UserCreateWithoutTokenUsagesInput = {
   plans?: Prisma.PlanCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
@@ -3635,7 +3397,6 @@ export type UserUncheckedCreateWithoutTokenUsagesInput = {
   plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
   checkins?: Prisma.CheckinUncheckedCreateNestedManyWithoutUserInput
   studyRecords?: Prisma.StudyRecordUncheckedCreateNestedManyWithoutUserInput
-  userBadges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
   aiHistories?: Prisma.AIHistoryUncheckedCreateNestedManyWithoutUserInput
   memories?: Prisma.UserMemoryUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
@@ -3683,7 +3444,6 @@ export type UserUpdateWithoutTokenUsagesInput = {
   plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
@@ -3715,7 +3475,6 @@ export type UserUncheckedUpdateWithoutTokenUsagesInput = {
   plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
   checkins?: Prisma.CheckinUncheckedUpdateManyWithoutUserNestedInput
   studyRecords?: Prisma.StudyRecordUncheckedUpdateManyWithoutUserNestedInput
-  userBadges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
   aiHistories?: Prisma.AIHistoryUncheckedUpdateManyWithoutUserNestedInput
   memories?: Prisma.UserMemoryUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
@@ -3742,7 +3501,6 @@ export type UserCountOutputType = {
   plans: number
   checkins: number
   studyRecords: number
-  userBadges: number
   aiHistories: number
   memories: number
   conversations: number
@@ -3765,7 +3523,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   plans?: boolean | UserCountOutputTypeCountPlansArgs
   checkins?: boolean | UserCountOutputTypeCountCheckinsArgs
   studyRecords?: boolean | UserCountOutputTypeCountStudyRecordsArgs
-  userBadges?: boolean | UserCountOutputTypeCountUserBadgesArgs
   aiHistories?: boolean | UserCountOutputTypeCountAiHistoriesArgs
   memories?: boolean | UserCountOutputTypeCountMemoriesArgs
   conversations?: boolean | UserCountOutputTypeCountConversationsArgs
@@ -3825,13 +3582,6 @@ export type UserCountOutputTypeCountCheckinsArgs<ExtArgs extends runtime.Types.E
  */
 export type UserCountOutputTypeCountStudyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.StudyRecordWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountUserBadgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserBadgeWhereInput
 }
 
 /**
@@ -3949,7 +3699,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   plans?: boolean | Prisma.User$plansArgs<ExtArgs>
   checkins?: boolean | Prisma.User$checkinsArgs<ExtArgs>
   studyRecords?: boolean | Prisma.User$studyRecordsArgs<ExtArgs>
-  userBadges?: boolean | Prisma.User$userBadgesArgs<ExtArgs>
   aiHistories?: boolean | Prisma.User$aiHistoriesArgs<ExtArgs>
   memories?: boolean | Prisma.User$memoriesArgs<ExtArgs>
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
@@ -4013,7 +3762,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   plans?: boolean | Prisma.User$plansArgs<ExtArgs>
   checkins?: boolean | Prisma.User$checkinsArgs<ExtArgs>
   studyRecords?: boolean | Prisma.User$studyRecordsArgs<ExtArgs>
-  userBadges?: boolean | Prisma.User$userBadgesArgs<ExtArgs>
   aiHistories?: boolean | Prisma.User$aiHistoriesArgs<ExtArgs>
   memories?: boolean | Prisma.User$memoriesArgs<ExtArgs>
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
@@ -4041,7 +3789,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     plans: Prisma.$PlanPayload<ExtArgs>[]
     checkins: Prisma.$CheckinPayload<ExtArgs>[]
     studyRecords: Prisma.$StudyRecordPayload<ExtArgs>[]
-    userBadges: Prisma.$UserBadgePayload<ExtArgs>[]
     aiHistories: Prisma.$AIHistoryPayload<ExtArgs>[]
     memories: Prisma.$UserMemoryPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
@@ -4467,7 +4214,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   plans<T extends Prisma.User$plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checkins<T extends Prisma.User$checkinsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$checkinsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CheckinPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studyRecords<T extends Prisma.User$studyRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studyRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudyRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  userBadges<T extends Prisma.User$userBadgesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userBadgesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserBadgePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiHistories<T extends Prisma.User$aiHistoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memories<T extends Prisma.User$memoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$memoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserMemoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.User$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5031,30 +4777,6 @@ export type User$studyRecordsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.StudyRecordScalarFieldEnum | Prisma.StudyRecordScalarFieldEnum[]
-}
-
-/**
- * User.userBadges
- */
-export type User$userBadgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the UserBadge
-   */
-  select?: Prisma.UserBadgeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the UserBadge
-   */
-  omit?: Prisma.UserBadgeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserBadgeInclude<ExtArgs> | null
-  where?: Prisma.UserBadgeWhereInput
-  orderBy?: Prisma.UserBadgeOrderByWithRelationInput | Prisma.UserBadgeOrderByWithRelationInput[]
-  cursor?: Prisma.UserBadgeWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.UserBadgeScalarFieldEnum | Prisma.UserBadgeScalarFieldEnum[]
 }
 
 /**

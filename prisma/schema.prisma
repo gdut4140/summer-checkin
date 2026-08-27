@@ -24,7 +24,6 @@ model User {
   plans         Plan[]
   checkins      Checkin[]
   studyRecords  StudyRecord[]
-  userBadges    UserBadge[]
   aiHistories   AIHistory[]
   memories      UserMemory[]
   conversations Conversation[]
@@ -175,30 +174,13 @@ model StudyRecord {
   @@map("studyrecord")
 }
 
-model Badge {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  icon        String
-  criteria    String
-  createdAt   DateTime @default(now())
+model AvatarChange {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
 
-  userBadges UserBadge[]
-
-  @@map("badge")
-}
-
-model UserBadge {
-  id       String   @id @default(cuid())
-  userId   String
-  badgeId  String
-  earnedAt DateTime @default(now())
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, badgeId])
-  @@map("userbadge")
+  @@index([userId, createdAt])
+  @@map("avatarchange")
 }
 
 model Conversation {

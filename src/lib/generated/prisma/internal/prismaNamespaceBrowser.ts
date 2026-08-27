@@ -59,8 +59,7 @@ export const ModelName = {
   Todo: 'Todo',
   Checkin: 'Checkin',
   StudyRecord: 'StudyRecord',
-  Badge: 'Badge',
-  UserBadge: 'UserBadge',
+  AvatarChange: 'AvatarChange',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
   AgentRun: 'AgentRun',
@@ -223,26 +222,13 @@ export const StudyRecordScalarFieldEnum = {
 export type StudyRecordScalarFieldEnum = (typeof StudyRecordScalarFieldEnum)[keyof typeof StudyRecordScalarFieldEnum]
 
 
-export const BadgeScalarFieldEnum = {
+export const AvatarChangeScalarFieldEnum = {
   id: 'id',
-  name: 'name',
-  description: 'description',
-  icon: 'icon',
-  criteria: 'criteria',
+  userId: 'userId',
   createdAt: 'createdAt'
 } as const
 
-export type BadgeScalarFieldEnum = (typeof BadgeScalarFieldEnum)[keyof typeof BadgeScalarFieldEnum]
-
-
-export const UserBadgeScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  badgeId: 'badgeId',
-  earnedAt: 'earnedAt'
-} as const
-
-export type UserBadgeScalarFieldEnum = (typeof UserBadgeScalarFieldEnum)[keyof typeof UserBadgeScalarFieldEnum]
+export type AvatarChangeScalarFieldEnum = (typeof AvatarChangeScalarFieldEnum)[keyof typeof AvatarChangeScalarFieldEnum]
 
 
 export const ConversationScalarFieldEnum = {

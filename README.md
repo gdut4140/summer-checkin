@@ -56,7 +56,7 @@
 
 ### 每日打卡
 - 记录学习内容与心情，支持上传截图
-- 连续打卡统计，达成里程碑自动获得成就徽章（勋章系统）
+- 连续打卡统计，记录坚持天数
 
 ### 学习计划
 - 任务制进度：`已完成任务 / 总任务`
@@ -74,8 +74,11 @@
 - 长期记忆：AI 自动提取用户偏好注入上下文
 
 ### 多人聊天室
-- WebSocket 实时群聊
-- `@AI` / `@雨宝` 触发 AI 流式回复，支持 Markdown 与代码高亮
+- WebSocket 实时群聊：所有在线用户共享一条消息流，在线人数实时广播
+- `@AI` 唤起 AI 伙伴流式回复，内置「温柔宝」「嘴欠宝」两种人格，支持 Markdown 与代码高亮
+- 独立 WebSocket sidecar 进程承载，握手期 Cookie 鉴权拦截未登录连接，心跳保活 + 断线清理
+- AI 以虚拟用户身份入群，读取最近群聊上下文后经 AI SDK `streamText` 逐字流式回推，模型池 LOW 档自动降级并做 token 记账 / 限流
+
 
 ### 其他
 - 三场景主题自动切换（雨林 / 雪日 / 暖云）
@@ -131,7 +134,7 @@ cp .env.example .env   # 填入真实 API Key 与数据库地址
 # 3. 生成 Prisma Client
 npx prisma generate
 
-# 4. 初始化数据库（建表 + 写入勋章种子数据）
+# 4. 初始化数据库（建表 + 写入引导模板等种子数据）
 npx prisma db push
 npx prisma db seed
 
@@ -187,12 +190,12 @@ npm run ws:dev     # WebSocket sidecar（:3001，聊天室 + AI 依赖它）
 
 ## 🗄 数据模型
 
-28 张表，按模块分组：
+26 张表，按模块分组：
 
 | 模块 | 表 |
 |---|---|
 | 用户与认证 | `user` · `session` · `account` |
-| 学习核心 | `plan` · `plantask` · `todo` · `checkin` · `studyrecord` · `badge` · `userbadge` |
+| 学习核心 | `plan` · `plantask` · `todo` · `checkin` · `studyrecord` |
 | AI 智能体 | `agentrun` · `agentstep` · `agentapproval` · `agentdecision` · `agenttoolcall` · `usermemory` · `aihistory` · `conversation` · `conversationmessage` |
 | 聊天室 | `chatmessage` |
 | 知识库 / 文档 | `document` · `documentchunk` · `knowledgedoc` · `plantemplate` · `documenttemplate` |

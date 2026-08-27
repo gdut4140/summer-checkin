@@ -82,15 +82,10 @@ export type Checkin = Prisma.CheckinModel
  */
 export type StudyRecord = Prisma.StudyRecordModel
 /**
- * Model Badge
+ * Model AvatarChange
  * 
  */
-export type Badge = Prisma.BadgeModel
-/**
- * Model UserBadge
- * 
- */
-export type UserBadge = Prisma.UserBadgeModel
+export type AvatarChange = Prisma.AvatarChangeModel
 /**
  * Model Conversation
  * 
