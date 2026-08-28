@@ -28,6 +28,7 @@
     "driver.js": "^1.8.0",
     "gsap": "^3.15.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.16.0",
     "lucide-react": "^1.23.0",
     "motion": "^12.42.2",
     "next": "16.2.10",

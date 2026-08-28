@@ -6,13 +6,14 @@ set -e
 # 用法: ./scripts/deploy.sh [镜像标签]
 # 示例: ./scripts/deploy.sh v1.0.0
 #
-# 用法一: 使用华为云 SWR 镜像仓库（推荐）
-#   设置环境变量: export HUAWEI_SWR_REGISTRY=swr.cn-east-3.myhuaweicloud.com/your-namespace
-#   需要先登录: docker login -u <username> -p <password> swr.cn-east-3.myhuaweicloud.com
-#
-# 用法二: 直接 tar 导出上传（无需镜像仓库）
+# 用法一: 直接 tar 导出上传（默认，无需镜像仓库）
 #   ./scripts/deploy.sh --tar v1.0.0
 #   然后 scp 镜像 tar 到服务器
+#   当前服务器: 8.148.146.16（阿里云，免密 key ~/.ssh/deploy_hw）
+#
+# 用法二: 推送到镜像仓库（可选，需自建/自配 ACR）
+#   设置环境变量: export REGISTRY=<你的阿里云 ACR 命名空间>
+#   需要先登录: docker login -u <username> -p <password> <你的 ACR 地址>
 # ============================================================
 
 VERSION="${1:-latest}"
@@ -76,11 +77,11 @@ else
   # ==========================================================
   # 方式二: 推送到镜像仓库
   # ==========================================================
-  REGISTRY="${HUAWEI_SWR_REGISTRY:-}"
+  REGISTRY="${REGISTRY:-}"
   if [ -z "$REGISTRY" ]; then
     echo ""
-    echo "  ❌ 错误: 请设置 HUAWEI_SWR_REGISTRY 或使用 --tar 模式"
-    echo "  export HUAWEI_SWR_REGISTRY=swr.cn-east-3.myhuaweicloud.com/your-namespace"
+    echo "  ❌ 错误: 请设置 REGISTRY 或使用 --tar 模式"
+    echo "  export REGISTRY=<你的阿里云 ACR 命名空间>"
     exit 1
   fi
 

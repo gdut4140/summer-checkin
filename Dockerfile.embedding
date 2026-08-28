@@ -2,7 +2,7 @@
 # Python Embedding 服务
 # 模型: BAAI/bge-small-zh-v1.5 (24MB, 512维, 中文优化)
 # 端口: 8765
-# 注意: 华为云 ECS 虚拟 CPU 不兼容 torch 2.x 的 AVX2 指令，
+# 注意: 阿里云 ECS 虚拟 CPU 不兼容 torch 2.x 的 AVX2 指令，
 # 使用 Python 3.10 + torch 1.13.1
 # ============================================================
 FROM python:3.10-slim

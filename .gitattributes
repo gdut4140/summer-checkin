@@ -1,0 +1,3 @@
+# 换行符统一：shell 脚本必须 LF（Windows checkout 的 CRLF 会让 shebang 失效，
+# 容器内 exec 报 "no such file or directory"，2026-08-29 部署踩坑，见部署笔记）
+*.sh text eol=lf
