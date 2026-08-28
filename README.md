@@ -240,7 +240,7 @@ docker compose up -d --build
 
 - [Next.js](https://nextjs.org) · [React](https://react.dev) · [Tailwind CSS](https://tailwindcss.com)
 - [Prisma](https://www.prisma.io) · [PostgreSQL](https://www.postgresql.org) · [pgvector](https://github.com/pgvector/pgvector)
-- [Better Auth](https://better-auth.com) · [AI SDK](https://ai-sdk.dev) · [Recharts](https://recharts.org) · [Motion](https://motion.dev)
+- [Better Auth](https://better-auth.com) · [AI SDK](https://ai-sdk.dev) · [Motion](https://motion.dev)
 
 ## 📄 License
 
