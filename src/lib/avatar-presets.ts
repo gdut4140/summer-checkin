@@ -76,6 +76,18 @@ export function fallbackAvatar(name: string): { preset: UserAvatarPreset; initia
   };
 }
 
+/* ── OSS 头像展示时附加图片处理参数 ──
+   头像在 OSS 上是公开读的原图（可能 1MB+），展示时让 OSS 服务端缩放成
+   w=256 的缩略图再返回，浏览器不再整图下载。仅改展示 URL，DB 里存的还是原 URL。 */
+const OSS_AVATAR_RESIZE = "?x-oss-process=image/resize,w_256";
+
+function withOssResize(url: string): string {
+  // 只对 OSS 公开读 URL 处理；已带 query 的（预签名等）跳过，避免破坏签名
+  if (!/^https?:\/\/[\w.-]+\.aliyuncs\.com\//i.test(url)) return url;
+  if (/\?/.test(url)) return url;
+  return `${url}${OSS_AVATAR_RESIZE}`;
+}
+
 /* ── 解析最终要显示的图片 URL：
    优先级  image(合法 preset id → src)
           image(已是 URL: /xxx http(s): data:)
@@ -95,7 +107,7 @@ export function resolveAvatarSrc(input: {
     const preset = findAvatarPreset(image);
     if (preset) return { src: preset.src, id: preset.id };
     // 已经是 http(s): / 开头 或 data: 的图片 URL
-    if (/^(https?:|\/|data:)/i.test(image)) return { src: image, id: "url" };
+    if (/^(https?:|\/|data:)/i.test(image)) return { src: withOssResize(image), id: "url" };
   }
 
   // 未知/空 → 按名字 hash 回落到 1~12 中一张

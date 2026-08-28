@@ -877,9 +877,9 @@ const PRESET_OPTIONS: {
 
 /** 场景组背景图（AccordionGallery 用） */
 const SCENE_GALLERY_ITEMS: GalleryItem[] = [
-  { image: "/rain.png", label: "雨林", value: "dark-rain" },
-  { image: "/snow.png", label: "雪日", value: "light-snow" },
-  { image: "/cloud.png", label: "暖云", value: "khaki-cloud" },
+  { image: "/rain.webp", label: "雨林", value: "dark-rain" },
+  { image: "/snow.webp", label: "雪日", value: "light-snow" },
+  { image: "/cloud.webp", label: "暖云", value: "khaki-cloud" },
 ];
 
 function StudioPresetToolGroup({

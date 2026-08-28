@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, subDays, startOfYear, endOfYear, format, eachDayOfInterval } from "date-fns";
-import { LearningIsland } from "@/components/landing/learning-island";
+import LearningIsland from "@/components/landing/learning-island-dynamic";
 import { Heatmap } from "@/components/calendar/heatmap";
 import { CheckinButton } from "./checkin-button";
 import { FootprintHeading } from "./footprint-heading";

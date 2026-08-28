@@ -1,32 +1,29 @@
 "use client";
 
-import { useScene } from "@/context/scene-context";
+import { useScene, type SceneType } from "@/context/scene-context";
 
+/** 场景 → 背景图 URL（WebP，每张 ~80–130KB；原 PNG 每张 2MB+） */
+const SCENE_BG: Record<SceneType, string> = {
+  rain: "url('/rain.webp')",
+  snow: "url('/snow.webp')",
+  cloud: "url('/cloud.webp')",
+};
+
+/**
+ * 全局场景背景。
+ * 只渲染「当前场景」那一张 —— 以前是雨/雪/云三张全挂 DOM，
+ * 首屏白下载 6MB+ 图片。切换场景时用 key 重挂 + 700ms 淡入保留过渡手感
+ * （prefers-reduced-motion 下动画会被全局规则压到 0.01ms）。
+ */
 export function BackgroundVideo() {
   const { scene } = useScene();
 
   return (
-    <>
-      {/* 雨林场景：背景图片 */}
-      <div
-        className={`bg-video bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${scene === "rain" ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        style={{ backgroundImage: "url('/rain.png')" }}
-        aria-hidden="true"
-      />
-
-      {/* 雪景场景：背景图片 */}
-      <div
-        className={`bg-video bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${scene === "snow" ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        style={{ backgroundImage: "url('/snow.png')" }}
-        aria-hidden="true"
-      />
-
-      {/* 暖云场景：背景图片（cloud.png） */}
-      <div
-        className={`bg-video bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${scene === "cloud" ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        style={{ backgroundImage: "url('/cloud.png')" }}
-        aria-hidden="true"
-      />
-    </>
+    <div
+      key={scene}
+      className="bg-video bg-cover bg-center bg-no-repeat animate-[bg-fade-in_700ms_ease]"
+      style={{ backgroundImage: SCENE_BG[scene] }}
+      aria-hidden="true"
+    />
   );
 }

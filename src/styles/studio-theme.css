@@ -30,7 +30,7 @@
   transition: opacity 700ms ease, background-image 700ms ease, filter 300ms ease;
 }
 
-/* 背景图层（rain.png 等）：与 .studio-bg-layer 同位，z-0
+/* 背景图层（rain.webp 等）：与 .studio-bg-layer 同位，z-0
    background-color 纯黑兜底：防止首帧/未加载时透出下方全局背景 */
 .studio-root>.studio-bg-video {
   position: absolute;
@@ -643,51 +643,6 @@
 .studio-root .studio-read ::selection {
   background: color-mix(in srgb, var(--studio-link) 35%, transparent);
   color: var(--studio-text);
-}
-
-/* ── Milkdown / ProseMirror 绑定（高优先级） ── */
-.studio-root .ProseMirror,
-.studio-root .ProseMirror p,
-.studio-root .ProseMirror li,
-.studio-root .ProseMirror blockquote,
-.studio-root .ProseMirror h1,
-.studio-root .ProseMirror h2,
-.studio-root .ProseMirror h3,
-.studio-root .ProseMirror h4,
-.studio-root .ProseMirror h5,
-.studio-root .ProseMirror h6,
-.studio-root .ProseMirror td,
-.studio-root .ProseMirror th {
-  color: var(--studio-text);
-}
-
-.studio-root .ProseMirror h1,
-.studio-root .ProseMirror h2,
-.studio-root .ProseMirror h3,
-.studio-root .ProseMirror h4,
-.studio-root .ProseMirror h5,
-.studio-root .ProseMirror h6 {
-  color: var(--studio-heading);
-}
-
-.studio-root .ProseMirror a {
-  color: var(--studio-link);
-}
-
-.studio-root .ProseMirror code {
-  background-color: var(--studio-code-inline-bg);
-  color: var(--studio-code-inline-text);
-}
-
-.studio-root .ProseMirror blockquote {
-  background: var(--studio-quote-bg);
-  border-left: 3px solid var(--studio-quote-border);
-}
-
-.studio-root .ProseMirror hr {
-  background-color: var(--studio-hr);
-  border: none;
-  height: 1px;
 }
 
 /* ── 代码块（.hljs 语法高亮）按变量覆盖：更高优先级 & 选择器 & !important ── */
