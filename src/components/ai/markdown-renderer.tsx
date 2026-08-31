@@ -7,6 +7,7 @@ import remarkMath from "remark-math";
 import remarkFootnotes from "remark-footnotes";
 import remarkDeflist from "remark-deflist";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import rehypeKatex from "rehype-katex";
 import { CheckSquare, Square } from "@phosphor-icons/react";
@@ -59,6 +60,27 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content }: Prop
         // 先解析原生 HTML，再让 KaTeX 接管 math 节点，避免两者互相覆盖。
         rehypePlugins={[
           rehypeRaw,
+          // 杀毒：白名单过滤（防 <script>/<style>/<iframe> 等 XSS），但放行 mark/details 等业务标签
+          [
+            rehypeSanitize,
+            {
+              ...defaultSchema,
+              tagNames: [
+                ...(defaultSchema.tagNames ?? []),
+                "mark",
+                "details",
+                "summary",
+              ],
+              attributes: {
+                ...defaultSchema.attributes,
+                a: ["href", "title"],
+                img: ["src", "alt", "title"],
+                span: ["className", "style"],
+                code: ["className"],
+                pre: ["className"],
+              },
+            },
+          ],
           [rehypeKatex, { throwOnError: false }],
           rehypeHighlight,
         ]}

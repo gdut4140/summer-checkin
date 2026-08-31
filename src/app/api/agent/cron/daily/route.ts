@@ -19,11 +19,15 @@ import { cleanupOldNotifications } from "@/lib/notification";
 import { cleanupColdMemories } from "@/lib/memory";
 
 export async function GET(request: NextRequest) {
-  // 安全校验
+  // 安全校验：CRON_SECRET 必须配置，未配置时直接拒绝（避免未设密钥时被任意触发烧 token）
   const authHeader = request.headers.get("authorization");
   const expectedSecret = process.env.CRON_SECRET;
 
-  if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
+  if (!expectedSecret) {
+    console.error("[Cron] CRON_SECRET 未配置，拒绝执行");
+    return NextResponse.json({ error: "Cron not configured" }, { status: 503 });
+  }
+  if (authHeader !== `Bearer ${expectedSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

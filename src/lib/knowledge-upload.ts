@@ -38,6 +38,12 @@ export async function processKnowledgeText(opts: ProcessOptions) {
     `[Knowledge] 分片完成: ${text.length} 字 → ${chunks.length} 个 chunk`
   );
 
+  // chunk 数量上限（防 500*10 批 embedding 打爆账单 / DB 事务过大）
+  const MAX_CHUNKS = 500;
+  if (chunks.length > MAX_CHUNKS) {
+    return { success: false as const, error: `文档过长（${chunks.length} chunks），上限 ${MAX_CHUNKS} chunks，请拆分后上传`, chunks: chunks.length };
+  }
+
   // 2. Embed（一次 API 调用批量处理）
   const embeddings = await embedTexts(chunks);
   console.log(`[Knowledge] Embedding 完成: ${embeddings.length} 个向量`);

@@ -48,6 +48,7 @@ services:
       OSS_BUCKET: ${OSS_BUCKET}
       OSS_REGION: ${OSS_REGION}
       OSS_PUBLIC_BASE_URL: ${OSS_PUBLIC_BASE_URL}
+      CRON_SECRET: ${CRON_SECRET:-}
       HOSTNAME: "0.0.0.0"
     volumes:
       - knowledge_data:/app/knowledge

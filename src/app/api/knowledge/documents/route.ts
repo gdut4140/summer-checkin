@@ -9,6 +9,10 @@ import { getAuthUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { processKnowledgeText } from "@/lib/knowledge-upload";
 
+// 单文件与总文本上限（防大文件打爆 embedding 账单 / 内存）
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
+const MAX_TEXT_CHARS = 200_000; // 约 200k 字，超出则拒绝或截断
+
 // ---- GET: 列出用户文档 ----
 export async function GET() {
   const user = await getAuthUser();
@@ -66,6 +70,14 @@ export async function POST(request: NextRequest) {
     const fileName = file.name;
     const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
 
+    // 文件大小硬上限 10MB（前端已应拦截，此处为服务端兜底）
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json(
+        { error: `文件过大（${(file.size/1024/1024).toFixed(1)}MB），单文件上限 10MB` },
+        { status: 413 }
+      );
+    }
+
     let text: string;
     let sourceType: "text" | "markdown" | "pdf" | "docx" = "text";
 
@@ -111,6 +123,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (text.length > MAX_TEXT_CHARS) {
+      return NextResponse.json(
+        { error: `文档过长（${text.length} 字），上限 ${MAX_TEXT_CHARS} 字，请拆分后上传` },
+        { status: 413 }
+      );
+    }
+
     const result = await processKnowledgeText({
       userId: user.id,
       text,
@@ -134,6 +153,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (text.length > MAX_TEXT_CHARS) {
+    return NextResponse.json(
+      { error: `文本过长（${text.length} 字），上限 ${MAX_TEXT_CHARS} 字` },
+      { status: 413 }
+    );
+  }
+
   const sourceName = (body?.name?.trim() || "手动输入") + ".txt";
   const result = await processKnowledgeText({
     userId: user.id,
@@ -151,7 +177,7 @@ async function extractViaPython(
   scriptName: string,
   ext: string
 ): Promise<string> {
-  const { exec } = await import("child_process");
+  const { execFile } = await import("child_process");
   const { writeFile, unlink, readFile } = await import("fs/promises");
   const { randomUUID } = await import("crypto");
   const path = await import("path");
@@ -168,8 +194,9 @@ async function extractViaPython(
 
     const scriptPath = path.join(process.cwd(), "scripts", scriptName);
     await new Promise<void>((resolve, reject) => {
-      exec(
-        `python "${scriptPath}" "${inputPath}" "${txtPath}"`,
+      execFile(
+        "python",
+        [scriptPath, inputPath, txtPath],
         { timeout: 30000 },
         (error, _stdout, stderr) => {
           if (error) {
