@@ -20,7 +20,7 @@ export const OSS_PUBLIC_BASE_URL =
   process.env.OSS_PUBLIC_BASE_URL ?? `https://${BUCKET}.${REGION}.aliyuncs.com`;
 
 /** 上传用途 → 对象前缀。新增用途（如壁纸）在此加一行，整套流程即可复用 */
-export const OSS_PURPOSES = ["avatars", "wallpapers"] as const;
+export const OSS_PURPOSES = ["avatars", "wallpapers", "checkins"] as const;
 export type OssPurpose = (typeof OSS_PURPOSES)[number];
 
 /** 允许上传的文件扩展名白名单 */

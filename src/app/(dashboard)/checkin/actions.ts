@@ -13,7 +13,7 @@ import {
   type SceneType,
 } from "@/lib/scene-meta";
 
-export async function dailyCheckin(mood?: string, scene?: SceneType): Promise<ActionResult> {
+export async function dailyCheckin(mood?: string, scene?: SceneType, screenshot?: string): Promise<ActionResult> {
   try {
     const user = await requireAuth();
     const now = new Date();
@@ -44,6 +44,7 @@ export async function dailyCheckin(mood?: string, scene?: SceneType): Promise<Ac
         content: visitRecordText,
         hours: 0,
         mood: mood ?? null,
+        screenshot: screenshot ?? null,
         checkinDate: now,
       },
     });

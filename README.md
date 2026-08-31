@@ -242,6 +242,13 @@ docker compose up -d --build
 - [Prisma](https://www.prisma.io) · [PostgreSQL](https://www.postgresql.org) · [pgvector](https://github.com/pgvector/pgvector)
 - [Better Auth](https://better-auth.com) · [AI SDK](https://ai-sdk.dev) · [Motion](https://motion.dev)
 
+## 扩展：JARVIS Obsidian 融合（外置仓）
+
+本融合不在 summer-checkin 目录内，外置于 jarvis-runtime（分支 feat/obsidian-fusion，D:\\OptoKB Vault 75文件已验证）。为外审可见，已在 jarvis-fusion/ 放置只读镜像（README_FUSION.md），实际以 jarvis-runtime 为准。
+- 模型：deepseek-v4-flash(Low)/muse-spark-1.2(High) 去限额（Summer 本体仍保留 AI_TOKEN_LIMIT，见常见问题）
+- 知识库：Summer 本体为 jsonb+JS cosine Top1000（非 pgvector 原生 vector），JARVIS 侧已接 pgvector jarvis_chunks
+- 场景：Summer 仅雨林有独立专注房（RainforestFocusRoom），雪日/暖云仅换色板与背景
+
 ## 📄 License
 
 [MIT](./LICENSE)

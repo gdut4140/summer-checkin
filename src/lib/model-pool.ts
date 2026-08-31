@@ -15,7 +15,7 @@ import { assertInteractiveUsageAllowed, recordUsage } from "@/lib/usage";
 // - HIGH ：agent / 文档 studio / 后台规划 —— agnes-2.5-flash 免费优先，不可用/额度耗尽降级阿里云。
 // ============================================================
 
-export type ModelProvider = "agnes" | "aliyun";
+export type ModelProvider = "agnes" | "aliyun" | "opencode";
 export type ModelTier = "low" | "high";
 export type ModelType =
   | "general"
@@ -59,6 +59,8 @@ const PROVIDER_CONFIG: Record<ModelProvider, { baseURL: string; apiKey: string }
 // ── HIGH 档（agent / 文档 studio / 后台规划）：agnes 免费优先，不可用/额度耗尽降级阿里云 ──
 const HIGH_CHAIN: ModelEntry[] = [
   { modelName: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", provider: "agnes", modelType: "general", tier: "high" },
+  { modelName: "deepseek-v4-flash", displayName: "DeepSeek V4 Flash", provider: "opencode", modelType: "general", tier: "high" },
+  { modelName: "muse-spark-1.2", displayName: "Muse Spark 1.2", provider: "opencode", modelType: "general", tier: "high" },
   { modelName: "qwen3.7-max-2026-06-08", displayName: "通义千问 3.7 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
   { modelName: "deepseek-v4-pro-0813", displayName: "DeepSeek V4 Pro", provider: "aliyun", modelType: "general", thinking: true, tier: "high", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3-max-2026-01-23", displayName: "通义千问 3 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
@@ -71,6 +73,8 @@ const HIGH_CHAIN: ModelEntry[] = [
 // ── LOW 档（聊天室/标题/记忆/拆任务）：agnes 免费优先，额度用完降级阿里云 flash ──
 const LOW_CHAIN: ModelEntry[] = [
   { modelName: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", provider: "agnes", modelType: "general", tier: "low" },
+  { modelName: "deepseek-v4-flash", displayName: "DeepSeek V4 Flash", provider: "opencode", modelType: "general", tier: "low" },
+  { modelName: "muse-spark-1.2", displayName: "Muse Spark 1.2", provider: "opencode", modelType: "general", tier: "low" },
   { modelName: "qwen-flash-2025-07-28", displayName: "通义千问 Flash", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3.7-flash-2026-07-15", displayName: "通义千问 3.7 Flash", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3.6-flash", displayName: "通义千问 3.6 Flash", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
