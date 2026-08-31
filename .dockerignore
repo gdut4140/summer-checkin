@@ -40,6 +40,10 @@ _oss-env.txt
 README.md
 *.md
 
+# 个人简历（含联系方式，绝不上服务器 / 不进构建上下文）
+简历.html
+简历-asu/
+
 # REST client test files
 *.http
 

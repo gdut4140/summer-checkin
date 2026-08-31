@@ -2,7 +2,7 @@
 set -e
 
 # ============================================================
-# Summer Checkin — 华为云 ECS 首次服务器初始化
+# Summer Checkin — 阿里云 ECS 首次服务器初始化
 # 支持: OpenEuler / CentOS / RHEL / Ubuntu / Debian
 #
 # 用法:
@@ -74,7 +74,7 @@ else
             fi
         else
             sudo dnf install -y docker 2>/dev/null || {
-                echo "  ❌ 安装失败，请参考华为云文档安装 Docker"
+                echo "  ❌ 安装失败，请参考云厂商文档安装 Docker"
                 exit 1
             }
         fi
@@ -138,7 +138,7 @@ echo "============================================"
 echo "  初始化完成!"
 echo "============================================"
 echo ""
-echo "  ⚠️ 重要: 华为云控制台安全组开放端口:"
+echo "  ⚠️ 重要: 阿里云控制台安全组开放端口:"
 echo "     → 入方向 → TCP 80 → 0.0.0.0/0"
 echo "     → 入方向 → TCP 22 → 你的IP/32"
 echo ""

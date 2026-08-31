@@ -36,7 +36,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-summer_checkin_dev}@postgres:5432/summer_checkin
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-agnes-2.5-flash}
-      DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://apihub.agnes-ai.com/v1}
+      DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://api.agnes-ai.cn/v1}
       EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v2}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode}

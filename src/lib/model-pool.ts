@@ -46,7 +46,7 @@ const PROVIDER_CONFIG: Record<ModelProvider, { baseURL: string; apiKey: string }
     baseURL:
       process.env.AGNES_BASE_URL ??
       process.env.DASHSCOPE_BASE_URL ??
-      "https://apihub.agnes-ai.com/v1",
+      "https://api.agnes-ai.cn/v1",
     apiKey: process.env.AGNES_API_KEY ?? process.env.DASHSCOPE_API_KEY ?? "",
   },
   aliyun: {
