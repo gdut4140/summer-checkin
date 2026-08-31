@@ -25,6 +25,11 @@ export const auth = betterAuth({
       },
     },
   },
+  rateLimit: {
+    window: 60, // 60s 窗口
+    max: 10, // 每 IP 每窗口 10 次（与 middleware 双保险）
+    storage: "memory",
+  },
   session: {
     cookieCache: {
       enabled: true,

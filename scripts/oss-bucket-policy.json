@@ -1,0 +1,19 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Action": [
+        "oss:PutObject"
+      ],
+      "Resource": [
+        "acs:oss:*:*:summer-checkin-app/*"
+      ],
+      "Condition": {
+        "NumericGreaterThan": {
+          "oss:ContentLength": 5242880
+        }
+      }
+    }
+  ]
+}

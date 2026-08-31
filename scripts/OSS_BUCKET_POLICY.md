@@ -1,0 +1,1 @@
+# OSS 5MB 限流\n\n已在 `src/app/api/user/avatar/route.ts` 服务端 HEAD 校验 5MB 并自动删除超大对象。\n为防直传绕过，建议在阿里云 OSS 控制台 → 权限管理 → Bucket Policy 贴入 `oss-bucket-policy.json`：\n\n- 对任何 `PutObject` 且 `ContentLength > 5MB` 直接 Deny\n- 生效后 OSS 侧直接 403，无需回源\n\n另见 `middleware.ts` 对 `/api/auth` 的 10/min/IP 限流，与 `better-auth` 内置 `rateLimit` 双保险。\n
