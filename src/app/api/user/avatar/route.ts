@@ -40,7 +40,7 @@ async function latestHistory(userId: string) {
 
 // 记录被替换下来的旧头像：只保留最近 1 个历史，并清理更早的历史对象
 // countAsUpload=true 时走 OSS 上传计数（每次新增一条计数行），否则只是切换头像不增加计数
-async function recordHistory(userId: string, oldImage: string | null, countAsUpload: boolean) {
+async function recordHistory(userId: string, oldImage: string | null | undefined, countAsUpload: boolean) {
   try {
     const previous = await latestHistory(userId);
     // 删除“更早”的历史对象（只保留最近 1 个）
