@@ -25,15 +25,86 @@ function checkMinuteBudget(userId: string): boolean {
   return true;
 }
 
+// 读取最近一个「历史头像」（被替换下来的上一张 OSS 头像）
+async function latestHistory(userId: string) {
+  try {
+    return await prisma.avatarChange.findFirst({
+      where: { userId, image: { not: null } },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    // 数据库尚未迁移 image 列时降级为无历史
+    return null;
+  }
+}
+
+// 记录被替换下来的旧头像：只保留最近 1 个历史，并清理更早的历史对象
+// countAsUpload=true 时走 OSS 上传计数（每次新增一条计数行），否则只是切换头像不增加计数
+async function recordHistory(userId: string, oldImage: string | null, countAsUpload: boolean) {
+  try {
+    const previous = await latestHistory(userId);
+    // 删除“更早”的历史对象（只保留最近 1 个）
+    if (previous?.image && isOssConfigured() && isOwnedAvatarUrl(previous.image, userId)) {
+      await deleteObject(previous.image).catch(() => {});
+    }
+
+    // 换下来的旧头像（预设 id 或 OSS URL）都保留为历史；没有旧头像则无历史
+    const image = oldImage ?? null;
+
+    if (countAsUpload) {
+      // 旧历史行转成无 image 的计数行，再新增本次上传的计数+历史行
+      if (previous) {
+        await prisma.avatarChange
+          .update({ where: { id: previous.id }, data: { image: null } })
+          .catch(() => {});
+      }
+      await prisma.avatarChange.create({ data: { userId, image } }).catch(() => {});
+    } else if (previous) {
+      await prisma.avatarChange
+        .update({ where: { id: previous.id }, data: { image } })
+        .catch(() => {});
+    } else if (image) {
+      await prisma.avatarChange.create({ data: { userId, image } }).catch(() => {});
+    }
+  } catch {
+    // 静默降级，不影响头像更新主流程
+  }
+}
+
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const history = await latestHistory(user.id);
+  return NextResponse.json({ image: user.image, previous: history?.image ?? null });
+}
+
 export async function PATCH(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { avatar } = (await req.json()) as { avatar: string };
+  const oldImage = user.image;
+  const history = await latestHistory(user.id);
+
+  // ── 换回历史头像：不计数、不走 OSS 对象校验（对象已保留），旧头像变成新的历史 ──
+  if (
+    history?.image &&
+    isOssConfigured() &&
+    isOwnedAvatarUrl(avatar, user.id) &&
+    history.image === avatar
+  ) {
+    await prisma.user.update({ where: { id: user.id }, data: { image: avatar } });
+    const nextHistory = oldImage ?? null;
+    await prisma.avatarChange
+      .update({ where: { id: history.id }, data: { image: nextHistory } })
+      .catch(() => {});
+    return NextResponse.json({ ok: true });
+  }
 
   // ── 预设头像：保持原逻辑（id "1"~"16" / "ai"），不限流 ──
   if (VALID_AVATAR_IDS.has(avatar)) {
     await prisma.user.update({ where: { id: user.id }, data: { image: avatar } });
+    await recordHistory(user.id, oldImage, false);
     return NextResponse.json({ ok: true });
   }
 
@@ -65,16 +136,12 @@ export async function PATCH(req: NextRequest) {
     }
 
     // 4. 写入 + 计数 + 清理旧对象（best-effort，不影响主流程）
-    const oldImage = user.image;
     await prisma.user.update({ where: { id: user.id }, data: { image: avatar } });
-    await prisma.avatarChange.create({ data: { userId: user.id } }).catch(() => {});
+    await recordHistory(user.id, oldImage, true);
     // 顺手清 30 天前的计数行，防表膨胀（量极小）
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
     await prisma.avatarChange.deleteMany({ where: { createdAt: { lt: cutoff } } }).catch(() => {});
-    if (oldImage && oldImage !== avatar && isOwnedAvatarUrl(oldImage, user.id)) {
-      await deleteObject(oldImage).catch(() => {});
-    }
     return NextResponse.json({ ok: true });
   }
 

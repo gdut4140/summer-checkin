@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ListChecks, PencilSimple, Plus, Sparkle, Trash } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTodos } from "@/lib/use-todos";
 import type { TodoInfo } from "@/types";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 export function LocalTodoPanel() {
   const { todos, loaded, addTodo, toggleTodo, removeTodo, updateTitle } = useTodos();
@@ -147,6 +148,19 @@ function TodoItem({
   const completed = todo.completed;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const [truncated, setTruncated] = useState(false);
+
+  // 标题被截断时才悬浮显示原文，避免短标题也弹出提示
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const check = () => setTruncated(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [todo.title]);
 
   const startEdit = () => {
     setEditValue(todo.title);
@@ -225,14 +239,22 @@ function TodoItem({
           </span>
 
           {/* 标题 */}
-          <span
-            className={cn(
-              "min-w-0 flex-1 truncate text-xs leading-5",
-              completed ? "text-muted-foreground/45 line-through" : "text-foreground/82"
-            )}
-          >
-            {todo.title}
-          </span>
+          <Tooltip disabled={!truncated}>
+            <TooltipTrigger render={
+              <span
+                ref={titleRef}
+                className={cn(
+                  "min-w-0 flex-1 truncate text-xs leading-5",
+                  completed ? "text-muted-foreground/45 line-through" : "text-foreground/82"
+                )}
+              />
+            }>
+              {todo.title}
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[280px] whitespace-normal break-words">
+              {completed ? <s>{todo.title}</s> : todo.title}
+            </TooltipContent>
+          </Tooltip>
 
           {/* 编辑 */}
           <button

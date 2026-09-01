@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 // ---- 类型 ----
@@ -90,7 +91,8 @@ export function KnowledgeBase() {
   }, []);
 
   useEffect(() => {
-    void loadDocs();
+    const timer = setTimeout(() => void loadDocs(), 0);
+    return () => clearTimeout(timer);
   }, [loadDocs]);
 
   // 上传文件
@@ -344,21 +346,31 @@ export function KnowledgeBase() {
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   {canViewDoc(doc.sourceType, doc.sourceName) && (
-                    <button
-                      onClick={() => viewDoc(doc)}
-                      className="rounded p-1 text-white/25 opacity-0 transition hover:bg-white/10 hover:text-primary group-hover:opacity-100"
-                      title="查看文档"
-                    >
-                      <Eye className="size-3.5" />
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger render={
+                        <button
+                          onClick={() => viewDoc(doc)}
+                          className="rounded p-1 text-white/25 opacity-0 transition hover:bg-white/10 hover:text-primary group-hover:opacity-100"
+                          aria-label="查看文档"
+                        />
+                      }>
+                        <Eye className="size-3.5" />
+                      </TooltipTrigger>
+                      <TooltipContent>查看文档</TooltipContent>
+                    </Tooltip>
                   )}
-                  <button
-                    onClick={() => deleteDoc(doc.sourceName)}
-                    className="rounded p-1 text-white/20 opacity-0 transition hover:bg-white/10 hover:text-red-300 group-hover:opacity-100"
-                    title="删除文档"
-                  >
-                    <Trash className="size-3.5" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger render={
+                      <button
+                        onClick={() => deleteDoc(doc.sourceName)}
+                        className="rounded p-1 text-white/20 opacity-0 transition hover:bg-white/10 hover:text-red-300 group-hover:opacity-100"
+                        aria-label="删除文档"
+                      />
+                    }>
+                      <Trash className="size-3.5" />
+                    </TooltipTrigger>
+                    <TooltipContent>删除文档</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             ))}

@@ -1,0 +1,2 @@
+# 防止 Windows checkout 把 shell 脚本转成 CRLF 破坏 Docker 构建（见 DEPLOYMENT-NOTES.md 坑 1）
+*.sh text eol=lf

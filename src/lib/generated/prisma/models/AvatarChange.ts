@@ -27,18 +27,21 @@ export type AggregateAvatarChange = {
 export type AvatarChangeMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  image: string | null
   createdAt: Date | null
 }
 
 export type AvatarChangeMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  image: string | null
   createdAt: Date | null
 }
 
 export type AvatarChangeCountAggregateOutputType = {
   id: number
   userId: number
+  image: number
   createdAt: number
   _all: number
 }
@@ -47,18 +50,21 @@ export type AvatarChangeCountAggregateOutputType = {
 export type AvatarChangeMinAggregateInputType = {
   id?: true
   userId?: true
+  image?: true
   createdAt?: true
 }
 
 export type AvatarChangeMaxAggregateInputType = {
   id?: true
   userId?: true
+  image?: true
   createdAt?: true
 }
 
 export type AvatarChangeCountAggregateInputType = {
   id?: true
   userId?: true
+  image?: true
   createdAt?: true
   _all?: true
 }
@@ -138,6 +144,7 @@ export type AvatarChangeGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type AvatarChangeGroupByOutputType = {
   id: string
   userId: string
+  image: string | null
   createdAt: Date
   _count: AvatarChangeCountAggregateOutputType | null
   _min: AvatarChangeMinAggregateOutputType | null
@@ -165,12 +172,14 @@ export type AvatarChangeWhereInput = {
   NOT?: Prisma.AvatarChangeWhereInput | Prisma.AvatarChangeWhereInput[]
   id?: Prisma.StringFilter<"AvatarChange"> | string
   userId?: Prisma.StringFilter<"AvatarChange"> | string
+  image?: Prisma.StringNullableFilter<"AvatarChange"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AvatarChange"> | Date | string
 }
 
 export type AvatarChangeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  image?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -180,12 +189,14 @@ export type AvatarChangeWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AvatarChangeWhereInput[]
   NOT?: Prisma.AvatarChangeWhereInput | Prisma.AvatarChangeWhereInput[]
   userId?: Prisma.StringFilter<"AvatarChange"> | string
+  image?: Prisma.StringNullableFilter<"AvatarChange"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AvatarChange"> | Date | string
 }, "id">
 
 export type AvatarChangeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  image?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.AvatarChangeCountOrderByAggregateInput
   _max?: Prisma.AvatarChangeMaxOrderByAggregateInput
@@ -198,66 +209,77 @@ export type AvatarChangeScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AvatarChangeScalarWhereWithAggregatesInput | Prisma.AvatarChangeScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"AvatarChange"> | string
   userId?: Prisma.StringWithAggregatesFilter<"AvatarChange"> | string
+  image?: Prisma.StringNullableWithAggregatesFilter<"AvatarChange"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AvatarChange"> | Date | string
 }
 
 export type AvatarChangeCreateInput = {
   id?: string
   userId: string
+  image?: string | null
   createdAt?: Date | string
 }
 
 export type AvatarChangeUncheckedCreateInput = {
   id?: string
   userId: string
+  image?: string | null
   createdAt?: Date | string
 }
 
 export type AvatarChangeUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AvatarChangeUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AvatarChangeCreateManyInput = {
   id?: string
   userId: string
+  image?: string | null
   createdAt?: Date | string
 }
 
 export type AvatarChangeUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AvatarChangeUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AvatarChangeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  image?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type AvatarChangeMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  image?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type AvatarChangeMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  image?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -266,28 +288,32 @@ export type AvatarChangeMinOrderByAggregateInput = {
 export type AvatarChangeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  image?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["avatarChange"]>
 
 export type AvatarChangeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  image?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["avatarChange"]>
 
 export type AvatarChangeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  image?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["avatarChange"]>
 
 export type AvatarChangeSelectScalar = {
   id?: boolean
   userId?: boolean
+  image?: boolean
   createdAt?: boolean
 }
 
-export type AvatarChangeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "createdAt", ExtArgs["result"]["avatarChange"]>
+export type AvatarChangeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "image" | "createdAt", ExtArgs["result"]["avatarChange"]>
 
 export type $AvatarChangePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AvatarChange"
@@ -295,6 +321,7 @@ export type $AvatarChangePayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    image: string | null
     createdAt: Date
   }, ExtArgs["result"]["avatarChange"]>
   composites: {}
@@ -721,6 +748,7 @@ export interface Prisma__AvatarChangeClient<T, Null = never, ExtArgs extends run
 export interface AvatarChangeFieldRefs {
   readonly id: Prisma.FieldRef<"AvatarChange", 'String'>
   readonly userId: Prisma.FieldRef<"AvatarChange", 'String'>
+  readonly image: Prisma.FieldRef<"AvatarChange", 'String'>
   readonly createdAt: Prisma.FieldRef<"AvatarChange", 'DateTime'>
 }
     

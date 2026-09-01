@@ -177,6 +177,7 @@ model StudyRecord {
 model AvatarChange {
   id        String   @id @default(cuid())
   userId    String
+  image     String?
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
@@ -440,11 +441,16 @@ model ChatMessage {
   content   String
   /** 聊天室 AI 角色（温柔宝/嘴欠宝）；AI 消息用于区分，让上下文标注不串风格 */
   aiRole    String?
+  /** 引用回复：被引用的消息 id（无 = 普通消息） */
+  replyToId String?
   createdAt DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user    User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  replyTo ChatMessage?  @relation("ChatReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies ChatMessage[] @relation("ChatReply")
 
   @@index([createdAt])
+  @@index([replyToId])
   @@map("chatmessage")
 }
 

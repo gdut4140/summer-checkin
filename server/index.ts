@@ -11,7 +11,7 @@ import { config } from "./config";
 import { authenticate, type AuthUser } from "./auth";
 import { prisma } from "./db";
 import { addConnection, removeConnection, broadcast, allConnections, type Connection } from "./room";
-import { toDTO, type AiRole, type ClientMessage } from "./protocol";
+import { toDTO, type AiRole, type ClientMessage, type ReplyToDTO } from "./protocol";
 import { handleAI } from "./ai";
 
 // ---- HTTP 服务（仅用于健康检查 + WS 升级） ----
@@ -109,7 +109,7 @@ async function handleRawMessage(conn: Connection, data: WebSocket.RawData) {
   }
 }
 
-async function handleUserMessage(conn: Connection, msg: { clientId: string; content: string }) {
+async function handleUserMessage(conn: Connection, msg: { clientId: string; content: string; replyToId?: string | null }) {
   const content = msg.content.trim();
   if (!content) return;
   if (content.length > config.maxMessageLength) {
@@ -127,8 +127,27 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
     conn.seenClientIds.delete(conn.seenClientIds.values().next().value!);
   }
 
+  // 引用回复：解析被引用消息快照（消息不存在则拒绝）
+  let replyTo: ReplyToDTO | null = null;
+  if (msg.replyToId) {
+    const target = await prisma.chatMessage.findUnique({
+      where: { id: msg.replyToId },
+      include: { user: { select: { name: true } } },
+    });
+    if (!target) {
+      sendError(conn, "reply_not_found", "回复的消息不存在");
+      return;
+    }
+    replyTo = {
+      id: target.id,
+      userId: target.userId,
+      userName: target.user?.name ?? "用户",
+      content: target.content,
+    };
+  }
+
   const saved = await prisma.chatMessage.create({
-    data: { userId: conn.userId, role: "user", content },
+    data: { userId: conn.userId, role: "user", content, replyToId: msg.replyToId ?? null },
   });
   // 用数据库里的最新昵称/头像（用户可能中途换了头像，conn 里是连接时的旧值）
   const sender = await prisma.user.findUnique({
@@ -141,10 +160,10 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
   conn.image = image;
 
   console.log(
-    `[ws][消息] ${new Date().toLocaleTimeString("zh-CN", { hour12: false })} ${userName}: ${content.length > 100 ? content.slice(0, 100) + "…" : content}`
+    `[ws][消息] ${new Date().toLocaleTimeString("zh-CN", { hour12: false })} ${userName}: ${content.length > 100 ? content.slice(0, 100) + "…" : content}${replyTo ? " (引用回复)" : ""}`
   );
 
-  broadcast({ type: "message", message: toDTO(saved, userName, image) });
+  broadcast({ type: "message", message: toDTO(saved, userName, image, replyTo) });
 
   // @AI 触发（传 userId，聊天室按用户记账 + 每日限额）；一条消息可同时 @温柔宝 + @嘴欠宝，各自流式
   for (const ai of extractAIPrompts(content)) {

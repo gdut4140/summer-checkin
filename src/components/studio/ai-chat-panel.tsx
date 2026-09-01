@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { MessageBubble } from "@/components/ai/message-bubble";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { ChatMessage } from "@/types";
 
 // ============================================================
@@ -58,11 +59,10 @@ export function AiChatPanel({
   aiExpanded = false,
   onToggleAiExpanded,
   studioRoot: studioRootProp,
-  autoFocus = false,
   starterPrompt,
 }: AiChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(starterPrompt ?? "");
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(!!storageKey);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -136,14 +136,12 @@ export function AiChatPanel({
     };
   }, [storageKey]);
 
-  // 从「新建计划」进入（autoFocus）→ 预填引导语并聚焦输入框
+  // 进入文档工作室即聚焦输入框；「新建计划」引导语在 useState 初始化时预填
   useEffect(() => {
-    if (!autoFocus) return;
-    if (starterPrompt) setInput(starterPrompt);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => inputRef.current?.focus());
     });
-  }, [autoFocus, starterPrompt]);
+  }, []);
 
   // 记录用户是否贴底：AI 生成时上滑查看历史不被拉回，只有贴近底部才自动跟随
   useEffect(() => {
@@ -255,6 +253,7 @@ export function AiChatPanel({
     setMessages([]);
     setInput("");
     conversationIdRef.current = null;
+    requestAnimationFrame(() => inputRef.current?.focus());
     if (storageKey) {
       window.localStorage.removeItem(STORAGE_PREFIX + storageKey);
     }
@@ -284,29 +283,37 @@ export function AiChatPanel({
         </span>
         <div className="ml-auto flex items-center gap-1">
           {onToggleAiExpanded && (
-            <button
-              type="button"
-              onClick={onToggleAiExpanded}
-              title={aiExpanded ? "收起对话面板" : "拉大对话面板"}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground"
-            >
-              {aiExpanded ? (
-                <ArrowsInSimple className="size-3.5" />
-              ) : (
-                <ArrowsOutSimple className="size-3.5" />
-              )}
-              {aiExpanded ? "收起" : "拉大"}
-            </button>
+            <Tooltip>
+              <TooltipTrigger render={
+                <button
+                  type="button"
+                  onClick={onToggleAiExpanded}
+                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground"
+                />
+              }>
+                {aiExpanded ? (
+                  <ArrowsInSimple className="size-3.5" />
+                ) : (
+                  <ArrowsOutSimple className="size-3.5" />
+                )}
+                {aiExpanded ? "收起" : "拉大"}
+              </TooltipTrigger>
+              <TooltipContent>{aiExpanded ? "收起对话面板" : "拉大对话面板"}</TooltipContent>
+            </Tooltip>
           )}
-          <button
-            type="button"
-            onClick={requestNewChat}
-            title="新对话（清空当前会话）"
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground"
-          >
-            <Plus className="size-3.5" />
-            新对话
-          </button>
+          <Tooltip>
+            <TooltipTrigger render={
+              <button
+                type="button"
+                onClick={requestNewChat}
+                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground"
+              />
+            }>
+              <Plus className="size-3.5" />
+              新对话
+            </TooltipTrigger>
+            <TooltipContent>新对话（清空当前会话）</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -334,7 +341,10 @@ export function AiChatPanel({
                   <button
                     key={prompt}
                     type="button"
-                    onClick={() => setInput(prompt)}
+                    onClick={() => {
+                      setInput(prompt);
+                      inputRef.current?.focus();
+                    }}
                     className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-left text-xs text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
                   >
                     {prompt}
@@ -358,14 +368,19 @@ export function AiChatPanel({
           <div className="mb-2 flex items-start gap-2 rounded-lg border border-primary/25 bg-primary/[0.06] px-3 py-2">
             <Quotes className="mt-0.5 size-3.5 shrink-0 text-primary" weight="fill" />
             <p className="min-w-0 flex-1 text-[11px] leading-relaxed text-foreground/80 line-clamp-2">{quote}</p>
-            <button
-              type="button"
-              onClick={onClearQuote}
-              className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="清除引用"
-            >
-              <X className="size-3.5" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger render={
+                <button
+                  type="button"
+                  onClick={onClearQuote}
+                  className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="清除引用"
+                />
+              }>
+                <X className="size-3.5" />
+              </TooltipTrigger>
+              <TooltipContent>清除引用</TooltipContent>
+            </Tooltip>
           </div>
         )}
         <div className="flex items-end gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 transition-colors focus-within:border-primary/40">
@@ -387,18 +402,23 @@ export function AiChatPanel({
             placeholder="让 AI 阅读并修改这篇文档…"
             className="no-scrollbar max-h-[90px] min-h-5 min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground/60"
           />
-          <button
-            onClick={loading ? stop : () => void send()}
-            disabled={!loading && !input.trim()}
-            aria-label={loading ? "停止" : "发送"}
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-40"
-          >
-            {loading ? (
-              <Stop className="size-4" weight="fill" />
-            ) : (
-              <PaperPlaneTilt className="size-4" weight="fill" />
-            )}
-          </button>
+          <Tooltip>
+            <TooltipTrigger render={
+              <button
+                onClick={loading ? stop : () => void send()}
+                disabled={!loading && !input.trim()}
+                aria-label={loading ? "停止" : "发送"}
+                className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:opacity-40"
+              />
+            }>
+              {loading ? (
+                <Stop className="size-4" weight="fill" />
+              ) : (
+                <PaperPlaneTilt className="size-4" weight="fill" />
+              )}
+            </TooltipTrigger>
+            <TooltipContent>{loading ? "停止" : "发送"}</TooltipContent>
+          </Tooltip>
         </div>
         <p className="mt-1.5 text-center text-[10px] text-muted-foreground/50">
           框选文字后点「问 AI」可引用到对话

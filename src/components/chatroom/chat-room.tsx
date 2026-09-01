@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowBendUpLeft,
   ArrowRight,
   ChatsCircle,
   PaperPlaneTilt,
@@ -20,6 +21,14 @@ import { AppAvatar } from "@/components/ui/app-avatar";
 import { MarkdownRenderer } from "@/components/ai/markdown-renderer";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
+/** 被引用消息的快照（服务端广播时带出，无需回查） */
+interface ReplyTo {
+  id: string;
+  userId: string | null;
+  userName: string | null;
+  content: string;
+}
+
 interface ChatMessage {
   id: string;
   userId: string | null;
@@ -30,6 +39,8 @@ interface ChatMessage {
   createdAt: string;
   /** 两个雨宝：gentle = 温柔宝（粉色头像），snarky = 嘴欠宝（雨宝） */
   aiRole?: "gentle" | "snarky";
+  /** 引用回复：被引用消息快照；普通消息为 null */
+  replyTo?: ReplyTo | null;
 }
 
 type ServerMessage =
@@ -59,6 +70,14 @@ function formatTime(iso: string): string {
   });
 }
 
+// 找到光标前一个可展开的 @（无论它在句首、句中还是句尾），且到光标为止只允许空格
+function findActiveMention(value: string, caret: number): number | null {
+  const before = value.slice(0, caret);
+  const m = before.match(/@(\s*)$/);
+  if (!m) return null;
+  return before.length - m[1].length - 1;
+}
+
 function senderKey(m: ChatMessage): string {
   // 温柔宝/嘴欠宝按各自虚拟用户分组，当成两个不同用户，不互相合并
   if (m.role === "assistant") {
@@ -74,6 +93,7 @@ export function ChatRoom() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionAt, setMentionAt] = useState<number | null>(null);
   const [online, setOnline] = useState(0);
   const [connected, setConnected] = useState(false);
   const [myId, setMyId] = useState<string | null>(null);
@@ -84,6 +104,10 @@ export function ChatRoom() {
   const [atBottom, setAtBottom] = useState(true);
   // 上滑阅读期间漏掉的新消息数
   const [newCount, setNewCount] = useState(0);
+  // 正在引用回复的目标消息（输入框上方显示引用条）
+  const [replyTarget, setReplyTarget] = useState<ReplyTo | null>(null);
+  // 已读过的「对我的回复」消息 id（localStorage 持久化，跨会话不重复提醒）
+  const [seenReplyIds, setSeenReplyIds] = useState<Set<string>>(new Set());
 
   const wsRef = useRef<WebSocket | null>(null);
   // 拉取历史期间通过 WebSocket 实时到达的消息，整体替换后补回，避免被冲掉
@@ -94,6 +118,11 @@ export function ChatRoom() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const atBottomRef = useRef(true);
   const myIdRef = useRef<string | null>(null);
+
+  // 统一把光标放回输入框，供打开弹窗、回复、发送、取消引用等场景复用
+  const focusInput = useCallback(() => {
+    inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     openRef.current = open;
@@ -123,8 +152,15 @@ export function ChatRoom() {
             createdAt: string;
             aiRole?: string | null;
             user?: { name: string | null; image: string | null } | null;
+            replyTo?: {
+              id: string;
+              userId: string | null;
+              userName: string | null;
+              content: string;
+            } | null;
           }) => {
             const role = m.role as ChatMessage["role"];
+            const replyTo = m.replyTo ?? null;
             if (role !== "assistant") {
               return {
                 id: m.id,
@@ -134,6 +170,7 @@ export function ChatRoom() {
                 role,
                 content: m.content,
                 createdAt: m.createdAt,
+                replyTo,
               };
             }
             // AI 消息：优先用数据库的虚拟 userId（新消息已落库）；旧消息按 aiRole / 用户名兜底
@@ -150,6 +187,7 @@ export function ChatRoom() {
               content: m.content,
               createdAt: m.createdAt,
               aiRole: isGentle ? "gentle" : "snarky",
+              replyTo,
             };
           }
         );
@@ -199,6 +237,14 @@ export function ChatRoom() {
       case "ready":
         setMyId(msg.user.id);
         myIdRef.current = msg.user.id;
+        // 同步 localStorage 里该用户已读过的回复 id（跨会话不重复提醒）
+        try {
+          const raw = localStorage.getItem(`chatroom:seen-replies:${msg.user.id}`);
+          const arr = raw ? (JSON.parse(raw) as unknown) : [];
+          setSeenReplyIds(new Set(Array.isArray(arr) ? (arr as string[]) : []));
+        } catch {
+          /* 解析失败当没看过 */
+        }
         break;
       case "presence":
         setOnline(msg.online);
@@ -316,6 +362,89 @@ export function ChatRoom() {
     }
   }
 
+  // 平滑滚动到某条消息（垂直居中）；消息行带 data-mid，直接查 DOM
+  function scrollToMessage(id: string) {
+    const el = scrollRef.current;
+    if (!el) return;
+    const target = el.querySelector<HTMLElement>(`[data-mid="${id}"]`);
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const cRect = el.getBoundingClientRect();
+    el.scrollTo({
+      top:
+        el.scrollTop +
+        (rect.top - cRect.top) -
+        (el.clientHeight - target.clientHeight) / 2,
+      behavior: "smooth",
+    });
+  }
+
+  // 把「对我的回复」标记为已读（写 state + 持久化）
+  const markSeen = useCallback((ids: string[]) => {
+    if (ids.length === 0) return;
+    setSeenReplyIds((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (!next.has(id)) {
+          next.add(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, []);
+
+  // 已读集合变化时写回 localStorage（上限 300，避免无限膨胀）
+  useEffect(() => {
+    if (!myId) return;
+    const key = `chatroom:seen-replies:${myId}`;
+    try {
+      localStorage.setItem(key, JSON.stringify([...seenReplyIds].slice(-300)));
+    } catch {
+      /* 隐私模式等写失败忽略 */
+    }
+  }, [seenReplyIds, myId]);
+
+  // 待提醒队列 = 对我的回复且未读过（按时间升序，展示时取最新一条）
+  const pendingReplies = useMemo(() => {
+    if (!myId) return [];
+    return messages.filter(
+      (m) =>
+        m.replyTo?.userId === myId &&
+        m.userId !== myId &&
+        !seenReplyIds.has(m.id)
+    );
+  }, [messages, myId, seenReplyIds]);
+  const latestReply =
+    pendingReplies.length > 0
+      ? pendingReplies[pendingReplies.length - 1]
+      : null;
+
+  // 滚动感知消除：回复了我 的消息行进入可视区 → 标记已读 → 提示消失
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !open) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const seen: string[] = [];
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const mid = (entry.target as HTMLElement).dataset.mid;
+            if (mid) seen.push(mid);
+          }
+        }
+        markSeen(seen);
+      },
+      { root: el, threshold: 0.2 }
+    );
+    // 已 seen 的也会被观察，markSeen 幂等，无副作用
+    el.querySelectorAll<HTMLElement>('[data-reply-to-me="true"]').forEach((node) =>
+      observer.observe(node)
+    );
+    return () => observer.disconnect();
+  }, [open, messages.length, myId, markSeen]);
+
   // 用户在消息区滚动：离开底部 → 停止自动滚动；回到底部 → 清空未读气泡
   function handleScroll() {
     const el = scrollRef.current;
@@ -332,7 +461,10 @@ export function ChatRoom() {
   // 每次打开弹窗：等入场动画结束、容器布局稳定后滚到底部
   useEffect(() => {
     if (!open) return;
-    const t = setTimeout(() => scrollToBottom(), 160);
+    const t = setTimeout(() => {
+      scrollToBottom();
+      inputRef.current?.focus();
+    }, 160);
     return () => clearTimeout(t);
   }, [open]);
 
@@ -363,20 +495,30 @@ export function ChatRoom() {
         type: "message",
         clientId,
         content,
+        replyToId: replyTarget?.id ?? null,
       })
     );
     setInput("");
-    inputRef.current?.focus();
+    setReplyTarget(null);
+    focusInput();
   }
 
   function selectMention(target: "gentle" | "snarky") {
-    setInput((prev) =>
-      prev.replace(/@$/, target === "gentle" ? "@温柔宝 " : "@嘴欠宝 ")
-    );
-    inputRef.current?.focus();
+    if (mentionAt === null) return;
+    const mention = target === "gentle" ? "@温柔宝" : "@嘴欠宝";
+    const insertAt = mentionAt;
+    setInput((prev) => {
+      if (prev[insertAt] !== "@") return prev;
+      return prev.slice(0, insertAt) + mention + " " + prev.slice(insertAt + 1);
+    });
+    setMentionAt(null);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(insertAt + mention.length + 1, insertAt + mention.length + 1);
+    });
   }
 
-  const showMention = input.endsWith("@");
+  const showMention = mentionAt !== null;
 
   return (
     <>
@@ -503,13 +645,30 @@ export function ChatRoom() {
                         new Date(m.createdAt).getTime() -
                           new Date(prev.createdAt).getTime() >
                           5 * 60 * 1000;
+                      const isMine = m.userId !== null && m.userId === myId;
+                      // 对「我」的引用回复（用于滚动感知标记已读）
+                      const isReplyToMe =
+                        m.replyTo?.userId != null &&
+                        m.replyTo.userId === myId &&
+                        m.userId !== myId;
                       return (
                         <MessageRow
                           key={m.id}
                           message={m}
-                          isMine={m.userId !== null && m.userId === myId}
+                          isMine={isMine}
                           grouped={Boolean(sameSender && !tooFarApart)}
                           isFirst={i === 0}
+                          replyToMe={isReplyToMe}
+                          onReply={() => {
+                            setReplyTarget({
+                              id: m.id,
+                              userId: m.userId,
+                              userName: m.userName,
+                              content: m.content,
+                            });
+                            focusInput();
+                          }}
+                          onJumpTo={scrollToMessage}
                         />
                       );
                     })}
@@ -575,13 +734,55 @@ export function ChatRoom() {
                       </button>
                     </div>
                   )}
-                  <div className="flex items-end gap-2 rounded-2xl border border-border bg-foreground/[0.04] px-3 py-2 transition-colors focus-within:border-primary/40">
+                  <div className="rounded-2xl border border-border bg-foreground/[0.04] px-2.5 py-2 transition-colors focus-within:border-primary/40">
+                    {/* 正在回复的目标消息引用条 */}
+                    {replyTarget && (
+                      <div className="mb-2 flex items-center gap-2.5 rounded-lg border border-primary/20 bg-primary/[0.06] px-2.5 py-1.5">
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <ArrowBendUpLeft className="size-3.5" weight="fill" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-semibold text-primary">
+                            引用 {replyTarget.userName ?? "用户"}
+                          </span>
+                          <p className="truncate text-[11px] leading-snug text-muted-foreground/80">
+                            {replyTarget.content}
+                          </p>
+                        </div>
+                        <Tooltip>
+                          <TooltipTrigger render={
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyTarget(null);
+                                focusInput();
+                              }}
+                              className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
+                              aria-label="取消回复"
+                            />
+                          }>
+                            <X className="size-3.5" />
+                          </TooltipTrigger>
+                          <TooltipContent>取消回复</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )}
+                    <div className="flex items-end gap-2">
                     <textarea
                       ref={inputRef}
                       value={input}
-                      onChange={(e) => setInput(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setInput(value);
+                        setMentionAt(findActiveMention(value, e.target.selectionStart ?? value.length));
+                      }}
+                      onSelect={(e) =>
+                        setMentionAt(
+                          findActiveMention(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)
+                        )
+                      }
                       onKeyDown={(e) => {
-                        if (input.endsWith("@")) {
+                        if (mentionAt !== null) {
                           // @ 面板：↑/↓ 切换高亮，Enter 选中当前项
                           if (e.key === "ArrowDown") {
                             e.preventDefault();
@@ -621,6 +822,7 @@ export function ChatRoom() {
                       </TooltipTrigger>
                       <TooltipContent>发送</TooltipContent>
                     </Tooltip>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -638,6 +840,18 @@ export function ChatRoom() {
                 className="absolute bottom-18 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg ring-1 ring-black/10 transition-transform hover:scale-105"
               >
                 {newCount} 条新消息
+              </button>
+            )}
+
+            {/* 被回复提醒：待看到的那条回复消息进入可视区后自动消失；点击定位到该消息 */}
+            {latestReply && (
+              <button
+                type="button"
+                onClick={() => scrollToMessage(latestReply.id)}
+                className="absolute bottom-36 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg ring-1 ring-black/10 transition-transform hover:scale-105"
+              >
+                <ArrowBendUpLeft className="size-3.5" weight="fill" />
+                {latestReply.userName ?? "有人"} 回复了你
               </button>
             )}
           </div>
@@ -700,11 +914,20 @@ function MessageRow({
   isMine,
   grouped,
   isFirst,
+  replyToMe,
+  onReply,
+  onJumpTo,
 }: {
   message: ChatMessage;
   isMine: boolean;
   grouped: boolean;
   isFirst: boolean;
+  /** 是否是对「我」的引用回复（用于滚动感知标记已读） */
+  replyToMe?: boolean;
+  /** 点「回复」：进入引用回复状态 */
+  onReply: (m: ChatMessage) => void;
+  /** 点被引用预览条：定位到原消息 */
+  onJumpTo: (id: string) => void;
 }) {
   if (message.role === "system") {
     return (
@@ -722,31 +945,33 @@ function MessageRow({
 
   return (
     <div
+      data-mid={message.id}
+      data-reply-to-me={replyToMe ? "true" : undefined}
       className={cn(
-        "flex items-start gap-2.5",
+        "group relative flex items-start gap-2.5",
         isMine ? "flex-row-reverse" : "flex-row",
         isFirst ? "" : grouped ? "mt-1" : "mt-5"
       )}
     >
       {/* 头像 */}
       {isAI ? (
-        // 雨宝 AI 专用图标：圆形实色底 + 对比色闪闪星
-        // self-start 覆盖父级 items-end，让头像对齐到内容顶部（名字行起点），避免错位
-        <div
-          aria-hidden="true"
-          className={cn(
-            "relative flex self-start size-8 shrink-0 items-center justify-center",
-            "rounded-full",
-            "mt-1",
-            isGentle
-              ? // 温柔宝：头像背景固定淡粉，不随主题变化
-                "bg-pink-200 ring-1 ring-pink-200/60 shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset,0_4px_14px_rgba(0,0,0,0.16),0_0_14px_rgba(244,114,182,0.3)] text-pink-900"
-              : "bg-primary ring-1 ring-primary/40 shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_14px_rgba(0,0,0,0.22),0_0_14px_color-mix(in_oklab,var(--color-primary)_35%,transparent)] text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]"
-          )}
-          title={isGentle ? "温柔宝" : "嘴欠宝"}
-        >
-          <Sparkle className="size-[20px]" weight="fill" />
-        </div>
+        <Tooltip>
+          <TooltipTrigger render={
+            <div
+              aria-hidden="true"
+              className={cn(
+                "relative flex self-start size-8 shrink-0 items-center justify-center",
+                "rounded-full mt-1",
+                isGentle
+                  ? "bg-pink-200 ring-1 ring-pink-200/60 shadow-[0_0_0_1px_rgba(255,255,255,0.5)_inset,0_4px_14px_rgba(0,0,0,0.16),0_0_14px_rgba(244,114,182,0.3)] text-pink-900"
+                  : "bg-primary ring-1 ring-primary/40 shadow-[0_0_0_1px_rgba(255,255,255,0.22)_inset,0_4px_14px_rgba(0,0,0,0.22),0_0_14px_color-mix(in_oklab,var(--color-primary)_35%,transparent)] text-[color:color-mix(in_oklab,var(--color-primary-foreground)_55%,white)]"
+              )}
+            />
+          }>
+            <Sparkle className="size-[20px]" weight="fill" />
+          </TooltipTrigger>
+          <TooltipContent>{isGentle ? "温柔宝" : "嘴欠宝"}</TooltipContent>
+        </Tooltip>
       ) : (
         <AppAvatar
           image={message.image}
@@ -756,13 +981,14 @@ function MessageRow({
         />
       )}
 
-      {/* 内容 */}
+      {/* 内容列 */}
       <div
         className={cn(
-          "flex min-w-0 max-w-[75%] flex-col",
+          "flex min-w-0 max-w-[78%] flex-col",
           isMine && "items-end"
         )}
       >
+        {/* 名字 + 时间 */}
         {!grouped && (
           <div
             className={cn(
@@ -784,35 +1010,111 @@ function MessageRow({
             </span>
           </div>
         )}
+
+        {/* 气泡 + 回复按钮（inline 并排） */}
         <div
-          data-bubble={isAI ? "ai" : isMine ? "user" : "other"}
           className={cn(
-            "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
-            isAI
-              ? "rounded-bl-sm bg-foreground/[0.06] text-foreground/90 ring-1 ring-foreground/[0.06]"
-              : isMine
-                ? "rounded-br-sm bg-primary text-primary-foreground"
-                : "rounded-bl-sm bg-foreground/[0.08] text-foreground/90"
+            "flex items-center gap-1.5",
+            isMine ? "flex-row-reverse" : "flex-row"
           )}
         >
-          {message.content ? (
-            <>
-              {isAI ? (
-                <MarkdownRenderer content={message.content} />
+          {/* 气泡 */}
+          <div
+            data-bubble={isAI ? "ai" : isMine ? "user" : "other"}
+            className={cn(
+              "min-w-0 rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
+              isAI
+                ? "rounded-bl-sm bg-foreground/[0.06] text-foreground/90 ring-1 ring-foreground/[0.06]"
+                : isMine
+                  ? "rounded-br-sm bg-primary text-primary-foreground"
+                  : "rounded-bl-sm bg-foreground/[0.08] text-foreground/90"
+            )}
+          >
+            {/* 被引用消息预览：外框包住内框，引用条作为独立内框嵌在气泡里 */}
+            {message.replyTo && (
+              <button
+                type="button"
+                onClick={() => onJumpTo(message.replyTo!.id)}
+                className={cn(
+                  "mb-2 flex w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors",
+                  isMine
+                    ? "border-primary-foreground/20 bg-primary-foreground/10 hover:bg-primary-foreground/[0.14]"
+                    : "border-primary/20 bg-primary/[0.06] hover:bg-primary/[0.1]"
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full",
+                    isMine
+                      ? "bg-primary-foreground/15 text-primary-foreground"
+                      : "bg-primary/10 text-primary"
+                  )}
+                >
+                  <ArrowBendUpLeft className="size-3" weight="fill" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span
+                    className={cn(
+                      "block text-[11px] font-semibold",
+                      isMine ? "text-primary-foreground/90" : "text-primary"
+                    )}
+                  >
+                    引用 {message.replyTo.userName ?? "用户"}
+                  </span>
+                  <span
+                    className={cn(
+                      "block truncate text-[11px] leading-snug",
+                      isMine ? "text-primary-foreground/60" : "text-foreground/60"
+                    )}
+                  >
+                    {message.replyTo.content}
+                  </span>
+                </span>
+              </button>
+            )}
+
+            <div>
+              {message.content ? (
+                <>
+                  {isAI ? (
+                    <MarkdownRenderer content={message.content} />
+                  ) : (
+                    message.content
+                  )}
+                  {isStreaming && (
+                    <span className="ml-0.5 inline-block h-3.5 w-[2px] animate-pulse bg-current align-text-bottom" />
+                  )}
+                </>
               ) : (
-                message.content
+                <span className="flex items-center gap-0.5 text-foreground/50">
+                  <span className="animate-bounce">●</span>
+                  <span className="animate-bounce [animation-delay:120ms]">●</span>
+                  <span className="animate-bounce [animation-delay:240ms]">●</span>
+                </span>
               )}
-              {isStreaming && (
-                <span className="ml-0.5 inline-block h-3.5 w-[2px] animate-pulse bg-current align-text-bottom" />
-              )}
-            </>
-          ) : (
-            <span className="flex items-center gap-0.5 text-foreground/50">
-              <span className="animate-bounce">●</span>
-              <span className="animate-bounce [animation-delay:120ms]">●</span>
-              <span className="animate-bounce [animation-delay:240ms]">●</span>
-            </span>
-          )}
+            </div>
+          </div>
+
+          {/* 回复按钮：桌面 hover 显现，移动端常驻，避免太隐晦 */}
+          <Tooltip>
+            <TooltipTrigger render={
+              <button
+                type="button"
+                onClick={() => onReply(message)}
+                aria-label="回复"
+                className={cn(
+                  "flex size-7 shrink-0 items-center justify-center rounded-full",
+                  "border border-border/80 bg-background/85 text-muted-foreground/70 shadow-sm backdrop-blur",
+                  "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
+                  "transition-all duration-150 hover:border-primary/25 hover:bg-primary/10 hover:text-primary",
+                  "focus-visible:ring-1 focus-visible:ring-primary/40"
+                )}
+              />
+            }>
+              <ArrowBendUpLeft className="size-4" weight="fill" />
+            </TooltipTrigger>
+            <TooltipContent>回复</TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>

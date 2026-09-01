@@ -39,6 +39,8 @@ export interface ModelEntry {
   tier: ModelTier;
   /** 免费额度到期（元信息，不参与逻辑；实际以 403 为准） */
   freeQuotaEnd?: string;
+  /** 免费额度已用完（人工标记，见「阿里云大语言模型.txt」额度盘点；调用前直接跳过，不再试 403） */
+  exhausted?: boolean;
 }
 
 const PROVIDER_CONFIG: Record<ModelProvider, { baseURL: string; apiKey: string }> = {
@@ -58,14 +60,28 @@ const PROVIDER_CONFIG: Record<ModelProvider, { baseURL: string; apiKey: string }
 
 // ── HIGH 档（agent / 文档 studio / 后台规划）：agnes 免费优先，不可用/额度耗尽降级阿里云 ──
 const HIGH_CHAIN: ModelEntry[] = [
+  // 免费优先（agnes）
   { modelName: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", provider: "agnes", modelType: "general", tier: "high" },
-  { modelName: "qwen3.7-max-2026-06-08", displayName: "通义千问 3.7 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
-  { modelName: "deepseek-v4-pro-0813", displayName: "DeepSeek V4 Pro", provider: "aliyun", modelType: "general", thinking: true, tier: "high", freeQuotaEnd: "2026-11-07" },
-  { modelName: "qwen3-max-2026-01-23", displayName: "通义千问 3 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
-  { modelName: "qwen3.7-plus-2026-05-26", displayName: "通义千问 3.7 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
-  { modelName: "deepseek-v3.2", displayName: "DeepSeek V3.2", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
-  { modelName: "qwen3.5-plus-2026-04-20", displayName: "通义千问 3.5 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
-  { modelName: "qwen-plus-2025-12-01", displayName: "通义千问 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+
+  // 阿里云百炼：每个快照独立免费额度，按强度从高到低排队，403 后自动降级下一个
+  { modelName: "qwen3.8-max", displayName: "通义千问 3.8 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "qwen3.7-max-preview", displayName: "通义千问 3.7 Max Preview", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "qwen3.7-max-2026-05-20", displayName: "通义千问 3.7 Max (05-20)", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "qwen3.6-max-preview", displayName: "通义千问 3.6 Max Preview", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "deepseek-v3.1", displayName: "DeepSeek V3.1", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "glm-5.2", displayName: "GLM-5.2", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "kimi-k2.6", displayName: "Kimi K2.6", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "qwen3.6-plus", displayName: "通义千问 3.6 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+  { modelName: "qwen3.5-plus-2026-02-15", displayName: "通义千问 3.5 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+
+  // 已用完（免费额度耗尽，403 后不再恢复；保留记录便于查账，exhausted=true 直接跳过）
+  { modelName: "qwen3.7-max-2026-06-08", displayName: "通义千问 3.7 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
+  { modelName: "deepseek-v4-pro-0813", displayName: "DeepSeek V4 Pro", provider: "aliyun", modelType: "general", thinking: true, tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
+  { modelName: "qwen3-max-2026-01-23", displayName: "通义千问 3 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
+  { modelName: "qwen3.7-plus-2026-05-26", displayName: "通义千问 3.7 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
+  { modelName: "deepseek-v3.2", displayName: "DeepSeek V3.2", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
+  { modelName: "qwen3.5-plus-2026-04-20", displayName: "通义千问 3.5 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
+  { modelName: "qwen-plus-2025-12-01", displayName: "通义千问 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
 ];
 
 // ── LOW 档（聊天室/标题/记忆/拆任务）：agnes 免费优先，额度用完降级阿里云 flash ──
@@ -152,6 +168,7 @@ export function isQuotaError(err: unknown): boolean {
 export function getChain(tier: ModelTier): ModelEntry[] {
   const chain = tier === "high" ? HIGH_CHAIN : LOW_CHAIN;
   return chain.filter((e) => {
+    if (e.exhausted) return false; // 人工标记「已用完」：直接跳过，不再试 403
     if (!isModelAvailable(e.modelName)) return false;
     if (!PROVIDER_CONFIG[e.provider].apiKey) return false;
     return true;
@@ -170,6 +187,7 @@ export function pickModel(tier: ModelTier): ModelEntry {
 /** 取 embedding 档可用候选链（过滤已耗尽 / 未配置 key 的 provider） */
 function getEmbeddingChain(): ModelEntry[] {
   return EMBEDDING_CHAIN.filter((e) => {
+    if (e.exhausted) return false; // 人工标记「已用完」：直接跳过
     if (!isModelAvailable(e.modelName)) return false;
     if (!PROVIDER_CONFIG[e.provider].apiKey) return false;
     return true;

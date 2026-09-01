@@ -2564,6 +2564,7 @@ export type StudyRecordScalarFieldEnum = (typeof StudyRecordScalarFieldEnum)[key
 export const AvatarChangeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  image: 'image',
   createdAt: 'createdAt'
 } as const
 
@@ -2775,6 +2776,7 @@ export const ChatMessageScalarFieldEnum = {
   role: 'role',
   content: 'content',
   aiRole: 'aiRole',
+  replyToId: 'replyToId',
   createdAt: 'createdAt'
 } as const
 

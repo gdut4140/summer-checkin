@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { USER_AVATAR_PRESETS, type UserAvatarPreset } from "@/lib/avatar-presets";
 import { compressAvatarImage } from "@/lib/avatar-compress";
 import { Button } from "@/components/ui/button";
 import { UploadSimple, Image } from "@phosphor-icons/react";
+import { AppAvatar } from "@/components/ui/app-avatar";
 
 interface Props {
   current: string | null;
@@ -21,25 +22,57 @@ export function AvatarPicker({ current, onSelect }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [previous, setPrevious] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleSelect(p: UserAvatarPreset) {
-    if (p.id === current) return;
-    setSaving(p.id);
+  // 拉取最近一次被替换下来的头像（没有则不显示）
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/user/avatar", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && typeof d?.previous === "string") setPrevious(d.previous);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // 换头像成功后重新拉一次，让「上次」头像（无论是预设还是上传）立刻出现
+  async function refreshPrevious() {
+    try {
+      const res = await fetch("/api/user/avatar", { cache: "no-store" });
+      if (!res.ok) return;
+      const d = (await res.json()) as { previous?: string | null };
+      setPrevious(typeof d?.previous === "string" ? d.previous : null);
+    } catch {
+      // 静默
+    }
+  }
+
+  async function applyAvatar(id: string) {
+    if (id === current) return;
+    setSaving(id);
     try {
       const res = await fetch("/api/user/avatar", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatar: p.id }),
+        body: JSON.stringify({ avatar: id }),
       });
       if (!res.ok) throw new Error("Failed");
-      onSelect(p.id);
+      onSelect(id);
+      void refreshPrevious();
       toast.success("头像已更新");
     } catch {
       toast.error("保存失败");
     } finally {
       setSaving(null);
     }
+  }
+
+  function handleSelect(p: UserAvatarPreset) {
+    void applyAvatar(p.id);
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -94,6 +127,7 @@ export function AvatarPicker({ current, onSelect }: Props) {
       if (!patchRes.ok) throw new Error("patch");
 
       onSelect(publicUrl);
+      void refreshPrevious();
       setFile(null);
       setPreview(null);
       toast.success("头像已更新");
@@ -147,6 +181,28 @@ export function AvatarPicker({ current, onSelect }: Props) {
               </button>
             );
           })}
+          {previous && previous !== current && (
+            <button
+              type="button"
+              onClick={() => void applyAvatar(previous)}
+              disabled={!!saving}
+              className={
+                "relative aspect-square overflow-hidden rounded-2xl ring-1 ring-primary/35 transition-all duration-200 ease-out " +
+                (saving === previous
+                  ? "animate-pulse"
+                  : "hover:scale-[1.06] hover:ring-2 hover:ring-primary shadow-sm hover:shadow-md")
+              }
+            >
+              <AppAvatar
+                image={previous}
+                name="上一次头像"
+                className="h-full w-full rounded-2xl"
+              />
+              <span className="absolute inset-x-0 bottom-0 bg-black/45 py-0.5 text-center text-[10px] font-medium text-white">
+                上次
+              </span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4 py-4">

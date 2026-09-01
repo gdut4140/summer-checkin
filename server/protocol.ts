@@ -11,7 +11,7 @@ export type AiRole = "gentle" | "snarky";
 
 // ---- 客户端 → 服务端 ----
 export type ClientMessage =
-  | { type: "message"; clientId: string; content: string }
+  | { type: "message"; clientId: string; content: string; replyToId?: string | null }
   | { type: "ping" };
 
 // ---- 服务端 → 客户端 ----
@@ -25,6 +25,14 @@ export type ServerMessage =
   | { type: "pong" }
   | { type: "error"; code: string; reason: string };
 
+/** 被引用消息的快照（广播时随 DTO 带出，前端无需回查） */
+export interface ReplyToDTO {
+  id: string;
+  userId: string | null;
+  userName: string | null;
+  content: string;
+}
+
 export interface ChatMessageDTO {
   id: string;
   userId: string | null;
@@ -34,13 +42,16 @@ export interface ChatMessageDTO {
   role: MessageRole;
   content: string;
   createdAt: string;
+  /** 引用回复的被引用消息快照；普通消息为 null */
+  replyTo: ReplyToDTO | null;
 }
 
 // 将 DB 记录转为前端 DTO
 export function toDTO(
   msg: { id: string; userId: string | null; role: string; content: string; createdAt: Date },
   userName: string | null,
-  image: string | null = null
+  image: string | null = null,
+  replyTo: ReplyToDTO | null = null
 ): ChatMessageDTO {
   const role: MessageRole =
     msg.role === "assistant" || msg.role === "system" ? (msg.role as MessageRole) : "user";
@@ -52,5 +63,6 @@ export function toDTO(
     role,
     content: msg.content,
     createdAt: msg.createdAt.toISOString(),
+    replyTo,
   };
 }
