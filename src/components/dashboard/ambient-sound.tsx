@@ -55,6 +55,8 @@ export function AmbientSound() {
   const cleanupFallbackRef = useRef<(() => void) | null>(null);
   const volumeRef = useRef(0.3);
   volumeRef.current = volume;
+  // 记录「离开页面前是否在播放」，回到页面时据此决定是否恢复
+  const wasPlayingRef = useRef(false);
 
   // 1) 创建音频实例（仅一次）
   useEffect(() => {
@@ -102,6 +104,28 @@ export function AmbientSound() {
     cleanupFallbackRef.current?.();
     cleanupFallbackRef.current = playWithUserGestureFallback(audio);
   }, [scene]);
+
+  // 3) 离开站点（切走标签页/最小化）时暂停环境音，回到页面恢复 —— 环境音不该在用户离开时继续响
+  useEffect(() => {
+    const onVisibility = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (document.hidden) {
+        // 仅在确实在播放时记录并暂停（静默场景/已暂停的不动）
+        wasPlayingRef.current = !audio.paused && !audio.ended && !!audio.src;
+        if (wasPlayingRef.current) audio.pause();
+      } else if (wasPlayingRef.current) {
+        // 回到页面：离开前在播就恢复，音量仍按用户设定（音量 0 则无声地续播，等价于没离开过）
+        wasPlayingRef.current = false;
+        audio.play().catch(() => { });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      wasPlayingRef.current = false;
+    };
+  }, []);
 
   // 音量变化即同步到 audio
   function changeVolume(v: number) {

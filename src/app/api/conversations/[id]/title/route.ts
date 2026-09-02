@@ -48,7 +48,7 @@ export async function PATCH(
           messages: [
             {
               role: "system",
-              content: `根据对话历史生成标题，不超过20字，只输出标题本身。`,
+              content: `根据对话历史生成标题，不超过20字，只输出标题本身。不暴露模型信息、API Key、用户隐私等敏感信息。`,
             },
             { role: "user", content: `请为以下对话生成标题：\n\n${messagesSummary}` },
           ],

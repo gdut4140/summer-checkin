@@ -5,7 +5,7 @@ import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
 import { UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { prisma } from "./db";
 import { broadcast } from "./room";
-import { toDTO, type AiRole } from "./protocol";
+import { toDTO, type AiRole, type ReplyToDTO } from "./protocol";
 import { config } from "./config";
 
 // ── 两个雨宝：温柔宝（gentle）/ 嘴欠宝（snarky） ──
@@ -51,10 +51,25 @@ const AI_USERS: Record<AiRole, { id: string; name: string; email: string }> = {
 /**
  * 处理 @雨宝 触发：取最近全局消息作上下文 → 流式生成 → 落库 → 广播
  */
-export async function handleAI(prompt: string, userId?: string, aiRole: AiRole = "snarky") {
+export async function handleAI(
+  prompt: string,
+  userId?: string,
+  aiRole: AiRole = "snarky",
+  replyTo?: ReplyToDTO | null,
+  senderName?: string
+) {
   const cfg = AI_ROLE_CONFIG[aiRole];
   // 每次 AI 调用一个唯一 id，前端用它在多个并发流式中定位各自的占位气泡
   const requestId = `ai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+  // 引用回复：明确点名“原作者是谁/转给人是谁”，避免模型把 @ 里的人和引用作者搞混
+  const quote =
+    replyTo?.content && replyTo.content.length > 400
+      ? replyTo.content.slice(0, 400) + "…"
+      : replyTo?.content;
+  const userContent = quote
+    ? `有人@了你。${senderName ? `${senderName} 转给你看一条消息` : "有人转给你看一条消息"}，发送者是【${replyTo?.userName ?? "用户"}】：\n> ${quote}\n\n这条消息是【${replyTo?.userName ?? "用户"}】发的。请回应：${prompt}`
+    : `有人@了你：${prompt}`;
 
   // 确保两个虚拟 AI 用户存在（幂等），AI 消息才有真实 userId
   try {
@@ -99,7 +114,7 @@ export async function handleAI(prompt: string, userId?: string, aiRole: AiRole =
         model,
         system: cfg.prompt,
         // 明确告知 AI 它被 @ 了，让它知道自己是被点名的那个（@ 前缀已在提取时去掉）
-        messages: [...context, { role: "user" as const, content: `有人@了你：${prompt}` }],
+        messages: [...context, { role: "user" as const, content: userContent }],
       }),
       // 聊天室是交互式面：有 userId 才记账 + 限流；匿名不拦不记
       userId ? { userId, surface: "chatroom", enforce: true } : undefined

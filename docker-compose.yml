@@ -49,6 +49,7 @@ services:
       OSS_REGION: ${OSS_REGION}
       OSS_PUBLIC_BASE_URL: ${OSS_PUBLIC_BASE_URL}
       HOSTNAME: "0.0.0.0"
+      AI_TOKEN_LIMIT: ${AI_TOKEN_LIMIT:-200000}
     volumes:
       - knowledge_data:/app/knowledge
     ports:

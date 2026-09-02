@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowDown,
   ArrowBendUpLeft,
   ArrowRight,
   ChatsCircle,
@@ -828,8 +829,8 @@ export function ChatRoom() {
               </div>
             </section>
 
-            {/* 上滑阅读期间漏掉新消息：主题色气泡，点击回到底部 */}
-            {!atBottom && newCount > 0 && (
+            {/* 不在底部时一键返回：有未读显示条数，没有未读显示“回到底部” */}
+            {!atBottom && (
               <button
                 type="button"
                 onClick={() => {
@@ -839,7 +840,14 @@ export function ChatRoom() {
                 }}
                 className="absolute bottom-18 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg ring-1 ring-black/10 transition-transform hover:scale-105"
               >
-                {newCount} 条新消息
+                {newCount > 0 ? (
+                  <>{newCount} 条新消息</>
+                ) : (
+                  <>
+                    <ArrowDown className="size-3.5" weight="bold" />
+                    回到底部
+                  </>
+                )}
               </button>
             )}
 

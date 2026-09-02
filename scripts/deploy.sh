@@ -7,12 +7,12 @@ set -e
 # 示例: ./scripts/deploy.sh v1.0.0
 #
 # 流程: 构建 → 导出 tar → scp 上传 → 服务器 docker load + compose up
-# 服务器: root@8.148.146.16（阿里云 ECS，可用 ECS_HOST/ECS_USER 覆盖）
+# 服务器: root@8.163.59.196（阿里云 ECS，可用 ECS_HOST/ECS_USER 覆盖）
 # 上传后务必 md5 比对，见 DEPLOYMENT-NOTES.md 坑 5
 # ============================================================
 
 VERSION="${1:-latest}"
-ECS_HOST="${ECS_HOST:-8.148.146.16}"
+ECS_HOST="${ECS_HOST:-8.163.59.196}"
 ECS_USER="${ECS_USER:-root}"
 
 echo "=== Summer Checkin 部署 (版本: $VERSION → $ECS_USER@$ECS_HOST) ==="
