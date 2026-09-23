@@ -6,46 +6,16 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
-import { prisma } from "@/lib/prisma";
 import { processKnowledgeText } from "@/lib/knowledge-upload";
+import { listKnowledgeDocs } from "@/lib/knowledge-docs";
 
 // ---- GET: 列出用户文档 ----
 export async function GET() {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // 按 sourceName 去重，每组取一条
-  const rows = await prisma.$queryRawUnsafe<
-    Array<{
-      sourceName: string;
-      sourceType: string;
-      chunkCount: number;
-      totalChars: number;
-      createdAt: string;
-    }>
-  >(
-    `SELECT
-       "sourceName",
-       "sourceType",
-       COUNT(*)::int AS "chunkCount",
-       SUM(LENGTH("content"))::int AS "totalChars",
-       MAX("createdAt") AS "createdAt"
-     FROM documentchunk
-     WHERE "userId" = $1
-     GROUP BY "sourceName", "sourceType"
-     ORDER BY MAX("createdAt") DESC`,
-    user.id
-  );
-
-  const documents = rows.map((r) => ({
-    sourceName: r.sourceName,
-    sourceType: r.sourceType,
-    chunkCount: r.chunkCount,
-    totalChars: r.totalChars,
-    createdAt: r.createdAt,
-  }));
-
-  return NextResponse.json({ documents });
+  // 与智能体的 listKnowledgeDocs 工具共用同一份查询，避免两处口径漂移
+  return NextResponse.json({ documents: await listKnowledgeDocs(user.id) });
 }
 
 // ---- POST: 上传文档 ----

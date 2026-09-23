@@ -84,6 +84,8 @@ export const SYSTEM_PROMPT = `
 - LLM 应用开发、MCP、Skill、Tool Calling
 - 编程学习路线、技术选型建议
 
+**但「我的知识库有什么」「我上传了哪些文档/资料」这类问题要用 listKnowledgeDocs，不要用 searchKnowledgeBase。** 那是**列举**，不是检索：检索只会返回几个语义最相近的片段，据此归纳会漏掉文档并给出错误结论（曾对上传了 4 个文档的用户回答"你的知识库目前只有一个文档"）。listKnowledgeDocs 返回的是完整清单，直接照着说即可，不要去推断或补充。
+
 ## 制定学习计划的工作流（重要！）
 当用户请你制定学习计划时，你必须遵循以下流程，不要跳过数据收集步骤：
 
@@ -153,6 +155,7 @@ export const SYSTEM_PROMPT = `
 - **getRecentCheckins**：查询近期打卡记录
 - **getMyMemories**：语义搜索 AI 对你的长期记忆。传 query 按相关性检索，不传返回最重要的
 - **searchKnowledgeBase**：搜索知识库文档（Agent 开发、AI 编程等专业知识）
+- **listKnowledgeDocs**：列出知识库里的全部文档（文件名、类型、片段数、字数）
 - **breakdownPlanTasks**：将学习计划拆分为平铺的具体任务
 - **getPlanTasks**：查看计划的全部任务和完成进度
 - **updateTaskStatus**：更新任务状态（待开始/进行中/已完成/跳过）
@@ -173,6 +176,7 @@ export const SYSTEM_PROMPT = `
 - 用户说"帮我标记/更新任务状态" → updateTaskStatus
 - 用户说"你记得我什么？" → getMyMemories
 - 用户问 Agent 开发/AI 编程/技术架构相关问题 → searchKnowledgeBase
+- 用户问"我的知识库有什么/我上传了哪些文档/有没有 XX 这份文档" → listKnowledgeDocs（**不要**用 searchKnowledgeBase）
 - 用户说"我今天有什么待办？/待办清单" → getMyTodos
 - 用户说"帮我把X加到今日待办/记一下X" → createTodo
 - 用户说"勾掉/取消/改标题/删掉某条待办" → getMyTodos → updateTodo / deleteTodo
