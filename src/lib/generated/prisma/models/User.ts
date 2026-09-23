@@ -33,6 +33,7 @@ export type UserMinAggregateOutputType = {
   password: string | null
   bio: string | null
   theme: string | null
+  vip: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +47,7 @@ export type UserMaxAggregateOutputType = {
   password: string | null
   bio: string | null
   theme: string | null
+  vip: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +61,7 @@ export type UserCountAggregateOutputType = {
   password: number
   bio: number
   theme: number
+  vip: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,6 +77,7 @@ export type UserMinAggregateInputType = {
   password?: true
   bio?: true
   theme?: true
+  vip?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +91,7 @@ export type UserMaxAggregateInputType = {
   password?: true
   bio?: true
   theme?: true
+  vip?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +105,7 @@ export type UserCountAggregateInputType = {
   password?: true
   bio?: true
   theme?: true
+  vip?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -186,6 +192,7 @@ export type UserGroupByOutputType = {
   password: string | null
   bio: string | null
   theme: string
+  vip: boolean
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -220,6 +227,7 @@ export type UserWhereInput = {
   password?: Prisma.StringNullableFilter<"User"> | string | null
   bio?: Prisma.StringNullableFilter<"User"> | string | null
   theme?: Prisma.StringFilter<"User"> | string
+  vip?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
@@ -252,6 +260,7 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   theme?: Prisma.SortOrder
+  vip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
@@ -287,6 +296,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringNullableFilter<"User"> | string | null
   bio?: Prisma.StringNullableFilter<"User"> | string | null
   theme?: Prisma.StringFilter<"User"> | string
+  vip?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
@@ -319,6 +329,7 @@ export type UserOrderByWithAggregationInput = {
   password?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   theme?: Prisma.SortOrder
+  vip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -338,6 +349,7 @@ export type UserScalarWhereWithAggregatesInput = {
   password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   bio?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   theme?: Prisma.StringWithAggregatesFilter<"User"> | string
+  vip?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -351,6 +363,7 @@ export type UserCreateInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -383,6 +396,7 @@ export type UserUncheckedCreateInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -415,6 +429,7 @@ export type UserUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -447,6 +462,7 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -479,6 +495,7 @@ export type UserCreateManyInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -492,6 +509,7 @@ export type UserUpdateManyMutationInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -505,6 +523,7 @@ export type UserUncheckedUpdateManyInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -518,6 +537,7 @@ export type UserCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   theme?: Prisma.SortOrder
+  vip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -531,6 +551,7 @@ export type UserMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   theme?: Prisma.SortOrder
+  vip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -544,6 +565,7 @@ export type UserMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   theme?: Prisma.SortOrder
+  vip?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -845,6 +867,7 @@ export type UserCreateWithoutSessionsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -876,6 +899,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -923,6 +947,7 @@ export type UserUpdateWithoutSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -954,6 +979,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -985,6 +1011,7 @@ export type UserCreateWithoutAccountsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1016,6 +1043,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1063,6 +1091,7 @@ export type UserUpdateWithoutAccountsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1094,6 +1123,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1125,6 +1155,7 @@ export type UserCreateWithoutPlansInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1156,6 +1187,7 @@ export type UserUncheckedCreateWithoutPlansInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1203,6 +1235,7 @@ export type UserUpdateWithoutPlansInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1234,6 +1267,7 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1265,6 +1299,7 @@ export type UserCreateWithoutPlanTasksInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1296,6 +1331,7 @@ export type UserUncheckedCreateWithoutPlanTasksInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1343,6 +1379,7 @@ export type UserUpdateWithoutPlanTasksInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1374,6 +1411,7 @@ export type UserUncheckedUpdateWithoutPlanTasksInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1405,6 +1443,7 @@ export type UserCreateWithoutTodosInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1436,6 +1475,7 @@ export type UserUncheckedCreateWithoutTodosInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1483,6 +1523,7 @@ export type UserUpdateWithoutTodosInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1514,6 +1555,7 @@ export type UserUncheckedUpdateWithoutTodosInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1545,6 +1587,7 @@ export type UserCreateWithoutCheckinsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1576,6 +1619,7 @@ export type UserUncheckedCreateWithoutCheckinsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1623,6 +1667,7 @@ export type UserUpdateWithoutCheckinsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1654,6 +1699,7 @@ export type UserUncheckedUpdateWithoutCheckinsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1685,6 +1731,7 @@ export type UserCreateWithoutStudyRecordsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1716,6 +1763,7 @@ export type UserUncheckedCreateWithoutStudyRecordsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1763,6 +1811,7 @@ export type UserUpdateWithoutStudyRecordsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1794,6 +1843,7 @@ export type UserUncheckedUpdateWithoutStudyRecordsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1825,6 +1875,7 @@ export type UserCreateWithoutConversationsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1856,6 +1907,7 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -1903,6 +1955,7 @@ export type UserUpdateWithoutConversationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -1934,6 +1987,7 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1965,6 +2019,7 @@ export type UserCreateWithoutAgentRunsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -1996,6 +2051,7 @@ export type UserUncheckedCreateWithoutAgentRunsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2043,6 +2099,7 @@ export type UserUpdateWithoutAgentRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2074,6 +2131,7 @@ export type UserUncheckedUpdateWithoutAgentRunsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2105,6 +2163,7 @@ export type UserCreateWithoutDecisionsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2136,6 +2195,7 @@ export type UserUncheckedCreateWithoutDecisionsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2183,6 +2243,7 @@ export type UserUpdateWithoutDecisionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2214,6 +2275,7 @@ export type UserUncheckedUpdateWithoutDecisionsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2245,6 +2307,7 @@ export type UserCreateWithoutMemoriesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2276,6 +2339,7 @@ export type UserUncheckedCreateWithoutMemoriesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2323,6 +2387,7 @@ export type UserUpdateWithoutMemoriesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2354,6 +2419,7 @@ export type UserUncheckedUpdateWithoutMemoriesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2385,6 +2451,7 @@ export type UserCreateWithoutAiHistoriesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2416,6 +2483,7 @@ export type UserUncheckedCreateWithoutAiHistoriesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2463,6 +2531,7 @@ export type UserUpdateWithoutAiHistoriesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2494,6 +2563,7 @@ export type UserUncheckedUpdateWithoutAiHistoriesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2525,6 +2595,7 @@ export type UserCreateWithoutDocsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2556,6 +2627,7 @@ export type UserUncheckedCreateWithoutDocsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2603,6 +2675,7 @@ export type UserUpdateWithoutDocsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2634,6 +2707,7 @@ export type UserUncheckedUpdateWithoutDocsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2665,6 +2739,7 @@ export type UserCreateWithoutDocumentsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2696,6 +2771,7 @@ export type UserUncheckedCreateWithoutDocumentsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2743,6 +2819,7 @@ export type UserUpdateWithoutDocumentsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2774,6 +2851,7 @@ export type UserUncheckedUpdateWithoutDocumentsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2805,6 +2883,7 @@ export type UserCreateWithoutKnowledgeDocsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2836,6 +2915,7 @@ export type UserUncheckedCreateWithoutKnowledgeDocsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -2883,6 +2963,7 @@ export type UserUpdateWithoutKnowledgeDocsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -2914,6 +2995,7 @@ export type UserUncheckedUpdateWithoutKnowledgeDocsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2945,6 +3027,7 @@ export type UserCreateWithoutNotificationsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -2976,6 +3059,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -3023,6 +3107,7 @@ export type UserUpdateWithoutNotificationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -3054,6 +3139,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -3085,6 +3171,7 @@ export type UserCreateWithoutSchedulesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -3116,6 +3203,7 @@ export type UserUncheckedCreateWithoutSchedulesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -3163,6 +3251,7 @@ export type UserUpdateWithoutSchedulesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -3194,6 +3283,7 @@ export type UserUncheckedUpdateWithoutSchedulesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -3225,6 +3315,7 @@ export type UserCreateWithoutChatMessagesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -3256,6 +3347,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -3303,6 +3395,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -3334,6 +3427,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -3365,6 +3459,7 @@ export type UserCreateWithoutTokenUsagesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
@@ -3396,6 +3491,7 @@ export type UserUncheckedCreateWithoutTokenUsagesInput = {
   password?: string | null
   bio?: string | null
   theme?: string
+  vip?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
@@ -3443,6 +3539,7 @@ export type UserUpdateWithoutTokenUsagesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
@@ -3474,6 +3571,7 @@ export type UserUncheckedUpdateWithoutTokenUsagesInput = {
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   theme?: Prisma.StringFieldUpdateOperationsInput | string
+  vip?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -3698,6 +3796,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   bio?: boolean
   theme?: boolean
+  vip?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -3731,6 +3830,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   bio?: boolean
   theme?: boolean
+  vip?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -3744,6 +3844,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   bio?: boolean
   theme?: boolean
+  vip?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -3757,11 +3858,12 @@ export type UserSelectScalar = {
   password?: boolean
   bio?: boolean
   theme?: boolean
+  vip?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "bio" | "theme" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "bio" | "theme" | "vip" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -3819,6 +3921,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     password: string | null
     bio: string | null
     theme: string
+    /**
+     * VIP：不受每日 AI token 限额约束（用量仍照常记账）。
+     * 这不是安全边界——它只影响 usage.ts 的限额判断，不改变任何鉴权。
+     */
+    vip: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -4271,6 +4378,7 @@ export interface UserFieldRefs {
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly bio: Prisma.FieldRef<"User", 'String'>
   readonly theme: Prisma.FieldRef<"User", 'String'>
+  readonly vip: Prisma.FieldRef<"User", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

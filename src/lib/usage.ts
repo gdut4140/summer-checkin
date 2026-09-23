@@ -22,7 +22,7 @@ export interface TodayUsage {
   used: number;
   limit: number;
   remaining: number;
-  /** 是否不限量（AI_TOKEN_LIMIT=0 或未配置时） */
+  /** 是否不限量（AI_TOKEN_LIMIT=0 或未配置时，或该用户是 VIP） */
   unlimited: boolean;
 }
 
@@ -32,19 +32,32 @@ export function usageLimit(): number {
   return Number.isFinite(raw) && raw > 0 ? raw : 0;
 }
 
+/**
+ * 由「每日限额 / 是否 VIP / 已用量」算出今天的状态（纯函数）
+ *
+ * VIP 与全局不限量（limit<=0）走同一条分支：limit 归 0、remaining 给
+ * MAX_SAFE_INTEGER，于是 assertInteractiveUsageAllowed 的 `remaining <= 0`
+ * 恒不成立。`used` 照样回传——不限额不等于不观测。
+ */
+export function buildTodayUsage(limit: number, isVip: boolean, used: number): TodayUsage {
+  if (isVip || limit <= 0) {
+    return { used, limit: 0, remaining: Number.MAX_SAFE_INTEGER, unlimited: true };
+  }
+  return { used, limit, remaining: Math.max(limit - used, 0), unlimited: false };
+}
+
 export async function getTodayUsage(userId: string): Promise<TodayUsage> {
   const limit = usageLimit();
-  const agg = await prisma.tokenUsage.aggregate({
-    where: { userId, createdAt: { gte: startOfDay(new Date()) } },
-    _sum: { totalTokens: true },
-  });
-  const used = agg._sum.totalTokens ?? 0;
-  return {
-    used,
-    limit,
-    remaining: limit > 0 ? Math.max(limit - used, 0) : Number.MAX_SAFE_INTEGER,
-    unlimited: limit <= 0,
-  };
+  const [user, agg] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { vip: true } }),
+    prisma.tokenUsage.aggregate({
+      where: { userId, createdAt: { gte: startOfDay(new Date()) } },
+      _sum: { totalTokens: true },
+    }),
+  ]);
+  // 用量始终记账（recordUsage 不动）：保留统计，也让精力条能显示真实消耗，
+  // 而不是因为它不限额就失去观测。这里只改「限额判断」这一件事。
+  return buildTodayUsage(limit, user?.vip ?? false, agg._sum.totalTokens ?? 0);
 }
 
 /** 交互式面超限检查；只剩 0 时抛 UsageLimitError */

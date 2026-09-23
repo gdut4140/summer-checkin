@@ -16,6 +16,9 @@ model User {
   password      String?
   bio           String?
   theme         String   @default("system")
+  /// VIP：不受每日 AI token 限额约束（用量仍照常记账）。
+  /// 这不是安全边界——它只影响 usage.ts 的限额判断，不改变任何鉴权。
+  vip           Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
