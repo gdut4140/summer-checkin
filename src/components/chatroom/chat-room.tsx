@@ -314,7 +314,12 @@ export function ChatRoom() {
         }
         break;
       case "error":
-        if (msg.code !== "rate_limited") toast.error(msg.reason);
+        // 限流此前被静默忽略（`if (msg.code !== "rate_limited")`），用户发太快时
+        // 消息看着发出去了、实际没人收到，且没有任何反馈。现在一律给出提示；
+        // 用固定 toast id 去重，避免连续触发时堆一屏。
+        toast.error(msg.reason, {
+          id: msg.code === "rate_limited" ? "chat-rate-limited" : "chat-error",
+        });
         break;
       default:
         break;
@@ -407,6 +412,25 @@ export function ChatRoom() {
     }
   }, [seenReplyIds, myId]);
 
+  // 把「对我的回复」中已滚进可视区的消息标记为已读 → 提示消失。
+  // 用 getBoundingClientRect 做确定性判定：弹窗有缩放/位移动画，IntersectionObserver
+  // 的观察时机不可靠，会导致偶发「滚到底部仍不消失」；滚动、打开、消息更新时都会触发。
+  const markVisibleRepliesSeen = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cRect = el.getBoundingClientRect();
+    const seen: string[] = [];
+    el.querySelectorAll<HTMLElement>('[data-reply-to-me="true"]').forEach((node) => {
+      const rect = node.getBoundingClientRect();
+      // 消息行与滚动容器可视区相交即视为已读（底部这条回复滚进来就消失）
+      if (rect.bottom > cRect.top && rect.top < cRect.bottom) {
+        const mid = node.dataset.mid;
+        if (mid) seen.push(mid);
+      }
+    });
+    markSeen(seen);
+  }, [markSeen]);
+
   // 待提醒队列 = 对我的回复且未读过（按时间升序，展示时取最新一条）
   const pendingReplies = useMemo(() => {
     if (!myId) return [];
@@ -422,29 +446,11 @@ export function ChatRoom() {
       ? pendingReplies[pendingReplies.length - 1]
       : null;
 
-  // 滚动感知消除：回复了我 的消息行进入可视区 → 标记已读 → 提示消失
+  // 打开或消息更新后立即判定一次：覆盖「初始就在底部、无需滚动即可看到」的情况
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || !open) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const seen: string[] = [];
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const mid = (entry.target as HTMLElement).dataset.mid;
-            if (mid) seen.push(mid);
-          }
-        }
-        markSeen(seen);
-      },
-      { root: el, threshold: 0.2 }
-    );
-    // 已 seen 的也会被观察，markSeen 幂等，无副作用
-    el.querySelectorAll<HTMLElement>('[data-reply-to-me="true"]').forEach((node) =>
-      observer.observe(node)
-    );
-    return () => observer.disconnect();
-  }, [open, messages.length, myId, markSeen]);
+    if (!open) return;
+    markVisibleRepliesSeen();
+  }, [open, messages, myId, markVisibleRepliesSeen]);
 
   // 用户在消息区滚动：离开底部 → 停止自动滚动；回到底部 → 清空未读气泡
   function handleScroll() {
@@ -457,6 +463,8 @@ export function ChatRoom() {
     } else {
       setAtBottom(false);
     }
+    // 滚动过程中实时判定，回复消息进入可视区即标记已读
+    markVisibleRepliesSeen();
   }
 
   // 每次打开弹窗：等入场动画结束、容器布局稳定后滚到底部
@@ -855,7 +863,10 @@ export function ChatRoom() {
             {latestReply && (
               <button
                 type="button"
-                onClick={() => scrollToMessage(latestReply.id)}
+                onClick={() => {
+                  markSeen([latestReply.id]);
+                  scrollToMessage(latestReply.id);
+                }}
                 className="absolute bottom-36 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg ring-1 ring-black/10 transition-transform hover:scale-105"
               >
                 <ArrowBendUpLeft className="size-3.5" weight="fill" />

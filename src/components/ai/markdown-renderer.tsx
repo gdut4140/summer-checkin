@@ -7,6 +7,8 @@ import remarkMath from "remark-math";
 import remarkFootnotes from "remark-footnotes";
 import remarkDeflist from "remark-deflist";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import { SANITIZE_SCHEMA } from "./markdown-sanitize-schema";
 import rehypeHighlight from "rehype-highlight";
 import rehypeKatex from "rehype-katex";
 import { CheckSquare, Square } from "@phosphor-icons/react";
@@ -27,7 +29,7 @@ interface Props {
  *  5. ```代码块 + highlight.js 语法高亮
  *  6. --- 分割线
  *  7. 链接 & 图片
- *  8. 行内 HTML（<span>, <br>, <details> 等原生透传，rehype-raw 解析）
+ *  8. 行内 HTML（<span>, <br>, <details> 等由 rehype-raw 解析，并经 rehype-sanitize 白名单过滤）
  *  9. [^note] 脚注（remark-footnotes，渲染到文末）
  * 10. 定义列表（术语 + : 解释）
  * 11. <details><summary> 折叠块（原生 HTML，由 rehype-raw 透传）
@@ -56,9 +58,11 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content }: Prop
           remarkDeflist,
           remarkGfm,
         ]}
-        // 先解析原生 HTML，再让 KaTeX 接管 math 节点，避免两者互相覆盖。
+        // 顺序关键：rehype-raw 解析原生 HTML → 立刻过净化白名单 → 再交给 KaTeX / highlight 生成受信标记。
+        // 净化夹在 raw 与 katex 之间，放最后会清掉 KaTeX 的 style / MathML。
         rehypePlugins={[
           rehypeRaw,
+          [rehypeSanitize, SANITIZE_SCHEMA],
           [rehypeKatex, { throwOnError: false }],
           rehypeHighlight,
         ]}

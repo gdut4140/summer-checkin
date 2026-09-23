@@ -101,7 +101,7 @@
 | 前端 | Next.js 16（App Router）、React 19、TypeScript、Tailwind CSS v4 |
 | 3D / 动效 | Three.js（react-three-fiber）、GSAP、Motion（按需动态加载）|
 | 后端 | Next.js API Routes、AI SDK、Prisma ORM |
-| 数据库 | PostgreSQL 16 + pgvector（向量检索）、Prisma |
+| 数据库 | PostgreSQL 16 + pgvector（embedding 存 `vector(1024)`，检索走 HNSW 索引在库内完成）、Prisma |
 | AI | OpenAI 兼容 API，**模型池**多模型可配（默认 Agnes 中国站，Embedding 走阿里百炼）|
 | 实时 | WebSocket（`ws`）独立 sidecar 进程 |
 | 文件存储 | 阿里云 OSS（头像预签名直传）|
@@ -120,12 +120,12 @@
   │
   └─ WebSocket ─────► server/index.ts（聊天室 + AI 流式回复）
                          │
-                         └─ Prisma ──► PostgreSQL 16 + pgvector
+                         └─ Prisma ──► PostgreSQL 16
 ```
 
 - **Next.js 应用**：页面、API、AI 智能体、知识库
 - **WebSocket sidecar**（`server/`）：独立进程，承载多人聊天室与 AI 流式回复
-- **PostgreSQL**：主数据 + pgvector 向量检索（文档分块 / 用户记忆）
+- **PostgreSQL + pgvector**：主数据 + 向量语义检索（文档分块 / 用户记忆；embedding 存 `vector(1024)` 列，相似度由 pgvector 的 `<=>` 算子在库内计算并走 HNSW 索引，应用层不参与向量运算）
 - **OSS**：头像对象存储，浏览器直传，应用只签发预签名 URL
 
 ## 🚀 快速开始
@@ -135,7 +135,7 @@
 | 依赖 | 版本 |
 |---|---|
 | Node.js | 18+ |
-| PostgreSQL | 16（建议 `pgvector/pgvector` 镜像，向量检索需要 pgvector 扩展）|
+| PostgreSQL | 16 + pgvector（必须用 `pgvector/pgvector:pg16` 镜像：embedding 列是 `vector(1024)`，检索依赖 `<=>` 算子与 HNSW 索引，均来自该扩展）|
 
 ### 本地开发
 
@@ -159,6 +159,26 @@ npm run ws:dev     # WebSocket sidecar（:3001，聊天室 + AI 依赖它）
 ```
 
 > **数据库升级**：本项目使用手写 SQL 迁移，见 `prisma/*.sql`，已有数据库按需执行对应文件。
+
+### 测试
+
+```bash
+npm test         # 运行全部单测（vitest）
+npm run check    # 一次跑完：类型检查 + ESLint + 单测
+```
+
+覆盖的都是**不依赖数据库与 API Key、可直接跑**的纯逻辑：文本分片（含防「逐字推进」死循环的兜底）、
+向量序列化格式契约（`toPgVector` 产出的字面量必须能被 pgvector 的 `::vector` 解析）、
+工具异常兜底 `safeExecute`、Agent 结构化输出的 Zod 边界，
+以及 Markdown 渲染的 **HTML 净化白名单**。
+
+最后一条最关键：渲染器开着 `rehype-raw`，而它的输入包含 AI 输出、用户导入的 `.md`
+和聊天室里他人的消息。白名单被误改就等于给不可信内容开了注入原生 HTML 的口子，
+`tests/markdown-sanitize.test.ts` 会用与线上相同的插件顺序和白名单锁住这个行为。
+
+> CI 见 `.github/workflows/ci.yml`，在每次 push / PR 上跑 `npm run check`。
+> 其中**不跑 `next build`**——本项目 RSC 直连数据库，构建需要真实环境变量，
+> 生产构建由部署流程（Dockerfile）负责。
 
 ## 🔑 环境变量
 
@@ -191,9 +211,11 @@ npm run ws:dev     # WebSocket sidecar（:3001，聊天室 + AI 依赖它）
 │   ├── context/             # 全局状态（场景 / 引导）
 │   └── styles/ types/       # 全局样式、共享类型
 ├── server/                  # WebSocket sidecar（聊天室 + AI 流式回复）
+├── tests/                   # vitest 单测（纯逻辑 + 渲染管线净化回归）
 ├── prisma/                  # Schema、种子数据、SQL 迁移
 ├── scripts/                 # 部署、文档提取、重置密码等工具
-└── nginx/                   # 反向代理配置
+├── nginx/                   # 反向代理配置
+└── .github/workflows/       # CI：typecheck + ESLint + vitest
 ```
 
 ## 🧰 内置脚本工具
@@ -202,6 +224,8 @@ npm run ws:dev     # WebSocket sidecar（:3001，聊天室 + AI 依赖它）
 |---|---|
 | `scripts/reset-password.ts` | 管理员重置用户密码（scrypt 与 Better Auth 兼容）|
 | `scripts/extract_pdf.py` / `extract_docx.py` | 知识库 PDF / Word 文本提取 |
+| `scripts/mock-weekly-report.ts` | 向指定用户塞一条「周报」通知（type=report），用于预览通知中心 Markdown 渲染 |
+| `scripts/optimize-backgrounds.mjs` | 场景背景图 PNG → WebP 重编码压缩（需 sharp）|
 | `scripts/deploy.sh` | Docker 镜像构建与上传部署 |
 | `scripts/server-setup.sh` | 新服务器初始化（装 Docker / 开端口）|
 
@@ -256,7 +280,7 @@ docker compose up -d --build
 ## 🙏 致谢
 
 - [Next.js](https://nextjs.org) · [React](https://react.dev) · [Tailwind CSS](https://tailwindcss.com)
-- [Prisma](https://www.prisma.io) · [PostgreSQL](https://www.postgresql.org) · [pgvector](https://github.com/pgvector/pgvector)
+- [Prisma](https://www.prisma.io) · [PostgreSQL](https://www.postgresql.org)
 - [Better Auth](https://better-auth.com) · [AI SDK](https://ai-sdk.dev) · [Three.js](https://threejs.org) · [Motion](https://motion.dev)
 
 ## 📄 License

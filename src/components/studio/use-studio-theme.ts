@@ -2,6 +2,13 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
+/**
+ * 允许 CSS 自定义属性（--x）的 style 对象。
+ * React 的 CSSProperties 没有索引签名，直接写 `--foo` 会被判为多余属性，
+ * 此前靠每处 `as any` 绕过。这里把自定义属性补进类型，去掉那些 any。
+ */
+export type CSSVarStyle = CSSProperties & Record<`--${string}`, string | number>;
+
 /* ────────────────────────────────────────────────────────────
    7 预设套餐：每个套餐绑定 主题色 + 背景，不可单独拆分
    ──────────────────────────────────────────────────────────── */
@@ -190,16 +197,16 @@ export function useStudioTheme(): {
    * 纯色套餐（无背景）：面板与顶栏完全不透明，忽略 opacity
    * 固定透明度套餐：使用固定值，不允许调整
    */
-  const rootStyle: CSSProperties = useMemo(() => {
+  const rootStyle: CSSVarStyle = useMemo(() => {
     const effectiveOpacity = fixedOpacity ?? opacity;
     const alpha = hasBg ? 1 - effectiveOpacity / 100 : 1;
     const headerAlpha = hasBg ? 1 - Math.max(0, effectiveOpacity - 15) / 100 : 1;
     return {
-      ["--studio-theme" as any]: theme,
-      ...(bgType === "image" && bgSrc ? { ["--studio-bg-url" as any]: `url(${bgSrc})` } : {}),
-      ["--studio-opacity-raw" as any]: `${effectiveOpacity}`,
-      ["--studio-surface-alpha" as any]: `${alpha}`,
-      ["--studio-header-alpha" as any]: `${headerAlpha}`,
+      "--studio-theme": theme,
+      ...(bgType === "image" && bgSrc ? { "--studio-bg-url": `url(${bgSrc})` } : {}),
+      "--studio-opacity-raw": `${effectiveOpacity}`,
+      "--studio-surface-alpha": `${alpha}`,
+      "--studio-header-alpha": `${headerAlpha}`,
     };
   }, [theme, bgType, bgSrc, opacity, hasBg, fixedOpacity]);
 

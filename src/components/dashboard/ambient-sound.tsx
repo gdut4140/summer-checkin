@@ -54,7 +54,11 @@ export function AmbientSound() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cleanupFallbackRef = useRef<(() => void) | null>(null);
   const volumeRef = useRef(0.3);
-  volumeRef.current = volume;
+  // 用 effect 镜像最新音量，供事件回调读取。不能在 render 期直接写 ref
+  // （React Compiler 会报 react-hooks/refs）；chat-room.tsx 的 atBottomRef 也是这个写法。
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
   // 记录「离开页面前是否在播放」，回到页面时据此决定是否恢复
   const wasPlayingRef = useRef(false);
 

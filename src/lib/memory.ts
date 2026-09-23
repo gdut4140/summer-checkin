@@ -16,7 +16,7 @@
 import { prisma } from "@/lib/prisma";
 import { completionsWithFallback } from "@/lib/model-pool";
 import { embedText } from "@/lib/rag/client";
-import { cosineSimilarity, parseEmbedding } from "@/lib/rag/retriever";
+import { toPgVector } from "@/lib/rag/retriever";
 
 // ---- 类型（Phase 2 升级版） ----
 
@@ -52,8 +52,8 @@ export interface MemoryExtraction {
 /**
  * 混合检索：向量语义搜索 + 重要性 + 时间衰减
  *
- * 如果有 query，用 pgvector 做语义搜索（余弦相似度排序）。
- * 无 query 时回退到原混合评分（importance + recency）。
+ * 有 query 时走 pgvector 库内语义检索；无 query（或检索失败）时回退到
+ * 混合评分（importance + recency）。
  *
  * 评分公式（无 query）：score = importance * 0.6 + recencyScore * 0.4
  */
@@ -62,43 +62,35 @@ export async function getRelevantMemories(
   limit = 20,
   query?: string
 ): Promise<UserMemory[]> {
-  // ── 语义搜索路径（JS 余弦相似度）──
+  // ── 语义搜索路径（pgvector 库内排序）──
   if (query) {
     try {
       const vec = await embedText(query);
 
-      // 加载该用户所有有 embedding 的记忆，在 JS 中计算相似度
+      // <=> 是余弦距离，升序即最相似；向量不再出库，也不再有条数上限截断
       const rows = await prisma.$queryRawUnsafe<
         Array<{
           id: string;
-          userId: string;
           type: string;
           content: string;
           importance: number;
           confidence: number;
           lastUsed: Date | null;
           createdAt: Date;
-          embedding: unknown;
         }>
       >(
-        `SELECT id, "userId", type, content, importance, confidence, "lastUsed", "createdAt", embedding
+        `SELECT id, type, content, importance, confidence, "lastUsed", "createdAt"
          FROM usermemory
          WHERE "userId" = $1 AND embedding IS NOT NULL
-         LIMIT 200`,
-        userId
+         ORDER BY embedding <=> $2::vector
+         LIMIT $3`,
+        userId,
+        toPgVector(vec),
+        limit
       );
 
       if (rows.length > 0) {
-        // JS 余弦相似度排序
-        const scored = rows.map((r) => {
-          const emb = parseEmbedding(r.embedding);
-          const sim = emb.length > 0 ? cosineSimilarity(vec, emb) : 0;
-          return { row: r, similarity: sim };
-        });
-        scored.sort((a, b) => b.similarity - a.similarity);
-        const top = scored.slice(0, limit);
-
-        return top.map(({ row: r }) => ({
+        return rows.map((r) => ({
           id: r.id,
           content: r.content,
           type: r.type as MemoryType,
@@ -108,7 +100,7 @@ export async function getRelevantMemories(
           createdAt: r.createdAt,
         }));
       }
-      // 如果向量搜索无结果（所有记忆都还没有 embedding），回退到原逻辑
+      // 向量搜索无结果（所有记忆都还没 embedding）→ 回退到混合评分
     } catch (err) {
       console.warn("[Memory] 向量搜索失败，回退到混合评分:", err);
     }
@@ -303,6 +295,7 @@ export async function extractAndSaveMemories(
 
     let saved = 0;
     let updated = 0;
+    let failed = 0;
     for (const item of extracted) {
       // AI 标注了匹配的已有记忆 ID → 更新（含 embedding）
       if (item.matchExistingId && existingById.has(item.matchExistingId)) {
@@ -325,8 +318,8 @@ export async function extractAndSaveMemories(
             try {
               const vec = await embedText(item.content);
               await prisma.$executeRawUnsafe(
-                `UPDATE usermemory SET embedding = $1::jsonb WHERE id = $2`,
-                JSON.stringify(vec),
+                `UPDATE usermemory SET embedding = $1::vector WHERE id = $2`,
+                toPgVector(vec),
                 item.matchExistingId,
               );
             } catch (err) {
@@ -336,7 +329,14 @@ export async function extractAndSaveMemories(
 
           updated++;
           console.log(`[Memory] 🔄 语义匹配更新: [${old.type}→${item.type}] "${old.content}" → "${item.content}"`);
-        } catch {}
+        } catch (err) {
+          failed++;
+          console.error("[Memory] 更新失败:", err, {
+            id: item.matchExistingId,
+            type: item.type,
+            content: item.content,
+          });
+        }
         continue;
       }
 
@@ -354,19 +354,23 @@ export async function extractAndSaveMemories(
           const id = crypto.randomUUID();
           await prisma.$executeRawUnsafe(
             `INSERT INTO usermemory (id, "userId", type, content, embedding, importance, confidence, "createdAt")
-             VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)`,
+             VALUES ($1, $2, $3, $4, $5::vector, $6, $7, $8)`,
             id,
             userId,
             item.type,
             item.content,
-            JSON.stringify(vec),
+            toPgVector(vec),
             item.importance,
             item.confidence,
             new Date(),
           );
         } else {
-          // 无向量 → 用 Prisma 普通写入
-          await (prisma.userMemory as any).create({
+          // 无向量 → 走类型安全的 create，embedding 留空（该列已改为可空，见 prisma/schema.prisma）
+          //
+          // 注：此前这里是 `(prisma.userMemory as any).create(...)`。之所以需要 `as any`：
+          // embedding 为必填的 Unsupported 字段时，Prisma 不会生成该模型的 create 操作
+          // （不存在合法的 CreateInput），方法在运行时不存在 → 抛错 → 被外层 catch 静默吞掉。
+          await prisma.userMemory.create({
             data: {
               userId,
               type: item.type,
@@ -378,11 +382,20 @@ export async function extractAndSaveMemories(
         }
         saved++;
         console.log(`[Memory] ✨ 新建: [${item.type}] "${item.content}"${vec ? " [向量化]" : ""}`);
-      } catch {}
+      } catch (err) {
+        failed++;
+        console.error("[Memory] 写入失败:", err, {
+          type: item.type,
+          content: item.content,
+        });
+      }
     }
 
-    if (saved > 0 || updated > 0) {
-      console.log(`[Memory] 用户 ${userId}: 新建 ${saved} 条, 更新 ${updated} 条`);
+    if (saved > 0 || updated > 0 || failed > 0) {
+      console.log(
+        `[Memory] 用户 ${userId}: 新建 ${saved} 条, 更新 ${updated} 条` +
+          (failed > 0 ? `, ⚠️ 失败 ${failed} 条` : "")
+      );
     }
   } catch (error) {
     console.error("[Memory] 提取记忆失败:", error);

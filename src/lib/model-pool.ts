@@ -94,10 +94,24 @@ const LOW_CHAIN: ModelEntry[] = [
 ];
 
 // ── Embedding 档（知识库 / memory 向量化）：不计入用户 token 精力条 ──
-// 阿里云百炼文本向量：v4 最新优先，v2 老版本兜底（额度参考「阿里云向量模型.txt」）
+// 阿里云百炼文本向量（额度参考「阿里云向量模型.txt」）
+//
+// ⚠️ 维度契约：向量列是 vector(1024)，链上每个模型的输出维度必须都是 1024。
+// 2026-09-22 实测：
+//   text-embedding-v4 → 1024 ✅
+//   text-embedding-v3 → 1024 ✅
+//   text-embedding-v2 → 1536 ❌ 且【直接忽略 dimensions 参数】，物理上做不到 1024
+//   text-embedding-v1 → 1536 ❌
+//
+// 原先的兜底是 v2，它会把 1536 维向量写进库里。在 jsonb 时代这不会报错——
+// 只是那些向量因长度不等而余弦恒返回 0，静默地永远检索不到（本地库实测有
+// 116 条 1536/512 维的遗留数据，来源就是历史上换过三次向量模型）。
+// 改用维度兼容的 v3 兜底。
+export const EMBEDDING_DIMENSION = 1024;
+
 const EMBEDDING_CHAIN: ModelEntry[] = [
   { modelName: "text-embedding-v4", displayName: "通义向量 v4", provider: "aliyun", modelType: "embedding", tier: "low", freeQuotaEnd: "2026-11-07" },
-  { modelName: "text-embedding-v2", displayName: "通义向量 v2", provider: "aliyun", modelType: "embedding", tier: "low", freeQuotaEnd: "2026-11-07" },
+  { modelName: "text-embedding-v3", displayName: "通义向量 v3", provider: "aliyun", modelType: "embedding", tier: "low", freeQuotaEnd: "2026-11-07" },
 ];
 
 /** 已耗尽模型（进程内记忆：403 后加入，本进程不再重试） */
@@ -231,9 +245,27 @@ export async function embeddingWithFallback(
       const res = await client.embeddings.create({
         model: entry.modelName,
         input,
+        // 显式声明维度，不依赖各家默认值——默认值是会变的，契约不能靠运气
+        dimensions: EMBEDDING_DIMENSION,
       });
       const sorted = [...res.data].sort((a, b) => a.index - b.index);
-      console.log(`[model-pool] embedding 使用 model=${entry.modelName} provider=${entry.provider}`);
+
+      // 维度守卫：维度不符的向量写进 vector(N) 列会整批失败；更隐蔽的是写进
+      // jsonb 时静默失效（余弦因长度不等恒返回 0，永远检索不到）。
+      // 宁可在这里响亮地失败，也不要让一批查不到的向量悄悄入库。
+      const mismatched = sorted.find(
+        (item) => item.embedding.length !== EMBEDDING_DIMENSION
+      );
+      if (mismatched) {
+        throw new Error(
+          `[model-pool] ${entry.modelName} 返回 ${mismatched.embedding.length} 维，` +
+            `与契约维度 ${EMBEDDING_DIMENSION} 不符——该模型与向量列不兼容`
+        );
+      }
+
+      console.log(
+        `[model-pool] embedding 使用 model=${entry.modelName} provider=${entry.provider} dim=${EMBEDDING_DIMENSION}`
+      );
       return { data: sorted.map((item) => item.embedding), model: entry.modelName };
     } catch (err) {
       if (isQuotaError(err)) {

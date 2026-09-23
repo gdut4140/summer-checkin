@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
       try {
         text = await extractPdfFromFile(file);
         sourceType = "pdf";
-      } catch (err: any) {
+      } catch (err) {
         return NextResponse.json(
-          { error: `PDF 文本提取失败: ${err.message}` },
+          { error: `PDF 文本提取失败: ${err instanceof Error ? err.message : String(err)}` },
           { status: 400 }
         );
       }
@@ -91,9 +91,9 @@ export async function POST(request: NextRequest) {
       try {
         text = await extractDocxFromFile(file);
         sourceType = "docx";
-      } catch (err: any) {
+      } catch (err) {
         return NextResponse.json(
-          { error: `Word 文本提取失败: ${err.message}` },
+          { error: `Word 文本提取失败: ${err instanceof Error ? err.message : String(err)}` },
           { status: 400 }
         );
       }

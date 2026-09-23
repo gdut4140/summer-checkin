@@ -1,10 +1,10 @@
 // ============================================================
-// Day 16 RAG: 统一导出
+// RAG: 统一导出
 // ============================================================
 
-export { embedTexts, embedText, rerank } from "./client";
+export { embedTexts, embedText } from "./client";
 export { splitText, splitMarkdown } from "./chunk";
-export { searchSimilarChunks, cosineSimilarity, parseEmbedding } from "./retriever";
+export { searchSimilarChunks, toPgVector } from "./retriever";
 export type { DocChunk } from "./retriever";
 export {
   searchKnowledge,

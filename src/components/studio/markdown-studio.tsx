@@ -32,7 +32,7 @@ import { EditorPane, type EditorPaneHandle, type EditorPaneMode } from "./editor
 import { OutlinePanel } from "./outline-panel";
 import { AiChatPanel } from "./ai-chat-panel";
 import { extractHeadings } from "@/lib/studio/outline";
-import { useStudioTheme, type StudioPreset } from "./use-studio-theme";
+import { useStudioTheme, type StudioPreset, type CSSVarStyle } from "./use-studio-theme";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AccordionGallery, { type GalleryItem } from "./accordion-gallery";
 import type { BgGalleryItem } from "./bg-accordion-gallery";
@@ -1058,7 +1058,7 @@ function StudioOpacityRange({
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
             className="studio-opacity-range"
-            style={{ ["--val" as any]: `${fillPercent}%` }}
+            style={{ "--val": `${fillPercent}%` } as CSSVarStyle}
             aria-label={label}
           />
         }

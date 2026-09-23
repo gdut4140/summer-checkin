@@ -326,7 +326,7 @@ model UserMemory {
   userId     String
   type       String                      @default("fact")
   content    String
-  embedding  Unsupported("jsonb")
+  embedding  Unsupported("vector(1024)")?
   importance Float                       @default(0.5)
   confidence Float                       @default(0.5)
   lastUsed   DateTime?
@@ -374,7 +374,7 @@ model DocumentChunk {
   sourceType String                      @default("text")
   chunkIndex Int
   content    String
-  embedding  Unsupported("jsonb")
+  embedding  Unsupported("vector(1024)")
   createdAt  DateTime                    @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

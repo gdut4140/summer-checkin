@@ -1638,6 +1638,18 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
           args: Prisma.UserMemoryFindManyArgs<ExtArgs>
           result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>[]
         }
+        create: {
+          args: Prisma.UserMemoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
+        }
+        createMany: {
+          args: Prisma.UserMemoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserMemoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>[]
+        }
         delete: {
           args: Prisma.UserMemoryDeleteArgs<ExtArgs>
           result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
@@ -1657,6 +1669,10 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         updateManyAndReturn: {
           args: Prisma.UserMemoryUpdateManyAndReturnArgs<ExtArgs>
           result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserMemoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserMemoryPayload>
         }
         aggregate: {
           args: Prisma.UserMemoryAggregateArgs<ExtArgs>

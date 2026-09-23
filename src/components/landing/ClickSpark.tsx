@@ -47,13 +47,13 @@ export default function ClickSpark({
   useEffect(() => {
     if (sparkColor !== undefined) return;
     setAutoColor(readThemePrimary());
+    // 场景/主题切换统一由 <html> 上的 data-scene / class 驱动，下面的 MutationObserver 已覆盖。
+    // 此前这里还挂了一个 "theme-changed" 监听：全仓库没有任何地方 dispatch 它（对照
+    // avatar:changed 是 dispatch + 监听的完整链路），而且 removeEventListener 传的是另一个
+    // 匿名函数、根本摘不掉。属死代码 + 监听泄漏，已移除。
     const mo = new MutationObserver(() => setAutoColor(readThemePrimary()));
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-scene", "class"] });
-    window.addEventListener("theme-changed" as any, () => setAutoColor(readThemePrimary()));
-    return () => {
-      mo.disconnect();
-      window.removeEventListener("theme-changed" as any, () => setAutoColor(readThemePrimary()));
-    };
+    return () => mo.disconnect();
   }, [sparkColor]);
 
   const effectiveColor = sparkColor ?? autoColor;

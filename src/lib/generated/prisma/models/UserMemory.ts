@@ -304,6 +304,28 @@ export type UserMemoryScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserMemory"> | Date | string
 }
 
+export type UserMemoryCreateInput = {
+  id?: string
+  type?: string
+  content: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
+  createdAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMemoriesInput
+}
+
+export type UserMemoryUncheckedCreateInput = {
+  id?: string
+  userId: string
+  type?: string
+  content: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
+  createdAt?: Date | string
+}
+
 export type UserMemoryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -324,6 +346,17 @@ export type UserMemoryUncheckedUpdateInput = {
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
   lastUsed?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserMemoryCreateManyInput = {
+  id?: string
+  userId: string
+  type?: string
+  content: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
+  createdAt?: Date | string
 }
 
 export type UserMemoryUpdateManyMutationInput = {
@@ -401,14 +434,24 @@ export type UserMemorySumOrderByAggregateInput = {
 }
 
 export type UserMemoryCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.UserMemoryCreateWithoutUserInput, Prisma.UserMemoryUncheckedCreateWithoutUserInput> | Prisma.UserMemoryCreateWithoutUserInput[] | Prisma.UserMemoryUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserMemoryCreateOrConnectWithoutUserInput | Prisma.UserMemoryCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.UserMemoryCreateManyUserInputEnvelope
   connect?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
 }
 
 export type UserMemoryUncheckedCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.UserMemoryCreateWithoutUserInput, Prisma.UserMemoryUncheckedCreateWithoutUserInput> | Prisma.UserMemoryCreateWithoutUserInput[] | Prisma.UserMemoryUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserMemoryCreateOrConnectWithoutUserInput | Prisma.UserMemoryCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.UserMemoryCreateManyUserInputEnvelope
   connect?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
 }
 
 export type UserMemoryUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.UserMemoryCreateWithoutUserInput, Prisma.UserMemoryUncheckedCreateWithoutUserInput> | Prisma.UserMemoryCreateWithoutUserInput[] | Prisma.UserMemoryUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserMemoryCreateOrConnectWithoutUserInput | Prisma.UserMemoryCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.UserMemoryUpsertWithWhereUniqueWithoutUserInput | Prisma.UserMemoryUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.UserMemoryCreateManyUserInputEnvelope
   set?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
   disconnect?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
   delete?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
@@ -419,6 +462,10 @@ export type UserMemoryUpdateManyWithoutUserNestedInput = {
 }
 
 export type UserMemoryUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.UserMemoryCreateWithoutUserInput, Prisma.UserMemoryUncheckedCreateWithoutUserInput> | Prisma.UserMemoryCreateWithoutUserInput[] | Prisma.UserMemoryUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserMemoryCreateOrConnectWithoutUserInput | Prisma.UserMemoryCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.UserMemoryUpsertWithWhereUniqueWithoutUserInput | Prisma.UserMemoryUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.UserMemoryCreateManyUserInputEnvelope
   set?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
   disconnect?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
   delete?: Prisma.UserMemoryWhereUniqueInput | Prisma.UserMemoryWhereUniqueInput[]
@@ -426,6 +473,42 @@ export type UserMemoryUncheckedUpdateManyWithoutUserNestedInput = {
   update?: Prisma.UserMemoryUpdateWithWhereUniqueWithoutUserInput | Prisma.UserMemoryUpdateWithWhereUniqueWithoutUserInput[]
   updateMany?: Prisma.UserMemoryUpdateManyWithWhereWithoutUserInput | Prisma.UserMemoryUpdateManyWithWhereWithoutUserInput[]
   deleteMany?: Prisma.UserMemoryScalarWhereInput | Prisma.UserMemoryScalarWhereInput[]
+}
+
+export type UserMemoryCreateWithoutUserInput = {
+  id?: string
+  type?: string
+  content: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type UserMemoryUncheckedCreateWithoutUserInput = {
+  id?: string
+  type?: string
+  content: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type UserMemoryCreateOrConnectWithoutUserInput = {
+  where: Prisma.UserMemoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserMemoryCreateWithoutUserInput, Prisma.UserMemoryUncheckedCreateWithoutUserInput>
+}
+
+export type UserMemoryCreateManyUserInputEnvelope = {
+  data: Prisma.UserMemoryCreateManyUserInput | Prisma.UserMemoryCreateManyUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserMemoryUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.UserMemoryWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserMemoryUpdateWithoutUserInput, Prisma.UserMemoryUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.UserMemoryCreateWithoutUserInput, Prisma.UserMemoryUncheckedCreateWithoutUserInput>
 }
 
 export type UserMemoryUpdateWithWhereUniqueWithoutUserInput = {
@@ -450,6 +533,16 @@ export type UserMemoryScalarWhereInput = {
   confidence?: Prisma.FloatFilter<"UserMemory"> | number
   lastUsed?: Prisma.DateTimeNullableFilter<"UserMemory"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserMemory"> | Date | string
+}
+
+export type UserMemoryCreateManyUserInput = {
+  id?: string
+  type?: string
+  content: string
+  importance?: number
+  confidence?: number
+  lastUsed?: Date | string | null
+  createdAt?: Date | string
 }
 
 export type UserMemoryUpdateWithoutUserInput = {
@@ -496,6 +589,17 @@ export type UserMemorySelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userMemory"]>
 
+export type UserMemorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  type?: boolean
+  content?: boolean
+  importance?: boolean
+  confidence?: boolean
+  lastUsed?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["userMemory"]>
 
 export type UserMemorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -522,6 +626,9 @@ export type UserMemorySelectScalar = {
 
 export type UserMemoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "content" | "importance" | "confidence" | "lastUsed" | "createdAt", ExtArgs["result"]["userMemory"]>
 export type UserMemoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type UserMemoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type UserMemoryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -632,6 +739,58 @@ export interface UserMemoryDelegate<ExtArgs extends runtime.Types.Extensions.Int
   findMany<T extends UserMemoryFindManyArgs>(args?: Prisma.SelectSubset<T, UserMemoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserMemoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
   /**
+   * Create a UserMemory.
+   * @param {UserMemoryCreateArgs} args - Arguments to create a UserMemory.
+   * @example
+   * // Create one UserMemory
+   * const UserMemory = await prisma.userMemory.create({
+   *   data: {
+   *     // ... data to create a UserMemory
+   *   }
+   * })
+   * 
+   */
+  create<T extends UserMemoryCreateArgs>(args: Prisma.SelectSubset<T, UserMemoryCreateArgs<ExtArgs>>): Prisma.Prisma__UserMemoryClient<runtime.Types.Result.GetResult<Prisma.$UserMemoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+  /**
+   * Create many UserMemories.
+   * @param {UserMemoryCreateManyArgs} args - Arguments to create many UserMemories.
+   * @example
+   * // Create many UserMemories
+   * const userMemory = await prisma.userMemory.createMany({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   *     
+   */
+  createMany<T extends UserMemoryCreateManyArgs>(args?: Prisma.SelectSubset<T, UserMemoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Create many UserMemories and returns the data saved in the database.
+   * @param {UserMemoryCreateManyAndReturnArgs} args - Arguments to create many UserMemories.
+   * @example
+   * // Create many UserMemories
+   * const userMemory = await prisma.userMemory.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many UserMemories and only return the `id`
+   * const userMemoryWithIdOnly = await prisma.userMemory.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends UserMemoryCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, UserMemoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserMemoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a UserMemory.
    * @param {UserMemoryDeleteArgs} args - Arguments to delete one UserMemory.
    * @example
@@ -724,6 +883,25 @@ export interface UserMemoryDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * 
    */
   updateManyAndReturn<T extends UserMemoryUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, UserMemoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserMemoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+  /**
+   * Create or update one UserMemory.
+   * @param {UserMemoryUpsertArgs} args - Arguments to update or create a UserMemory.
+   * @example
+   * // Update or create a UserMemory
+   * const userMemory = await prisma.userMemory.upsert({
+   *   create: {
+   *     // ... data to create a UserMemory
+   *   },
+   *   update: {
+   *     // ... in case it already exists, update
+   *   },
+   *   where: {
+   *     // ... the filter for the UserMemory we want to update
+   *   }
+   * })
+   */
+  upsert<T extends UserMemoryUpsertArgs>(args: Prisma.SelectSubset<T, UserMemoryUpsertArgs<ExtArgs>>): Prisma.Prisma__UserMemoryClient<runtime.Types.Result.GetResult<Prisma.$UserMemoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
   /**
@@ -1108,6 +1286,62 @@ export type UserMemoryFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * UserMemory create
+ */
+export type UserMemoryCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserMemory
+   */
+  select?: Prisma.UserMemorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserMemory
+   */
+  omit?: Prisma.UserMemoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserMemoryInclude<ExtArgs> | null
+  /**
+   * The data needed to create a UserMemory.
+   */
+  data: Prisma.XOR<Prisma.UserMemoryCreateInput, Prisma.UserMemoryUncheckedCreateInput>
+}
+
+/**
+ * UserMemory createMany
+ */
+export type UserMemoryCreateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to create many UserMemories.
+   */
+  data: Prisma.UserMemoryCreateManyInput | Prisma.UserMemoryCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * UserMemory createManyAndReturn
+ */
+export type UserMemoryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserMemory
+   */
+  select?: Prisma.UserMemorySelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserMemory
+   */
+  omit?: Prisma.UserMemoryOmit<ExtArgs> | null
+  /**
+   * The data used to create many UserMemories.
+   */
+  data: Prisma.UserMemoryCreateManyInput | Prisma.UserMemoryCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserMemoryIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * UserMemory update
  */
 export type UserMemoryUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1179,6 +1413,36 @@ export type UserMemoryUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    * Choose, which related nodes to fetch as well
    */
   include?: Prisma.UserMemoryIncludeUpdateManyAndReturn<ExtArgs> | null
+}
+
+/**
+ * UserMemory upsert
+ */
+export type UserMemoryUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserMemory
+   */
+  select?: Prisma.UserMemorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserMemory
+   */
+  omit?: Prisma.UserMemoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserMemoryInclude<ExtArgs> | null
+  /**
+   * The filter to search for the UserMemory to update in case it exists.
+   */
+  where: Prisma.UserMemoryWhereUniqueInput
+  /**
+   * In case the UserMemory found by the `where` argument doesn't exist, create a new UserMemory with this data.
+   */
+  create: Prisma.XOR<Prisma.UserMemoryCreateInput, Prisma.UserMemoryUncheckedCreateInput>
+  /**
+   * In case the UserMemory was found with the provided `where` argument, update it with this data.
+   */
+  update: Prisma.XOR<Prisma.UserMemoryUpdateInput, Prisma.UserMemoryUncheckedUpdateInput>
 }
 
 /**

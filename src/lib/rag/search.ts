@@ -1,23 +1,29 @@
 // ============================================================
-// Day 16 RAG: 高级搜索（召回 + 重排）
+// RAG 知识库搜索
 //
 // searchKnowledge(userId, query)
 //   1. query → Embedding
-//   2. 召回: 向量相似度 Top-K (默认 20)
-//   3. 重排: bge-small-zh-v1.5 余弦相似度精排 → Top-N (默认 5)
-//   4. 返回格式化结果
+//   2. pgvector 库内相似度检索 Top-K
+//   3. 返回格式化结果
+//
+// 历史：这里曾有过"召回 Top-20 → 重排 Top-5"的两级检索，但重排用的是
+// 召回阶段同一套余弦（同模型、同公式、同候选集），确定性函数不可能改变
+// 排序，属于数学空转；且回传的 score 取值下标错位，喂给 AI 的相关性分数
+// 是错的。重排与错位下标已一并移除，现在的 score 直接来自 pgvector 的
+// 余弦距离（1 - distance），是真实值。
 // ============================================================
 
+import { prisma } from "@/lib/prisma";
 import { embedText } from "./client";
-import { rerank } from "./client";
-import { searchSimilarChunks, type DocChunk } from "./retriever";
+import { searchSimilarChunks } from "./retriever";
 
 // ---- 结果类型 ----
 
 export interface KnowledgeResult {
   content: string;
   sourceName: string;
-  score: number;      // 重排后的分数
+  /** 余弦相似度 = 1 - 余弦距离，越大越相关，取值 [-1, 1] */
+  score: number;
   chunkIndex: number;
 }
 
@@ -32,17 +38,15 @@ export interface SearchResult {
 /**
  * 搜索知识库
  *
- * @param userId       当前用户 ID
  * @param query        用户查询文本
- * @param recallTopK   召回阶段取多少条（默认 20）
- * @param finalTopN    最终返回多少条（默认 5）
- * @param sourceFilter 可选：限定来源
+ * @param userId       当前用户 ID（数据隔离）
+ * @param topK         返回条数（默认 5）
+ * @param sourceFilter 可选：限定来源文档
  */
 export async function searchKnowledge(
   query: string,
   userId?: string,
-  recallTopK = 20,
-  finalTopN = 5,
+  topK = 5,
   sourceFilter?: string
 ): Promise<SearchResult> {
   console.log(`[Search] 查询: "${query.slice(0, 80)}"${userId ? ` (user: ${userId})` : ""}`);
@@ -50,64 +54,32 @@ export async function searchKnowledge(
   // 1. Query → Embedding
   const queryEmbedding = await embedText(query);
 
-  // 2. 召回：向量相似度 Top-K
-  const recalled = await searchSimilarChunks(queryEmbedding, recallTopK, sourceFilter, userId);
+  // 2. pgvector 库内检索
+  const recalled = await searchSimilarChunks(queryEmbedding, topK, sourceFilter, userId);
 
-  if (recalled.length === 0) {
-    console.log("[Search] 未找到相关结果");
-    return { query, results: [], searchedChunks: 0 };
-  }
-
-  // 3. 重排：embedding 模型余弦相似度
-  // 先查有多少 chunks
-  const { prisma } = await import("@/lib/prisma");
   const totalChunks = userId
     ? await prisma.documentChunk.count({ where: { userId } })
     : await prisma.documentChunk.count();
 
-  const documents = recalled.map((c) => c.content);
-
-  let reranked: DocChunk[];
-  try {
-    const rerankResult = await rerank(query, documents);
-
-    // 按重排分数重新排序
-    reranked = rerankResult.indices.slice(0, finalTopN).map((idx) => ({
-      ...recalled[idx],
-    }));
-
-    // 附加重排分数
-    const rerankScores = rerankResult.scores;
-
-    console.log(
-      `[Search] 召回 ${recalled.length}/${totalChunks} → 重排 → Top-${finalTopN}`
-    );
-
-    return {
-      query,
-      results: reranked.map((c, i) => ({
-        content: c.content,
-        sourceName: c.sourceName,
-        score: rerankScores[rerankResult.indices[i]] ?? 0,
-        chunkIndex: c.chunkIndex,
-      })),
-      searchedChunks: totalChunks,
-    };
-  } catch (err) {
-    // 重排失败时回退到只用相似度排序
-    console.warn("[Search] Rerank 失败，回退到纯向量排序:", err);
-
-    return {
-      query,
-      results: recalled.slice(0, finalTopN).map((c, i) => ({
-        content: c.content,
-        sourceName: c.sourceName,
-        score: 0, // 无重排分数
-        chunkIndex: c.chunkIndex,
-      })),
-      searchedChunks: totalChunks,
-    };
+  if (recalled.length === 0) {
+    console.log("[Search] 未找到相关结果");
+    return { query, results: [], searchedChunks: totalChunks };
   }
+
+  console.log(
+    `[Search] pgvector 检索 ${recalled.length} 条 (知识库共 ${totalChunks} 块)`
+  );
+
+  return {
+    query,
+    results: recalled.map((c) => ({
+      content: c.content,
+      sourceName: c.sourceName,
+      score: c.similarity,
+      chunkIndex: c.chunkIndex,
+    })),
+    searchedChunks: totalChunks,
+  };
 }
 
 /**

@@ -1,18 +1,23 @@
 // ============================================================
 // Embedding 服务客户端 — 对接 OpenAI 兼容 Embedding API
 //
-// 默认使用 DeepSeek deepseek-embed（2048 维），
-// 也可切换为 OpenAI text-embedding-3-small 等任意兼容模型。
+// 走模型池 embedding 档（text-embedding-v4 优先，v2 兜底），
+// 维度 1024，与 documentchunk.embedding / usermemory.embedding
+// 的 vector(1024) 列对齐。
 //
-// 之前依赖本地 Python 微服务（bge-m3），现已替换为线上 API。
+// 历史：曾依赖本地 Python 微服务（bge-m3 向量 + bge-reranker 重排），
+// 后替换为线上 API。原先还有一个 rerank()，但它是"召回阶段用过的那套
+// 余弦再算一遍"——同一模型、同一公式、同一候选集，确定性函数重复应用
+// 不可能改变排序，属于纯粹的数学空转，每次搜索白烧 3 批 embedding
+// 调用。已移除。若日后需要真正的重排，应接入 cross-encoder
+// （如 gte-rerank），而非各自 embedding 后算余弦。
 // ============================================================
 
-import { cosineSimilarity } from "./retriever";
 import { embeddingWithFallback } from "@/lib/model-pool";
 
 /**
  * 批量文本 → 向量
- * 走模型池 embedding 档（text-embedding-v4 优先，v2 兜底），不计入用户 token 精力条。
+ * 走模型池 embedding 档（text-embedding-v4 优先，v3 兜底，均为 1024 维），不计入用户 token 精力条。
  * 自动分批，每批最多 10 条（DashScope text-embedding-v4 单次 batch 上限为 10）。
  */
 export async function embedTexts(texts: string[]): Promise<number[][]> {
@@ -51,49 +56,4 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
 export async function embedText(text: string): Promise<number[]> {
   const results = await embedTexts([text]);
   return results[0];
-}
-
-// ---- Rerank（本地余弦相似度，无需远程服务）----
-
-/**
- * Rerank：对候选文档按与 query 的余弦相似度重新排序
- *
- * 之前依赖 Python 微服务的 bge-reranker，现在改为：
- * ① query → embedding
- * ② 每个文档 → embedding
- * ③ 计算 cosineSimilarity → 排序
- *
- * 对于个人知识库（几百条 chunk），这个性能完全够用。
- *
- * @param query     用户查询文本
- * @param documents 候选文档文本列表
- * @returns 按相似度降序排列的结果
- */
-export async function rerank(
-  query: string,
-  documents: string[]
-): Promise<{ scores: number[]; indices: number[] }> {
-  if (documents.length === 0) {
-    return { scores: [], indices: [] };
-  }
-
-  // query + documents 一起 embedding（一次 API 调用）
-  const allTexts = [query, ...documents];
-  const allVectors = await embedTexts(allTexts);
-  const queryVec = allVectors[0];
-  const docVecs = allVectors.slice(1);
-
-  // 计算余弦相似度
-  const scored = docVecs.map((vec, i) => ({
-    index: i,
-    score: cosineSimilarity(queryVec, vec),
-  }));
-
-  // 按分数降序
-  scored.sort((a, b) => b.score - a.score);
-
-  return {
-    scores: scored.map((s) => s.score),
-    indices: scored.map((s) => s.index),
-  };
 }

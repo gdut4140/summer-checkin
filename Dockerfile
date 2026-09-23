@@ -58,7 +58,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# 复制 Prisma 迁移文件（启动时需要执行 migrate deploy）
+# 复制 prisma 目录（schema + 手工 SQL 迁移脚本）
+# 注意：本项目的 schema 变更走 `prisma db push` + prisma/*.sql 手工脚本，
+# 启动时【不】执行 migrate deploy——docker-entrypoint.sh 里没有这一步。
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 

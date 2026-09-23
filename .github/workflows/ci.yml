@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+# 同一分支连续推送时取消上一次未跑完的检查，省额度
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: 类型 / Lint / 净化回归
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      # Prisma Client 是生成物（src/lib/generated/），仓库里带着但需与 schema 对齐
+      - name: 生成 Prisma Client
+        run: npx prisma generate
+
+      # next-env.d.ts 与 .next/types/ 都是 gitignore 的生成物，干净检出里不存在，
+      # 不先跑这一步 tsc 会因为缺 Next 的类型声明而失败。
+      # 用 typegen 而不是 build：不触发完整构建、不需要数据库与任何运行时环境变量。
+      - name: 生成 Next 路由类型
+        run: npx next typegen
+
+      - name: 类型检查
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+      # 防回归。其中 markdown 净化那条尤其关键：渲染器开着 rehype-raw，
+      # 白名单改错就等于给不可信内容（AI 输出 / 用户导入的 .md / 他人聊天消息）
+      # 开了注入原生 HTML 的口子。
+      - name: 测试
+        run: npm test
+
+# 说明：这里**不跑 next build**。
+# 本项目是 RSC + 数据库直连，build 需要真实的 DATABASE_URL 等环境变量；
+# 在 CI 里连库既慢又会把生产数据卷进来。生产构建由部署流程（Dockerfile）负责。
+# 若日后需要构建校验，建议起一个 CI 专用的临时 Postgres service 再开启。

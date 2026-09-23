@@ -5,7 +5,9 @@
 //   ① splitText       — 固定大小 + 重叠（通用，适合纯文本/PDF）
 //   ② splitMarkdown   — 按 ## 标题语义分片（适合 Markdown）
 //
-// bge-m3 最大输入 8192 tokens，默认 chunk 500 字留足余量
+// 分片按「字数」计而非 token：默认 500 字，远低于向量模型
+// （text-embedding-v4 / v3，见 model-pool.ts 的 EMBEDDING_CHAIN）的输入上限，
+// 留足余量——中文一个字通常 1~2 token，500 字仍远未触及上限。
 // ============================================================
 
 /**

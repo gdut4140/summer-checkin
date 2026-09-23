@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { splitText, splitMarkdown } from "@/lib/rag/chunk";
 import { embedTexts } from "@/lib/rag/client";
+import { toPgVector } from "@/lib/rag/retriever";
 
 interface ProcessOptions {
   userId: string;
@@ -43,18 +44,19 @@ export async function processKnowledgeText(opts: ProcessOptions) {
   console.log(`[Knowledge] Embedding 完成: ${embeddings.length} 个向量`);
 
   // 3. 写库 — 用 raw SQL（embedding 是 Unsupported 字段，Prisma 无法生成 create 方法）
+  //    向量以 JSON 数组字符串传参，$7::vector 由 pgvector 解析
   await prisma.$transaction(
     chunks.map((content, i) =>
       prisma.$executeRawUnsafe(
         `INSERT INTO documentchunk (id, "userId", "sourceName", "sourceType", "chunkIndex", content, embedding, "createdAt")
-         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7::vector, $8)`,
         randomUUID(),
         userId,
         sourceName,
         sourceType,
         i,
         content,
-        JSON.stringify(embeddings[i]),
+        toPgVector(embeddings[i]),
         new Date(),
       )
     )

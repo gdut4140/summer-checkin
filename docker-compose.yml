@@ -37,9 +37,10 @@ services:
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-agnes-2.5-flash}
       DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://api.agnes-ai.cn/v1}
+      # embedding 的模型与 baseURL 由 src/lib/model-pool.ts 硬编码（EMBEDDING_CHAIN
+      # 固定为 text-embedding-v4 → v3，均 1024 维），不通过环境变量配置。
+      # 原先透传的 EMBEDDING_MODEL / EMBEDDING_BASE_URL 已移除：代码从不读取它们。
       EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v2}
-      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
