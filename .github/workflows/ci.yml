@@ -31,8 +31,16 @@ jobs:
         run: npm ci
 
       # Prisma Client 是生成物（src/lib/generated/），仓库里带着但需与 schema 对齐
+      #
+      # ⚠️ 必须给一个 DATABASE_URL，哪怕是假的：prisma.config.ts 第一行是
+      # `import "dotenv/config"`，靠读 .env 来满足 `env("DATABASE_URL")`。
+      # 本地有 .env 所以能过，CI 里 .env 是 gitignore 的、根本不存在，
+      # 于是 config 加载直接抛 PrismaConfigEnvError（首次 CI 就栽在这）。
+      # generate 只读 schema、不连库，所以值是什么无所谓，只要存在。
       - name: 生成 Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_placeholder
 
       # next-env.d.ts 与 .next/types/ 都是 gitignore 的生成物，干净检出里不存在，
       # 不先跑这一步 tsc 会因为缺 Next 的类型声明而失败。
