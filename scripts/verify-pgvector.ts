@@ -82,10 +82,21 @@ async function main() {
   const scores = res.results.map((r) => r.score);
   const descending = scores.every((s, i) => i === 0 || scores[i - 1] >= s);
   check("score 按降序排列", descending, scores.map((s) => s.toFixed(3)).join(" > "));
-  check("score 是余弦相似度（落在 [-1,1]）", scores.every((s) => s >= -1.001 && s <= 1.001));
-  check("最相关的是刚插入的探测文本",
-    res.results[0]?.content.includes("pgvector 写入验证"),
-    `top1 来自 ${res.results[0]?.sourceName}`);
+  check(
+    `score 落在合法区间（来源=${res.results[0]?.scoreSource ?? "?"}）`,
+    scores.every((s) => s >= -1.001 && s <= 1.001)
+  );
+
+  // ⚠️ 这里**不能**再断言探测块是 top-1。引入 cross-encoder 重排后，把某个候选
+  // 降下去是它的正常行为、不是 bug——断言 top-1 会变成随机红灯，让人去查一个
+  // 根本不存在的"重排故障"。本步只验证"写入→检索"闭环成立（召回得到），
+  // 顺带报出名次供人观察。重排本身是否生效由 scripts/verify-rerank.ts 单独验证。
+  const probeRank = res.results.findIndex((r) => r.content.includes("pgvector 写入验证"));
+  check(
+    "刚插入的探测文本被召回",
+    probeRank >= 0,
+    probeRank >= 0 ? `名次 ${probeRank + 1}/${res.results.length}` : "未出现在结果中"
+  );
 
   // ============================================================
   console.log("\n③ 数据隔离（跨 userId）");

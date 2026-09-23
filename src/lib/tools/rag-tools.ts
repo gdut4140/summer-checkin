@@ -12,7 +12,8 @@ import { safeExecute } from "./utils";
 export function createRAGTool(userId: string) {
   const searchKnowledgeBase = tool({
     description:
-      "搜索用户个人知识库（其上传的文档/资料）。用户询问自己的文档内容时用。",
+      "搜索用户个人知识库（其上传的文档/资料）。用户询问自己的文档内容时用。" +
+      "返回结果已按相关性从高到低排序，relevanceScore 越高越相关。",
 
     inputSchema: z.object({
       query: z.string().describe("自然语言搜索内容"),
@@ -35,7 +36,9 @@ export function createRAGTool(userId: string) {
         }
 
         console.log(
-          `[RAG Tool] ✅ 找到 ${result.results.length} 条结果 (搜索了 ${result.searchedChunks} 个文档块)`
+          `[RAG Tool] ✅ 找到 ${result.results.length} 条结果 ` +
+            `(召回 ${result.recalledChunks} 条，${result.rerankModel ? `重排 ${result.rerankModel}` : "未重排"}，` +
+            `知识库共 ${result.searchedChunks} 块)`
         );
 
         return {
