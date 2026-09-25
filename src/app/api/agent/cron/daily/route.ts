@@ -17,13 +17,19 @@ import { runLearningAgent } from "@/lib/agent";
 import { createWeeklyReportNotification } from "@/lib/agent/weekly";
 import { cleanupOldNotifications } from "@/lib/notification";
 import { cleanupColdMemories } from "@/lib/memory";
+import { isCronAuthorized } from "@/lib/cron-auth";
 
 export async function GET(request: NextRequest) {
-  // 安全校验
+  // 安全校验（fail-closed：CRON_SECRET 未配置时同样拒绝，见 #4）
   const authHeader = request.headers.get("authorization");
   const expectedSecret = process.env.CRON_SECRET;
 
-  if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
+  if (!isCronAuthorized(authHeader, expectedSecret)) {
+    if (!expectedSecret) {
+      console.error(
+        "[Cron] CRON_SECRET 未配置，已拒绝请求（fail-closed）。请在 .env 设置后再启用 cron。"
+      );
+    }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
