@@ -35,7 +35,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // api/agent/cron 放行：该接口由 cron 无人值守调用，内部用 CRON_SECRET Bearer 鉴权
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*|uploads|api/agent/cron).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\..*|uploads).*)",
   ],
 };

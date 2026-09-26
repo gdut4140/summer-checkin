@@ -8,7 +8,6 @@ import {
   ClockCounterClockwise,
   GitBranch,
   Lightning,
-  Target,
   Timer,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -24,13 +23,11 @@ const typeConfig: Record<
   PLAN_ADJUST: { icon: GitBranch, label: "计划调整", color: "text-primary", bg: "bg-primary/12" },
   REMINDER: { icon: Timer, label: "提醒", color: "text-amber-400", bg: "bg-amber-500/12" },
   ANALYSIS: { icon: Lightning, label: "分析", color: "text-blue-400", bg: "bg-blue-500/12" },
-  TASK_CREATE: { icon: Target, label: "新建任务", color: "text-primary", bg: "bg-primary/12" },
 };
 
 const filterTypes: { key: DecisionType | "all"; label: string }[] = [
   { key: "all", label: "全部" },
   { key: "PLAN_ADJUST", label: "计划调整" },
-  { key: "TASK_CREATE", label: "新建任务" },
   { key: "REMINDER", label: "提醒" },
   { key: "ANALYSIS", label: "分析" },
 ];

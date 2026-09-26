@@ -21,7 +21,7 @@ COPY prisma.config.ts ./
 COPY prisma/schema.prisma ./prisma/
 COPY tsconfig.json ./
 
-# 生成 Prisma Client（输出到 src/lib/generated/prisma/）
+# 生成 Prisma Client（输出到 prisma/generated/，见 schema.prisma 的 generator）
 # prisma generate 只需 schema 不连数据库，给个占位 DATABASE_URL
 RUN DATABASE_URL=mysql://dummy:dummy@localhost:3306/dummy npx prisma generate
 

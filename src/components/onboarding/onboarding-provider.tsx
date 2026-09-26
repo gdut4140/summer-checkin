@@ -38,7 +38,8 @@ function storageKey(userId: string) {
   return `${STORAGE_PREFIX}.${TOUR_VERSION}.${userId}`;
 }
 
-function hasSeen(userId: string) {
+/** 该用户是否看过本版本的新手引导（公告弹窗据此决定要不要先等引导播完） */
+export function hasSeenTour(userId: string) {
   try {
     return window.localStorage.getItem(storageKey(userId)) === "1";
   } catch {
@@ -188,7 +189,12 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
           activeRef.current = false;
           driverRef.current = null;
           removeNavExpand();
-          if (!navigatingRef.current) markSeen(userId);
+          if (!navigatingRef.current) {
+            markSeen(userId);
+            // 引导真的结束了（完成 / 关闭 / Esc 都算；段间跳页不算）。
+            // 公告弹窗挂在这个事件上，保证"先引导完，再弹公告"。
+            window.dispatchEvent(new CustomEvent("tour:finished"));
+          }
         },
       });
       return d;
@@ -250,7 +256,7 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
 
     if (!autoStartedRef.current) {
       autoStartedRef.current = true;
-      if (!hasSeen(userId)) {
+      if (!hasSeenTour(userId)) {
         // 首屏多等一拍（背景视频 / 组件挂载），再自动开始
         const t = window.setTimeout(() => startTour(), 900);
         return () => window.clearTimeout(t);

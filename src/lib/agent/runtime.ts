@@ -31,7 +31,7 @@ import { createDecision } from "./decisions";
 import { getRelevantMemories, formatMemoriesForPrompt, touchMemories } from "@/lib/memory";
 import { createNotification } from "@/lib/notification";
 import { generateDailyReport, formatReportAsMarkdown } from "./report";
-import type { Prisma } from "@/lib/generated/prisma/client";
+import type { Prisma } from "@prisma-generated/client";
 
 // ---- 类型定义 ----
 
@@ -99,7 +99,7 @@ export interface AnalysisFinding {
 
 /** 行动项（Plan 阶段的输出） */
 export interface AgentAction {
-  type: "ADJUST_PLAN" | "CREATE_TASK" | "SEND_REMINDER" | "GENERATE_REPORT" | "ENCOURAGE";
+  type: "ADJUST_PLAN" | "SEND_REMINDER" | "GENERATE_REPORT" | "ENCOURAGE";
   priority: "high" | "normal" | "low";
   reason: string;
   detail: string;
@@ -435,10 +435,10 @@ export interface ExecutionResult {
 /**
  * 执行一条 Agent 行动
  *
- * Phase 3 升级：
+ * 所有动作都只产生 Notification，不改动用户的计划 / 任务数据——
+ * 要改什么由用户自己决定。
  * - SEND_REMINDER → 创建真实的 Notification 记录
  * - GENERATE_REPORT → 生成结构化日报并保存为 Notification
- * - CREATE_TASK → 尝试自动创建任务（查找活跃计划）
  * - ADJUST_PLAN → 创建通知提醒用户确认调整
  */
 export async function executeAction(
@@ -464,46 +464,6 @@ export async function executeAction(
         success: true,
         message: action.detail,
       };
-
-    case "CREATE_TASK":
-      // 尝试自动创建任务：查找用户的活跃计划，添加到第一个计划
-      try {
-        const activePlan = await prisma.plan.findFirst({
-          where: { userId, status: "active" },
-          orderBy: { createdAt: "desc" },
-        });
-
-        if (!activePlan) {
-          return {
-            type: action.type,
-            success: false,
-            message: `无法自动创建任务（用户无活跃计划）：${action.detail}`,
-          };
-        }
-
-        const task = await prisma.planTask.create({
-          data: {
-            planId: activePlan.id,
-            userId,
-            title: action.detail.slice(0, 160),
-            description: `系统自动创建 — ${action.reason}`,
-            category: "study",
-            priority: action.priority,
-          },
-        });
-
-        return {
-          type: action.type,
-          success: true,
-          message: `已在计划「${activePlan.name}」中自动创建任务「${task.title}」`,
-        };
-      } catch (error) {
-        return {
-          type: action.type,
-          success: false,
-          message: `创建任务失败：${error instanceof Error ? error.message : "未知错误"}`,
-        };
-      }
 
     case "ADJUST_PLAN":
       try {
@@ -795,7 +755,6 @@ export async function runLearningAgent(
         const decisionType =
           action.type === "ADJUST_PLAN" ? "PLAN_ADJUST" :
           action.type === "SEND_REMINDER" ? "REMINDER" :
-          action.type === "CREATE_TASK" ? "TASK_CREATE" :
           "ANALYSIS";
         await createDecision({
           userId,

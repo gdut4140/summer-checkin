@@ -65,19 +65,17 @@ export const ModelName = {
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
   AgentApproval: 'AgentApproval',
-  AgentToolCall: 'AgentToolCall',
   AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
-  AIHistory: 'AIHistory',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
   KnowledgeDoc: 'KnowledgeDoc',
   Notification: 'Notification',
-  AgentSchedule: 'AgentSchedule',
   ChatMessage: 'ChatMessage',
   PlanTemplate: 'PlanTemplate',
   DocumentTemplate: 'DocumentTemplate',
-  TokenUsage: 'TokenUsage'
+  TokenUsage: 'TokenUsage',
+  Announcement: 'Announcement'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -106,6 +104,7 @@ export const UserScalarFieldEnum = {
   bio: 'bio',
   theme: 'theme',
   vip: 'vip',
+  announcementSeenOn: 'announcementSeenOn',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -236,6 +235,8 @@ export type AvatarChangeScalarFieldEnum = (typeof AvatarChangeScalarFieldEnum)[k
 export const ConversationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  surface: 'surface',
+  refId: 'refId',
   title: 'title',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -308,24 +309,6 @@ export const AgentApprovalScalarFieldEnum = {
 export type AgentApprovalScalarFieldEnum = (typeof AgentApprovalScalarFieldEnum)[keyof typeof AgentApprovalScalarFieldEnum]
 
 
-export const AgentToolCallScalarFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  stepId: 'stepId',
-  toolName: 'toolName',
-  status: 'status',
-  idempotencyKey: 'idempotencyKey',
-  input: 'input',
-  output: 'output',
-  error: 'error',
-  startedAt: 'startedAt',
-  completedAt: 'completedAt',
-  createdAt: 'createdAt'
-} as const
-
-export type AgentToolCallScalarFieldEnum = (typeof AgentToolCallScalarFieldEnum)[keyof typeof AgentToolCallScalarFieldEnum]
-
-
 export const AgentDecisionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -353,17 +336,6 @@ export const UserMemoryScalarFieldEnum = {
 } as const
 
 export type UserMemoryScalarFieldEnum = (typeof UserMemoryScalarFieldEnum)[keyof typeof UserMemoryScalarFieldEnum]
-
-
-export const AIHistoryScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  message: 'message',
-  response: 'response',
-  createdAt: 'createdAt'
-} as const
-
-export type AIHistoryScalarFieldEnum = (typeof AIHistoryScalarFieldEnum)[keyof typeof AIHistoryScalarFieldEnum]
 
 
 export const DocumentScalarFieldEnum = {
@@ -417,21 +389,6 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
-export const AgentScheduleScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  type: 'type',
-  cron: 'cron',
-  enabled: 'enabled',
-  lastRunAt: 'lastRunAt',
-  nextRunAt: 'nextRunAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type AgentScheduleScalarFieldEnum = (typeof AgentScheduleScalarFieldEnum)[keyof typeof AgentScheduleScalarFieldEnum]
-
-
 export const ChatMessageScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -480,6 +437,19 @@ export const TokenUsageScalarFieldEnum = {
 } as const
 
 export type TokenUsageScalarFieldEnum = (typeof TokenUsageScalarFieldEnum)[keyof typeof TokenUsageScalarFieldEnum]
+
+
+export const AnnouncementScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  body: 'body',
+  published: 'published',
+  popup: 'popup',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AnnouncementScalarFieldEnum = (typeof AnnouncementScalarFieldEnum)[keyof typeof AnnouncementScalarFieldEnum]
 
 
 export const SortOrder = {

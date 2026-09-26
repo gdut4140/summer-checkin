@@ -8,7 +8,14 @@ interface DocStudioClientProps {
   docId: string;
   title: string;
   initialContent: string;
+  /** 只读：不可编辑、不可重命名。知识库文档用它（改了会与已切好的分片对不上），文档区不用 */
   readOnly?: boolean;
+  /**
+   * 是否开放 AI 面板。缺省跟随 readOnly（只读则不开）。
+   * 之所以单独留一个开关：「能不能改」和「能不能用 AI」本是两件事，
+   * 之前把 AI 绑死在 readOnly 上，导致文档一旦只读就连 AI 一起没了。
+   */
+  enableAi?: boolean;
   backHref?: string;
   backLabel?: string;
   backNavigation?: "push" | "replace";
@@ -19,11 +26,13 @@ export function DocStudioClient({
   title: initialTitle,
   initialContent,
   readOnly = false,
+  enableAi,
   backHref = "/docs",
   backLabel = "返回文档列表",
   backNavigation = "push",
 }: DocStudioClientProps) {
   const [title, setTitle] = useState(initialTitle);
+  const aiEnabled = enableAi ?? !readOnly;
 
   const handleSave = useCallback(
     async (content: string) => {
@@ -70,10 +79,14 @@ export function DocStudioClient({
         backHref={backHref}
         backLabel={backLabel}
         backNavigation={backNavigation}
-        ai={readOnly ? undefined : {
-          context: { kind: "doc", refId: docId },
-          fetchLatest,
-        }}
+        ai={
+          aiEnabled
+            ? {
+                context: { kind: "doc", refId: docId },
+                fetchLatest,
+              }
+            : undefined
+        }
         readOnly={readOnly}
         // 进入文档工作台直接是专注阅读模式；想对照编辑时点顶栏"专注阅读"切换
         defaultMode="focus"

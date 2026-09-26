@@ -13,15 +13,11 @@
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@/lib/generated/prisma/client";
+import type { Prisma } from "@prisma-generated/client";
 
 // ---- 类型 ----
 
-export type DecisionType =
-  | "PLAN_ADJUST"
-  | "REMINDER"
-  | "ANALYSIS"
-  | "TASK_CREATE";
+export type DecisionType = "PLAN_ADJUST" | "REMINDER" | "ANALYSIS";
 
 export type DecisionStatus =
   | "executed"

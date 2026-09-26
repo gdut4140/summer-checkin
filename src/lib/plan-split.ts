@@ -79,7 +79,7 @@ async function tasksNeedUpdate(
       ],
       ...extraBody,
     }),
-    { userId, surface: "split", enforce: true }
+    { userId, surface: "split" }
   );
   const text = response.choices[0]?.message?.content?.trim();
   if (!text) return true; // 拿不到判断结果时保守处理：当作需要更新
@@ -164,7 +164,7 @@ export async function splitPlanTasks(
             ],
             ...extraBody,
           }),
-        { userId, surface: "split", enforce: true }
+        { userId, surface: "split" }
       );
       const text = response.choices[0]?.message?.content?.trim();
       if (!text) continue;

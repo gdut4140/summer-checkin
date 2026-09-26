@@ -66,10 +66,17 @@ export async function POST(request: NextRequest) {
       const lastMessage = messages[messages.length - 1];
       const title = await generateChatTitle(lastMessage.content, user.id);
 
+      // 来源界面 + 归属对象：智能体页 / 文档工作台 / 计划工作台三者严格分开。
+      // studioContext.kind 本身就是 "doc" | "plan"，与 surface 取值一一对应；
+      // refId 钉住具体文档或计划，工作台据此取回自己的历史（不再依赖 localStorage）。
+      const surface = studioContext?.kind === "plan" ? "plan" : studioContext ? "doc" : "agent";
+
       const conversation = await prisma.conversation.create({
         data: {
           userId: user.id,
           title,
+          surface,
+          refId: studioContext?.refId ?? null,
         },
       });
       activeConversationId = conversation.id;
@@ -273,14 +280,6 @@ export async function POST(request: NextRequest) {
             data: { updatedAt: new Date() },
           });
 
-          await prisma.aIHistory.create({
-            data: {
-              userId: user.id,
-              message: lastUserMsg.content,
-              response: finalText,
-            },
-          });
-
           console.log("[AI] onEnd: 保存成功 ✅");
 
           // ============================================================
@@ -299,6 +298,8 @@ export async function POST(request: NextRequest) {
       },
     }), {
       userId: user.id,
+      // 记账口径：文档与计划合并为 studio（与 conversation.surface 的三值口径不同，
+      // 那边要区分到具体文档/计划，这边只需按界面统计；历史数据也按这个口径落库）
       surface: studioContext ? "studio" : "agent",
       enforce: true,
     });

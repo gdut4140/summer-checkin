@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState, type CSSProperties } from "react";
+
+/**
+ * SSR 期间没有 window，useLayoutEffect 会告警且不执行；服务端退化成 useEffect。
+ * 客户端仍是 layout effect —— 这是「读 localStorage 又不闪屏」的关键。
+ */
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /**
  * 允许 CSS 自定义属性（--x）的 style 对象。
@@ -110,8 +116,11 @@ function parsePersisted(raw: string | null): Persisted {
 }
 
 /**
- * 客户端同步读取 localStorage（在 useState 初始化器中调用，避免首帧→useEffect 两阶段渲染闪屏）
- * SSR / 非浏览器环境返回 DEFAULT
+ * 读取本地存储的主题偏好。
+ *
+ * **只能在挂载之后调用**（由 useStudioTheme 里的 layout effect 调），
+ * 不能在 useState 初始化器里调——那会让客户端首帧与服务端不一致，触发 hydration 失败。
+ * SSR / 非浏览器环境返回 DEFAULT。
  *
  * 规则：
  *  1. 已有 studio-theme:v2 记录 → 尊重用户在 Studio 内部的独立选择，直接用
@@ -138,6 +147,15 @@ function readInitialPersisted(): Persisted {
   }
 }
 
+/** 固定透明度 / 区间限制套餐 → 把存下来的透明度规整到合法值 */
+function normalizeOpacity(preset: StudioPreset, opacity: number): number {
+  const fixed = FIXED_OPACITY_PRESETS[preset];
+  if (fixed !== undefined) return fixed;
+  const range = OPACITY_RANGE_PRESETS[preset];
+  if (range && (opacity < range.min || opacity > range.max)) return range.default;
+  return opacity;
+}
+
 export function useStudioTheme(): {
   preset: StudioPreset;
   setPreset: (p: StudioPreset) => void;
@@ -153,17 +171,32 @@ export function useStudioTheme(): {
   opacityMax: number;
   opacityLabel: string;
 } {
-  // 首帧同步读取 localStorage（初始化器在客户端同步执行，SSR 走 DEFAULT）
-  // 避免 useEffect → setState 的两阶段渲染闪屏
-  const [preset, setPresetState] = useState<StudioPreset>(() => readInitialPersisted().preset);
-  const [opacity, setOpacityState] = useState<number>(() => {
+  /**
+   * 首帧一律用 DEFAULT，**不能**在这里同步读 localStorage。
+   *
+   * 原因：服务端读不到 localStorage，只能渲染 DEFAULT；客户端首帧若直接读，
+   * 两边渲染出的 preset 就不同（服务端「雨林」/ 客户端「暖云」），React 判定
+   * hydration 失败并把这棵子树整个在客户端重建——控制台报 hydration mismatch，
+   * 用户看到的还是一闪，等于两头不讨好。首次访问的用户跟随全局场景（cloud→暖云）
+   * 时同样会踩到。
+   *
+   * 现在的做法：首帧与 SSR 一致 → 挂载后在 layout effect 里读并套用。
+   * layout effect 在浏览器绘制前执行，中间态不会被画出来，所以既不报错也不闪。
+   */
+  const [persisted, setPersisted] = useState<Persisted>(DEFAULT);
+  const { preset, opacity } = persisted;
+
+  useIsomorphicLayoutEffect(() => {
     const initial = readInitialPersisted();
-    const fixed = FIXED_OPACITY_PRESETS[initial.preset];
-    if (fixed !== undefined) return fixed;
-    const range = OPACITY_RANGE_PRESETS[initial.preset];
-    if (range && (initial.opacity < range.min || initial.opacity > range.max)) return range.default;
-    return initial.opacity;
-  });
+    const next: Persisted = {
+      preset: initial.preset,
+      opacity: normalizeOpacity(initial.preset, initial.opacity),
+    };
+    // 没存过主题时 next 与 DEFAULT 相同，避免白跑一次渲染
+    setPersisted((prev) =>
+      prev.preset === next.preset && prev.opacity === next.opacity ? prev : next
+    );
+  }, []);
 
   // 回写 localStorage（preset / opacity 变化时）
   useEffect(() => {
@@ -211,22 +244,22 @@ export function useStudioTheme(): {
   }, [theme, bgType, bgSrc, opacity, hasBg, fixedOpacity]);
 
   function setPreset(p: StudioPreset) {
-    setPresetState(p);
-    const fixed = FIXED_OPACITY_PRESETS[p];
-    if (fixed !== undefined) {
-      setOpacityState(fixed);
-    } else {
+    setPersisted((prev) => {
+      const fixed = FIXED_OPACITY_PRESETS[p];
+      if (fixed !== undefined) return { preset: p, opacity: fixed };
       const range = OPACITY_RANGE_PRESETS[p];
-      if (range && (opacity < range.min || opacity > range.max)) {
-        setOpacityState(range.default);
+      if (range && (prev.opacity < range.min || prev.opacity > range.max)) {
+        return { preset: p, opacity: range.default };
       }
-    }
+      return { preset: p, opacity: prev.opacity };
+    });
   }
   function setOpacity(n: number) {
     if (fixedOpacity !== undefined) return; // 固定透明度套餐不允许调整
     const min = rangeConfig?.min ?? 0;
     const max = rangeConfig?.max ?? 100;
-    setOpacityState(Math.min(max, Math.max(min, Math.round(n))));
+    const next = Math.min(max, Math.max(min, Math.round(n)));
+    setPersisted((prev) => (prev.opacity === next ? prev : { ...prev, opacity: next }));
   }
 
   return {

@@ -20,7 +20,16 @@ const QUICK_PROMPTS = [
   "把这份计划的节奏安排得更合理",
   "帮我把目标拆解成更具体的任务",
   "给这篇文档补充一段学习笔记",
-];
+];/**
+ * 一段对话归属哪个工作台的哪个对象。
+ * 抽成具名类型是为了让 MarkdownStudio 与面板共用同一份定义——
+ * 之前两边各写一遍字面量类型，`kind` 从 Record<string,string> 取出来是 string，
+ * 不做这层收窄就传不进来（类型检查会拦下）。
+ */
+export interface AiChatThread {
+  surface: "doc" | "plan";
+  refId: string;
+}
 
 interface AiChatPanelProps {
   /** 当前文档内容（发送消息时随 studioContext 携带） */
@@ -33,8 +42,15 @@ interface AiChatPanelProps {
   quote?: string | null;
   /** 清除引用 */
   onClearQuote?: () => void;
-  /** 会话历史存储键（同一文档跨刷新复用同一会话），如 "plan:xxx" */
-  storageKey?: string;
+  /**
+   * 这段对话归属哪个工作台的哪个对象（文档 / 计划）。
+   *
+   * 以前这里是 storageKey，靠浏览器 localStorage 记住「这篇文档对应哪条对话」——
+   * 换设备 / 清缓存就断，点「新对话」还会把上一条变成谁也够不着的孤儿。
+   * 现在归属关系落在服务端的 conversation.surface + refId 上，面板每次挂载
+   * 直接问服务端要，浏览器不留任何状态。
+   */
+  thread?: AiChatThread;
   /** 对话面板是否处于拉宽状态（顶部按钮切换） */
   aiExpanded?: boolean;
   /** 切换拉宽/收起 */
@@ -47,15 +63,13 @@ interface AiChatPanelProps {
   starterPrompt?: string;
 }
 
-const STORAGE_PREFIX = "studio-chat:";
-
 export function AiChatPanel({
   document,
   context,
   onStreamEnd,
   quote,
   onClearQuote,
-  storageKey,
+  thread,
   aiExpanded = false,
   onToggleAiExpanded,
   studioRoot: studioRootProp,
@@ -64,7 +78,6 @@ export function AiChatPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(starterPrompt ?? "");
   const [loading, setLoading] = useState(false);
-  const [historyLoading, setHistoryLoading] = useState(!!storageKey);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -88,53 +101,55 @@ export function AiChatPanel({
     onStreamEndRef.current = onStreamEnd;
   });
 
-  // 挂载时回载会话历史（同一文档的对话跨刷新保留）
-  useEffect(() => {
-    if (!storageKey) return;
-    let cancelled = false;
-    const savedId = window.localStorage.getItem(STORAGE_PREFIX + storageKey);
-    const load = savedId
-      ? fetch(`/api/conversations/${savedId}`).then((res) => {
-          if (!res.ok) throw new Error("会话不存在");
-          return res.json();
-        })
-      : Promise.resolve({ messages: [] });
+  // 挂载时从服务端取回「这篇文档/计划」的对话（取最近一条）。
+  // 归属关系存在 conversation.surface + refId 上，浏览器不再保存任何会话状态。
+  //
+  // threadKey 把 surface + refId 压成一个字符串，既方便做依赖，也方便判断
+  // 「这一条载入过没有」——载入中状态由它和 loadedThreadKey 推导，
+  // 不在 effect 里同步 setState（那会多一轮级联渲染）。
+  const threadSurface = thread?.surface;
+  const threadRefId = thread?.refId;
+  const threadKey = threadSurface && threadRefId ? `${threadSurface}:${threadRefId}` : null;
+  const [loadedThreadKey, setLoadedThreadKey] = useState<string | null>(null);
+  const historyLoading = threadKey !== null && loadedThreadKey !== threadKey;
 
-    load
-      .then((data) => {
+  useEffect(() => {
+    if (!threadKey || !threadSurface || !threadRefId) return;
+    let cancelled = false;
+
+    const query = `surface=${threadSurface}&refId=${encodeURIComponent(threadRefId)}`;
+    fetch(`/api/conversations?${query}`)
+      .then((res) => (res.ok ? res.json() : { conversations: [] }))
+      .then(async (data: { conversations?: { id: string }[] }) => {
+        const latest = data.conversations?.[0];
+        if (!latest) return;
+        const res = await fetch(`/api/conversations/${latest.id}`);
+        if (!res.ok) throw new Error("会话不存在");
+        const detail = (await res.json()) as {
+          messages?: { id: string; role: "user" | "assistant"; content: string; createdAt: string }[];
+        };
         if (cancelled) return;
-        const list = (data.messages ?? []) as {
-          id: string;
-          role: "user" | "assistant";
-          content: string;
-          createdAt: string;
-        }[];
-        if (savedId && list.length > 0) {
-          conversationIdRef.current = savedId;
-          setMessages(
-            list.map((m) => ({
-              id: m.id,
-              role: m.role,
-              content: m.content,
-              createdAt: new Date(m.createdAt),
-            }))
-          );
-        } else if (savedId) {
-          window.localStorage.removeItem(STORAGE_PREFIX + storageKey);
-        }
+        conversationIdRef.current = latest.id;
+        setMessages(
+          (detail.messages ?? []).map((m) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            createdAt: new Date(m.createdAt),
+          }))
+        );
       })
       .catch(() => {
-        if (!cancelled && savedId) {
-          window.localStorage.removeItem(STORAGE_PREFIX + storageKey);
-        }
+        // 取不到就当作新对话，不打断使用
       })
       .finally(() => {
-        if (!cancelled) setHistoryLoading(false);
+        if (!cancelled) setLoadedThreadKey(threadKey);
       });
+
     return () => {
       cancelled = true;
     };
-  }, [storageKey]);
+  }, [threadKey, threadSurface, threadRefId]);
 
   // 进入文档工作室即聚焦输入框；「新建计划」引导语在 useState 初始化时预填
   useEffect(() => {
@@ -203,16 +218,11 @@ export function AiChatPanel({
         const data = await res.json().catch(() => null);
         throw new Error(data?.error ?? "AI 请求失败");
       }
-      // 记住会话 id：同一面板内的多轮消息归入同一会话（保存到对话历史）
+      // 记住会话 id：同一面板内的多轮消息归入同一会话（保存到对话历史）。
+      // 归属（哪篇文档/计划）由服务端在建对话时记在 surface + refId 上，这里只留内存值。
       const newConversationId = res.headers.get("X-Conversation-Id");
       if (newConversationId) {
         conversationIdRef.current = newConversationId;
-        if (storageKey) {
-          window.localStorage.setItem(
-            STORAGE_PREFIX + storageKey,
-            newConversationId
-          );
-        }
       }
       const reader = res.body?.getReader();
       if (!reader) throw new Error("浏览器不支持流式读取");
@@ -246,7 +256,8 @@ export function AiChatPanel({
     setLoading(false);
   }
 
-  // 新对话：直接清空当前会话、覆盖旧会话，不保存历史
+  // 新对话：清空当前会话，下次发送时服务端会为这篇文档/计划新建一条
+  // （旧对话仍挂在同一 refId 下，不再像以前那样成为够不着的孤儿）
   function newChat() {
     abortRef.current?.abort();
     setLoading(false);
@@ -254,9 +265,6 @@ export function AiChatPanel({
     setInput("");
     conversationIdRef.current = null;
     requestAnimationFrame(() => inputRef.current?.focus());
-    if (storageKey) {
-      window.localStorage.removeItem(STORAGE_PREFIX + storageKey);
-    }
   }
 
   // 请求新对话：有记录时先弹出局部确认框

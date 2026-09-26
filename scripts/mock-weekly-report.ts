@@ -7,7 +7,7 @@
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env" });
 loadEnv({ path: ".env.local", override: true });
-import { PrismaClient } from "../src/lib/generated/prisma/client";
+import { PrismaClient } from "../prisma/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const email = process.argv[2];

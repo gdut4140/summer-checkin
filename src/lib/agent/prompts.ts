@@ -10,7 +10,7 @@
 // 设计原则：
 // ① 角色转变：从"问答机器人"到"学习教练"
 // ② 数据驱动：决策必须基于真实学习数据，不随意鼓励
-// ③ 可执行：输出是具体行动（调整计划/创建任务/发送提醒）
+// ③ 可执行：输出是具体行动（调整计划/发送提醒/生成报告/鼓励）
 // ============================================================
 
 /**
@@ -61,7 +61,7 @@ export const AGENT_COACH_PROMPT = `你是 Summer，一个贴心的学习伙伴�
   ],
   "actions": [
     {
-      "type": "ADJUST_PLAN" | "CREATE_TASK" | "SEND_REMINDER" | "GENERATE_REPORT" | "ENCOURAGE",
+      "type": "ADJUST_PLAN" | "SEND_REMINDER" | "GENERATE_REPORT" | "ENCOURAGE",
       "priority": "high" | "normal" | "low",
       "reason": "为什么要做这个动作（自然的语气）",
       "detail": "具体做什么，像朋友给建议一样"

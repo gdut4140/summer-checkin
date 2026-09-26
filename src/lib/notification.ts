@@ -198,12 +198,17 @@ export async function deleteNotification(
 // ---- 清理旧通知 ----
 
 /**
- * 清理 N 天前的已读通知（防止数据膨胀）
- * 由 cron job 或手动调用
+ * 清理 N 天前的通知（防止数据膨胀），已读未读一并删除。
+ *
+ * 只保留最近 N 天：通知是易耗内容，7 天前还没被点开的基本就是没打动用户，
+ * 留着只占空间。用户真正做过什么（打卡、改计划）记在各自的表里，不会因为
+ * 删通知而丢失。
+ *
+ * 由每日分析流程在跑完后调用（见 /api/agent/daily-run）。
  */
 export async function cleanupOldNotifications(
   userId: string,
-  olderThanDays: number = 30
+  olderThanDays: number = 7
 ): Promise<number> {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - olderThanDays);
@@ -211,7 +216,6 @@ export async function cleanupOldNotifications(
   const result = await prisma.notification.deleteMany({
     where: {
       userId,
-      read: true,
       createdAt: { lt: cutoff },
     },
   });

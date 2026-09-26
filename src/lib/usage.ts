@@ -26,9 +26,9 @@ export interface TodayUsage {
   unlimited: boolean;
 }
 
-/** 每日限额（env AI_TOKEN_LIMIT，0 = 不限），默认 20 万 token */
+/** 每日限额（env AI_TOKEN_LIMIT，0 = 不限），默认 100 万 token */
 export function usageLimit(): number {
-  const raw = Number(process.env.AI_TOKEN_LIMIT ?? 200000);
+  const raw = Number(process.env.AI_TOKEN_LIMIT ?? 1000000);
   return Number.isFinite(raw) && raw > 0 ? raw : 0;
 }
 
@@ -46,17 +46,30 @@ export function buildTodayUsage(limit: number, isVip: boolean, used: number): To
   return { used, limit, remaining: Math.max(limit - used, 0), unlimited: false };
 }
 
+/**
+ * 计入用户每日限额的 surface —— 只有「用户主动发起的 AI 对话」。
+ *
+ * 其余 surface（title / memory / split / agent-bg）是系统自己产生的开销：
+ * 用户没点任何东西就烧掉的 token 不该记在他头上。它们仍然照常记账
+ * （recordUsage 不动，库里查得到总消耗），只是不计入限额与精力条。
+ */
+export const COUNTED_SURFACES = ["agent", "studio", "chatroom"] as const;
+
 export async function getTodayUsage(userId: string): Promise<TodayUsage> {
   const limit = usageLimit();
   const [user, agg] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { vip: true } }),
     prisma.tokenUsage.aggregate({
-      where: { userId, createdAt: { gte: startOfDay(new Date()) } },
+      where: {
+        userId,
+        createdAt: { gte: startOfDay(new Date()) },
+        surface: { in: [...COUNTED_SURFACES] },
+      },
       _sum: { totalTokens: true },
     }),
   ]);
-  // 用量始终记账（recordUsage 不动）：保留统计，也让精力条能显示真实消耗，
-  // 而不是因为它不限额就失去观测。这里只改「限额判断」这一件事。
+  // 只汇总 COUNTED_SURFACES：用量始终记账（recordUsage 不动），库里查得到
+  // 真实总消耗；这里只改「记在用户头上的是哪部分」这一件事。
   return buildTodayUsage(limit, user?.vip ?? false, agg._sum.totalTokens ?? 0);
 }
 

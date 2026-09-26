@@ -41,16 +41,25 @@ export function ProfileHeader({ user }: Props) {
       <section className="product-panel relative overflow-hidden px-5 py-6 md:px-7 md:py-8">
           <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary to-primary/70" />
           <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <button
-              onClick={() => setAvatarOpen(true)}
-              className="group relative shrink-0"
-              title="更换头像"
-            >
-              <AppAvatar image={avatarId} name={user.name} size="lg" />
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100">
-                <PencilSimple className="h-5 w-5 text-white" weight="bold" />
-              </div>
-            </button>
+            <div className="flex shrink-0 flex-col items-center gap-2.5">
+              <button
+                onClick={() => setAvatarOpen(true)}
+                className="group relative"
+                title="更换头像"
+              >
+                <AppAvatar image={avatarId} name={user.name} size="lg" />
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100">
+                  <PencilSimple className="h-5 w-5 text-white" weight="bold" />
+                </div>
+              </button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAvatarOpen(true)}
+              >
+                更换头像
+              </Button>
+            </div>
 
             <div className="min-w-0 flex-1">
               <p className="product-eyebrow">Personal space</p>

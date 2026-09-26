@@ -30,7 +30,7 @@ import {
 } from "@phosphor-icons/react";
 import { EditorPane, type EditorPaneHandle, type EditorPaneMode } from "./editor-pane";
 import { OutlinePanel } from "./outline-panel";
-import { AiChatPanel } from "./ai-chat-panel";
+import { AiChatPanel, type AiChatThread } from "./ai-chat-panel";
 import { extractHeadings } from "@/lib/studio/outline";
 import { useStudioTheme, type StudioPreset, type CSSVarStyle } from "./use-studio-theme";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -202,6 +202,17 @@ export function MarkdownStudio({
   const docTourRef = useRef<ReturnType<typeof driver> | null>(null);
   const flashTimerRef = useRef<number | null>(null);
   const aiUndoContentRef = useRef<string | null>(null);
+
+  /** AI 面板归属的文档/计划：面板据此从服务端取回自己的历史（不依赖 localStorage） */
+  const aiThread = useMemo<AiChatThread | undefined>(() => {
+    const kind = ai?.context?.kind;
+    const refId = ai?.context?.refId;
+    // 正向判断才能把 string 收窄成字面量联合（反向排除收窄不了 string）
+    if (kind === "doc" || kind === "plan") {
+      if (refId) return { surface: kind, refId };
+    }
+    return undefined;
+  }, [ai?.context?.kind, ai?.context?.refId]);
 
   const contentRef = useRef(document.content);
   const dirtyRef = useRef(false);
@@ -387,11 +398,19 @@ export function MarkdownStudio({
   }, []);
 
   const headings = useMemo(() => extractHeadings(content), [content]);
+  // 目录高亮：阅读面板滚动时由 EditorPane 上报当前章节，点击目录时这里先行设置
+  const [activeHeadingIndex, setActiveHeadingIndex] = useState<number | null>(null);
 
-  const handleNavigate = useCallback((heading: { text: string }) => {
-    editorRef.current?.scrollToHeading(heading.text);
-    setMobileTab("doc");
-  }, []);
+  const handleNavigate = useCallback(
+    (heading: { text: string }) => {
+      editorRef.current?.scrollToHeading(heading.text);
+      // 用对象同一性找下标：headings 与 EditorPane 拿到的是同一个数组
+      const index = headings.indexOf(heading as (typeof headings)[number]);
+      if (index >= 0) setActiveHeadingIndex(index);
+      setMobileTab("doc");
+    },
+    [headings]
+  );
 
   // 框选文字 → 作为引用交给 AI（引用条展示，不塞输入框），并自动打开 AI 侧边栏
   const handleSelectionAction = useCallback((text: string) => {
@@ -775,7 +794,11 @@ export function MarkdownStudio({
               >
                 <PanelGrip onPointerDown={(e) => startPanelDrag(e, "outline")} />
                 <div className="flex h-full w-full md:w-56">
-                  <OutlinePanel headings={headings} onNavigate={handleNavigate} />
+                  <OutlinePanel
+                    headings={headings}
+                    onNavigate={handleNavigate}
+                    activeIndex={activeHeadingIndex}
+                  />
                 </div>
               </div>
             );
@@ -801,6 +824,8 @@ export function MarkdownStudio({
                   onSelectionAction={handleSelectionAction}
                   readOnly={readOnly}
                   selectionActionEnabled={aiEnabled}
+                  headings={headings}
+                  onActiveHeadingIndexChange={setActiveHeadingIndex}
                 />
               </main>
             );
@@ -827,7 +852,7 @@ export function MarkdownStudio({
                   onStreamEnd={handleAiStreamEnd}
                   quote={quote}
                   onClearQuote={() => setQuote(null)}
-                  storageKey={ai?.context ? `${ai.context.kind ?? "doc"}:${ai.context.refId ?? ""}` : undefined}
+                  thread={aiThread}
                   aiExpanded={aiExpanded}
                   onToggleAiExpanded={() => setAiExpanded((v) => !v)}
                   autoFocus={autoFocusAi}

@@ -1,6 +1,11 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/lib/generated/prisma"
+  // 生成物刻意**不放 src/**：每次 prisma generate 都会重写这一整目录（30+ 文件），
+  // 放在源码树里会让 dev server 的模块图整片失效、把所有页面重新编译一遍，
+  // 也把 src/ 搅得不像源码。prisma/ 下与 schema、手工 SQL 迁移脚本同处一处更好找。
+  // 引用方式：src/ 内用 "@/prisma-generated/client"（见 tsconfig paths），
+  // scripts/ 与 prisma/seed.ts 用相对路径。
+  output   = "./generated"
 }
 
 datasource db {
@@ -19,6 +24,9 @@ model User {
   /// VIP：不受每日 AI token 限额约束（用量仍照常记账）。
   /// 这不是安全边界——它只影响 usage.ts 的限额判断，不改变任何鉴权。
   vip           Boolean  @default(false)
+  /// 上次被弹「每日公告」的日期，格式 YYYY-MM-DD，由客户端按**自己的本地时区**写入。
+  /// 放服务端是为了跨设备 / 跨标签页去重；服务端不解释这个值，只做字符串相等比较。
+  announcementSeenOn String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -27,14 +35,12 @@ model User {
   plans         Plan[]
   checkins      Checkin[]
   studyRecords  StudyRecord[]
-  aiHistories   AIHistory[]
   memories      UserMemory[]
   conversations Conversation[]
   planTasks     PlanTask[]
   agentRuns     AgentRun[]
   decisions     AgentDecision[]
   notifications Notification[]
-  schedules       AgentSchedule[]
   todos           Todo[]
   docs            Document[]
   documents       DocumentChunk[]
@@ -190,6 +196,25 @@ model AvatarChange {
 model Conversation {
   id        String   @id @default(cuid())
   userId    String
+  /**
+   * 界面来源，三选一：agent 智能体页 / doc 文档工作台 / plan 计划工作台。
+   * 三者共用这一张表，靠 surface + refId 才能严格区分。
+   *
+   * 注意：与 tokenusage.surface 是**两套不同的口径**，不要强行对齐——
+   * 那边是记账用的（agent | studio | chatroom | title | memory | split | agent-bg），
+   * 历史数据已按旧口径落库，且把文档与计划合并为 studio 即可满足统计需要；
+   * 这里要区分到「哪篇文档/计划」，粒度更细。
+   */
+  surface   String   @default("agent")
+  /**
+   * 归属对象：surface=doc 时为文档 id，surface=plan 时为计划 id，agent 时为 null。
+   *
+   * 有了这一列，工作台才能直接问服务端「这篇文档/计划的对话是哪一条」——
+   * 在此之前这个绑定只存在浏览器 localStorage 里（studio-chat:doc:<id>），
+   * 换设备 / 清缓存就断，点「新对话」更会把上一条变成谁也够不着的孤儿。
+   * 历史上（2026-09 之前）创建的对话没有这一列的值，无法追溯归属，只能为 null。
+   */
+  refId     String?
   title     String   @default("新对话")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -198,6 +223,8 @@ model Conversation {
   messages ConversationMessage[]
 
   @@index([userId, updatedAt])
+  // 对话的访问路径：userId + surface(+refId) 过滤后按 updatedAt 倒序
+  @@index([userId, surface, refId, updatedAt])
   @@map("conversation")
 }
 
@@ -232,7 +259,6 @@ model AgentRun {
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   steps     AgentStep[]
   approvals AgentApproval[]
-  toolCalls AgentToolCall[]
   decisions AgentDecision[]
 
   @@index([userId, updatedAt])
@@ -257,7 +283,6 @@ model AgentStep {
 
   run       AgentRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
   approvals AgentApproval[]
-  toolCalls AgentToolCall[]
 
   @@unique([runId, stepNumber])
   @@index([runId, status])
@@ -280,28 +305,6 @@ model AgentApproval {
 
   @@index([runId, status])
   @@map("agentapproval")
-}
-
-model AgentToolCall {
-  id             String    @id @default(cuid())
-  runId          String
-  stepId         String?
-  toolName       String
-  status         String    @default("pending")
-  idempotencyKey String?   @unique
-  input          Json?
-  output         Json?
-  error          String?
-  startedAt      DateTime?
-  completedAt    DateTime?
-  createdAt      DateTime  @default(now())
-
-  run  AgentRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
-  step AgentStep? @relation(fields: [stepId], references: [id])
-
-  @@index([runId, status])
-  @@index([runId, toolName])
-  @@map("agenttoolcall")
 }
 
 model AgentDecision {
@@ -341,19 +344,6 @@ model UserMemory {
   @@index([userId, importance])
   @@index([userId, lastUsed])
   @@map("usermemory")
-}
-
-model AIHistory {
-  id        String   @id @default(cuid())
-  userId    String
-  message   String
-  response  String
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@map("aihistory")
 }
 
 model Document {
@@ -419,24 +409,6 @@ model Notification {
   @@map("notification")
 }
 
-model AgentSchedule {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String   @default("daily_review")
-  cron      String   @default("0 9 * * *")
-  enabled   Boolean  @default(true)
-  lastRunAt DateTime?
-  nextRunAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, type])
-  @@index([enabled, nextRunAt])
-  @@map("agentschedule")
-}
-
 model ChatMessage {
   id        String   @id @default(cuid())
   userId    String?
@@ -494,4 +466,20 @@ model TokenUsage {
 
   @@index([userId, createdAt])
   @@map("tokenusage")
+}
+
+/// 全站公告 —— 不按用户存，一份所有人看同一份
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String // Markdown
+  /// 是否对用户可见。发错了改成 false 即可撤下，不必删数据
+  published Boolean  @default(true)
+  /// 是否参与「每天首次进入弹一次」。false 则只出现在铃铛的公告列表里
+  popup     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, createdAt])
+  @@map("announcement")
 }

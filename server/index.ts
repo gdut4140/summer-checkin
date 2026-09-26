@@ -13,6 +13,17 @@ import { prisma } from "./db";
 import { addConnection, removeConnection, broadcast, allConnections, type Connection } from "./room";
 import { toDTO, type AiRole, type ClientMessage, type ReplyToDTO } from "./protocol";
 import { handleAI } from "./ai";
+import { allowedOrigins, isAllowedUpgrade } from "./origin";
+
+// ---- 握手白名单 ----
+// 启动时算一次并打印：这道校验是 fail-closed 的，BETTER_AUTH_URL 配错会让
+// 聊天室整个连不上，所以运维要能在日志里第一眼看到当前允许哪些 Origin。
+const ALLOWED_ORIGINS = allowedOrigins();
+console.log(
+  ALLOWED_ORIGINS.size > 0
+    ? `[ws] 允许的 Origin: ${[...ALLOWED_ORIGINS].join(", ")}`
+    : "[ws] ⚠️ 允许的 Origin 为空（BETTER_AUTH_URL 未配置？）—— 所有握手都会被拒绝"
+);
 
 // ---- HTTP 服务（仅用于健康检查 + WS 升级） ----
 const server = createServer((req, res) => {
@@ -30,6 +41,15 @@ const wss = new WebSocketServer({ noServer: true });
 // ---- 升级阶段鉴权（在握手前拒绝未登录连接） ----
 server.on("upgrade", (req, socket, head) => {
   console.log(`[ws] upgrade: path=${req.url} cookie=${req.headers.cookie ? "有" : "无"}`);
+  // 先校验路径 + Origin，再谈鉴权：不带 cookie 的跨站握手不该走到 session 查询
+  if (!isAllowedUpgrade(req.url, req.headers.origin, ALLOWED_ORIGINS)) {
+    console.warn(
+      `[ws] 拒绝握手: origin=${req.headers.origin ?? "(无)"} path=${req.url}`
+    );
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return;
+  }
   authenticate(req.headers.cookie)
     .then((user) => {
       if (!user) {

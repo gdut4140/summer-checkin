@@ -15,40 +15,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import ReactMarkdown from "react-markdown";
+import { DetailCard } from "@/components/layout/detail-card";
+import { AnnouncementList } from "@/components/layout/announcement-list";
+import { BellRow, formatRelativeTime } from "@/components/layout/bell-row";
 import type { NotificationInfo, NotificationType } from "@/types";
 
-function formatRelativeTime(iso: string): string {
-  const diffMin = Math.floor(
-    (Date.now() - new Date(iso).getTime()) / 60000
-  );
-  if (diffMin < 1) return "刚刚";
-  if (diffMin < 60) return `${diffMin}分钟前`;
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return `${diffHour}小时前`;
-  const diffDay = Math.floor(diffHour / 24);
-  if (diffDay < 7) return `${diffDay}天前`;
-  return new Date(iso).toLocaleDateString("zh-CN");
-}
+/** 面板顶部的两个页签 */
+const TABS = [
+  { key: "notifications", label: "通知" },
+  { key: "announcements", label: "公告" },
+] as const;
 
 const typeMeta: Record<
   NotificationType,
-  { icon: typeof Bell; label: string; tint: string }
+  { icon: typeof Bell; label: string }
 > = {
-  reminder: { icon: BellRinging, label: "提醒", tint: "bg-primary/12 text-primary" },
-  analysis: { icon: ChartBar, label: "分析", tint: "bg-primary/10 text-primary" },
-  report: { icon: Newspaper, label: "报告", tint: "bg-primary/8 text-primary" },
-  encouragement: { icon: Fire, label: "鼓励", tint: "bg-primary/14 text-primary" },
-  system: { icon: Gear, label: "系统", tint: "bg-foreground/[0.06] text-muted-foreground" },
+  reminder: { icon: BellRinging, label: "提醒" },
+  analysis: { icon: ChartBar, label: "分析" },
+  report: { icon: Newspaper, label: "报告" },
+  encouragement: { icon: Fire, label: "鼓励" },
+  system: { icon: Gear, label: "系统" },
 };
 
 export function NotificationBell() {
@@ -56,6 +44,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<NotificationInfo[]>([]);
   const [open, setOpen] = useState(false);
   const [viewing, setViewing] = useState<NotificationInfo | null>(null);
+  const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("notifications");
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -138,16 +127,39 @@ export function NotificationBell() {
           align="end"
           className="w-80 rounded-xl border border-foreground/10 bg-background/98 p-0 shadow-2xl backdrop-blur-2xl"
         >
-          <div className="flex items-center justify-between px-4 py-3">
-            <span className="text-sm font-semibold text-foreground">通知</span>
-            {unread > 0 && (
-              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
-                {unread} 条未读
-              </span>
-            )}
+          <div
+            role="tablist"
+            className="flex items-center gap-1 border-b border-foreground/8 px-2"
+          >
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => setTab(t.key)}
+                className={`relative flex items-center gap-1.5 px-2.5 py-3 text-[13px] font-medium transition-colors ${
+                  tab === t.key
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground/80"
+                }`}
+              >
+                {t.label}
+                {t.key === "notifications" && unread > 0 && (
+                  <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary tabular-nums">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
+                {tab === t.key && (
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary" />
+                )}
+              </button>
+            ))}
           </div>
 
-          {notifications.length === 0 ? (
+          {tab === "announcements" ? (
+            <AnnouncementList />
+          ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center py-12 text-center">
               <Bell className="h-8 w-8 text-muted-foreground/30" />
               <p className="mt-3 text-xs text-muted-foreground">暂无通知</p>
@@ -156,96 +168,68 @@ export function NotificationBell() {
             // 普通滚动容器：在弹层内部滚动，不撑高整个弹层/页面
             <div className="max-h-[360px] overflow-y-auto overflow-x-hidden">
               {notifications.map((n) => (
-                <button
+                <BellRow
                   key={n.id}
-                  type="button"
+                  dot={typeColor[n.type] ?? "bg-foreground/30"}
+                  glow={!n.read}
+                  highlight={!n.read}
+                  title={n.title}
+                  preview={n.content}
+                  time={formatRelativeTime(n.createdAt)}
                   onClick={() => {
                     if (!n.read) markAsRead(n.id);
                     setOpen(false);
                     setViewing(n);
                   }}
-                  className="block w-full overflow-hidden text-left px-4 py-3 transition-colors hover:bg-foreground/[0.04]"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${typeColor[n.type] ?? "bg-foreground/30"} ${!n.read ? "ring-2 ring-primary/30" : ""}`} />
-                    <div className="min-w-0 flex-1">
-                      <p className={`truncate text-[13px] ${!n.read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                        {n.title}
-                      </p>
-                      {n.content && (
-                        <p className="mt-0.5 truncate text-[11px] text-muted-foreground/70">{n.content}</p>
-                      )}
-                      <p className="mt-1 text-[10px] text-muted-foreground/50">{formatRelativeTime(n.createdAt)}</p>
-                    </div>
-                  </div>
-                </button>
+                />
               ))}
             </div>
           )}
         </PopoverContent>
       </Popover>
 
-      {/* 弹窗查看完整通知 */}
+      {/* 弹窗查看完整通知 —— 与公告共用同一个 DetailCard 外壳 */}
       <Dialog
         open={viewing !== null}
         onOpenChange={(next) => {
           if (!next) setViewing(null);
         }}
       >
-        <DialogContent className="border border-foreground/10 bg-background/95 text-foreground backdrop-blur-xl sm:max-w-lg">
-          {viewing &&
-            (() => {
-              const meta = typeMeta[viewing.type] ?? typeMeta.system;
-              const Icon = meta.icon;
-              return (
-                <>
-                  <DialogHeader>
-                    <div className="flex items-center gap-2 pr-6">
-                      <span
-                        className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${meta.tint}`}
-                      >
-                        <Icon className="size-3.5" weight="fill" />
-                      </span>
-                      <DialogTitle className="text-[15px] leading-snug text-foreground">
-                        {viewing.title}
-                      </DialogTitle>
-                    </div>
-                    <div className="flex items-center gap-2 pl-9">
-                      <span className={`text-[11px] font-medium ${meta.tint.split(" ")[1]}`}>{meta.label}</span>
-                      <span className="text-[11px] text-muted-foreground tabular-nums">
-                        {formatRelativeTime(viewing.createdAt)}
-                      </span>
-                    </div>
-                  </DialogHeader>
-
-                  <div className="max-h-[50vh] overflow-y-auto pr-1 text-[13px] leading-relaxed">
-                    {viewing.type === "report" ? (
-                      <div className="prose prose-sm prose-invert max-w-none text-foreground/90 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-xs [&_h1]:font-bold [&_h2]:font-semibold [&_p]:text-[13px] [&_li]:text-[13px]">
-                        <ReactMarkdown>{viewing.content}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p className="whitespace-pre-wrap text-foreground/85">{viewing.content}</p>
-                    )}
-                  </div>
-
-                  <DialogFooter className="border-foreground/8 bg-foreground/[0.03]">
+        {viewing &&
+          (() => {
+            const meta = typeMeta[viewing.type] ?? typeMeta.system;
+            return (
+              <DetailCard
+                icon={meta.icon}
+                eyebrow={meta.label}
+                title={viewing.title}
+                meta={formatRelativeTime(viewing.createdAt)}
+                content={viewing.content}
+                // 只有报告是 Markdown；其余是纯文本，解析反而会把 * # 之类吃掉
+                markdown={viewing.type === "report"}
+                action={
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-muted-foreground hover:text-red-500"
+                      className="shrink-0 text-muted-foreground hover:text-destructive"
                       onClick={() => void deleteNotification(viewing.id)}
                     >
                       <Trash className="size-3.5" />
                       删除
                     </Button>
-                    <DialogClose render={<Button variant="outline" size="sm" />}>
-                      关闭
+                    <DialogClose
+                      render={
+                        <button type="button" className="btn-sticker flex-1" />
+                      }
+                    >
+                      知道了
                     </DialogClose>
-                  </DialogFooter>
-                </>
-              );
-            })()}
-        </DialogContent>
+                  </div>
+                }
+              />
+            );
+          })()}
       </Dialog>
     </>
   );

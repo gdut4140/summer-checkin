@@ -22,7 +22,7 @@ export default async function DocsPage() {
           <p className="product-eyebrow">Doc studio</p>
           <h1 className="product-title">文档</h1>
           <p className="product-subtitle">
-            写作、阅读与知识库整理集中在一个安静的工作空间。
+            写作、阅读与 AI 改写集中在一个安静的工作空间。
           </p>
         </div>
       </header>

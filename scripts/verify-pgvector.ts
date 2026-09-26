@@ -15,7 +15,7 @@ loadEnv({ path: ".env" });
 loadEnv({ path: ".env.local", override: true });
 
 import { randomUUID } from "node:crypto";
-import { PrismaClient } from "../src/lib/generated/prisma/client";
+import { PrismaClient } from "../prisma/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 let pass = 0;

@@ -18,7 +18,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Prisma 生成的 client（约 7.7 万行）。不排除的话 lint 会去扫生成代码，
     // 既慢（全量 lint 从数秒涨到 5 分钟以上）又毫无意义——这些文件不归我们维护。
-    "src/lib/generated/**",
+    // 注意路径：generator 的 output 在 prisma/generated（曾一度放在 src/lib/generated）。
+    "prisma/generated/**",
     // 本地工具目录：`.claude/worktrees/` 下有历史 git worktree 的完整副本
     // （246 个源文件，比主 src 还多）。不排除的话全量 lint 会把副本整个扫一遍。
     ".claude/**",

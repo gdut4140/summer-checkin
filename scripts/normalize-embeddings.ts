@@ -23,7 +23,7 @@ import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env" });
 loadEnv({ path: ".env.local", override: true });
 
-import { PrismaClient } from "../src/lib/generated/prisma/client";
+import { PrismaClient } from "../prisma/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 /** 与 embedTexts 的分批大小一致（DashScope 单次 batch 上限 10） */

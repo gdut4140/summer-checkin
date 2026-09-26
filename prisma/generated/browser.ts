@@ -88,11 +88,6 @@ export type AgentStep = Prisma.AgentStepModel
  */
 export type AgentApproval = Prisma.AgentApprovalModel
 /**
- * Model AgentToolCall
- * 
- */
-export type AgentToolCall = Prisma.AgentToolCallModel
-/**
  * Model AgentDecision
  * 
  */
@@ -102,11 +97,6 @@ export type AgentDecision = Prisma.AgentDecisionModel
  * 
  */
 export type UserMemory = Prisma.UserMemoryModel
-/**
- * Model AIHistory
- * 
- */
-export type AIHistory = Prisma.AIHistoryModel
 /**
  * Model Document
  * 
@@ -128,11 +118,6 @@ export type KnowledgeDoc = Prisma.KnowledgeDocModel
  */
 export type Notification = Prisma.NotificationModel
 /**
- * Model AgentSchedule
- * 
- */
-export type AgentSchedule = Prisma.AgentScheduleModel
-/**
  * Model ChatMessage
  * 
  */
@@ -152,3 +137,8 @@ export type DocumentTemplate = Prisma.DocumentTemplateModel
  * 
  */
 export type TokenUsage = Prisma.TokenUsageModel
+/**
+ * Model Announcement
+ * 全站公告 —— 不按用户存，一份所有人看同一份
+ */
+export type Announcement = Prisma.AnnouncementModel

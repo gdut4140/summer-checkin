@@ -122,7 +122,8 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
   }, [updateTitleIfNeeded]);
 
   const refreshConversations = useCallback(async (selectLatest = false) => {
-    const response = await fetch("/api/conversations");
+    // 显式只取智能体页的对话：工作台（文档/计划）的对话也在同一张表里
+    const response = await fetch("/api/conversations?surface=agent");
     if (!response.ok) return;
     const data = await response.json();
     const list = (data.conversations ?? []) as Conversation[];

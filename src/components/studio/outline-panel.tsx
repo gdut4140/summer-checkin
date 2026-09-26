@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ListBullets } from "@phosphor-icons/react";
 import type { HeadingInfo } from "@/lib/studio/outline";
 import { cn } from "@/lib/utils";
@@ -8,10 +7,14 @@ import { cn } from "@/lib/utils";
 interface OutlinePanelProps {
   headings: HeadingInfo[];
   onNavigate: (heading: HeadingInfo) => void;
+  /**
+   * 当前章节下标。由阅读面板的滚动位置驱动（滚动到哪一章就亮哪一章），
+   * 点击目录时父层先行设置，滚动跟上后由滚动结果接管。
+   */
+  activeIndex: number | null;
 }
 
-export function OutlinePanel({ headings, onNavigate }: OutlinePanelProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+export function OutlinePanel({ headings, onNavigate, activeIndex }: OutlinePanelProps) {
 
   return (
     <aside className="flex min-h-0 flex-1 flex-col border-r border-white/[0.08] bg-white/[0.02]">
@@ -36,10 +39,7 @@ export function OutlinePanel({ headings, onNavigate }: OutlinePanelProps) {
               <li key={index}>
                 <button
                   type="button"
-                  onClick={() => {
-                    setActiveIndex(index);
-                    onNavigate(heading);
-                  }}
+                  onClick={() => onNavigate(heading)}
                   className={cn(
                     "relative w-full rounded-r-md border-l-2 py-1.5 pr-2 text-left transition-colors",
                     activeIndex === index

@@ -84,6 +84,21 @@
 - `@AI` 唤起 AI 伙伴流式回复，内置「温柔宝」「嘴欠宝」两种人格，支持 Markdown 与代码高亮
 - 独立 WebSocket sidecar 进程承载，握手期 Cookie 鉴权，心跳保活 + 断线清理
 - AI 以虚拟用户身份入群，读取最近群聊上下文后流式回推，模型池 LOW 档自动降级并做 token 记账 / 限流
+- **游标分页 + 消息窗口**：首次只取最新 50 条，上滑到顶按需加载更早的一页（游标钉在消息 id 上，
+  新消息涌入不会让「下一页」漂移）；挂载的消息最多 100 条——超出后最早的整块卸载，
+  所以无论翻到几百还是几千条，DOM 都停在这个量级
+- **贴底才跟随**：新消息与 AI 流式输出只在用户位于底部时自动跟随，上滑阅读时改为「N 条新消息」提示
+
+> 聊天室刻意**不做虚拟化**：虚拟化要靠估算未渲染行的高度，而聊天行高参差（短消息 ~45px、
+> 带引用预览 ~120px、AI 长回复 300px+），估算误差会在测量后被回调，实测每 100 帧就有 1 帧跳、
+> 最大跳 369px。改成「整块换窗口 + 真实 DOM 锚点补偿」后实测偏离率 0.02%、最大 6px（= 换块那一帧的滚动量）。
+> 验证脚本见 `scripts/bench-render.tsx`；量化方法与结论也记在 `chat-room.tsx` 的常量注释里。
+
+### 📖 文档阅读
+- **长文档虚拟化**：Markdown 先按安全边界切成块（只在围栏代码块 / 表格 / 列表 / 引用块之外断开，
+  文末脚注与引用式链接定义自动前置到引用它们的块），再交给虚拟列表只渲染视口附近的块
+- 切块让每块独立 memo，对照模式下改一个字符只重解析被改的那一块，而不是整篇重跑渲染管线
+- 目录随滚动高亮当前章节；Ctrl+F 为源级统计 + 定位，虚拟化后依然能搜到未渲染的内容
 
 ### 👤 账号与头像
 - Better Auth 注册 / 登录 / 会话管理
@@ -189,13 +204,12 @@ npm run check    # 一次跑完：类型检查 + ESLint + 单测
 | `AGNES_BASE_URL` / `DASHSCOPE_BASE_URL` | 对话 API 地址（默认 `https://api.agnes-ai.cn/v1` 中国站）|
 | `DASHSCOPE_MODEL` | 对话模型（默认 `agnes-2.5-flash`）|
 | `EMBEDDING_API_KEY` / `MODEL` / `BASE_URL` | 向量模型（默认阿里百炼）|
-| `AI_TOKEN_LIMIT` | 每用户每日 token 上限（0 = 不限，默认 200000）|
+| `AI_TOKEN_LIMIT` | 每用户每日 token 上限（0 = 不限，默认 1000000；只统计 AI 聊天 / 工作台 / 聊天室 @AI）|
 | `BETTER_AUTH_SECRET` | 会话签名密钥（`openssl rand -base64 32`）|
-| `BETTER_AUTH_URL` | 登录回调地址（部署时 = 公网访问地址，不带端口）|
+| `BETTER_AUTH_URL` | 登录回调地址 + WebSocket 握手的 Origin 白名单（部署时 = 公网访问地址，**不带端口**）|
 | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | Server Actions 加密密钥（`openssl rand -hex 32`）|
 | `OSS_ACCESS_KEY_ID` / `SECRET` | 阿里云 OSS 凭证（头像直传）|
 | `OSS_BUCKET` / `REGION` / `PUBLIC_BASE_URL` | OSS Bucket 配置 |
-| `CRON_SECRET` | agent 定时接口 Bearer 鉴权，**必填**：未配置时接口一律 401（fail-closed）（服务器本地维护，勿整包覆盖 .env）|
 
 ## 📁 项目结构
 
@@ -226,6 +240,7 @@ npm run check    # 一次跑完：类型检查 + ESLint + 单测
 | `scripts/extract_pdf.py` / `extract_docx.py` | 知识库 PDF / Word 文本提取 |
 | `scripts/mock-weekly-report.ts` | 向指定用户塞一条「周报」通知（type=report），用于预览通知中心 Markdown 渲染 |
 | `scripts/optimize-backgrounds.mjs` | 场景背景图 PNG → WebP 重编码压缩（需 sharp）|
+| `scripts/bench-render.tsx` | 文档 / 聊天列表的渲染性能基准（整篇渲染 vs 虚拟窗口渲染，输出耗时与 DOM 节点数）|
 | `scripts/deploy.sh` | Docker 镜像构建与上传部署 |
 | `scripts/server-setup.sh` | 新服务器初始化（装 Docker / 开端口）|
 
@@ -237,7 +252,7 @@ npm run check    # 一次跑完：类型检查 + ESLint + 单测
 |---|---|
 | 用户与认证 | `user` · `session` · `account` · `avatarchange`（头像历史）|
 | 学习核心 | `plan` · `plantask` · `todo` · `checkin` · `studyrecord` |
-| AI 智能体 | `agentrun` · `agentstep` · `agentapproval` · `agentdecision` · `agenttoolcall` · `usermemory` · `aihistory` · `conversation` · `conversationmessage` · `agentschedule` |
+| AI 智能体 | `agentrun` · `agentstep` · `agentapproval` · `agentdecision` · `usermemory` · `conversation` · `conversationmessage` |
 | 聊天室 | `chatmessage` |
 | 知识库 / 文档 | `document` · `documentchunk` · `knowledgedoc` · `plantemplate` · `documenttemplate` |
 | 其他 | `notification` · `tokenusage` |

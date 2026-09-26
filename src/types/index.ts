@@ -214,7 +214,7 @@ export interface MemoryInfo {
 }
 
 /** Agent 决策类型 */
-export type DecisionType = "PLAN_ADJUST" | "REMINDER" | "ANALYSIS" | "TASK_CREATE";
+export type DecisionType = "PLAN_ADJUST" | "REMINDER" | "ANALYSIS";
 export type DecisionStatus = "executed" | "pending" | "rejected" | "failed";
 
 export interface DecisionInfo {
@@ -258,6 +258,17 @@ export interface NotificationInfo {
   createdAt: string;
 }
 
+/** 全站公告（不按用户存，一份所有人看同一份） */
+export interface AnnouncementInfo {
+  id: string;
+  title: string;
+  /** Markdown */
+  body: string;
+  /** 是否参与「每天首次进入弹一次」；false 则只出现在铃铛的公告列表里 */
+  popup: boolean;
+  createdAt: string;
+}
+
 export interface DailyReport {
   userId: string;
   date: string;
@@ -273,17 +284,4 @@ export interface DailyReport {
   weaknesses: string[];
   suggestions: string[];
   generatedBy: string | null; // AgentRun ID
-}
-
-export type ScheduleType = "daily_review" | "weekly_analysis" | "plan_adjust";
-
-export interface ScheduleInfo {
-  id: string;
-  userId: string;
-  type: ScheduleType;
-  cron: string;
-  enabled: boolean;
-  lastRunAt: string | null;
-  nextRunAt: string | null;
-  createdAt: string;
 }

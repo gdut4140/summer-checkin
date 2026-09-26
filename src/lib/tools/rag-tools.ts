@@ -93,7 +93,7 @@ export function createRAGTool(userId: string) {
             type: d.sourceType,
             chunks: d.chunkCount,
             chars: d.totalChars,
-            uploadedAt: d.createdAt,
+            uploadedAt: d.createdAt.toISOString(),
           })),
         };
       });

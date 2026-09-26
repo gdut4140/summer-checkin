@@ -398,19 +398,17 @@ export const ModelName = {
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
   AgentApproval: 'AgentApproval',
-  AgentToolCall: 'AgentToolCall',
   AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
-  AIHistory: 'AIHistory',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
   KnowledgeDoc: 'KnowledgeDoc',
   Notification: 'Notification',
-  AgentSchedule: 'AgentSchedule',
   ChatMessage: 'ChatMessage',
   PlanTemplate: 'PlanTemplate',
   DocumentTemplate: 'DocumentTemplate',
-  TokenUsage: 'TokenUsage'
+  TokenUsage: 'TokenUsage',
+  Announcement: 'Announcement'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -426,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentToolCall" | "agentDecision" | "userMemory" | "aIHistory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "agentSchedule" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentDecision" | "userMemory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1466,80 +1464,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    AgentToolCall: {
-      payload: Prisma.$AgentToolCallPayload<ExtArgs>
-      fields: Prisma.AgentToolCallFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AgentToolCallFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AgentToolCallFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
-        }
-        findFirst: {
-          args: Prisma.AgentToolCallFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AgentToolCallFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
-        }
-        findMany: {
-          args: Prisma.AgentToolCallFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>[]
-        }
-        create: {
-          args: Prisma.AgentToolCallCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
-        }
-        createMany: {
-          args: Prisma.AgentToolCallCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AgentToolCallCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>[]
-        }
-        delete: {
-          args: Prisma.AgentToolCallDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
-        }
-        update: {
-          args: Prisma.AgentToolCallUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
-        }
-        deleteMany: {
-          args: Prisma.AgentToolCallDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AgentToolCallUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AgentToolCallUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>[]
-        }
-        upsert: {
-          args: Prisma.AgentToolCallUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentToolCallPayload>
-        }
-        aggregate: {
-          args: Prisma.AgentToolCallAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentToolCall>
-        }
-        groupBy: {
-          args: Prisma.AgentToolCallGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentToolCallGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AgentToolCallCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentToolCallCountAggregateOutputType> | number
-        }
-      }
-    }
     AgentDecision: {
       payload: Prisma.$AgentDecisionPayload<ExtArgs>
       fields: Prisma.AgentDecisionFieldRefs
@@ -1685,80 +1609,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserMemoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserMemoryCountAggregateOutputType> | number
-        }
-      }
-    }
-    AIHistory: {
-      payload: Prisma.$AIHistoryPayload<ExtArgs>
-      fields: Prisma.AIHistoryFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AIHistoryFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AIHistoryFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>
-        }
-        findFirst: {
-          args: Prisma.AIHistoryFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AIHistoryFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>
-        }
-        findMany: {
-          args: Prisma.AIHistoryFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>[]
-        }
-        create: {
-          args: Prisma.AIHistoryCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>
-        }
-        createMany: {
-          args: Prisma.AIHistoryCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AIHistoryCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>[]
-        }
-        delete: {
-          args: Prisma.AIHistoryDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>
-        }
-        update: {
-          args: Prisma.AIHistoryUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>
-        }
-        deleteMany: {
-          args: Prisma.AIHistoryDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AIHistoryUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AIHistoryUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>[]
-        }
-        upsert: {
-          args: Prisma.AIHistoryUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIHistoryPayload>
-        }
-        aggregate: {
-          args: Prisma.AIHistoryAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAIHistory>
-        }
-        groupBy: {
-          args: Prisma.AIHistoryGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AIHistoryGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AIHistoryCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AIHistoryCountAggregateOutputType> | number
         }
       }
     }
@@ -2039,80 +1889,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.NotificationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.NotificationCountAggregateOutputType> | number
-        }
-      }
-    }
-    AgentSchedule: {
-      payload: Prisma.$AgentSchedulePayload<ExtArgs>
-      fields: Prisma.AgentScheduleFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AgentScheduleFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AgentScheduleFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
-        }
-        findFirst: {
-          args: Prisma.AgentScheduleFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AgentScheduleFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
-        }
-        findMany: {
-          args: Prisma.AgentScheduleFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>[]
-        }
-        create: {
-          args: Prisma.AgentScheduleCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
-        }
-        createMany: {
-          args: Prisma.AgentScheduleCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AgentScheduleCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>[]
-        }
-        delete: {
-          args: Prisma.AgentScheduleDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
-        }
-        update: {
-          args: Prisma.AgentScheduleUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
-        }
-        deleteMany: {
-          args: Prisma.AgentScheduleDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AgentScheduleUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AgentScheduleUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>[]
-        }
-        upsert: {
-          args: Prisma.AgentScheduleUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentSchedulePayload>
-        }
-        aggregate: {
-          args: Prisma.AgentScheduleAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentSchedule>
-        }
-        groupBy: {
-          args: Prisma.AgentScheduleGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentScheduleGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AgentScheduleCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentScheduleCountAggregateOutputType> | number
         }
       }
     }
@@ -2412,6 +2188,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Announcement: {
+      payload: Prisma.$AnnouncementPayload<ExtArgs>
+      fields: Prisma.AnnouncementFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AnnouncementFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AnnouncementFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        findFirst: {
+          args: Prisma.AnnouncementFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AnnouncementFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        findMany: {
+          args: Prisma.AnnouncementFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>[]
+        }
+        create: {
+          args: Prisma.AnnouncementCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        createMany: {
+          args: Prisma.AnnouncementCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AnnouncementCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>[]
+        }
+        delete: {
+          args: Prisma.AnnouncementDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        update: {
+          args: Prisma.AnnouncementUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        deleteMany: {
+          args: Prisma.AnnouncementDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AnnouncementUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AnnouncementUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>[]
+        }
+        upsert: {
+          args: Prisma.AnnouncementUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        aggregate: {
+          args: Prisma.AnnouncementAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnnouncement>
+        }
+        groupBy: {
+          args: Prisma.AnnouncementGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnnouncementGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AnnouncementCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnnouncementCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2461,6 +2311,7 @@ export const UserScalarFieldEnum = {
   bio: 'bio',
   theme: 'theme',
   vip: 'vip',
+  announcementSeenOn: 'announcementSeenOn',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2591,6 +2442,8 @@ export type AvatarChangeScalarFieldEnum = (typeof AvatarChangeScalarFieldEnum)[k
 export const ConversationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  surface: 'surface',
+  refId: 'refId',
   title: 'title',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2663,24 +2516,6 @@ export const AgentApprovalScalarFieldEnum = {
 export type AgentApprovalScalarFieldEnum = (typeof AgentApprovalScalarFieldEnum)[keyof typeof AgentApprovalScalarFieldEnum]
 
 
-export const AgentToolCallScalarFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  stepId: 'stepId',
-  toolName: 'toolName',
-  status: 'status',
-  idempotencyKey: 'idempotencyKey',
-  input: 'input',
-  output: 'output',
-  error: 'error',
-  startedAt: 'startedAt',
-  completedAt: 'completedAt',
-  createdAt: 'createdAt'
-} as const
-
-export type AgentToolCallScalarFieldEnum = (typeof AgentToolCallScalarFieldEnum)[keyof typeof AgentToolCallScalarFieldEnum]
-
-
 export const AgentDecisionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2708,17 +2543,6 @@ export const UserMemoryScalarFieldEnum = {
 } as const
 
 export type UserMemoryScalarFieldEnum = (typeof UserMemoryScalarFieldEnum)[keyof typeof UserMemoryScalarFieldEnum]
-
-
-export const AIHistoryScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  message: 'message',
-  response: 'response',
-  createdAt: 'createdAt'
-} as const
-
-export type AIHistoryScalarFieldEnum = (typeof AIHistoryScalarFieldEnum)[keyof typeof AIHistoryScalarFieldEnum]
 
 
 export const DocumentScalarFieldEnum = {
@@ -2772,21 +2596,6 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
-export const AgentScheduleScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  type: 'type',
-  cron: 'cron',
-  enabled: 'enabled',
-  lastRunAt: 'lastRunAt',
-  nextRunAt: 'nextRunAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type AgentScheduleScalarFieldEnum = (typeof AgentScheduleScalarFieldEnum)[keyof typeof AgentScheduleScalarFieldEnum]
-
-
 export const ChatMessageScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2835,6 +2644,19 @@ export const TokenUsageScalarFieldEnum = {
 } as const
 
 export type TokenUsageScalarFieldEnum = (typeof TokenUsageScalarFieldEnum)[keyof typeof TokenUsageScalarFieldEnum]
+
+
+export const AnnouncementScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  body: 'body',
+  published: 'published',
+  popup: 'popup',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AnnouncementScalarFieldEnum = (typeof AnnouncementScalarFieldEnum)[keyof typeof AnnouncementScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3091,19 +2913,17 @@ export type GlobalOmitConfig = {
   agentRun?: Prisma.AgentRunOmit
   agentStep?: Prisma.AgentStepOmit
   agentApproval?: Prisma.AgentApprovalOmit
-  agentToolCall?: Prisma.AgentToolCallOmit
   agentDecision?: Prisma.AgentDecisionOmit
   userMemory?: Prisma.UserMemoryOmit
-  aIHistory?: Prisma.AIHistoryOmit
   document?: Prisma.DocumentOmit
   documentChunk?: Prisma.DocumentChunkOmit
   knowledgeDoc?: Prisma.KnowledgeDocOmit
   notification?: Prisma.NotificationOmit
-  agentSchedule?: Prisma.AgentScheduleOmit
   chatMessage?: Prisma.ChatMessageOmit
   planTemplate?: Prisma.PlanTemplateOmit
   documentTemplate?: Prisma.DocumentTemplateOmit
   tokenUsage?: Prisma.TokenUsageOmit
+  announcement?: Prisma.AnnouncementOmit
 }
 
 /* Types for Logging */

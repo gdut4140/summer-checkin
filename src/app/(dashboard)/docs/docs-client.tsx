@@ -3,12 +3,10 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Books,
   ArrowUpRight,
   FilePlus,
   FileText,
   Plus,
-  Spinner,
   Trash,
   UploadSimple,
 } from "@phosphor-icons/react";
@@ -41,7 +39,6 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [docs, setDocs] = useState(documents);
   const [creating, setCreating] = useState(false);
-  const [indexingId, setIndexingId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DocListItem | null>(null);
   const dragDepth = useRef(0);
@@ -95,7 +92,7 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
     }
   }
 
-  async function removeDocument(id: string, title: string) {
+  async function removeDocument(id: string) {
     try {
       const res = await fetch(`/api/documents/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
@@ -104,49 +101,6 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
       setDeleteTarget(null);
     } catch {
       toast.error("删除失败");
-    }
-  }
-
-  async function addToKnowledge(doc: DocListItem) {
-    setIndexingId(doc.id);
-    try {
-      const res = await fetch(`/api/documents/${doc.id}`);
-      if (!res.ok) throw new Error("读取失败");
-      const data = (await res.json()) as {
-        document?: { content?: string };
-      };
-      const content = data.document?.content ?? "";
-      if (content.trim().length < 10) {
-        toast.error("文档内容太短，无法加入知识库");
-        return;
-      }
-
-      const sourceName = `${doc.title}.md`;
-      // 已加入过则先删除旧分片（替换语义，避免重复 chunk 污染检索）
-      await fetch(`/api/knowledge/documents/${encodeURIComponent(sourceName)}`, {
-        method: "DELETE",
-      }).catch(() => {});
-
-      const form = new FormData();
-      form.append(
-        "file",
-        new File([content], sourceName, { type: "text/markdown" })
-      );
-      const kbRes = await fetch("/api/knowledge/documents", {
-        method: "POST",
-        body: form,
-      });
-      const kbData = (await kbRes.json().catch(() => null)) as {
-        chunks?: number;
-        error?: string;
-      } | null;
-      if (!kbRes.ok) throw new Error(kbData?.error ?? "加入失败");
-
-      toast.success(`已加入知识库（${kbData?.chunks ?? 0} 个分片）`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "加入知识库失败");
-    } finally {
-      setIndexingId(null);
     }
   }
 
@@ -227,23 +181,6 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
               <div className="flex items-center justify-end gap-0.5">
                   <button
                     type="button"
-                    aria-label="加入知识库"
-                    title="加入知识库（可被 AI 检索）"
-                    disabled={indexingId === doc.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void addToKnowledge(doc);
-                    }}
-                    className="flex size-8 items-center justify-center rounded-md text-white/28 transition hover:bg-white/8 hover:text-primary disabled:opacity-50"
-                  >
-                    {indexingId === doc.id ? (
-                      <Spinner className="size-4 animate-spin" />
-                    ) : (
-                      <Books className="size-4" weight="fill" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
                     aria-label="删除文档"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -279,7 +216,7 @@ export function DocsClient({ documents }: { documents: DocListItem[] }) {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
-            <Button variant="destructive" onClick={() => deleteTarget && void removeDocument(deleteTarget.id, deleteTarget.title)}>确认删除</Button>
+            <Button variant="destructive" onClick={() => deleteTarget && void removeDocument(deleteTarget.id)}>确认删除</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

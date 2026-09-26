@@ -3,8 +3,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * 每次页面加载时检查：如果今天还没运行过 daily agent，
- * 就在后台触发一次分析。同一浏览器会话只触发一次。
+ * 当天第一次打开 dashboard 时，在后台跑一次属于自己的每日分析。
+ *
+ * "今天是否已经跑过"由服务端按 userId 判断（见 /api/agent/daily-run）。
+ * 这里不用 localStorage 做判断——那只能按浏览器算，换设备 / 无痕 / 清缓存
+ * 都会重复触发，而且触发的是全站任务。重复请求由服务端幂等挡掉。
  */
 export function DailyAgentCheck() {
   const triggered = useRef(false);
@@ -13,25 +16,10 @@ export function DailyAgentCheck() {
     if (triggered.current) return;
     triggered.current = true;
 
-    // 用 localStorage 标记今天已经触发过
-    const today = new Date().toISOString().slice(0, 10);
-    const lastCheckKey = `agent-daily-check-${today}`;
-    if (typeof window !== "undefined" && window.localStorage.getItem(lastCheckKey)) {
-      return; // 今天已经触发过了
-    }
-
-    // 后台触发（fire-and-forget）
-    fetch("/api/agent/cron/daily")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          window.localStorage.setItem(lastCheckKey, "1");
-          console.log("[DailyAgent] 今日自动分析完成");
-        }
-      })
-      .catch(() => {
-        // 静默失败，下次访问再试
-      });
+    // fire-and-forget：不阻塞页面，失败也不打扰用户
+    fetch("/api/agent/daily-run", { method: "POST" }).catch(() => {
+      // 静默失败，下次访问再试
+    });
   }, []);
 
   return null; // 不渲染任何东西

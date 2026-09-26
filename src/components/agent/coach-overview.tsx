@@ -181,9 +181,14 @@ export function CoachOverview() {
   const triggerAgent = useCallback(async () => {
     setRunning(true);
     try {
-      const res = await fetch("/api/agent/cron/daily");
-      if (res.ok) toast.success("AI 分析完成，刷新中…");
-      else toast.error("分析失败，请重试");
+      const res = await fetch("/api/agent/daily-run", { method: "POST" });
+      if (!res.ok) {
+        toast.error("分析失败，请重试");
+      } else {
+        const data = await res.json();
+        // 同一用户每天只跑一次，今天已经跑过时后端会返回 skipped
+        toast.success(data?.skipped ? "今天已经分析过了" : "AI 分析完成，刷新中…");
+      }
       setData(await loadCoachData());
     } catch {
       toast.error("分析失败");
