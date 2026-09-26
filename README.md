@@ -134,7 +134,7 @@
 
 | 依赖 | 版本 |
 |---|---|
-| Node.js | 18+ |
+| Node.js | 20.9+（Next.js 16 的最低要求；Docker / CI 使用 Node 22） |
 | PostgreSQL | 16 + pgvector（必须用 `pgvector/pgvector:pg16` 镜像：embedding 列是 `vector(1024)`，检索依赖 `<=>` 算子与 HNSW 索引，均来自该扩展）|
 
 ### 本地开发

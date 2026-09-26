@@ -13,6 +13,7 @@ import { prisma } from "./db";
 import { addConnection, removeConnection, broadcast, allConnections, type Connection } from "./room";
 import { toDTO, type AiRole, type ClientMessage, type ReplyToDTO } from "./protocol";
 import { handleAI } from "./ai";
+import { isAllowedWebSocketUpgrade } from "./origin";
 
 // ---- HTTP 服务（仅用于健康检查 + WS 升级） ----
 const server = createServer((req, res) => {
@@ -30,6 +31,11 @@ const wss = new WebSocketServer({ noServer: true });
 // ---- 升级阶段鉴权（在握手前拒绝未登录连接） ----
 server.on("upgrade", (req, socket, head) => {
   console.log(`[ws] upgrade: path=${req.url} cookie=${req.headers.cookie ? "有" : "无"}`);
+  if (!isAllowedWebSocketUpgrade(req.url, req.headers.origin)) {
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return;
+  }
   authenticate(req.headers.cookie)
     .then((user) => {
       if (!user) {

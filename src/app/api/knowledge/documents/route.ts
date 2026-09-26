@@ -8,6 +8,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { processKnowledgeText } from "@/lib/knowledge-upload";
 import { listKnowledgeDocs } from "@/lib/knowledge-docs";
+import {
+  formatUploadLimit,
+  getKnowledgeUploadLimit,
+  isKnowledgeUploadTooLarge,
+} from "@/lib/knowledge-upload-limits";
 
 // ---- GET: 列出用户文档 ----
 export async function GET() {
@@ -35,6 +40,17 @@ export async function POST(request: NextRequest) {
 
     const fileName = file.name;
     const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+    const uploadLimit = getKnowledgeUploadLimit(ext);
+
+    // Check File.size before file.text()/arrayBuffer(). Without this guard a
+    // direct request (bypassing nginx) can make the Node process buffer an
+    // arbitrarily large upload in memory before format-specific processing.
+    if (isKnowledgeUploadTooLarge(ext, file.size)) {
+      return NextResponse.json(
+        { error: `文件过大（.${ext} 最大 ${formatUploadLimit(uploadLimit!)}）` },
+        { status: 413 }
+      );
+    }
 
     let text: string;
     let sourceType: "text" | "markdown" | "pdf" | "docx" = "text";
