@@ -195,7 +195,7 @@ npm run check    # 一次跑完：类型检查 + ESLint + 单测
 | `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | Server Actions 加密密钥（`openssl rand -hex 32`）|
 | `OSS_ACCESS_KEY_ID` / `SECRET` | 阿里云 OSS 凭证（头像直传）|
 | `OSS_BUCKET` / `REGION` / `PUBLIC_BASE_URL` | OSS Bucket 配置 |
-| `CRON_SECRET` | agent 定时接口 Bearer 鉴权（服务器本地维护，勿整包覆盖 .env）|
+| `CRON_SECRET` | agent 定时接口 Bearer 鉴权，**必填**：未配置时接口一律 401（fail-closed）（服务器本地维护，勿整包覆盖 .env）|
 
 ## 📁 项目结构
 
