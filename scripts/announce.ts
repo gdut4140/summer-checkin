@@ -9,6 +9,11 @@
  *
  * --popup  参与「每天首次进入弹一次」；不加则只出现在铃铛的公告列表里
  * --draft  先不发（published=false），之后 UPDATE announcement SET published=true 再放出来
+ * =============================================================
+ * 取消某个用户的「已读」状态（让他下次进来又弹一次）：
+ * UPDATE "user"
+ * SET "announcementSeenOn" = NULL
+ * WHERE "name" = 'doro'; --替换成目标行名字或者id
  * ============================================================ */
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env" });

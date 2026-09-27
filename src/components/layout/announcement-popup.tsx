@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Megaphone } from "@phosphor-icons/react";
 import { Dialog, DialogClose } from "@/components/ui/dialog";
 import { DetailCard } from "@/components/layout/detail-card";
@@ -12,6 +13,9 @@ import {
 import { hasSeenTour } from "@/components/onboarding/onboarding-provider";
 import { formatRelativeTime } from "@/components/layout/bell-row";
 import type { AnnouncementInfo } from "@/types";
+
+/** 两次服务端查询之间的最小间隔：站内跳页会重跑 effect，用来限流 */
+const MIN_RECHECK_MS = 60_000;
 
 /** 本机记一笔（隐私模式下写不了就忽略，服务端那份仍然有效） */
 function markLocally(key: string) {
@@ -30,10 +34,17 @@ function markLocally(key: string) {
  * - **服务端兜底** —— user.announcementSeenOn，跨设备 / 跨标签页都算数。
  *   日期由客户端按本地时区给出，服务端只做相等比较。
  *
+ * 触发时机跟着 `pathname` 走，而不是只在挂载时跑一次：
+ * Next.js 的 layout 在站内跳页时【不会】重新挂载，只看 [] 依赖的话，
+ * 一个下午都开着标签页的用户永远等不到公告。跟着 pathname 就能在用户
+ * 下一次点任何站内链接时补上。跳页频繁，所以 60 秒内不重复查。
+ *
  * 新手引导没看过时先挂起，等引导结束（onboarding-provider 派发 tour:finished）再弹。
  */
 export function AnnouncementPopup({ userId }: { userId: string }) {
   const [latest, setLatest] = useState<AnnouncementInfo | null>(null);
+  const pathname = usePathname();
+  const lastCheckRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +70,13 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
 
     const pop = async () => {
       if (cancelled) return;
+
+      // 限流放在 pop 内部而不是 effect 顶部：否则跳页触发的重跑会提前 return，
+      // 顺手把上一轮注册的 tour:finished 监听在 cleanup 里摘掉，引导结束后就没人弹了。
+      const now = Date.now();
+      if (now - lastCheckRef.current < MIN_RECHECK_MS) return;
+      lastCheckRef.current = now;
+
       try {
         const res = await fetch("/api/announcements");
         if (!res.ok || cancelled) return;
@@ -74,7 +92,7 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
         const first = (data?.announcements ?? []).find(
           (a: AnnouncementInfo) => a.popup
         );
-        // 当前没有可弹的公告 → 什么都不记，这样当天新发的公告下次进页面就能弹出来
+        // 当前没有可弹的公告 → 什么都不记，这样当天新发的公告下次跳页就能弹出来
         if (!first) return;
 
         setLatest(first);
@@ -87,7 +105,7 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
           // 服务端没记上也不影响本次 —— 本机那份已经落了，别的设备下次补上
         });
       } catch {
-        // 静默：公告弹不出来不该影响任何事，下次进页面再试
+        // 静默：公告弹不出来不该影响任何事，下次跳页再试
       }
     };
 
@@ -107,7 +125,7 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
       if (timer) window.clearTimeout(timer);
       window.removeEventListener("tour:finished", onTourFinished);
     };
-  }, [userId]);
+  }, [userId, pathname]);
 
   return (
     <Dialog
