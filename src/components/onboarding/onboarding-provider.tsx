@@ -47,6 +47,19 @@ export function hasSeenTour(userId: string) {
   }
 }
 
+/**
+ * 引导是否**正在播放** —— 注意这跟 hasSeenTour 的「曾经看过」是两回事。
+ *
+ * 从顶栏菜单重播引导时 hasSeenTour 仍是 true，但此刻引导确实在播。
+ * 公告弹窗必须用这个判断：否则它会在引导播到一半时插进来
+ * （表现为「点下一步公告就弹出来了」）。
+ */
+let tourPlaying = false;
+
+export function isTourPlaying() {
+  return tourPlaying;
+}
+
 function markSeen(userId: string) {
   try {
     window.localStorage.setItem(storageKey(userId), "1");
@@ -111,6 +124,7 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
     driverRef.current?.destroy();
     driverRef.current = null;
     activeRef.current = false;
+    tourPlaying = false;
   }, [removeNavExpand]);
 
   /** 按当前页面构建 driver（元素缺失自动退化为居中弹层） */
@@ -198,6 +212,7 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
           activeRef.current = false;
           driverRef.current = null;
           removeNavExpand();
+          tourPlaying = false;
           if (!navigatingRef.current) {
             markSeen(userId);
             // 引导真的结束了（完成 / 关闭 / Esc 都算；段间跳页不算）。
@@ -219,6 +234,7 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
   const beginSegment = useCallback(
     async (page: string) => {
       activeRef.current = true;
+      tourPlaying = true;
       // 等页面第一个目标元素渲染出来，避免跨页跳转后元素未就绪导致高亮落空
       const first = (TOUR_SEGMENTS[page] ?? []).find((s) => s.selector);
       if (first?.selector) {

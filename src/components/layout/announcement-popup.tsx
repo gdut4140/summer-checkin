@@ -9,7 +9,7 @@ import {
   decideAnnouncementPopup,
   localDayString,
 } from "@/lib/announcement-popup";
-import { hasSeenTour } from "@/components/onboarding/onboarding-provider";
+import { hasSeenTour, isTourPlaying } from "@/components/onboarding/onboarding-provider";
 import { formatRelativeTime } from "@/components/layout/bell-row";
 import type { AnnouncementInfo } from "@/types";
 
@@ -49,6 +49,11 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
     const pop = async () => {
       if (cancelled) return;
 
+      // 引导正在播放（含从菜单重播）→ 让位，等它结束。
+      // 判据必须是「正在播放」而不是 hasSeenTour 的「曾经看过」：
+      // 重播时后者为 true，会让公告插进引导中间。
+      if (isTourPlaying()) return;
+
       // 限流放在 pop 内部而不是 effect 顶部：否则跳页触发的重跑会提前 return，
       // 顺手把上一轮注册的 tour:finished 监听在 cleanup 里摘掉，引导结束后就没人弹了。
       const now = Date.now();
@@ -87,11 +92,13 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
       void pop();
     };
 
+    // 总是监听：引导可能在被判定为「已看过」之后又被从菜单重播，
+    // 那次结束（完成或叉掉）同样要把公告补上
+    window.addEventListener("tour:finished", onTourFinished);
+
     if (decision === "now") {
       // 首屏多等一拍，避开背景视频 / 组件挂载
       timer = window.setTimeout(() => void pop(), 1200);
-    } else {
-      window.addEventListener("tour:finished", onTourFinished);
     }
 
     return () => {
