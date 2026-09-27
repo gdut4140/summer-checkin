@@ -6,7 +6,6 @@ import { Megaphone } from "@phosphor-icons/react";
 import { Dialog, DialogClose } from "@/components/ui/dialog";
 import { DetailCard } from "@/components/layout/detail-card";
 import {
-  announcementPopupKey,
   decideAnnouncementPopup,
   localDayString,
 } from "@/lib/announcement-popup";
@@ -17,29 +16,21 @@ import type { AnnouncementInfo } from "@/types";
 /** 两次服务端查询之间的最小间隔：站内跳页会重跑 effect，用来限流 */
 const MIN_RECHECK_MS = 60_000;
 
-/** 本机记一笔（隐私模式下写不了就忽略，服务端那份仍然有效） */
-function markLocally(key: string) {
-  try {
-    window.localStorage.setItem(key, "1");
-  } catch {
-    /* 忽略 */
-  }
-}
-
 /**
  * 每天首次进入弹一次最新公告（只挑 popup=true 的那条）。
  *
- * 去重是两层的：
- * - **本机快路径** —— localStorage 命中就直接返回，连请求都不发
- * - **服务端兜底** —— user.announcementSeenOn，跨设备 / 跨标签页都算数。
- *   日期由客户端按本地时区给出，服务端只做相等比较。
+ * **去重只有一个真相源：服务端的 `user.announcementSeenOn`**（客户端按本地时区
+ * 给出日期，服务端只做相等比较）。这里刻意不做本机缓存 —— 曾经用 localStorage
+ * 做过「快路径省请求」，结果同一个事实存在两处，重置服务端字段后用户的浏览器
+ * 里还留着旧标记，表现为「我明明改了怎么不弹」。
  *
  * 触发时机跟着 `pathname` 走，而不是只在挂载时跑一次：
  * Next.js 的 layout 在站内跳页时【不会】重新挂载，只看 [] 依赖的话，
  * 一个下午都开着标签页的用户永远等不到公告。跟着 pathname 就能在用户
  * 下一次点任何站内链接时补上。跳页频繁，所以 60 秒内不重复查。
  *
- * 新手引导没看过时先挂起，等引导结束（onboarding-provider 派发 tour:finished）再弹。
+ * 新手引导没看过时先挂起，等引导结束（onboarding-provider 派发 tour:finished）
+ * 再弹 —— 完成和直接叉掉都会派发。
  */
 export function AnnouncementPopup({ userId }: { userId: string }) {
   const [latest, setLatest] = useState<AnnouncementInfo | null>(null);
@@ -51,22 +42,9 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
     let timer: number | undefined;
 
     const today = localDayString();
-    const key = announcementPopupKey(userId);
-
-    // 本机快路径。读不到 localStorage（隐私模式等）就当作"还没弹过"，
-    // 交给服务端那份判断 —— 它按用户存在库里、不依赖浏览器存储，比这里权威。
-    let poppedLocally = false;
-    try {
-      poppedLocally = window.localStorage.getItem(key) === "1";
-    } catch {
-      /* 忽略 */
-    }
-
     const decision = decideAnnouncementPopup({
-      poppedToday: poppedLocally,
       tourSeen: hasSeenTour(userId),
     });
-    if (decision === "skip") return;
 
     const pop = async () => {
       if (cancelled) return;
@@ -83,11 +61,8 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
         const data = await res.json();
         if (cancelled) return;
 
-        // 服务端兜底：别的设备/标签页今天已经弹过了
-        if (data?.seenOn === today) {
-          markLocally(key);
-          return;
-        }
+        // 今天已经弹过了（可能是别的设备/标签页弹的）——服务端说了算
+        if (data?.seenOn === today) return;
 
         const first = (data?.announcements ?? []).find(
           (a: AnnouncementInfo) => a.popup
@@ -96,13 +71,12 @@ export function AnnouncementPopup({ userId }: { userId: string }) {
         if (!first) return;
 
         setLatest(first);
-        markLocally(key);
         void fetch("/api/announcements/seen", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ day: today }),
         }).catch(() => {
-          // 服务端没记上也不影响本次 —— 本机那份已经落了，别的设备下次补上
+          // 服务端没记上也不影响本次；下次跳页会再弹一遍
         });
       } catch {
         // 静默：公告弹不出来不该影响任何事，下次跳页再试

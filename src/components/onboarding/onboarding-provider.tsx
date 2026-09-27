@@ -99,6 +99,8 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
   const navigatingRef = useRef(false); // 段间跳页中（销毁 driver 时不标记"已看过"）
   const pendingRouteRef = useRef<string | null>(null); // 跳页后待接续的页面
   const autoStartedRef = useRef(false);
+  // 点「完成」时若不在 dashboard：先把人送回去，到了那边再派发 tour:finished
+  const announceAfterNavRef = useRef(false);
 
   const removeNavExpand = useCallback(() => {
     document.querySelector(".atomic-nav")?.classList.remove("atomic-nav--tour");
@@ -178,9 +180,16 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
             navigateAway(nextPage);
             return;
           }
-          // 最后一站点"完成"：标记已看过并收尾
+          // 最后一站点"完成"：标记已看过并收尾。
+          // 引导的最后一站不一定是 dashboard，但公告该在 dashboard 上弹，
+          // 所以不在 dashboard 就先记一个待办，等跳回去再派发 tour:finished。
+          // 这里读 window.location 而不是 pathnameRef：后者被 React Compiler
+          // 判定为不可在 memo 回调里引用（"This value cannot be modified"）。
           markSeen(userId);
+          const needHome = window.location.pathname !== "/dashboard";
+          announceAfterNavRef.current = needHome;
           cleanup();
+          if (needHome) router.push("/dashboard");
         },
         onDestroyed: () => {
           // 任何方式销毁后：复位状态、清理导航展开；非段间跳页都视为"看过"。
@@ -193,7 +202,11 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
             markSeen(userId);
             // 引导真的结束了（完成 / 关闭 / Esc 都算；段间跳页不算）。
             // 公告弹窗挂在这个事件上，保证"先引导完，再弹公告"。
-            window.dispatchEvent(new CustomEvent("tour:finished"));
+            // 例外：点「完成」且当时不在 dashboard 时先不派发 —— 等跳回
+            // dashboard 再派（由下面的 pathname effect 消费 announceAfterNavRef）。
+            if (!announceAfterNavRef.current) {
+              window.dispatchEvent(new CustomEvent("tour:finished"));
+            }
           }
         },
       });
@@ -241,6 +254,12 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
 
   // 路径变化：接续跳页段落 / 首次挂载自动播放
   useEffect(() => {
+    // 点「完成」后先跳回 dashboard，到了这里再放公告
+    if (announceAfterNavRef.current && pathname === "/dashboard") {
+      announceAfterNavRef.current = false;
+      window.dispatchEvent(new CustomEvent("tour:finished"));
+    }
+
     if (pendingRouteRef.current && pendingRouteRef.current === pathname) {
       const page = pendingRouteRef.current;
       pendingRouteRef.current = null;
