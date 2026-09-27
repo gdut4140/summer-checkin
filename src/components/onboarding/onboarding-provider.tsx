@@ -292,9 +292,14 @@ export function OnboardingProvider({ userId, children }: { userId: string; child
     if (!autoStartedRef.current) {
       autoStartedRef.current = true;
       if (!hasSeenTour(userId)) {
-        // 首屏多等一拍（背景视频 / 组件挂载），再自动开始
-        const t = window.setTimeout(() => startTour(), 900);
-        return () => window.clearTimeout(t);
+        // 首屏多等一拍（背景视频 / 组件挂载），再自动开始。
+        //
+        // 这里刻意【不】返回清理函数：开发模式下 React StrictMode 会把 effect
+        // 跑两遍 —— 第一遍置了 autoStartedRef，cleanup 又把定时器清掉，
+        // 第二遍看到标记已置位就跳过，结果引导永远不自动开始（连带公告
+        // 因为等不到 tour:finished 也不弹）。定时器留着即可：真跑起来时
+        // startTour 自己会判断该不该开播（activeRef）。
+        window.setTimeout(() => startTour(), 900);
       }
     }
   }, [pathname, startTour, beginSegment, cleanup, userId]);
