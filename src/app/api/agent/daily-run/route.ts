@@ -40,8 +40,6 @@ export async function POST() {
   try {
     // ---- 幂等：今天已经跑过就跳过 ----
     // 多标签页 / 多设备同时打开时，只有第一个请求会真正执行。
-    // 注：用户在 /agent 手动发起的 review 运行也会命中这个判断，
-    //     代价只是当天少一次后台分析，可以接受。
     const ranToday = await prisma.agentRun.findFirst({
       where: {
         userId: user.id,

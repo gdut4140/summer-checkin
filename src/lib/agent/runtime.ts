@@ -20,14 +20,13 @@
 // 设计原则：
 // ① 每个 Step 是独立函数，可单独测试和复用
 // ② LLM 调用带 fallback：模型不可用时返回基于规则的分析
-// ③ 所有决策记录到 AgentRun + AgentDecision（可追溯）
-// ④ 不依赖数据库迁移 — 使用已有 AgentRun/AgentStep/AgentApproval 模型
+// ③ 运行轨迹记录到 AgentRun + AgentStep（可追溯）
+// ④ 不依赖数据库迁移 — 使用已有 AgentRun/AgentStep 模型
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
 import { completionsWithFallback } from "@/lib/model-pool";
 import { AGENT_COACH_PROMPT } from "./prompts";
-import { createDecision } from "./decisions";
 import { getRelevantMemories, formatMemoriesForPrompt, touchMemories } from "@/lib/memory";
 import { createNotification } from "@/lib/notification";
 import { generateDailyReport, formatReportAsMarkdown } from "./report";
@@ -407,20 +406,8 @@ export function fallbackAnalysis(context: LearningContext): AgentAnalysis {
 }
 
 // ============================================================
-// Step 3: Plan — 生成行动计划（由 analyze 的 LLM 调用完成，
-//          这里提供工具函数用于将 actions 写入 AgentApproval）
+// Step 3: Plan — 生成行动计划（由 analyze 的 LLM 调用完成）
 // ============================================================
-
-export function formatPlanForApproval(
-  analysis: AgentAnalysis
-): { action: string; payload: AgentAction }[] {
-  return analysis.actions
-    .filter((a) => a.priority === "high" || a.priority === "normal")
-    .map((a) => ({
-      action: a.type,
-      payload: a,
-    }));
-}
 
 // ============================================================
 // Step 4: Execute — 执行 Agent 行动计划
@@ -697,30 +684,6 @@ export async function runLearningAgent(
           completedAt: new Date(),
         },
       });
-
-      // 分析发现 + 行动建议 → 写入 AgentApproval（UI 可展示）
-      for (const finding of analysis.findings) {
-        await prisma.agentApproval.create({
-          data: {
-            runId: run.id,
-            stepId: analysisStep.id,
-            action: "daily_analysis",
-            status: "pending",
-            payload: asJson({ type: "finding", ...finding }),
-          },
-        });
-      }
-      for (const action of analysis.actions) {
-        await prisma.agentApproval.create({
-          data: {
-            runId: run.id,
-            stepId: analysisStep.id,
-            action: "daily_action",
-            status: "pending",
-            payload: asJson({ ...action, type: "action" }),
-          },
-        });
-      }
     }
 
     // ---- Step 4: Execute ----
@@ -749,27 +712,6 @@ export async function runLearningAgent(
       console.log(
         `[Agent Runtime]   action=${result.type} success=${result.success}: ${result.message.slice(0, 80)}`
       );
-
-      // Phase 2: 记录 Agent 决策到 AgentDecision 表
-      if (run) {
-        const decisionType =
-          action.type === "ADJUST_PLAN" ? "PLAN_ADJUST" :
-          action.type === "SEND_REMINDER" ? "REMINDER" :
-          "ANALYSIS";
-        await createDecision({
-          userId,
-          runId: run.id,
-          type: decisionType,
-          reason: action.reason,
-          action: {
-            detail: action.detail,
-            priority: action.priority,
-            executed: result.success,
-            message: result.message,
-          },
-          status: "pending", // 等用户确认后才算 executed
-        });
-      }
     }
 
     // 更新执行步骤

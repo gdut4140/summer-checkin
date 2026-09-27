@@ -98,6 +98,10 @@ image.png
 阿里云向量模型.txt
 DEPLOYMENT-NOTES.md
 txt文件/
-简历.html
+简历*.html
+
+# Resume export artifacts
+/output/pdf/
+/tmp/pdfs/
 
 todo.md

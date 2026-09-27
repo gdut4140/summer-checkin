@@ -83,16 +83,6 @@ export type AgentRun = Prisma.AgentRunModel
  */
 export type AgentStep = Prisma.AgentStepModel
 /**
- * Model AgentApproval
- * 
- */
-export type AgentApproval = Prisma.AgentApprovalModel
-/**
- * Model AgentDecision
- * 
- */
-export type AgentDecision = Prisma.AgentDecisionModel
-/**
  * Model UserMemory
  * 
  */

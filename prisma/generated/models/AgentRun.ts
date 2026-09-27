@@ -286,8 +286,6 @@ export type AgentRunWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   steps?: Prisma.AgentStepListRelationFilter
-  approvals?: Prisma.AgentApprovalListRelationFilter
-  decisions?: Prisma.AgentDecisionListRelationFilter
 }
 
 export type AgentRunOrderByWithRelationInput = {
@@ -306,8 +304,6 @@ export type AgentRunOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   steps?: Prisma.AgentStepOrderByRelationAggregateInput
-  approvals?: Prisma.AgentApprovalOrderByRelationAggregateInput
-  decisions?: Prisma.AgentDecisionOrderByRelationAggregateInput
 }
 
 export type AgentRunWhereUniqueInput = Prisma.AtLeast<{
@@ -329,8 +325,6 @@ export type AgentRunWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   steps?: Prisma.AgentStepListRelationFilter
-  approvals?: Prisma.AgentApprovalListRelationFilter
-  decisions?: Prisma.AgentDecisionListRelationFilter
 }, "id">
 
 export type AgentRunOrderByWithAggregationInput = {
@@ -388,8 +382,6 @@ export type AgentRunCreateInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAgentRunsInput
   steps?: Prisma.AgentStepCreateNestedManyWithoutRunInput
-  approvals?: Prisma.AgentApprovalCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutRunInput
 }
 
 export type AgentRunUncheckedCreateInput = {
@@ -407,8 +399,6 @@ export type AgentRunUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   steps?: Prisma.AgentStepUncheckedCreateNestedManyWithoutRunInput
-  approvals?: Prisma.AgentApprovalUncheckedCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutRunInput
 }
 
 export type AgentRunUpdateInput = {
@@ -426,8 +416,6 @@ export type AgentRunUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAgentRunsNestedInput
   steps?: Prisma.AgentStepUpdateManyWithoutRunNestedInput
-  approvals?: Prisma.AgentApprovalUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUpdateManyWithoutRunNestedInput
 }
 
 export type AgentRunUncheckedUpdateInput = {
@@ -445,8 +433,6 @@ export type AgentRunUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.AgentStepUncheckedUpdateManyWithoutRunNestedInput
-  approvals?: Prisma.AgentApprovalUncheckedUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutRunNestedInput
 }
 
 export type AgentRunCreateManyInput = {
@@ -569,11 +555,6 @@ export type AgentRunScalarRelationFilter = {
   isNot?: Prisma.AgentRunWhereInput
 }
 
-export type AgentRunNullableScalarRelationFilter = {
-  is?: Prisma.AgentRunWhereInput | null
-  isNot?: Prisma.AgentRunWhereInput | null
-}
-
 export type AgentRunCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.AgentRunCreateWithoutUserInput, Prisma.AgentRunUncheckedCreateWithoutUserInput> | Prisma.AgentRunCreateWithoutUserInput[] | Prisma.AgentRunUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.AgentRunCreateOrConnectWithoutUserInput | Prisma.AgentRunCreateOrConnectWithoutUserInput[]
@@ -638,36 +619,6 @@ export type AgentRunUpdateOneRequiredWithoutStepsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AgentRunUpdateToOneWithWhereWithoutStepsInput, Prisma.AgentRunUpdateWithoutStepsInput>, Prisma.AgentRunUncheckedUpdateWithoutStepsInput>
 }
 
-export type AgentRunCreateNestedOneWithoutApprovalsInput = {
-  create?: Prisma.XOR<Prisma.AgentRunCreateWithoutApprovalsInput, Prisma.AgentRunUncheckedCreateWithoutApprovalsInput>
-  connectOrCreate?: Prisma.AgentRunCreateOrConnectWithoutApprovalsInput
-  connect?: Prisma.AgentRunWhereUniqueInput
-}
-
-export type AgentRunUpdateOneRequiredWithoutApprovalsNestedInput = {
-  create?: Prisma.XOR<Prisma.AgentRunCreateWithoutApprovalsInput, Prisma.AgentRunUncheckedCreateWithoutApprovalsInput>
-  connectOrCreate?: Prisma.AgentRunCreateOrConnectWithoutApprovalsInput
-  upsert?: Prisma.AgentRunUpsertWithoutApprovalsInput
-  connect?: Prisma.AgentRunWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AgentRunUpdateToOneWithWhereWithoutApprovalsInput, Prisma.AgentRunUpdateWithoutApprovalsInput>, Prisma.AgentRunUncheckedUpdateWithoutApprovalsInput>
-}
-
-export type AgentRunCreateNestedOneWithoutDecisionsInput = {
-  create?: Prisma.XOR<Prisma.AgentRunCreateWithoutDecisionsInput, Prisma.AgentRunUncheckedCreateWithoutDecisionsInput>
-  connectOrCreate?: Prisma.AgentRunCreateOrConnectWithoutDecisionsInput
-  connect?: Prisma.AgentRunWhereUniqueInput
-}
-
-export type AgentRunUpdateOneWithoutDecisionsNestedInput = {
-  create?: Prisma.XOR<Prisma.AgentRunCreateWithoutDecisionsInput, Prisma.AgentRunUncheckedCreateWithoutDecisionsInput>
-  connectOrCreate?: Prisma.AgentRunCreateOrConnectWithoutDecisionsInput
-  upsert?: Prisma.AgentRunUpsertWithoutDecisionsInput
-  disconnect?: Prisma.AgentRunWhereInput | boolean
-  delete?: Prisma.AgentRunWhereInput | boolean
-  connect?: Prisma.AgentRunWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AgentRunUpdateToOneWithWhereWithoutDecisionsInput, Prisma.AgentRunUpdateWithoutDecisionsInput>, Prisma.AgentRunUncheckedUpdateWithoutDecisionsInput>
-}
-
 export type AgentRunCreateWithoutUserInput = {
   id?: string
   mode?: string
@@ -682,8 +633,6 @@ export type AgentRunCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   steps?: Prisma.AgentStepCreateNestedManyWithoutRunInput
-  approvals?: Prisma.AgentApprovalCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutRunInput
 }
 
 export type AgentRunUncheckedCreateWithoutUserInput = {
@@ -700,8 +649,6 @@ export type AgentRunUncheckedCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   steps?: Prisma.AgentStepUncheckedCreateNestedManyWithoutRunInput
-  approvals?: Prisma.AgentApprovalUncheckedCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutRunInput
 }
 
 export type AgentRunCreateOrConnectWithoutUserInput = {
@@ -763,8 +710,6 @@ export type AgentRunCreateWithoutStepsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAgentRunsInput
-  approvals?: Prisma.AgentApprovalCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutRunInput
 }
 
 export type AgentRunUncheckedCreateWithoutStepsInput = {
@@ -781,8 +726,6 @@ export type AgentRunUncheckedCreateWithoutStepsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  approvals?: Prisma.AgentApprovalUncheckedCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutRunInput
 }
 
 export type AgentRunCreateOrConnectWithoutStepsInput = {
@@ -815,8 +758,6 @@ export type AgentRunUpdateWithoutStepsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAgentRunsNestedInput
-  approvals?: Prisma.AgentApprovalUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUpdateManyWithoutRunNestedInput
 }
 
 export type AgentRunUncheckedUpdateWithoutStepsInput = {
@@ -833,184 +774,6 @@ export type AgentRunUncheckedUpdateWithoutStepsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  approvals?: Prisma.AgentApprovalUncheckedUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutRunNestedInput
-}
-
-export type AgentRunCreateWithoutApprovalsInput = {
-  id?: string
-  mode?: string
-  goal: string
-  status?: string
-  currentStep?: number
-  maxSteps?: number
-  summary?: string | null
-  error?: string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutAgentRunsInput
-  steps?: Prisma.AgentStepCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionCreateNestedManyWithoutRunInput
-}
-
-export type AgentRunUncheckedCreateWithoutApprovalsInput = {
-  id?: string
-  userId: string
-  mode?: string
-  goal: string
-  status?: string
-  currentStep?: number
-  maxSteps?: number
-  summary?: string | null
-  error?: string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  steps?: Prisma.AgentStepUncheckedCreateNestedManyWithoutRunInput
-  decisions?: Prisma.AgentDecisionUncheckedCreateNestedManyWithoutRunInput
-}
-
-export type AgentRunCreateOrConnectWithoutApprovalsInput = {
-  where: Prisma.AgentRunWhereUniqueInput
-  create: Prisma.XOR<Prisma.AgentRunCreateWithoutApprovalsInput, Prisma.AgentRunUncheckedCreateWithoutApprovalsInput>
-}
-
-export type AgentRunUpsertWithoutApprovalsInput = {
-  update: Prisma.XOR<Prisma.AgentRunUpdateWithoutApprovalsInput, Prisma.AgentRunUncheckedUpdateWithoutApprovalsInput>
-  create: Prisma.XOR<Prisma.AgentRunCreateWithoutApprovalsInput, Prisma.AgentRunUncheckedCreateWithoutApprovalsInput>
-  where?: Prisma.AgentRunWhereInput
-}
-
-export type AgentRunUpdateToOneWithWhereWithoutApprovalsInput = {
-  where?: Prisma.AgentRunWhereInput
-  data: Prisma.XOR<Prisma.AgentRunUpdateWithoutApprovalsInput, Prisma.AgentRunUncheckedUpdateWithoutApprovalsInput>
-}
-
-export type AgentRunUpdateWithoutApprovalsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  mode?: Prisma.StringFieldUpdateOperationsInput | string
-  goal?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  currentStep?: Prisma.IntFieldUpdateOperationsInput | number
-  maxSteps?: Prisma.IntFieldUpdateOperationsInput | number
-  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutAgentRunsNestedInput
-  steps?: Prisma.AgentStepUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUpdateManyWithoutRunNestedInput
-}
-
-export type AgentRunUncheckedUpdateWithoutApprovalsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  mode?: Prisma.StringFieldUpdateOperationsInput | string
-  goal?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  currentStep?: Prisma.IntFieldUpdateOperationsInput | number
-  maxSteps?: Prisma.IntFieldUpdateOperationsInput | number
-  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  steps?: Prisma.AgentStepUncheckedUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutRunNestedInput
-}
-
-export type AgentRunCreateWithoutDecisionsInput = {
-  id?: string
-  mode?: string
-  goal: string
-  status?: string
-  currentStep?: number
-  maxSteps?: number
-  summary?: string | null
-  error?: string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutAgentRunsInput
-  steps?: Prisma.AgentStepCreateNestedManyWithoutRunInput
-  approvals?: Prisma.AgentApprovalCreateNestedManyWithoutRunInput
-}
-
-export type AgentRunUncheckedCreateWithoutDecisionsInput = {
-  id?: string
-  userId: string
-  mode?: string
-  goal: string
-  status?: string
-  currentStep?: number
-  maxSteps?: number
-  summary?: string | null
-  error?: string | null
-  startedAt?: Date | string | null
-  completedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  steps?: Prisma.AgentStepUncheckedCreateNestedManyWithoutRunInput
-  approvals?: Prisma.AgentApprovalUncheckedCreateNestedManyWithoutRunInput
-}
-
-export type AgentRunCreateOrConnectWithoutDecisionsInput = {
-  where: Prisma.AgentRunWhereUniqueInput
-  create: Prisma.XOR<Prisma.AgentRunCreateWithoutDecisionsInput, Prisma.AgentRunUncheckedCreateWithoutDecisionsInput>
-}
-
-export type AgentRunUpsertWithoutDecisionsInput = {
-  update: Prisma.XOR<Prisma.AgentRunUpdateWithoutDecisionsInput, Prisma.AgentRunUncheckedUpdateWithoutDecisionsInput>
-  create: Prisma.XOR<Prisma.AgentRunCreateWithoutDecisionsInput, Prisma.AgentRunUncheckedCreateWithoutDecisionsInput>
-  where?: Prisma.AgentRunWhereInput
-}
-
-export type AgentRunUpdateToOneWithWhereWithoutDecisionsInput = {
-  where?: Prisma.AgentRunWhereInput
-  data: Prisma.XOR<Prisma.AgentRunUpdateWithoutDecisionsInput, Prisma.AgentRunUncheckedUpdateWithoutDecisionsInput>
-}
-
-export type AgentRunUpdateWithoutDecisionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  mode?: Prisma.StringFieldUpdateOperationsInput | string
-  goal?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  currentStep?: Prisma.IntFieldUpdateOperationsInput | number
-  maxSteps?: Prisma.IntFieldUpdateOperationsInput | number
-  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutAgentRunsNestedInput
-  steps?: Prisma.AgentStepUpdateManyWithoutRunNestedInput
-  approvals?: Prisma.AgentApprovalUpdateManyWithoutRunNestedInput
-}
-
-export type AgentRunUncheckedUpdateWithoutDecisionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  mode?: Prisma.StringFieldUpdateOperationsInput | string
-  goal?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  currentStep?: Prisma.IntFieldUpdateOperationsInput | number
-  maxSteps?: Prisma.IntFieldUpdateOperationsInput | number
-  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  steps?: Prisma.AgentStepUncheckedUpdateManyWithoutRunNestedInput
-  approvals?: Prisma.AgentApprovalUncheckedUpdateManyWithoutRunNestedInput
 }
 
 export type AgentRunCreateManyUserInput = {
@@ -1042,8 +805,6 @@ export type AgentRunUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.AgentStepUpdateManyWithoutRunNestedInput
-  approvals?: Prisma.AgentApprovalUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUpdateManyWithoutRunNestedInput
 }
 
 export type AgentRunUncheckedUpdateWithoutUserInput = {
@@ -1060,8 +821,6 @@ export type AgentRunUncheckedUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.AgentStepUncheckedUpdateManyWithoutRunNestedInput
-  approvals?: Prisma.AgentApprovalUncheckedUpdateManyWithoutRunNestedInput
-  decisions?: Prisma.AgentDecisionUncheckedUpdateManyWithoutRunNestedInput
 }
 
 export type AgentRunUncheckedUpdateManyWithoutUserInput = {
@@ -1086,14 +845,10 @@ export type AgentRunUncheckedUpdateManyWithoutUserInput = {
 
 export type AgentRunCountOutputType = {
   steps: number
-  approvals: number
-  decisions: number
 }
 
 export type AgentRunCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   steps?: boolean | AgentRunCountOutputTypeCountStepsArgs
-  approvals?: boolean | AgentRunCountOutputTypeCountApprovalsArgs
-  decisions?: boolean | AgentRunCountOutputTypeCountDecisionsArgs
 }
 
 /**
@@ -1113,20 +868,6 @@ export type AgentRunCountOutputTypeCountStepsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.AgentStepWhereInput
 }
 
-/**
- * AgentRunCountOutputType without action
- */
-export type AgentRunCountOutputTypeCountApprovalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AgentApprovalWhereInput
-}
-
-/**
- * AgentRunCountOutputType without action
- */
-export type AgentRunCountOutputTypeCountDecisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AgentDecisionWhereInput
-}
-
 
 export type AgentRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1144,8 +885,6 @@ export type AgentRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.AgentRun$stepsArgs<ExtArgs>
-  approvals?: boolean | Prisma.AgentRun$approvalsArgs<ExtArgs>
-  decisions?: boolean | Prisma.AgentRun$decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.AgentRunCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agentRun"]>
 
@@ -1203,8 +942,6 @@ export type AgentRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type AgentRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.AgentRun$stepsArgs<ExtArgs>
-  approvals?: boolean | Prisma.AgentRun$approvalsArgs<ExtArgs>
-  decisions?: boolean | Prisma.AgentRun$decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.AgentRunCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AgentRunIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1219,8 +956,6 @@ export type $AgentRunPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     steps: Prisma.$AgentStepPayload<ExtArgs>[]
-    approvals: Prisma.$AgentApprovalPayload<ExtArgs>[]
-    decisions: Prisma.$AgentDecisionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1632,8 +1367,6 @@ export interface Prisma__AgentRunClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   steps<T extends Prisma.AgentRun$stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AgentRun$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  approvals<T extends Prisma.AgentRun$approvalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AgentRun$approvalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentApprovalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  decisions<T extends Prisma.AgentRun$decisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AgentRun$decisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AgentDecisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2098,54 +1831,6 @@ export type AgentRun$stepsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AgentStepScalarFieldEnum | Prisma.AgentStepScalarFieldEnum[]
-}
-
-/**
- * AgentRun.approvals
- */
-export type AgentRun$approvalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AgentApproval
-   */
-  select?: Prisma.AgentApprovalSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AgentApproval
-   */
-  omit?: Prisma.AgentApprovalOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AgentApprovalInclude<ExtArgs> | null
-  where?: Prisma.AgentApprovalWhereInput
-  orderBy?: Prisma.AgentApprovalOrderByWithRelationInput | Prisma.AgentApprovalOrderByWithRelationInput[]
-  cursor?: Prisma.AgentApprovalWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AgentApprovalScalarFieldEnum | Prisma.AgentApprovalScalarFieldEnum[]
-}
-
-/**
- * AgentRun.decisions
- */
-export type AgentRun$decisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AgentDecision
-   */
-  select?: Prisma.AgentDecisionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AgentDecision
-   */
-  omit?: Prisma.AgentDecisionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AgentDecisionInclude<ExtArgs> | null
-  where?: Prisma.AgentDecisionWhereInput
-  orderBy?: Prisma.AgentDecisionOrderByWithRelationInput | Prisma.AgentDecisionOrderByWithRelationInput[]
-  cursor?: Prisma.AgentDecisionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AgentDecisionScalarFieldEnum | Prisma.AgentDecisionScalarFieldEnum[]
 }
 
 /**

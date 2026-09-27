@@ -1,13 +1,13 @@
 import { z } from "zod";
 
+// AgentRun.status 的可达取值。
+// 原 awaiting_approval / cancelled / rejected 只由已移除的规划审批链路
+// 与 run 取消接口写入，随该链路一并删掉。
 export const agentRunStatuses = [
   "queued",
   "running",
-  "awaiting_approval",
   "completed",
   "failed",
-  "cancelled",
-  "rejected",
 ] as const;
 
 export type AgentRunStatus = (typeof agentRunStatuses)[number];
@@ -37,43 +37,5 @@ export interface AgentContextSnapshot {
   totalCheckins: number;
   activePlans: { id: string; name: string; progress: number }[];
   memoryCount: number;
-}
-
-export interface AgentRunResponse {
-  id: string;
-  mode: string;
-  goal: string;
-  status: string;
-  currentStep: number;
-  maxSteps: number;
-  summary: string | null;
-  error: string | null;
-  startedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  steps: {
-    id: string;
-    stepNumber: number;
-    kind: string;
-    status: string;
-    title: string;
-    detail: string | null;
-    input: unknown;
-    output: unknown;
-    error: string | null;
-    startedAt: string | null;
-    completedAt: string | null;
-    createdAt: string;
-  }[];
-  approvals: {
-    id: string;
-    action: string;
-    status: string;
-    payload: unknown;
-    decisionReason: string | null;
-    decidedAt: string | null;
-    createdAt: string;
-  }[];
 }
 

@@ -397,8 +397,6 @@ export const ModelName = {
   ConversationMessage: 'ConversationMessage',
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
-  AgentApproval: 'AgentApproval',
-  AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
@@ -424,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "agentApproval" | "agentDecision" | "userMemory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "userMemory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1387,154 +1385,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AgentStepCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AgentStepCountAggregateOutputType> | number
-        }
-      }
-    }
-    AgentApproval: {
-      payload: Prisma.$AgentApprovalPayload<ExtArgs>
-      fields: Prisma.AgentApprovalFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AgentApprovalFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AgentApprovalFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
-        }
-        findFirst: {
-          args: Prisma.AgentApprovalFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AgentApprovalFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
-        }
-        findMany: {
-          args: Prisma.AgentApprovalFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>[]
-        }
-        create: {
-          args: Prisma.AgentApprovalCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
-        }
-        createMany: {
-          args: Prisma.AgentApprovalCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AgentApprovalCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>[]
-        }
-        delete: {
-          args: Prisma.AgentApprovalDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
-        }
-        update: {
-          args: Prisma.AgentApprovalUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
-        }
-        deleteMany: {
-          args: Prisma.AgentApprovalDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AgentApprovalUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AgentApprovalUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>[]
-        }
-        upsert: {
-          args: Prisma.AgentApprovalUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApprovalPayload>
-        }
-        aggregate: {
-          args: Prisma.AgentApprovalAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentApproval>
-        }
-        groupBy: {
-          args: Prisma.AgentApprovalGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentApprovalGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AgentApprovalCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentApprovalCountAggregateOutputType> | number
-        }
-      }
-    }
-    AgentDecision: {
-      payload: Prisma.$AgentDecisionPayload<ExtArgs>
-      fields: Prisma.AgentDecisionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AgentDecisionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AgentDecisionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>
-        }
-        findFirst: {
-          args: Prisma.AgentDecisionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AgentDecisionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>
-        }
-        findMany: {
-          args: Prisma.AgentDecisionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>[]
-        }
-        create: {
-          args: Prisma.AgentDecisionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>
-        }
-        createMany: {
-          args: Prisma.AgentDecisionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AgentDecisionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>[]
-        }
-        delete: {
-          args: Prisma.AgentDecisionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>
-        }
-        update: {
-          args: Prisma.AgentDecisionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>
-        }
-        deleteMany: {
-          args: Prisma.AgentDecisionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AgentDecisionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AgentDecisionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>[]
-        }
-        upsert: {
-          args: Prisma.AgentDecisionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentDecisionPayload>
-        }
-        aggregate: {
-          args: Prisma.AgentDecisionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentDecision>
-        }
-        groupBy: {
-          args: Prisma.AgentDecisionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentDecisionGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AgentDecisionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AgentDecisionCountAggregateOutputType> | number
         }
       }
     }
@@ -2501,36 +2351,6 @@ export const AgentStepScalarFieldEnum = {
 export type AgentStepScalarFieldEnum = (typeof AgentStepScalarFieldEnum)[keyof typeof AgentStepScalarFieldEnum]
 
 
-export const AgentApprovalScalarFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  stepId: 'stepId',
-  action: 'action',
-  status: 'status',
-  payload: 'payload',
-  decisionReason: 'decisionReason',
-  decidedAt: 'decidedAt',
-  createdAt: 'createdAt'
-} as const
-
-export type AgentApprovalScalarFieldEnum = (typeof AgentApprovalScalarFieldEnum)[keyof typeof AgentApprovalScalarFieldEnum]
-
-
-export const AgentDecisionScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  runId: 'runId',
-  type: 'type',
-  reason: 'reason',
-  action: 'action',
-  status: 'status',
-  feedback: 'feedback',
-  createdAt: 'createdAt'
-} as const
-
-export type AgentDecisionScalarFieldEnum = (typeof AgentDecisionScalarFieldEnum)[keyof typeof AgentDecisionScalarFieldEnum]
-
-
 export const UserMemoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2673,13 +2493,6 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -2912,8 +2725,6 @@ export type GlobalOmitConfig = {
   conversationMessage?: Prisma.ConversationMessageOmit
   agentRun?: Prisma.AgentRunOmit
   agentStep?: Prisma.AgentStepOmit
-  agentApproval?: Prisma.AgentApprovalOmit
-  agentDecision?: Prisma.AgentDecisionOmit
   userMemory?: Prisma.UserMemoryOmit
   document?: Prisma.DocumentOmit
   documentChunk?: Prisma.DocumentChunkOmit

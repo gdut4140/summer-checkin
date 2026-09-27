@@ -39,7 +39,6 @@ model User {
   conversations Conversation[]
   planTasks     PlanTask[]
   agentRuns     AgentRun[]
-  decisions     AgentDecision[]
   notifications Notification[]
   todos           Todo[]
   docs            Document[]
@@ -258,8 +257,6 @@ model AgentRun {
 
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   steps     AgentStep[]
-  approvals AgentApproval[]
-  decisions AgentDecision[]
 
   @@index([userId, updatedAt])
   @@index([userId, status])
@@ -282,49 +279,10 @@ model AgentStep {
   createdAt   DateTime  @default(now())
 
   run       AgentRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
-  approvals AgentApproval[]
 
   @@unique([runId, stepNumber])
   @@index([runId, status])
   @@map("agentstep")
-}
-
-model AgentApproval {
-  id             String    @id @default(cuid())
-  runId          String
-  stepId         String?
-  action         String
-  status         String    @default("pending")
-  payload        Json?
-  decisionReason String?
-  decidedAt      DateTime?
-  createdAt      DateTime  @default(now())
-
-  run  AgentRun   @relation(fields: [runId], references: [id], onDelete: Cascade)
-  step AgentStep? @relation(fields: [stepId], references: [id])
-
-  @@index([runId, status])
-  @@map("agentapproval")
-}
-
-model AgentDecision {
-  id        String   @id @default(cuid())
-  userId    String
-  runId     String?
-  type      String
-  reason    String
-  action    Json
-  status    String   @default("executed")
-  feedback  String?
-  createdAt DateTime @default(now())
-
-  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  run  AgentRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
-
-  @@index([userId, createdAt])
-  @@index([userId, type])
-  @@index([runId])
-  @@map("agentdecision")
 }
 
 model UserMemory {

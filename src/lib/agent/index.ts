@@ -1,12 +1,4 @@
-export {
-  cancelAgentRun,
-  createAgentRun,
-  decideAgentApproval,
-  getAgentRunForUser,
-  listAgentRuns,
-  serializeAgentRun,
-  generatePlanForPlan,
-} from "./service";
+export { generatePlanForPlan } from "./service";
 export type { GeneratePlanInput } from "./service";
 export {
   agentRunStatuses,
@@ -15,7 +7,6 @@ export {
 } from "./types";
 export type {
   AgentContextSnapshot,
-  AgentRunResponse,
   AgentRunStatus,
   PlanDraft,
 } from "./types";
@@ -44,21 +35,3 @@ export {
   generateWeeklyReport,
   formatReportAsMarkdown,
 } from "./report";
-export type {
-} from "./report";
-
-// Phase 2: AgentDecision
-export {
-  createDecision,
-  listDecisions,
-  getLatestAnalysis,
-  updateDecisionStatus,
-  getDecisionStats,
-} from "./decisions";
-export type {
-  DecisionType,
-  DecisionStatus,
-  AgentDecisionRecord,
-  DecisionStats,
-} from "./decisions";
-

@@ -64,8 +64,6 @@ export const ModelName = {
   ConversationMessage: 'ConversationMessage',
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
-  AgentApproval: 'AgentApproval',
-  AgentDecision: 'AgentDecision',
   UserMemory: 'UserMemory',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
@@ -294,36 +292,6 @@ export const AgentStepScalarFieldEnum = {
 export type AgentStepScalarFieldEnum = (typeof AgentStepScalarFieldEnum)[keyof typeof AgentStepScalarFieldEnum]
 
 
-export const AgentApprovalScalarFieldEnum = {
-  id: 'id',
-  runId: 'runId',
-  stepId: 'stepId',
-  action: 'action',
-  status: 'status',
-  payload: 'payload',
-  decisionReason: 'decisionReason',
-  decidedAt: 'decidedAt',
-  createdAt: 'createdAt'
-} as const
-
-export type AgentApprovalScalarFieldEnum = (typeof AgentApprovalScalarFieldEnum)[keyof typeof AgentApprovalScalarFieldEnum]
-
-
-export const AgentDecisionScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  runId: 'runId',
-  type: 'type',
-  reason: 'reason',
-  action: 'action',
-  status: 'status',
-  feedback: 'feedback',
-  createdAt: 'createdAt'
-} as const
-
-export type AgentDecisionScalarFieldEnum = (typeof AgentDecisionScalarFieldEnum)[keyof typeof AgentDecisionScalarFieldEnum]
-
-
 export const UserMemoryScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -466,13 +434,6 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
