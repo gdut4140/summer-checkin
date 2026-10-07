@@ -9,9 +9,6 @@ export interface Connection {
   userName: string;
   image: string | null;
   isAlive: boolean;
-  // 限流
-  windowStart: number;
-  messageCount: number;
   // 幂等去重（记录最近处理过的 clientId）
   seenClientIds: Set<string>;
 }

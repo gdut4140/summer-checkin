@@ -14,6 +14,7 @@ import { addConnection, removeConnection, broadcast, allConnections, type Connec
 import { toDTO, type AiRole, type ClientMessage, type ReplyToDTO } from "./protocol";
 import { handleAI } from "./ai";
 import { allowedOrigins, isAllowedUpgrade } from "./origin";
+import { UserRateLimiter } from "./rate-limit";
 
 // ---- 握手白名单 ----
 // 启动时算一次并打印：这道校验是 fail-closed 的，BETTER_AUTH_URL 配错会让
@@ -37,6 +38,10 @@ const server = createServer((req, res) => {
 });
 
 const wss = new WebSocketServer({ noServer: true });
+// 限流按 userId 共享，而不是按连接共享，避免同一用户通过多标签页绕过限制。
+const rateLimiter = new UserRateLimiter(config.rateLimit);
+const rateLimitCleanup = setInterval(() => rateLimiter.prune(), config.rateLimit.windowMs);
+rateLimitCleanup.unref();
 
 // ---- 升级阶段鉴权（在握手前拒绝未登录连接） ----
 server.on("upgrade", (req, socket, head) => {
@@ -74,8 +79,6 @@ function setupConnection(ws: WebSocket, user: NonNullable<AuthUser>) {
     userName: user.name ?? "匿名",
     image: user.image ?? null,
     isAlive: true,
-    windowStart: Date.now(),
-    messageCount: 0,
     seenClientIds: new Set(),
   };
   addConnection(conn);
@@ -136,7 +139,7 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
     sendError(conn, "too_long", "消息过长");
     return;
   }
-  if (!checkRateLimit(conn)) {
+  if (!rateLimiter.allow(conn.userId)) {
     sendError(conn, "rate_limited", "发送太频繁，稍后再试");
     return;
   }
@@ -195,16 +198,6 @@ function sendError(conn: Connection, code: string, reason: string) {
   conn.ws.send(JSON.stringify({ type: "error", code, reason }));
 }
 
-function checkRateLimit(conn: Connection): boolean {
-  const now = Date.now();
-  if (now - conn.windowStart > config.rateLimit.windowMs) {
-    conn.windowStart = now;
-    conn.messageCount = 0;
-  }
-  conn.messageCount++;
-  return conn.messageCount <= config.rateLimit.max;
-}
-
 function extractAIPrompts(content: string): { prompt: string; aiRole: AiRole }[] {
   // @温柔宝 → 温柔宝；@雨宝 / @嘴欠宝 / @AI → 嘴欠宝；/ai 是命令式，仍要求开头（避免命中 /api 之类）
   const results: { prompt: string; aiRole: AiRole }[] = [];
@@ -246,6 +239,8 @@ const heartbeat = setInterval(() => {
 function shutdown() {
   console.log("[ws] 优雅关闭中…");
   clearInterval(heartbeat);
+  clearInterval(rateLimitCleanup);
+  rateLimiter.clear();
   for (const c of allConnections()) {
     c.ws.close(1001, "Server shutting down");
   }
