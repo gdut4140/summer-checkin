@@ -19,13 +19,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
-import { getDeepThinkOptions, generateChatTitle, SYSTEM_PROMPT } from "@/lib/deepseek";
+import { getDeepThinkOptions, generateChatTitle, buildSystemPrompt } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import { createTextStreamResponse, isStepCount } from "ai";
 import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
 import { assertInteractiveUsageAllowed, UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { createStudyTools, createRAGTool, createAgentTools, createTodoTools } from "@/lib/tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
+import { pickTools, promptGroupsFor, surfaceOf } from "@/lib/tools/router";
 import {
   getRelevantMemories,
   formatMemoriesForPrompt,
@@ -72,16 +73,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 来源界面 + 归属对象：智能体页 / 文档工作台 / 计划工作台三者严格分开。
+    // studioContext.kind 本身就是 "doc" | "plan"，与 surface 取值一一对应；
+    // refId 钉住具体文档或计划，工作台据此取回自己的历史（不再依赖 localStorage）。
+    //
+    // ⚠️ 必须在「新建会话」分支之外求值：工具集与系统提示词都要按它裁剪，
+    // 而老会话的后续消息不带 conversationId 分支、也要拿到同一个 surface。
+    const surface = surfaceOf(studioContext);
+
     // 如果没有 conversationId，自动创建一个新对话
     let activeConversationId = conversationId;
     if (!activeConversationId) {
       const lastMessage = messages[messages.length - 1];
       const title = await generateChatTitle(lastMessage.content, user.id);
-
-      // 来源界面 + 归属对象：智能体页 / 文档工作台 / 计划工作台三者严格分开。
-      // studioContext.kind 本身就是 "doc" | "plan"，与 surface 取值一一对应；
-      // refId 钉住具体文档或计划，工作台据此取回自己的历史（不再依赖 localStorage）。
-      const surface = studioContext?.kind === "plan" ? "plan" : studioContext ? "doc" : "agent";
 
       const conversation = await prisma.conversation.create({
         data: {
@@ -205,7 +209,14 @@ export async function POST(request: NextRequest) {
         ].join("\n")
       : "";
 
-    const fullSystem = [SYSTEM_PROMPT, userNamePrompt, studioPrompt, memoryPrompt]
+    // 系统提示词同样按场景拼：只注入「该场景真的注册了对应工具」的段落。
+    // 提示词与工具白名单必须一起裁——只裁工具会让模型反复去调不存在的工具。
+    const fullSystem = [
+      buildSystemPrompt(promptGroupsFor(surface)),
+      userNamePrompt,
+      studioPrompt,
+      memoryPrompt,
+    ]
       .filter(Boolean)
       .join("\n\n");
 
@@ -232,29 +243,36 @@ export async function POST(request: NextRequest) {
       messages: truncatedMessages,
       // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
       // Phase 1: Coach 工具（学习分析 + 计划调整）
-      tools: {
-        // 在文档工作室里编辑已有计划/文档时，不给 createPlan，避免 AI 新建重复计划；
-        // 聊天场景把最近对话 + 长期记忆带给 createPlan，用于后台生成个性化计划文档
-        ...createStudyTools(
-          user.id,
-          studioContext
-            ? { excludeCreatePlan: true }
-            : { conversation: conversationHint, memories: memoryPrompt }
-        ),
-        ...createRAGTool(user.id),
-        ...createAgentTools(user.id),
-        ...createTodoTools(user.id),
-        ...studioTools,
-      },
+      // 工具集按场景裁剪（白名单见 lib/tools/router.ts）。
+      // 工作台不持有「改非当前对象」的写工具——文档编辑器里不该能顺手删掉待办。
+      //
+      // 先建全部候选再过滤：conversation/memories 只被 createPlan 用到，而 createPlan
+      // 只在智能体场景入选，所以工作台多建一次没有副作用（纯对象构造，不碰数据库）。
+      tools: pickTools(
+        {
+          ...createStudyTools(user.id, {
+            conversation: conversationHint,
+            memories: memoryPrompt,
+          }),
+          ...createRAGTool(user.id),
+          ...createAgentTools(user.id),
+          ...createTodoTools(user.id),
+          ...studioTools,
+        },
+        surface
+      ),
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
       // Day 22: 增至 10 步 — Agent Workflow 需要更多步骤（规划→拆分→检查）
       stopWhen: isStepCount(MAX_STEPS),
-      // Day 7 调试：观察每一步的执行情况
+      // Day 7 调试：观察每一步的执行情况。
+      // 带上**工具名**而不只是数量——这是判断「模型有没有选错工具」的唯一原始数据。
+      // 只打数量的话，拿不到「同一轮里调了两个以上同簇工具」这类信号。
       onStepEnd: (step) => {
+        const called = (step.toolCalls ?? []).map((c) => c.toolName).join(",");
         console.log(
-          `[AI] Step | finishReason=${step.finishReason} | ` +
+          `[AI] Step | surface=${surface} | finishReason=${step.finishReason} | ` +
           `text=${step.text?.length ?? 0}chars | ` +
-          `toolCalls=${step.toolCalls?.length ?? 0} | ` +
+          `toolCalls=[${called}] | ` +
           `toolResults=${step.toolResults?.length ?? 0}`
         );
       },

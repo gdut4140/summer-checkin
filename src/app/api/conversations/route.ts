@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
+import { AI_SURFACES, type AiSurface } from "@/lib/tools/router";
 
-const SURFACES = ["agent", "doc", "plan"] as const;
-type Surface = (typeof SURFACES)[number];
+// 场景枚举只有一处定义：AI_SURFACES 同时也是工具集与系统提示词的裁剪依据
+// （见 lib/tools/router.ts）。原先这里另写了一份字面量元组，改一处漏一处的风险。
+const SURFACES = AI_SURFACES;
+type Surface = AiSurface;
 
 // GET /api/conversations — 获取对话列表
 //

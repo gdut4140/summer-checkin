@@ -16,11 +16,32 @@ import type { ChatMessage } from "@/types";
 // · 流结束后通过 onStreamEnd 通知外层拉取最新文档并应用（可撤销）
 // ============================================================
 
-const QUICK_PROMPTS = [
-  "把这份计划的节奏安排得更合理",
-  "帮我把目标拆解成更具体的任务",
-  "给这篇文档补充一段学习笔记",
-];/**
+/**
+ * 空态快捷提示词，按工作台给两套。
+ *
+ * 原先只有一套、文案是「计划」导向，却被文档工作台共用——在文档里点下去会粘一段
+ * 讲计划的字。而且第二条「帮我把目标拆解成更具体的任务」会诱导模型去调
+ * breakdownPlanTasks，但工作台现在没有这个工具（它只在智能体场景注册，
+ * 见 lib/tools/router.ts）。工作台里拆任务的正确路径是让 AI 改文档里的
+ * 「## 任务安排」段——改完由 plan-sync 回写 PlanTask。
+ */
+const QUICK_PROMPTS_BY_KIND: Record<"plan" | "doc", string[]> = {
+  plan: [
+    "把这份计划的节奏安排得更合理",
+    "帮我把「## 任务安排」里的任务拆得更具体",
+    "补充一段学习笔记",
+  ],
+  doc: [
+    "把这篇文档的结构理得更清楚",
+    "帮我把这段内容改得更简洁",
+    "补充一段学习笔记",
+  ],
+};
+
+/** context.kind 缺失时按文档工作台处理（它是最通用的一套） */
+function quickPromptsFor(kind?: string): string[] {
+  return kind === "plan" ? QUICK_PROMPTS_BY_KIND.plan : QUICK_PROMPTS_BY_KIND.doc;
+}/**
  * 一段对话归属哪个工作台的哪个对象。
  * 抽成具名类型是为了让 MarkdownStudio 与面板共用同一份定义——
  * 之前两边各写一遍字面量类型，`kind` 从 Record<string,string> 取出来是 string，
@@ -345,7 +366,7 @@ export function AiChatPanel({
             </p>
             {context && (
               <div className="mt-4 flex w-full flex-col gap-1.5">
-                {QUICK_PROMPTS.map((prompt) => (
+                {quickPromptsFor(context.kind).map((prompt) => (
                   <button
                     key={prompt}
                     type="button"
