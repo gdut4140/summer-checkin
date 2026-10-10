@@ -6,6 +6,8 @@ import {
   type PlanDraft,
 } from "./types";
 import { planDraftToMarkdown } from "@/lib/studio/plan-serialize";
+import { splitTitleDay } from "@/lib/studio/plan-sync";
+import { extractJsonText } from "@/lib/llm-json";
 
 const MAX_TASKS = 40;
 
@@ -106,12 +108,6 @@ async function collectContext(userId: string): Promise<AgentContextSnapshot> {
     }),
     memoryCount,
   };
-}
-
-// 提取模型输出中的 JSON 主体（兼容可能的 markdown 代码围栏）
-function extractJsonText(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  return (fenced ? fenced[1] : text).trim();
 }
 
 function parseDraft(value: unknown): PlanDraft | null {
@@ -225,13 +221,28 @@ export async function generatePlanForPlan(
     memories: input.memories,
   });
 
+  // 模型倾向把日期写在标题文字里（「第1天：闭包」）而不是填 dayNumber 字段——
+  // 实测库里 263 条任务只有 6 条有 dayNumber。按标题前缀拆出来（模型自己给的
+  // 字段优先），让文档渲染、任务行、以及之后的 plan-sync 三处用同一套日期。
+  //
+  // 同时在这里截断到 MAX_TASKS：原先文档用完整的 draft.tasks 渲染、任务只建
+  // 前 40 条，超过 40 条时文档和任务会对不上。
+  const tasks = draft.tasks.slice(0, MAX_TASKS).map((t) => {
+    const parts = splitTitleDay(t.title);
+    return {
+      ...t,
+      title: parts.title,
+      dayNumber: t.dayNumber ?? parts.dayNumber,
+      weekNumber: t.weekNumber ?? parts.weekNumber,
+    };
+  });
+
   // 文档标题与计划名保持一致；任务直接来自 draft（结构化，比解析文档更可靠）
-  const document = planDraftToMarkdown({ ...draft, name: plan.name });
+  const document = planDraftToMarkdown({ ...draft, name: plan.name, tasks });
   await prisma.plan.update({ where: { id: planId }, data: { document } });
 
-  const tasksToCreate = draft.tasks.slice(0, MAX_TASKS);
   await Promise.all(
-    tasksToCreate.map((task) =>
+    tasks.map((task) =>
       prisma.planTask.create({
         data: {
           userId,
@@ -247,5 +258,5 @@ export async function generatePlanForPlan(
     )
   );
 
-  return { planId, name: plan.name, tasksCreated: tasksToCreate.length };
+  return { planId, name: plan.name, tasksCreated: tasks.length };
 }
