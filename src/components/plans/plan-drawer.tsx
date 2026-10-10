@@ -15,6 +15,14 @@ interface Props {
   onPlanNameChange?: (name: string) => void;
 }
 
+/**
+ * 两次轮询拿到的任务是否完全一致。
+ * 用于跳过无谓的 setState——不然每 2 秒换一个新数组引用，整张任务表都要重渲染。
+ */
+function sameTasks(a: PlanTaskInfo[], b: PlanTaskInfo[]): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props) {
   const [tasks, setTasks] = useState<PlanTaskInfo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,6 +84,17 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
     } finally {
       setRefreshing(false);
       setSplitting(false);
+      // 拆分结束后补拉一次权威状态。
+      // ⚠️ 必须有这一步：轮询只在 refreshing/splitting 期间跑，POST 一返回它就停了，
+      // 而 stale 是否已被这次拆分清掉、任务是否已更新，只有服务端知道。少了它，
+      // 「计划已修改」横幅会在拆分成功后继续赖着不走。
+      void loadTasks(plan.id)
+        .then(({ tasks, stale: s, splitting: serverSplitting }) => {
+          setTasks((prev) => (sameTasks(prev, tasks) ? prev : tasks));
+          setStale(s);
+          setSplitting(serverSplitting);
+        })
+        .catch(() => {});
       onRefresh();
     }
   };
@@ -102,14 +121,19 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plan, loadTasks]);
 
-  // 刷新/拆分中：每 2 秒轮询，直到 tasksSplittingAt 清空，加载最新任务并刷新计划页。
-  // stale 也参与轮询，以覆盖"AI 判断中 → 拆分开始 → 完成"的整段过程。
+  // 刷新/拆分中才轮询：每 2 秒拉一次，直到服务端的 tasksSplittingAt 清空。
+  //
+  // ⚠️ 刻意【不】把 stale 放进条件。轮询是「等一个异步任务结束」，而 stale 是持久的
+  // 数据状态（文档在最后一次拆分之后被改过）——轮询既不改文档、也不写回 hash，所以
+  // 它永远清不掉：等于抽屉只要开着就每 2 秒发一次请求，直到用户真的重拆一次为止。
+  // stale 该做的事是显示横幅提示（见下面的渲染），不该驱动轮询。
   useEffect(() => {
-    if (!plan || (!splitting && !refreshing && !stale)) return;
+    if (!plan || (!splitting && !refreshing)) return;
     const timer = window.setInterval(() => {
       loadTasks(plan.id)
         .then(({ tasks, stale: s, splitting: serverSplitting }) => {
-          setTasks(tasks);
+          // 内容一致时不 setState，避免每 2 秒换一个数组引用导致整表重渲染
+          setTasks((prev) => (sameTasks(prev, tasks) ? prev : tasks));
           setStale(s);
           setSplitting(serverSplitting);
           // 自动触发的拆分结束（非手动刷新）→ 刷新计划页数据
@@ -118,7 +142,7 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
         .catch(() => {});
     }, 2000);
     return () => window.clearInterval(timer);
-  }, [plan, splitting, refreshing, stale, loadTasks, onRefresh]);
+  }, [plan, splitting, refreshing, loadTasks, onRefresh]);
 
   useEffect(() => {
     if (plan) document.body.style.overflow = "hidden";
@@ -314,8 +338,15 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
 
                   {loading ? (
                     <div className="flex justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
-                  ) : tasks.length === 0 && !splitting && !refreshing ? (
-                    <p className="py-8 text-center text-xs text-muted-foreground">还没有任务，点上方「刷新任务」从文档拆分</p>
+                  ) : tasks.length === 0 ? (
+                    // 没任务时分两种：正在拆（第一批还没出来）显示转圈，否则显示空态。
+                    // 原先写成 `!splitting && !refreshing` 才给空态，于是「没任务 + 拆分中」
+                    // 三个分支全不命中，落到列表分支渲染出一片空白——既不转圈也没提示。
+                    splitting || refreshing ? (
+                      <div className="flex justify-center py-10"><div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
+                    ) : (
+                      <p className="py-8 text-center text-xs text-muted-foreground">还没有任务，点上方「刷新任务」从文档拆分</p>
+                    )
                   ) : (
                     <div className="space-y-1">
                       {tasks.map((task) => {
