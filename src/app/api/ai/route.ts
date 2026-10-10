@@ -32,6 +32,18 @@ import {
   extractAndSaveMemories,
   touchMemories,
 } from "@/lib/memory";
+
+/**
+ * Tool Calling 循环的步数上限。
+ *
+ * ⚠️ 这是「防跑飞」的保险丝，不是编排策略：模型从十几个工具里选错、
+ * 拿到结果再自我纠正，最多烧这么多步。烧完了 AI SDK 不给任何标记
+ * （finish 事件复用最后一步的 finishReason，见 ai@7 的 stopWhen 实现），
+ * 所以下面 onEnd 里显式判定并告警，否则「正常回答」和「被砍断的回答」
+ * 在日志里长得一模一样。
+ */
+const MAX_STEPS = 10;
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser();
@@ -206,10 +218,11 @@ export async function POST(request: NextRequest) {
     // Day 7 新增：Tool Calling — 让 AI 操作项目已有功能
     // ④ tools      — createStudyTools(userId) 为当前用户创建工具
     //                 AI 可以：创建计划、查询计划、查询打卡记录
-    // ⑤ stopWhen   — isStepCount(5) 允许多步调用：
+    // ⑤ stopWhen   — isStepCount(10) 允许多步调用：
     //                 Step 1: LLM 判断 → 调用 tool → execute 写入 DB
     //                 Step 2: LLM 基于 tool 结果 → 生成自然语言回复
-    //                 （默认 isStepCount(1) 无法完成 Tool Calling 闭环）
+    //                 （默认 isStepCount(1) 无法完成 Tool Calling 闭环；
+    //                   Day 7 起为 5，Day 22 因 Agent Workflow 增至 10）
     // ============================================================
     // 走模型池 HIGH 档（agent/文档），免费额度耗尽自动降级到下一个模型
     const { stream } = await streamTextWithFallback("high", (_entry, model) => ({
@@ -235,7 +248,7 @@ export async function POST(request: NextRequest) {
       },
       // Day 7: 允许多步 — 默认 1 步不够 Tool Calling 闭环
       // Day 22: 增至 10 步 — Agent Workflow 需要更多步骤（规划→拆分→检查）
-      stopWhen: isStepCount(10),
+      stopWhen: isStepCount(MAX_STEPS),
       // Day 7 调试：观察每一步的执行情况
       onStepEnd: (step) => {
         console.log(
@@ -247,12 +260,32 @@ export async function POST(request: NextRequest) {
       },
       // Day 7 修复：onEnd 替代废弃的 onFinish
       // ① onEnd 确保所有 tool execution 完成后才回调
-      // ② text 为空时从 steps 兜底取最后一步的文本
+      // ② 拼接所有步的文本（不能只用 text，见下方说明）
       // ③ try-catch 避免单个 DB 失败导致静默中断
-      onEnd: async ({ text, steps }) => {
-        // 兜底：text 可能为空（tool calling 场景），从 steps 获取
-        const finalText =
-          text || steps?.at(-1)?.text || "";
+      onEnd: async ({ text, steps, finalStep }) => {
+        // ⚠️ 步数耗尽检测。AI SDK 不提供「因 stopWhen 而停」的标记
+        //    （finish 事件直接复用最后一步的 finishReason），只能自己判：
+        //    跑满上限 **且** 最后一步仍在请求工具调用才算跑飞。
+        //    只判步数会把「模型恰好在第 10 步自然收尾」误报成故障。
+        //    只做日志——用户已在流里看到原文，在 onEnd 里往 finalText 追加会
+        //    造成 DB 与 UI 不一致（正是下面那段注释在防的事）。
+        if (steps.length >= MAX_STEPS && finalStep?.finishReason === "tool-calls") {
+          console.warn(
+            `[AI] ⚠️ 步数耗尽(${MAX_STEPS}) | conversation=${activeConversationId} | ` +
+              `最后一步仍在请求工具调用，回答可能被截断`
+          );
+        }
+
+        // ⚠️ onEnd 拿到的 text 只是「最后一步」的文本（SDK 类型注释：
+        //    "The text that was generated in the final step"），
+        //    而 toTextStream 推给前端的是**所有步**的文本增量。
+        //    只存最后一步会造成 UI 与 DB 不一致：模型在中间步说的话
+        //    （如"我先查一下你的学习记录"）前端看得到、刷新后却没了。
+        //    多步 Tool Calling 时必现。这里显式拼接所有步，与前端
+        //    rainforest-explorer 的 accumulated 严格对齐。
+        const finalText = steps?.length
+          ? steps.map((step) => step.text ?? "").join("")
+          : text ?? "";
 
         if (!finalText || !activeConversationId) {
           console.warn("[AI] onEnd: no text or no conversationId, 跳过保存", {

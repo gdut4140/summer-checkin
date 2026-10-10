@@ -8,6 +8,7 @@ import { z } from "zod";
 import { completionsWithFallback } from "@/lib/model-pool";
 import { prisma } from "@/lib/prisma";
 import { planTaskSource, planTaskSourceHash } from "@/lib/plan-tasks";
+import { extractJsonText } from "@/lib/llm-json";
 
 const SplitSchema = z.object({
   tasks: z.array(
@@ -42,12 +43,6 @@ const SPLIT_SYSTEM_PROMPT = `你是学习计划拆解助手，把用户的学习
 
 function normalizeTitle(t: string): string {
   return t.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-// 提取模型输出中的 JSON 主体（兼容可能的 markdown 代码围栏）
-function extractJsonText(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  return (fenced ? fenced[1] : text).trim();
 }
 
 // 判断文档改动是否实质影响任务清单（大意没变就不重新拆分任务）

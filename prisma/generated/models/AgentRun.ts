@@ -50,6 +50,7 @@ export type AgentRunMinAggregateOutputType = {
   completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  runDate: string | null
 }
 
 export type AgentRunMaxAggregateOutputType = {
@@ -66,6 +67,7 @@ export type AgentRunMaxAggregateOutputType = {
   completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  runDate: string | null
 }
 
 export type AgentRunCountAggregateOutputType = {
@@ -82,6 +84,7 @@ export type AgentRunCountAggregateOutputType = {
   completedAt: number
   createdAt: number
   updatedAt: number
+  runDate: number
   _all: number
 }
 
@@ -110,6 +113,7 @@ export type AgentRunMinAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  runDate?: true
 }
 
 export type AgentRunMaxAggregateInputType = {
@@ -126,6 +130,7 @@ export type AgentRunMaxAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  runDate?: true
 }
 
 export type AgentRunCountAggregateInputType = {
@@ -142,6 +147,7 @@ export type AgentRunCountAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  runDate?: true
   _all?: true
 }
 
@@ -245,6 +251,7 @@ export type AgentRunGroupByOutputType = {
   completedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  runDate: string | null
   _count: AgentRunCountAggregateOutputType | null
   _avg: AgentRunAvgAggregateOutputType | null
   _sum: AgentRunSumAggregateOutputType | null
@@ -284,6 +291,7 @@ export type AgentRunWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"AgentRun"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
+  runDate?: Prisma.StringNullableFilter<"AgentRun"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   steps?: Prisma.AgentStepListRelationFilter
 }
@@ -302,12 +310,14 @@ export type AgentRunOrderByWithRelationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  runDate?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   steps?: Prisma.AgentStepOrderByRelationAggregateInput
 }
 
 export type AgentRunWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  userId_runDate?: Prisma.AgentRunUserIdRunDateCompoundUniqueInput
   AND?: Prisma.AgentRunWhereInput | Prisma.AgentRunWhereInput[]
   OR?: Prisma.AgentRunWhereInput[]
   NOT?: Prisma.AgentRunWhereInput | Prisma.AgentRunWhereInput[]
@@ -323,9 +333,10 @@ export type AgentRunWhereUniqueInput = Prisma.AtLeast<{
   completedAt?: Prisma.DateTimeNullableFilter<"AgentRun"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
+  runDate?: Prisma.StringNullableFilter<"AgentRun"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   steps?: Prisma.AgentStepListRelationFilter
-}, "id">
+}, "id" | "userId_runDate">
 
 export type AgentRunOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -341,6 +352,7 @@ export type AgentRunOrderByWithAggregationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  runDate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AgentRunCountOrderByAggregateInput
   _avg?: Prisma.AgentRunAvgOrderByAggregateInput
   _max?: Prisma.AgentRunMaxOrderByAggregateInput
@@ -365,6 +377,7 @@ export type AgentRunScalarWhereWithAggregatesInput = {
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AgentRun"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AgentRun"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AgentRun"> | Date | string
+  runDate?: Prisma.StringNullableWithAggregatesFilter<"AgentRun"> | string | null
 }
 
 export type AgentRunCreateInput = {
@@ -380,6 +393,7 @@ export type AgentRunCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
   user: Prisma.UserCreateNestedOneWithoutAgentRunsInput
   steps?: Prisma.AgentStepCreateNestedManyWithoutRunInput
 }
@@ -398,6 +412,7 @@ export type AgentRunUncheckedCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
   steps?: Prisma.AgentStepUncheckedCreateNestedManyWithoutRunInput
 }
 
@@ -414,6 +429,7 @@ export type AgentRunUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutAgentRunsNestedInput
   steps?: Prisma.AgentStepUpdateManyWithoutRunNestedInput
 }
@@ -432,6 +448,7 @@ export type AgentRunUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.AgentStepUncheckedUpdateManyWithoutRunNestedInput
 }
 
@@ -449,6 +466,7 @@ export type AgentRunCreateManyInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
 }
 
 export type AgentRunUpdateManyMutationInput = {
@@ -464,6 +482,7 @@ export type AgentRunUpdateManyMutationInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgentRunUncheckedUpdateManyInput = {
@@ -480,6 +499,7 @@ export type AgentRunUncheckedUpdateManyInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgentRunListRelationFilter = {
@@ -490,6 +510,11 @@ export type AgentRunListRelationFilter = {
 
 export type AgentRunOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AgentRunUserIdRunDateCompoundUniqueInput = {
+  userId: string
+  runDate: string
 }
 
 export type AgentRunCountOrderByAggregateInput = {
@@ -506,6 +531,7 @@ export type AgentRunCountOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  runDate?: Prisma.SortOrder
 }
 
 export type AgentRunAvgOrderByAggregateInput = {
@@ -527,6 +553,7 @@ export type AgentRunMaxOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  runDate?: Prisma.SortOrder
 }
 
 export type AgentRunMinOrderByAggregateInput = {
@@ -543,6 +570,7 @@ export type AgentRunMinOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  runDate?: Prisma.SortOrder
 }
 
 export type AgentRunSumOrderByAggregateInput = {
@@ -632,6 +660,7 @@ export type AgentRunCreateWithoutUserInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
   steps?: Prisma.AgentStepCreateNestedManyWithoutRunInput
 }
 
@@ -648,6 +677,7 @@ export type AgentRunUncheckedCreateWithoutUserInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
   steps?: Prisma.AgentStepUncheckedCreateNestedManyWithoutRunInput
 }
 
@@ -694,6 +724,7 @@ export type AgentRunScalarWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"AgentRun"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AgentRun"> | Date | string
+  runDate?: Prisma.StringNullableFilter<"AgentRun"> | string | null
 }
 
 export type AgentRunCreateWithoutStepsInput = {
@@ -709,6 +740,7 @@ export type AgentRunCreateWithoutStepsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
   user: Prisma.UserCreateNestedOneWithoutAgentRunsInput
 }
 
@@ -726,6 +758,7 @@ export type AgentRunUncheckedCreateWithoutStepsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
 }
 
 export type AgentRunCreateOrConnectWithoutStepsInput = {
@@ -757,6 +790,7 @@ export type AgentRunUpdateWithoutStepsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutAgentRunsNestedInput
 }
 
@@ -774,6 +808,7 @@ export type AgentRunUncheckedUpdateWithoutStepsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AgentRunCreateManyUserInput = {
@@ -789,6 +824,7 @@ export type AgentRunCreateManyUserInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  runDate?: string | null
 }
 
 export type AgentRunUpdateWithoutUserInput = {
@@ -804,6 +840,7 @@ export type AgentRunUpdateWithoutUserInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.AgentStepUpdateManyWithoutRunNestedInput
 }
 
@@ -820,6 +857,7 @@ export type AgentRunUncheckedUpdateWithoutUserInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.AgentStepUncheckedUpdateManyWithoutRunNestedInput
 }
 
@@ -836,6 +874,7 @@ export type AgentRunUncheckedUpdateManyWithoutUserInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  runDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -883,6 +922,7 @@ export type AgentRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  runDate?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.AgentRun$stepsArgs<ExtArgs>
   _count?: boolean | Prisma.AgentRunCountOutputTypeDefaultArgs<ExtArgs>
@@ -902,6 +942,7 @@ export type AgentRunSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  runDate?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agentRun"]>
 
@@ -919,6 +960,7 @@ export type AgentRunSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  runDate?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agentRun"]>
 
@@ -936,9 +978,10 @@ export type AgentRunSelectScalar = {
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  runDate?: boolean
 }
 
-export type AgentRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "mode" | "goal" | "status" | "currentStep" | "maxSteps" | "summary" | "error" | "startedAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["agentRun"]>
+export type AgentRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "mode" | "goal" | "status" | "currentStep" | "maxSteps" | "summary" | "error" | "startedAt" | "completedAt" | "createdAt" | "updatedAt" | "runDate", ExtArgs["result"]["agentRun"]>
 export type AgentRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.AgentRun$stepsArgs<ExtArgs>
@@ -971,6 +1014,12 @@ export type $AgentRunPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     completedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    /**
+     * 本地日期 YYYY-MM-DD，仅「每日分析」写入；配合下面的唯一约束做幂等抢锁。
+     * 可空是为了不影响其他 mode 的行——Postgres 视多个 NULL 互不相等，
+     * 所以存量行（全是 NULL）不会与唯一索引冲突。
+     */
+    runDate: string | null
   }, ExtArgs["result"]["agentRun"]>
   composites: {}
 }
@@ -1409,6 +1458,7 @@ export interface AgentRunFieldRefs {
   readonly completedAt: Prisma.FieldRef<"AgentRun", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"AgentRun", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AgentRun", 'DateTime'>
+  readonly runDate: Prisma.FieldRef<"AgentRun", 'String'>
 }
     
 

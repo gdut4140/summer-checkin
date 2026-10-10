@@ -4,11 +4,17 @@ export {
   agentRunStatuses,
   planDraftSchema,
   planTaskDraftSchema,
+  analysisFindingSchema,
+  agentActionSchema,
+  agentAnalysisSchema,
 } from "./types";
 export type {
   AgentContextSnapshot,
   AgentRunStatus,
   PlanDraft,
+  AnalysisFinding,
+  AgentAction,
+  AgentAnalysis,
 } from "./types";
 
 // Phase 1: Agent Runtime
@@ -18,13 +24,12 @@ export {
   analyze,
   executeAction,
   runLearningAgent,
+  agentRunGoal,
   fallbackAnalysis as _fallbackAnalysis,
 } from "./runtime";
 export type {
   LearningContext,
-  AnalysisFinding,
-  AgentAction,
-  AgentAnalysis,
+  AnalyzeResult,
   AgentRunResult,
   ExecutionResult,
 } from "./runtime";

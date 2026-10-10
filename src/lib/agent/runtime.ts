@@ -27,9 +27,16 @@
 import { prisma } from "@/lib/prisma";
 import { completionsWithFallback } from "@/lib/model-pool";
 import { AGENT_COACH_PROMPT } from "./prompts";
-import { getRelevantMemories, formatMemoriesForPrompt, touchMemories } from "@/lib/memory";
+import { getRelevantMemories, touchMemories } from "@/lib/memory";
 import { createNotification } from "@/lib/notification";
 import { generateDailyReport, formatReportAsMarkdown } from "./report";
+import { extractJsonText } from "@/lib/llm-json";
+import {
+  agentAnalysisSchema,
+  type AgentAction,
+  type AgentAnalysis,
+  type AnalysisFinding,
+} from "./types";
 import type { Prisma } from "@prisma-generated/client";
 
 // ---- 类型定义 ----
@@ -88,29 +95,10 @@ export interface LearningContext {
   }[];
 }
 
-/** 分析发现（Analyze 阶段的输出） */
-export interface AnalysisFinding {
-  category: "progress" | "weakness" | "deviation" | "streak" | "habit";
-  severity: "info" | "warning" | "critical";
-  detail: string;
-  evidence: Record<string, unknown>;
-}
-
-/** 行动项（Plan 阶段的输出） */
-export interface AgentAction {
-  type: "ADJUST_PLAN" | "SEND_REMINDER" | "GENERATE_REPORT" | "ENCOURAGE";
-  priority: "high" | "normal" | "low";
-  reason: string;
-  detail: string;
-}
-
-/** LLM 分析结果 */
-export interface AgentAnalysis {
-  status: "on_track" | "need_attention" | "need_adjustment" | "at_risk";
-  summary: string;
-  findings: AnalysisFinding[];
-  actions: AgentAction[];
-}
+// AnalysisFinding / AgentAction / AgentAnalysis 现在由 types.ts 的 zod schema
+// 推导（z.infer），在这里转发一下，让 `from "./runtime"` 的既有导入继续可用
+// （report.ts 就是这么导入的）。
+export type { AgentAction, AgentAnalysis, AnalysisFinding } from "./types";
 
 /** Agent 运行结果 */
 export interface AgentRunResult {
@@ -258,11 +246,20 @@ export async function observe(userId: string): Promise<LearningContext> {
 // Step 2: Analyze — LLM 分析学习状态
 // ============================================================
 
+/** analyze 的结果：这次分析是模型给的还是规则兜底的，以及兜底的具体原因 */
+export interface AnalyzeResult {
+  analysis: AgentAnalysis;
+  /** model = 模型返回了合法结构；fallback = 走了规则兜底 */
+  source: "model" | "fallback";
+  /** 仅 source=fallback 时有值，用于区分「模型胡说」和「模型没响应」 */
+  reason?: "empty_text" | "json_parse" | "schema_invalid" | "llm_error";
+}
+
 export async function analyze(
   context: LearningContext,
   memories: { content: string; type: string }[],
   userId: string
-): Promise<AgentAnalysis> {
+): Promise<AnalyzeResult> {
   // 构建分析 prompt
   const memoryText = memories.length > 0
     ? memories.map((m) => `- [${m.type}] ${m.content}`).join("\n")
@@ -293,45 +290,82 @@ export async function analyze(
     memories: memoryText,
   });
 
+  let reason: AnalyzeResult["reason"] = "llm_error";
+
   try {
-    const { data: response } = await completionsWithFallback(
-      "high",
-      (entry, client, extraBody) =>
-        client.chat.completions.create({
-          model: entry.modelName,
-          temperature: 0.3,
-          max_tokens: 16384,
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: `${AGENT_COACH_PROMPT}\n\n请严格按照输出格式返回 JSON。不要包含 Markdown 代码块标记。`,
-            },
-            { role: "user", content: userMessage },
-          ],
-          ...extraBody,
-        }),
-      { userId, surface: "agent-bg" }
-    );
+    // 模型偶尔输出损坏/截断的 JSON，或结构对不上 prompt。
+    // 失败重试一次，两次都不行才落到规则兜底（同 service.ts 的形状）。
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { data: response } = await completionsWithFallback(
+        "high",
+        (entry, client, extraBody) =>
+          client.chat.completions.create({
+            model: entry.modelName,
+            temperature: 0.3,
+            max_tokens: 16384,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content: `${AGENT_COACH_PROMPT}\n\n请严格按照输出格式返回 JSON。不要包含 Markdown 代码块标记。`,
+              },
+              { role: "user", content: userMessage },
+            ],
+            ...extraBody,
+          }),
+        { userId, surface: "agent-bg" }
+      );
 
-    const text = response.choices[0]?.message?.content?.trim();
-    if (!text) {
-      console.warn("[Agent Runtime] LLM 返回空内容，finish_reason:", response.choices[0]?.finish_reason);
-      throw new Error("LLM 返回空内容");
+      const text = response.choices[0]?.message?.content?.trim();
+      if (!text) {
+        console.warn(
+          `[Agent Runtime] 第 ${attempt + 1} 次分析返回空内容，finish_reason:`,
+          response.choices[0]?.finish_reason
+        );
+        reason = "empty_text";
+        continue;
+      }
+
+      let raw: unknown;
+      try {
+        raw = JSON.parse(extractJsonText(text));
+      } catch (parseError) {
+        console.warn(
+          `[Agent Runtime] 第 ${attempt + 1} 次分析 JSON 解析失败:`,
+          parseError instanceof Error ? parseError.message : parseError
+        );
+        reason = "json_parse";
+        continue;
+      }
+
+      // ⚠️ 这层校验是本次修复的核心。此前只做 JSON.parse 就取字段，
+      // 于是任何「能解析但结构不对」的输出（{"foo":1}、{}、{"status":"x"}）
+      // 都会被读成 status=on_track + 空 findings —— 失败伪装成「一切正常」。
+      const parsed = agentAnalysisSchema.safeParse(raw);
+      if (!parsed.success) {
+        console.warn(
+          `[Agent Runtime] 第 ${attempt + 1} 次分析结构校验失败:`,
+          parsed.error.issues
+            .map((i) => `${i.path.map(String).join(".") || "(根)"}: ${i.message}`)
+            .join("; ")
+        );
+        reason = "schema_invalid";
+        continue;
+      }
+
+      console.log(
+        `[Agent Runtime] ✅ 模型分析 (第 ${attempt + 1} 次): status=${parsed.data.status} ` +
+          `findings=${parsed.data.findings.length} actions=${parsed.data.actions.length}`
+      );
+      return { analysis: parsed.data, source: "model" };
     }
-
-    console.log(`[Agent Runtime] LLM 分析结果: ${text.slice(0, 200)}...`);
-    const parsed = JSON.parse(text);
-    return {
-      status: parsed.status ?? "on_track",
-      summary: parsed.summary ?? "分析完成",
-      findings: Array.isArray(parsed.findings) ? parsed.findings : [],
-      actions: Array.isArray(parsed.actions) ? parsed.actions : [],
-    };
   } catch (error) {
-    console.warn("[Agent Runtime] LLM 分析失败，使用规则兜底:", error);
-    return fallbackAnalysis(context);
+    console.warn("[Agent Runtime] LLM 调用失败，使用规则兜底:", error);
+    reason = "llm_error";
   }
+
+  console.warn(`[Agent Runtime] ⚠️ 分析走规则兜底 (reason=${reason})`);
+  return { analysis: fallbackAnalysis(context), source: "fallback", reason };
 }
 
 /**
@@ -568,45 +602,80 @@ export async function executeAction(
 // 完整 Agent 循环：Observe → Analyze → Plan → Execute → Record
 // ============================================================
 
+/**
+ * AgentRun.goal 的取值（该字段必填非空）。
+ *
+ * 抽成函数是因为它现在有两个写入方：daily-run 路由先用唯一约束抢锁建行，
+ * runtime 收到 runId 后复用该行。两处各写一份字符串迟早会漂移。
+ */
+export function agentRunGoal(mode: string): string {
+  return mode === "daily" ? "每日学习状态自动分析" : `自主${mode}分析`;
+}
+
 export interface RunAgentOptions {
   /** 是否保存到 AgentRun（默认 true） */
   persist?: boolean;
   /** 运行模式 */
   mode?: "coach" | "review" | "daily";
+  /**
+   * 已存在的 AgentRun 行（daily-run 路由抢锁时创建）。
+   * 给了就复用它，不再新建——否则会出现「锁行 + 真运行行」两行并存。
+   */
+  runId?: string;
 }
 
 export async function runLearningAgent(
   userId: string,
   options: RunAgentOptions = {}
 ): Promise<AgentRunResult> {
-  const { persist = true, mode = "coach" } = options;
+  const { persist = true, mode = "coach", runId } = options;
   const startedAt = new Date();
 
   console.log(`[Agent Runtime] ====== 开始运行 (mode: ${mode}) ======`);
 
-  // 创建 AgentRun 记录
+  // 创建 / 接管 AgentRun 记录
   let run: { id: string } | null = null;
   if (persist) {
-    run = await prisma.agentRun.create({
-      data: {
-        userId,
-        mode,
-        goal: mode === "daily" ? "每日学习状态自动分析" : `自主${mode}分析`,
-        status: "running",
-        startedAt,
-        currentStep: 1,
-        steps: {
-          create: {
-            stepNumber: 1,
-            kind: "context",
-            status: "running",
-            title: "Observe: 收集学习上下文",
-            detail: "正在汇总学习统计、计划进度、待办任务和长期记忆。",
-            startedAt,
+    if (runId) {
+      // 复用路由抢到的锁行：转 running 并补上第 1 个 step
+      run = { id: runId };
+      await prisma.agentRun.update({
+        where: { id: runId },
+        data: { status: "running", startedAt, currentStep: 1 },
+      });
+      await prisma.agentStep.create({
+        data: {
+          runId,
+          stepNumber: 1,
+          kind: "context",
+          status: "running",
+          title: "Observe: 收集学习上下文",
+          detail: "正在汇总学习统计、计划进度、待办任务和长期记忆。",
+          startedAt,
+        },
+      });
+    } else {
+      run = await prisma.agentRun.create({
+        data: {
+          userId,
+          mode,
+          goal: agentRunGoal(mode),
+          status: "running",
+          startedAt,
+          currentStep: 1,
+          steps: {
+            create: {
+              stepNumber: 1,
+              kind: "context",
+              status: "running",
+              title: "Observe: 收集学习上下文",
+              detail: "正在汇总学习统计、计划进度、待办任务和长期记忆。",
+              startedAt,
+            },
           },
         },
-      },
-    });
+      });
+    }
   }
 
   try {
@@ -663,7 +732,8 @@ export async function runLearningAgent(
       });
     }
 
-    const analysis = await analyze(context, memories, userId);
+    const { analysis, source: analysisSource, reason: analysisReason } =
+      await analyze(context, memories, userId);
 
     // 更新分析步骤
     if (run) {
@@ -679,6 +749,11 @@ export async function runLearningAgent(
             summary: analysis.summary,
             findingsCount: analysis.findings.length,
             actionsCount: analysis.actions.length,
+            // 落库后才回答得了「模型结构化输出成功率是多少」：
+            //   SELECT output->>'source', COUNT(*) FROM agentstep
+            //   WHERE kind='analysis' GROUP BY 1;
+            source: analysisSource,
+            ...(analysisReason ? { reason: analysisReason } : {}),
           }),
           detail: analysis.summary,
           completedAt: new Date(),

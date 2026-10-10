@@ -255,9 +255,15 @@ model AgentRun {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  /// 本地日期 YYYY-MM-DD，仅「每日分析」写入；配合下面的唯一约束做幂等抢锁。
+  /// 可空是为了不影响其他 mode 的行——Postgres 视多个 NULL 互不相等，
+  /// 所以存量行（全是 NULL）不会与唯一索引冲突。
+  runDate String?
+
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   steps     AgentStep[]
 
+  @@unique([userId, runDate])
   @@index([userId, updatedAt])
   @@index([userId, status])
   @@map("agentrun")

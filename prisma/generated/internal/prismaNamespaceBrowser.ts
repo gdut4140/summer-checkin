@@ -267,7 +267,8 @@ export const AgentRunScalarFieldEnum = {
   startedAt: 'startedAt',
   completedAt: 'completedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  runDate: 'runDate'
 } as const
 
 export type AgentRunScalarFieldEnum = (typeof AgentRunScalarFieldEnum)[keyof typeof AgentRunScalarFieldEnum]
