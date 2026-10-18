@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, subDays, startOfYear, endOfYear, format, eachDayOfInterval } from "date-fns";
+import { checkinDayKeys, computeStreak } from "@/lib/checkin-streak";
 import LearningIsland from "@/components/landing/learning-island-dynamic";
 import { Heatmap } from "@/components/calendar/heatmap";
 import { CheckinButton } from "./checkin-button";
@@ -13,27 +14,23 @@ export default async function CheckinPage() {
   const todayStart = startOfDay(now);
   const todayEnd = endOfDay(now);
 
-  // 今日是否已签到
-  const todayCheckin = await prisma.checkin.findFirst({
-    where: {
-      userId: user.id,
-      checkinDate: { gte: todayStart, lte: todayEnd },
-    },
+  // 最近一年多的打卡日期：一次取回，同时喂给「今日是否已签到」和「连续天数」。
+  // 原先的写法是 while(true) 里每往回一天就 findFirst 一次——一天一次数据库往返，
+  // 而且没有上限（跨年用户就是几百次查询）。
+  const yearAgo = startOfDay(subDays(now, 365));
+  const recentCheckinDates = await prisma.checkin.findMany({
+    where: { userId: user.id, checkinDate: { gte: yearAgo } },
+    select: { checkinDate: true },
   });
 
-  // 连续签到天数
-  let streak = 0;
-  let checkDate = new Date(now);
-  if (!todayCheckin) checkDate = subDays(checkDate, 1);
-  while (true) {
-    const ds = startOfDay(checkDate);
-    const de = endOfDay(checkDate);
-    const dayCheckin = await prisma.checkin.findFirst({
-      where: { userId: user.id, checkinDate: { gte: ds, lte: de } },
-    });
-    if (dayCheckin) { streak++; checkDate = subDays(checkDate, 1); }
-    else break;
-  }
+  // 今日是否已签到。注意：**任何**一条今天的记录都算——包括 AI 代报「完成任务」
+  // 写进来的那些，所以让 agent 完成一个任务后，签到按钮当天就不再出现。
+  const todayCheckin = recentCheckinDates.find(
+    (c) => c.checkinDate >= todayStart && c.checkinDate <= todayEnd
+  );
+
+  // 连续签到天数：口径见 lib/checkin-streak.ts（本地时区，今天没打卡不算断）
+  const streak = computeStreak(checkinDayKeys(recentCheckinDates), now);
 
   // 总签到次数
   const totalCheckins = await prisma.checkin.count({ where: { userId: user.id } });

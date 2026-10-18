@@ -1,6 +1,7 @@
 // @AI 聊天：复用项目同款 AI SDK，token 流式回推到房间
 // 聊天室里的雨宝是纯聊天好友；agent 类功能统一引导去智能体
 
+import { toTextStream } from "ai";
 import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
 import { UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { prisma } from "./db";
@@ -119,7 +120,11 @@ export async function handleAI(
       // 聊天室是交互式面：有 userId 才记账 + 限流；匿名不拦不记
       userId ? { userId, surface: "chatroom", enforce: true } : undefined
     );
-    stream = pooled.stream;
+    // 模型池现在给的是**全量** part 流（智能体页要用里面的 tool-call）。
+    // 聊天室只关心文本，就地投成纯文本——降级探测已经在上面的
+    // streamTextWithFallback 内部做完了（403 会在这里抛出走 catch），
+    // 所以这次投影不会再把额度错误吞掉。
+    stream = toTextStream({ stream: pooled.stream });
     console.log(`[chatroom] 雨宝使用模型: ${pooled.model}`);
   } catch (err) {
     if (err instanceof UsageLimitError || isQuotaError(err)) {

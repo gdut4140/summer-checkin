@@ -10,7 +10,8 @@ export const config = {
   // 消息长度上限（字符）
   maxMessageLength: 2000,
 
-  // 限流：每个连接在窗口内的最大消息数（防刷屏）
+  // 限流：每个用户在窗口内的最大消息数（防刷屏）。
+  // 按 userId 记账而不是按 WebSocket 连接 —— 否则同一账号多开标签页就等于多份配额。
   rateLimit: {
     windowMs: 60_000,
     max: 30,

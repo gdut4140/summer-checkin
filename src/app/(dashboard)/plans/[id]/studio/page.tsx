@@ -61,6 +61,9 @@ export default async function PlanStudioPage({
       planId={plan.id}
       title={plan.name}
       initialContent={content}
+      // 与 api/plans/[id] 的 ETag 算法保持一致，给客户端的条件请求预热 ——
+      // 正文由服务端给出，客户端不会为它发 GET，不预热则第一轮 AI 对话必然拿到 200。
+      initialEtag={`W/"${plan.updatedAt.getTime()}"`}
       autoFocusAi={focusAi === "1"}
     />
   );

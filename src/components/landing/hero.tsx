@@ -14,6 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import ShinyText from "./ShinyText";
 import VariableProximity from "@/components/ui/variable-proximity";
+import { BlogLink } from "@/components/layout/blog-link";
 import { GithubLink } from "@/components/layout/github-link";
 
 const pulseItems = [
@@ -44,6 +45,7 @@ export function Hero() {
           </Link>
         <div className="flex items-center gap-3">
           <GithubLink />
+          <BlogLink />
         </div>
       </nav>
 

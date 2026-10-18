@@ -149,12 +149,31 @@ model Checkin {
   id           String   @id @default(cuid())
   userId       String
   planId       String?
+  /**
+   * 来源任务 id。**没有外键**，只是个裸字符串——用于「一个任务只产生一条打卡记录」
+   * 的幂等键（见 lib/tools/agent-tools.ts 完成任务时的那段）。签到（手动到访）
+   * 永远为 null。
+   */
   sourceTaskId String?
   content      String
+  /**
+   * ⚠️ 遗留列，**已经没有任何代码写入**。
+   *
+   * 手动签到恒为 0；AI 标记完成任务那条路也在 2026-10 去掉了——当时 `updateTaskStatus`
+   * 带一个 hours 参数，由模型自己填，等于「模型猜 → 入库 → 下一轮被当成事实引用」的
+   * 闭环。真实学习时长一律以番茄钟为准（StudyRecord.totalMinutes，那才是计时的）。
+   *
+   * 现在只有打卡页的小岛在 `_sum` 它，读到的都是历史值（2026-07/08 富签到表单留下的）。
+   */
   hours        Float    @default(0)
+  /** 科目，取自 PlanTask.category。只有「完成任务」那类记录才有值。 */
   subject      String?
+  /**
+   * ⚠️ 遗留列，**没有任何代码读写它**，保留只是因为库里有 6 行历史数据
+   * （2026-07 那批「富签到表单」留下来的心情值）。
+   * 现在的签到界面不收集心情。确认那 6 行可以丢之后再删这一列。
+   */
   mood         String?
-  screenshot   String?
   checkinDate  DateTime @default(now())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -173,6 +192,11 @@ model StudyRecord {
   date         DateTime
   totalMinutes Float    @default(0)
   subject      String?
+  /**
+   * ⚠️ 名字有误导性：它**不是** Checkin.id，也没有外键。
+   * 实际存的是番茄钟的会话 id（形如 "focus-…"，见 api/focus/sessions）。
+   * 统计页靠 `startsWith("focus-")` 把它们和别的记录区分开。
+   */
   checkinId    String?
   createdAt    DateTime @default(now())
 
@@ -231,7 +255,23 @@ model ConversationMessage {
   id             String   @id @default(cuid())
   conversationId String
   role           String
+  /**
+   * 纯文本内容。**仍然是有效契约，不能停写**：对话标题生成
+   * （api/conversations/[id]/title）和 createPlan 的 conversationHint 都按字符串读它。
+   */
   content        String
+  /**
+   * 结构化的消息片段（text / tool），用来在界面上渲染「AI 调用了什么工具」。
+   *
+   * 为什么另开一列而不是把 content 改成 JSON：content 有两处按字符串读的调用方，
+   * 改了要一起动；而且 2026-10 之前的存量行只有 content，nullable 的 parts 让它们
+   * 自然回落到纯文本渲染，无需回填。
+   *
+   * ⚠️ 形状是 src/lib/ai/parts.ts 的 ViewPart，**不是** AI SDK 的 UIMessagePart
+   * 原样落库：工具的 input/output 在落库前已被压成一条短摘要，否则 updateDocument
+   * 的整篇文档（zod 上限 10 万字符）会被复制进每一条消息行。
+   */
+  parts          Json?
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)

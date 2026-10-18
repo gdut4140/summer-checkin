@@ -43,7 +43,6 @@ export type CheckinMinAggregateOutputType = {
   hours: number | null
   subject: string | null
   mood: string | null
-  screenshot: string | null
   checkinDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -58,7 +57,6 @@ export type CheckinMaxAggregateOutputType = {
   hours: number | null
   subject: string | null
   mood: string | null
-  screenshot: string | null
   checkinDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -73,7 +71,6 @@ export type CheckinCountAggregateOutputType = {
   hours: number
   subject: number
   mood: number
-  screenshot: number
   checkinDate: number
   createdAt: number
   updatedAt: number
@@ -98,7 +95,6 @@ export type CheckinMinAggregateInputType = {
   hours?: true
   subject?: true
   mood?: true
-  screenshot?: true
   checkinDate?: true
   createdAt?: true
   updatedAt?: true
@@ -113,7 +109,6 @@ export type CheckinMaxAggregateInputType = {
   hours?: true
   subject?: true
   mood?: true
-  screenshot?: true
   checkinDate?: true
   createdAt?: true
   updatedAt?: true
@@ -128,7 +123,6 @@ export type CheckinCountAggregateInputType = {
   hours?: true
   subject?: true
   mood?: true
-  screenshot?: true
   checkinDate?: true
   createdAt?: true
   updatedAt?: true
@@ -230,7 +224,6 @@ export type CheckinGroupByOutputType = {
   hours: number
   subject: string | null
   mood: string | null
-  screenshot: string | null
   checkinDate: Date
   createdAt: Date
   updatedAt: Date
@@ -268,7 +261,6 @@ export type CheckinWhereInput = {
   hours?: Prisma.FloatFilter<"Checkin"> | number
   subject?: Prisma.StringNullableFilter<"Checkin"> | string | null
   mood?: Prisma.StringNullableFilter<"Checkin"> | string | null
-  screenshot?: Prisma.StringNullableFilter<"Checkin"> | string | null
   checkinDate?: Prisma.DateTimeFilter<"Checkin"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Checkin"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Checkin"> | Date | string
@@ -285,7 +277,6 @@ export type CheckinOrderByWithRelationInput = {
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
   mood?: Prisma.SortOrderInput | Prisma.SortOrder
-  screenshot?: Prisma.SortOrderInput | Prisma.SortOrder
   checkinDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -305,7 +296,6 @@ export type CheckinWhereUniqueInput = Prisma.AtLeast<{
   hours?: Prisma.FloatFilter<"Checkin"> | number
   subject?: Prisma.StringNullableFilter<"Checkin"> | string | null
   mood?: Prisma.StringNullableFilter<"Checkin"> | string | null
-  screenshot?: Prisma.StringNullableFilter<"Checkin"> | string | null
   checkinDate?: Prisma.DateTimeFilter<"Checkin"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Checkin"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Checkin"> | Date | string
@@ -322,7 +312,6 @@ export type CheckinOrderByWithAggregationInput = {
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrderInput | Prisma.SortOrder
   mood?: Prisma.SortOrderInput | Prisma.SortOrder
-  screenshot?: Prisma.SortOrderInput | Prisma.SortOrder
   checkinDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -345,7 +334,6 @@ export type CheckinScalarWhereWithAggregatesInput = {
   hours?: Prisma.FloatWithAggregatesFilter<"Checkin"> | number
   subject?: Prisma.StringNullableWithAggregatesFilter<"Checkin"> | string | null
   mood?: Prisma.StringNullableWithAggregatesFilter<"Checkin"> | string | null
-  screenshot?: Prisma.StringNullableWithAggregatesFilter<"Checkin"> | string | null
   checkinDate?: Prisma.DateTimeWithAggregatesFilter<"Checkin"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Checkin"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Checkin"> | Date | string
@@ -358,7 +346,6 @@ export type CheckinCreateInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -375,7 +362,6 @@ export type CheckinUncheckedCreateInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -388,7 +374,6 @@ export type CheckinUpdateInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -405,7 +390,6 @@ export type CheckinUncheckedUpdateInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -420,7 +404,6 @@ export type CheckinCreateManyInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -433,7 +416,6 @@ export type CheckinUpdateManyMutationInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -448,7 +430,6 @@ export type CheckinUncheckedUpdateManyInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -473,7 +454,6 @@ export type CheckinCountOrderByAggregateInput = {
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   mood?: Prisma.SortOrder
-  screenshot?: Prisma.SortOrder
   checkinDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -492,7 +472,6 @@ export type CheckinMaxOrderByAggregateInput = {
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   mood?: Prisma.SortOrder
-  screenshot?: Prisma.SortOrder
   checkinDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -507,7 +486,6 @@ export type CheckinMinOrderByAggregateInput = {
   hours?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   mood?: Prisma.SortOrder
-  screenshot?: Prisma.SortOrder
   checkinDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -616,7 +594,6 @@ export type CheckinCreateWithoutUserInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -631,7 +608,6 @@ export type CheckinUncheckedCreateWithoutUserInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -675,7 +651,6 @@ export type CheckinScalarWhereInput = {
   hours?: Prisma.FloatFilter<"Checkin"> | number
   subject?: Prisma.StringNullableFilter<"Checkin"> | string | null
   mood?: Prisma.StringNullableFilter<"Checkin"> | string | null
-  screenshot?: Prisma.StringNullableFilter<"Checkin"> | string | null
   checkinDate?: Prisma.DateTimeFilter<"Checkin"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Checkin"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Checkin"> | Date | string
@@ -688,7 +663,6 @@ export type CheckinCreateWithoutPlanInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -703,7 +677,6 @@ export type CheckinUncheckedCreateWithoutPlanInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -743,7 +716,6 @@ export type CheckinCreateManyUserInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -756,7 +728,6 @@ export type CheckinUpdateWithoutUserInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -771,7 +742,6 @@ export type CheckinUncheckedUpdateWithoutUserInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -785,7 +755,6 @@ export type CheckinUncheckedUpdateManyWithoutUserInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -799,7 +768,6 @@ export type CheckinCreateManyPlanInput = {
   hours?: number
   subject?: string | null
   mood?: string | null
-  screenshot?: string | null
   checkinDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -812,7 +780,6 @@ export type CheckinUpdateWithoutPlanInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -827,7 +794,6 @@ export type CheckinUncheckedUpdateWithoutPlanInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -841,7 +807,6 @@ export type CheckinUncheckedUpdateManyWithoutPlanInput = {
   hours?: Prisma.FloatFieldUpdateOperationsInput | number
   subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mood?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  screenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -858,7 +823,6 @@ export type CheckinSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   hours?: boolean
   subject?: boolean
   mood?: boolean
-  screenshot?: boolean
   checkinDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -875,7 +839,6 @@ export type CheckinSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   hours?: boolean
   subject?: boolean
   mood?: boolean
-  screenshot?: boolean
   checkinDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -892,7 +855,6 @@ export type CheckinSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   hours?: boolean
   subject?: boolean
   mood?: boolean
-  screenshot?: boolean
   checkinDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -909,13 +871,12 @@ export type CheckinSelectScalar = {
   hours?: boolean
   subject?: boolean
   mood?: boolean
-  screenshot?: boolean
   checkinDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CheckinOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "planId" | "sourceTaskId" | "content" | "hours" | "subject" | "mood" | "screenshot" | "checkinDate" | "createdAt" | "updatedAt", ExtArgs["result"]["checkin"]>
+export type CheckinOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "planId" | "sourceTaskId" | "content" | "hours" | "subject" | "mood" | "checkinDate" | "createdAt" | "updatedAt", ExtArgs["result"]["checkin"]>
 export type CheckinInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   plan?: boolean | Prisma.Checkin$planArgs<ExtArgs>
@@ -939,12 +900,31 @@ export type $CheckinPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     userId: string
     planId: string | null
+    /**
+     * *
+     *    * 来源任务 id。**没有外键**，只是个裸字符串——用于「一个任务只产生一条打卡记录」
+     *    * 的幂等键（见 lib/tools/agent-tools.ts 完成任务时的那段）。签到（手动到访）
+     *    * 永远为 null。
+     */
     sourceTaskId: string | null
     content: string
+    /**
+     * *
+     *    * 学习时长。手动签到恒为 0；AI 代报「完成任务」时才会写入真实值。
+     *    * 目前只有打卡页的小岛总时长在读它。
+     */
     hours: number
+    /**
+     * * 科目，取自 PlanTask.category。同上，只有「完成任务」那类记录才有值。
+     */
     subject: string | null
+    /**
+     * *
+     *    * ⚠️ 遗留列，**没有任何代码读写它**，保留只是因为库里有 6 行历史数据
+     *    * （2026-07 那批「富签到表单」留下来的心情值）。
+     *    * 现在的签到界面不收集心情。确认那 6 行可以丢之后再删这一列。
+     */
     mood: string | null
-    screenshot: string | null
     checkinDate: Date
     createdAt: Date
     updatedAt: Date
@@ -1381,7 +1361,6 @@ export interface CheckinFieldRefs {
   readonly hours: Prisma.FieldRef<"Checkin", 'Float'>
   readonly subject: Prisma.FieldRef<"Checkin", 'String'>
   readonly mood: Prisma.FieldRef<"Checkin", 'String'>
-  readonly screenshot: Prisma.FieldRef<"Checkin", 'String'>
   readonly checkinDate: Prisma.FieldRef<"Checkin", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Checkin", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Checkin", 'DateTime'>

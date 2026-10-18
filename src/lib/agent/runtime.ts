@@ -25,6 +25,7 @@
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
+import { checkinDayKeys, computeStreak } from "@/lib/checkin-streak";
 import { completionsWithFallback } from "@/lib/model-pool";
 import { AGENT_COACH_PROMPT } from "./prompts";
 import { getRelevantMemories, touchMemories } from "@/lib/memory";
@@ -53,7 +54,11 @@ export interface LearningContext {
     activePlanNames: string[];
   };
 
-  /** 学习统计（打卡仅为小岛计数：不含时长/科目/心情） */
+  /**
+   * 学习统计。
+   * totalCheckins 是打卡记录**条数**（含 AI 标记完成任务写进来的），不是天数。
+   * 学习时长不在这里——以番茄钟为准，见下面的 focus 字段。
+   */
   stats: {
     streak: number;
     totalCheckins: number;
@@ -166,21 +171,11 @@ export async function observe(userId: string): Promise<LearningContext> {
     }),
   ]);
 
-  // ---- 统计（打卡仅为小岛计数：不含时长/科目/心情） ----
-  // 连续打卡
-  const checkDates = new Set(
-    allCheckins.map((c) => c.checkinDate.toISOString().slice(0, 10))
-  );
-  let streak = 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    if (checkDates.has(d.toISOString().slice(0, 10))) {
-      streak++;
-    } else if (i > 0) break;
-  }
+  // ---- 统计（打卡含两类记录：一键到访 + AI 代报「完成任务」） ----
+  // 连续打卡走共享口径（本地时区，今天没打卡不算断）。
+  // 这里原先是一份 toISOString().slice(0,10) 的 UTC 键实现，与 study-stats.ts
+  // 逐字重复，且同样会把今天的打卡挤出扫描窗口。
+  const streak = computeStreak(checkinDayKeys(allCheckins));
 
   // ---- 计划进度（任务完成度） ----
   const plans = activePlans.map((plan) => {

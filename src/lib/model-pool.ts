@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, toTextStream, type LanguageModel } from "ai";
+import { streamText, type LanguageModel, type TextStreamPart, type ToolSet } from "ai";
 import { assertInteractiveUsageAllowed, recordUsage } from "@/lib/usage";
 
 // ============================================================
@@ -602,8 +602,17 @@ export async function completionsWithFallback<T>(
   throw lastErr ?? new Error(`[model-pool] ${tier} 档所有模型请求失败`);
 }
 
+/**
+ * streamText 全量 part 流的元素类型。
+ *
+ * 含 tool-call / tool-result —— 这正是「工具调用显示不到界面上」曾经丢掉的东西：
+ * 旧实现把它投影成 ReadableStream<string>（toTextStream），只剩 text-delta。
+ */
+export type PooledStreamPart = TextStreamPart<ToolSet>;
+
 export interface PooledStream {
-  stream: ReadableStream<string>;
+  /** **全量** part 流，不是纯文本投影。投成文本还是 UI message 流由调用方决定。 */
+  stream: ReadableStream<PooledStreamPart>;
   model: string;
 }
 
@@ -654,8 +663,7 @@ export async function streamTextWithFallback(
         };
       }
       const result = streamText(options);
-      const textStream = toTextStream({ stream: result.stream });
-      const { stream } = await peelFirstChunk(textStream);
+      const { stream } = await peelFirstChunk(result.stream);
       console.log(`[model-pool] stream 使用 model=${entry.modelName} tier=${tier}`);
       return { stream, model: entry.modelName };
     } catch (err) {
@@ -676,19 +684,60 @@ export async function streamTextWithFallback(
   throw lastErr ?? new Error(`[model-pool] ${tier} 档所有模型请求失败`);
 }
 
-/** 读取流的第一个 chunk（模型 403 会在此时抛出，从而触发降级）；成功则返回「首块 + 剩余」的合成流 */
-async function peelFirstChunk(
-  stream: ReadableStream<string>
-): Promise<{ stream: ReadableStream<string> }> {
+/**
+ * 读取流的开头直到出现「provider 确实响应了」的块；成功则返回
+ * 「已读出的块 + 剩余」的合成流。失败则**抛出**，由调用方切换模型。
+ *
+ * 它是模型池降级的唯一探测点，有两处极易写错：
+ *
+ * ① **`start` 不算成功。** ai@7 的 streamText 在 ReadableStream 的 start() 回调里
+ *    **同步**入队 { type: "start" }（node_modules/ai/dist/index.js:8941），那一刻
+ *    provider 请求还没发出。真正的证据是紧随其后的 start-step（index.js:9428），
+ *    它要等模型吐出第一个 chunk 才发。
+ *
+ * ② **模型调用失败不 reject，而是吐一个 error part。** 实测 ai@7.0.22：doStream
+ *    抛错时 result.stream 给出的是
+ *      [{ type: "start" }, { type: "error", error: Error("403 ...") }]
+ *    整条流里没有 rejection，必须显式把这个 part 当失败抛出去。
+ *
+ * ⚠️ 旧实现两处都踩了：它剥的是 toTextStream 的输出，而 toTextStream 只透传
+ * text-delta，`start` 和 `error` **两个都会被丢掉**，第一次 read() 直接拿到
+ * done —— 探测点永远报「成功」，403 被吞成一条**空回复**，降级从未真正发生。
+ * 换句话说 /api/ai 这条流式链路此前是没有额度降级的（非流式的
+ * completionsWithFallback 不受影响，它走的是真正的网络 reject）。
+ * 两条不变量由 tests/model-pool-peel.test.ts 钉着。
+ */
+export async function peelFirstChunk<T extends { type: string; error?: unknown }>(
+  stream: ReadableStream<T>
+): Promise<{ stream: ReadableStream<T> }> {
   const reader = stream.getReader();
-  const first = await reader.read();
-  if (first.done) {
+  const peeled: T[] = [];
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        // 整条流只有 start（或彻底为空）：按空流处理
+        reader.releaseLock();
+        return { stream: new ReadableStream<T>({ start(c) { c.close(); } }) };
+      }
+      if (value.type === "error") {
+        // 失败信号，抛出去让模型池切下一个模型
+        throw value.error instanceof Error
+          ? value.error
+          : new Error(String(value.error));
+      }
+      peeled.push(value);
+      // start 是 SDK 自己造的，不代表 provider 通了，继续往下剥
+      if (value.type !== "start") break;
+    }
+  } catch (err) {
     reader.releaseLock();
-    return { stream: new ReadableStream<string>({ start(c) { c.close(); } }) };
+    throw err;
   }
-  const out = new ReadableStream<string>({
+
+  const out = new ReadableStream<T>({
     async start(controller) {
-      controller.enqueue(first.value);
+      for (const part of peeled) controller.enqueue(part);
       try {
         while (true) {
           const { done, value } = await reader.read();

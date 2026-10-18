@@ -607,6 +607,12 @@ export type $StudyRecordPayload<ExtArgs extends runtime.Types.Extensions.Interna
     date: Date
     totalMinutes: number
     subject: string | null
+    /**
+     * *
+     *    * ⚠️ 名字有误导性：它**不是** Checkin.id，也没有外键。
+     *    * 实际存的是番茄钟的会话 id（形如 "focus-…"，见 api/focus/sessions）。
+     *    * 统计页靠 `startsWith("focus-")` 把它们和别的记录区分开。
+     */
     checkinId: string | null
     createdAt: Date
   }, ExtArgs["result"]["studyRecord"]>

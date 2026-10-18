@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { syncTasksFromDocument } from "@/lib/studio/plan-sync";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser();
@@ -12,12 +12,19 @@ export async function GET(
   const { id } = await params;
   const plan = await prisma.plan.findUnique({
     where: { id },
-    select: { id: true, userId: true, name: true, document: true },
+    select: { id: true, userId: true, name: true, document: true, updatedAt: true },
   });
   if (!plan || plan.userId !== user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  return NextResponse.json(plan);
+  // 条件请求：与 documents 同构 —— AI 每轮结束后前端会拉一次最新正文，
+  // 正文没变时回 304（无 body），避免白传整篇 Markdown。
+  const etag = `W/"${plan.updatedAt.getTime()}"`;
+  if (req.headers.get("if-none-match") === etag) {
+    return new NextResponse(null, { status: 304, headers: { ETag: etag } });
+  }
+  const { updatedAt: _updatedAt, ...payload } = plan;
+  return NextResponse.json(payload, { headers: { ETag: etag } });
 }
 
 export async function PATCH(
@@ -55,5 +62,8 @@ export async function PATCH(
     }
   }
 
-  return NextResponse.json(updated);
+  // 同 documents PATCH：回带 ETag，让客户端保存后把本地 etag 推到最新版本
+  return NextResponse.json(updated, {
+    headers: { ETag: `W/"${updated.updatedAt.getTime()}"` },
+  });
 }

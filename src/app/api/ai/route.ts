@@ -21,18 +21,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { getDeepThinkOptions, generateChatTitle, buildSystemPrompt } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
-import { createTextStreamResponse, isStepCount } from "ai";
+import {
+  createTextStreamResponse,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  convertToModelMessages,
+  isStepCount,
+  toTextStream,
+  toUIMessageStream,
+} from "ai";
 import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
 import { assertInteractiveUsageAllowed, UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { createStudyTools, createRAGTool, createAgentTools, createTodoTools } from "@/lib/tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
 import { pickTools, promptGroupsFor, surfaceOf } from "@/lib/tools/router";
+import { messageText, toViewParts, type ChatUIMessage, type ViewPart } from "@/lib/ai/parts";
 import {
   getRelevantMemories,
   formatMemoriesForPrompt,
   extractAndSaveMemories,
   touchMemories,
 } from "@/lib/memory";
+
+/**
+ * 传输协议。
+ *
+ * - `ui`   AI SDK 的 UI Message Stream：助手消息是一组 part（text / tool），
+ *          工具调用才有信道抵达浏览器。智能体页用它。
+ * - `text` 纯文本流（历史行为）。studio 面板尚未迁移，暂时还走这条。
+ *
+ * 两种协议**只差三处**：请求里 messages 的形状、助手消息落库的时机、
+ * 响应的编码方式。认证 / 限额 / 建会话 / 记忆 / 提示词 / 工具白名单 / 模型池
+ * 全部共用。studio 迁完之后 `text` 分支连同这个类型一起删掉即可。
+ */
+type ChatProtocol = "ui" | "text";
+
 
 /**
  * Tool Calling 循环的步数上限。
@@ -46,32 +69,50 @@ import {
 const MAX_STEPS = 10;
 
 export async function POST(request: NextRequest) {
+  // 协议在解析 body 时才确定。提前声明是为了**外层 catch 也能按对的协议回错**：
+  // 每日限额早检发生在解析 body 之前，那时拿不到 protocol，只能先用默认值兜着，
+  // 等 body 解析出来再覆盖。回错用错协议的表现是 useChat 解析不了 text/plain，
+  // 用户看到通用报错而不是「没精力了」。
+  let protocol: ChatProtocol = "text";
   try {
     const user = await getAuthUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 交互式面：每日限额早检（超限抛 UsageLimitError，由外层 catch 流式返回友好文本；不建会话不写库）
+    const body = await request.json();
+    protocol = body.protocol === "ui" ? "ui" : "text";
+
+    // 交互式面：每日限额早检（超限抛 UsageLimitError，由外层 catch 按协议返回友好提示；
+    // 不建会话不写库）。放在 body 解析之后，是为了错误响应能走对的协议。
     await assertInteractiveUsageAllowed(user.id);
 
-    const body = await request.json();
-    const messages = body.messages as {
-      role: "user" | "assistant";
-      content: string;
-    }[];
+    const rawMessages = body.messages as unknown[] | undefined;
     const conversationId = body.conversationId as string | undefined;
     const deepThink = body.deepThink as boolean | undefined;
     const studioContext = body.studioContext as
       | { kind?: "plan" | "doc"; refId?: string; document?: string }
       | undefined;
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
       return NextResponse.json(
         { error: "Messages are required" },
         { status: 400 }
       );
     }
+
+    // 两种协议在服务端统一成 UIMessage，下游只认一种形状。
+    // 文本协议（studio 面板）的 { role, content } 就地补成单个 text part。
+    const uiMessages: ChatUIMessage[] =
+      protocol === "ui"
+        ? (rawMessages as ChatUIMessage[])
+        : (rawMessages as { role: "user" | "assistant"; content: string }[])
+            .filter((m) => typeof m?.content === "string" && m.content.trim() !== "")
+            .map((m, i) => ({
+              id: `legacy-${i}`,
+              role: m.role,
+              parts: [{ type: "text" as const, text: m.content }],
+            }));
 
     // 来源界面 + 归属对象：智能体页 / 文档工作台 / 计划工作台三者严格分开。
     // studioContext.kind 本身就是 "doc" | "plan"，与 surface 取值一一对应；
@@ -81,11 +122,15 @@ export async function POST(request: NextRequest) {
     // 而老会话的后续消息不带 conversationId 分支、也要拿到同一个 surface。
     const surface = surfaceOf(studioContext);
 
+    // 最后一条消息 = 本次要处理的用户消息。两种协议都从 parts 里取纯文本，
+    // 于是标题、落库、记忆提取三处都只有这一种读法。
+    const lastUserMsg = uiMessages[uiMessages.length - 1];
+    const lastUserText = messageText(lastUserMsg);
+
     // 如果没有 conversationId，自动创建一个新对话
     let activeConversationId = conversationId;
     if (!activeConversationId) {
-      const lastMessage = messages[messages.length - 1];
-      const title = await generateChatTitle(lastMessage.content, user.id);
+      const title = await generateChatTitle(lastUserText, user.id);
 
       const conversation = await prisma.conversation.create({
         data: {
@@ -99,12 +144,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 保存用户消息
-    const lastUserMsg = messages[messages.length - 1];
     await prisma.conversationMessage.create({
       data: {
         conversationId: activeConversationId,
         role: "user",
-        content: lastUserMsg.content,
+        content: lastUserText,
       },
     });
 
@@ -115,16 +159,23 @@ export async function POST(request: NextRequest) {
     // ============================================================
     const MAX_CONTEXT_ROUNDS = 20;
     const MAX_CONTEXT_MESSAGES = MAX_CONTEXT_ROUNDS * 2;
-    const truncatedMessages =
-      messages.length > MAX_CONTEXT_MESSAGES
-        ? messages.slice(-MAX_CONTEXT_MESSAGES)
-        : messages;
+    const truncatedUiMessages =
+      uiMessages.length > MAX_CONTEXT_MESSAGES
+        ? uiMessages.slice(-MAX_CONTEXT_MESSAGES)
+        : uiMessages;
 
-    if (messages.length > MAX_CONTEXT_MESSAGES) {
+    if (uiMessages.length > MAX_CONTEXT_MESSAGES) {
       console.log(
-        `[AI] 后端截断: ${messages.length} → ${MAX_CONTEXT_MESSAGES} 条消息`
+        `[AI] 后端截断: ${uiMessages.length} → ${MAX_CONTEXT_MESSAGES} 条消息`
       );
     }
+
+    // UIMessage → 模型消息。
+    // ignoreIncompleteToolCalls：被中断的一轮里可能只有 tool-call 没有 tool-result，
+    // 那是非法消息，忽略掉而不是让整轮请求失败。
+    const modelMessages = await convertToModelMessages(truncatedUiMessages, {
+      ignoreIncompleteToolCalls: true,
+    });
 
     // ============================================================
     // Day 13 新增：注入长期记忆到 system prompt
@@ -136,9 +187,9 @@ export async function POST(request: NextRequest) {
     touchMemories(memories.map((m) => m.id)).catch(() => {});
 
     // 最近对话摘要：createPlan 后台生成计划文档时作为个性化上下文（截断，控制成本）
-    const conversationHint = truncatedMessages
+    const conversationHint = truncatedUiMessages
       .slice(-6)
-      .map((m) => `${m.role === "user" ? "用户" : "雨宝"}: ${m.content.slice(0, 200)}`)
+      .map((m) => `${m.role === "user" ? "用户" : "雨宝"}: ${messageText(m).slice(0, 200)}`)
       .join("\n");
 
     // ============================================================
@@ -240,7 +291,7 @@ export async function POST(request: NextRequest) {
       model,
       system: fullSystem,
       providerOptions: getDeepThinkOptions(deepThink ?? false),
-      messages: truncatedMessages,
+      messages: modelMessages,
       // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
       // Phase 1: Coach 工具（学习分析 + 计划调整）
       // 工具集按场景裁剪（白名单见 lib/tools/router.ts）。
@@ -294,6 +345,11 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        // UI 协议的落库在下面 toUIMessageStream 的 onEnd 里 —— 只有那里拿得到
+        // responseMessage.parts。这里是文本协议（studio 面板）的唯一落库点。
+        // （步数告警不搬走：那边给不了 steps/finalStep。）
+        if (protocol !== "text" || !activeConversationId) return;
+
         // ⚠️ onEnd 拿到的 text 只是「最后一步」的文本（SDK 类型注释：
         //    "The text that was generated in the final step"），
         //    而 toTextStream 推给前端的是**所有步**的文本增量。
@@ -305,47 +361,13 @@ export async function POST(request: NextRequest) {
           ? steps.map((step) => step.text ?? "").join("")
           : text ?? "";
 
-        if (!finalText || !activeConversationId) {
-          console.warn("[AI] onEnd: no text or no conversationId, 跳过保存", {
-            hasText: !!finalText,
-            hasConversationId: !!activeConversationId,
-          });
-          return;
-        }
-
-        console.log(
-          `[AI] onEnd: 保存 AI 回复 (${finalText.length} 字符) → conversation:${activeConversationId}`
-        );
-
-        try {
-          await prisma.conversationMessage.create({
-            data: {
-              conversationId: activeConversationId,
-              role: "assistant",
-              content: finalText,
-            },
-          });
-
-          await prisma.conversation.update({
-            where: { id: activeConversationId },
-            data: { updatedAt: new Date() },
-          });
-
-          console.log("[AI] onEnd: 保存成功 ✅");
-
-          // ============================================================
-          // Day 13: fire-and-forget 提取长期记忆
-          // ============================================================
-          extractAndSaveMemories(
-            user.id,
-            lastUserMsg.content,
-            finalText
-          ).catch((err) =>
-            console.error("[Memory] 后台提取失败:", err)
-          );
-        } catch (err) {
-          console.error("[AI] onEnd: 数据库写入失败", err);
-        }
+        await saveAssistantMessage({
+          conversationId: activeConversationId,
+          content: finalText,
+          parts: null,
+          userText: lastUserText,
+          userId: user.id,
+        });
       },
     }), {
       userId: user.id,
@@ -355,18 +377,64 @@ export async function POST(request: NextRequest) {
       enforce: true,
     });
 
-    return createTextStreamResponse({
-      stream,
-      headers: {
-        "X-Conversation-Id": activeConversationId,
-        "Access-Control-Expose-Headers": "X-Conversation-Id",
-      },
+    const streamHeaders = {
+      "X-Conversation-Id": activeConversationId,
+      "Access-Control-Expose-Headers": "X-Conversation-Id",
+    };
+
+    // 文本协议（studio 面板）：维持历史行为，把全量 part 流投影回纯文本
+    if (protocol === "text") {
+      return createTextStreamResponse({
+        stream: toTextStream({ stream }),
+        headers: streamHeaders,
+      });
+    }
+
+    // UI 协议：全量 part 流 → UI message 流，工具调用随之抵达浏览器。
+    //
+    // onEnd 在所有步跑完之后回调，responseMessage.parts 就是这条助手消息的完整
+    // 形状（text + tool），正是要落库的东西。比文本协议手工拼
+    // steps.map(s => s.text) 更准——那个老写法只是在绕开「onEnd 的 text 只是
+    // 最后一步」这个 SDK 行为，现在有了 parts 就不需要绕了。
+    //
+    // originalMessages 让 SDK 给响应消息定一个 id（客户端历史末尾总是 user 消息，
+    // 所以 isContinuation 为 false）。
+    return createUIMessageStreamResponse({
+      // 注意泛型顺序是 <TOOLS, UI_MESSAGE>，第一个不是消息类型——这里靠
+      // originalMessages 把 UI_MESSAGE 推断成 ChatUIMessage，不显式传。
+      //
+      // ⚠️ 不要在这里挂 messageMetadata。ai@7 的 .d.ts 说它「Called on start and
+      // finish events」，但 index.js:7477-7500 的实现是**对每个 part 都调一次**、
+      // 并额外 enqueue 一个 message-metadata chunk（start/finish 除外）。挂上去
+      // 等于给线上每个 chunk 都加一份元数据，chunk 数近乎翻倍。客户端的时间戳
+      // 因此改在本地打（见 rainforest-explorer 的 stamp 逻辑）。
+      stream: toUIMessageStream({
+        stream,
+        originalMessages: uiMessages,
+        onEnd: async ({ responseMessage, isAborted }) => {
+          if (isAborted) {
+            console.warn(
+              `[AI] 客户端中断，落库已生成的部分 | conversation=${activeConversationId}`
+            );
+          }
+          if (!activeConversationId) return;
+          await saveAssistantMessage({
+            conversationId: activeConversationId,
+            content: messageText(responseMessage),
+            parts: toViewParts(responseMessage.parts),
+            userText: lastUserText,
+            userId: user.id,
+          });
+        },
+      }),
+      headers: streamHeaders,
     });
   } catch (error) {
     // 每日精力用完（UsageLimitError）或余额/配额不足（isQuotaError）：
-    // 统一流式返回「我宕机了，呃啊」，前端照常渲染为雨宝的回复
+    // 按协议返回「没精力了」。UI 协议下不能用 text/plain——useChat 解析不了，
+    // 用户会看到通用报错而不是这条文案。
     if (error instanceof UsageLimitError || isQuotaError(error)) {
-      return limitStreamResponse(ENERGY_DOWN_MESSAGE);
+      return limitStreamResponse(ENERGY_DOWN_MESSAGE, protocol);
     }
     console.error("AI API error:", error);
     return NextResponse.json(
@@ -376,13 +444,89 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** 把一段文本包装成流式响应（雨宝没精力时的友好提示） */
-function limitStreamResponse(message: string) {
-  const stream = new ReadableStream<string>({
-    start(controller) {
-      controller.enqueue(message);
-      controller.close();
+/**
+ * 落一条助手消息。
+ *
+ * content 与 parts 一起写：content 是标题生成与 conversationHint 的读取契约
+ * （它们按字符串读它），parts 是界面渲染工具卡片用的结构化形状。
+ * 两者从同一份 parts 派生，不会漂移。
+ */
+async function saveAssistantMessage({
+  conversationId,
+  content,
+  parts,
+  userText,
+  userId,
+}: {
+  conversationId: string;
+  content: string;
+  /** null = 文本协议，没有结构化片段可存 */
+  parts: ViewPart[] | null;
+  userText: string;
+  userId: string;
+}) {
+  if (!content && !parts?.length) {
+    console.warn("[AI] onEnd: 没有可保存的内容，跳过");
+    return;
+  }
+
+  console.log(
+    `[AI] onEnd: 保存 AI 回复 (${content.length} 字符, ${parts?.length ?? 0} parts) → conversation:${conversationId}`
+  );
+
+  try {
+    await prisma.conversationMessage.create({
+      data: {
+        conversationId,
+        role: "assistant",
+        content,
+        // undefined = 不写这一列（保持 NULL），而不是写 JSON null
+        parts: parts ?? undefined,
+      },
+    });
+
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { updatedAt: new Date() },
+    });
+
+    console.log("[AI] onEnd: 保存成功 ✅");
+
+    // ============================================================
+    // Day 13: fire-and-forget 提取长期记忆
+    // ============================================================
+    extractAndSaveMemories(userId, userText, content).catch((err) =>
+      console.error("[Memory] 后台提取失败:", err)
+    );
+  } catch (err) {
+    console.error("[AI] onEnd: 数据库写入失败", err);
+  }
+}
+
+/** 雨宝没精力时的友好提示，按协议包装 */
+function limitStreamResponse(message: string, protocol: ChatProtocol) {
+  if (protocol === "text") {
+    const stream = new ReadableStream<string>({
+      start(controller) {
+        controller.enqueue(message);
+        controller.close();
+      },
+    });
+    return createTextStreamResponse({ stream });
+  }
+
+  // UI 协议：手工拼一条只含一段文本的 UI message 流。
+  // chunk 序列抄自 ai@7 的 transformTextToUiMessageStream（dist/index.js:16908）。
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      writer.write({ type: "start" });
+      writer.write({ type: "start-step" });
+      writer.write({ type: "text-start", id: "text-1" });
+      writer.write({ type: "text-delta", id: "text-1", delta: message });
+      writer.write({ type: "text-end", id: "text-1" });
+      writer.write({ type: "finish-step" });
+      writer.write({ type: "finish" });
     },
   });
-  return createTextStreamResponse({ stream });
+  return createUIMessageStreamResponse({ stream });
 }

@@ -31,6 +31,10 @@ export default async function DocStudioPage({
       docId={doc.id}
       title={doc.title}
       initialContent={doc.content}
+      // ETag 的格式必须与 api/documents/[id] 里算的一致（服务端用 updatedAt 毫秒）。
+      // 传下去是为了给客户端的条件请求**预热**：初始正文由这里给出，客户端不会为它
+      // 发 GET，不预热就会导致每次打开工作台后的第一轮 AI 对话带不上 If-None-Match。
+      initialEtag={`W/"${doc.updatedAt.getTime()}"`}
       backHref="/docs"
       backLabel="返回文档列表"
     />

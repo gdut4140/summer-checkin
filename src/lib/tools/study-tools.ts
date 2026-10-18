@@ -13,8 +13,10 @@
 
 import { tool } from "ai";
 import { z } from "zod";
+import { startOfDay, subDays } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { safeExecute } from "./utils";
+import { localDayKey } from "@/lib/checkin-streak";
 import { getRelevantMemories } from "@/lib/memory";
 import { generatePlanForPlan } from "@/lib/agent/service";
 import { getStudyStatsData } from "@/lib/study-stats";
@@ -25,6 +27,13 @@ import type {
   PlansListData,
   CheckinsListData,
 } from "@/types";
+
+/**
+ * getRecentCheckins 一次最多返回的记录条数。
+ * 「完成任务」那类打卡一天能写很多条（一个任务一条），不封顶的话窗口一拉长就能
+ * 把上下文撑爆。截断时结果里带 `truncated` 标记，不让它变成「失败伪装成成功」。
+ */
+const MAX_CHECKIN_ROWS = 100;
 
 /**
  * Day 7 核心：创建针对特定用户的学习助手工具集
@@ -143,27 +152,47 @@ export function createStudyTools(
 
   // ============================================================
   // Tool 3: 查询近期打卡记录
+  //
+  // 打卡有两类来源：签到界面的一键「到访」（hours=0、无科目），以及 AI 代报
+  // 「完成任务」时自动记下的（带真实 hours / subject）。工具把两类都返回，
+  // 并明确把时长和科目交出去——库里本来就有，藏着只会让模型靠猜。
   // ============================================================
   const getRecentCheckins = tool({
-    description: "查询用户最近的打卡记录（内容、日期）。",
+    description:
+      "查询用户最近的打卡记录（日期、内容、科目、所属计划）。" +
+      "记录分两类：签到界面的「到访」只有一句到访文案；AI 帮忙标记完成任务时会记下任务名和科目。" +
+      "**这里没有学习时长**——时长以番茄钟为准。回答「我最近学了什么」「打卡情况如何」时用它。",
 
     inputSchema: z.object({
-      days: z.number().optional().describe("最近多少天，默认 7，最大 30"),
+      days: z
+        .number()
+        .int()
+        .min(1)
+        .max(30)
+        .optional()
+        .describe("查最近多少天（含今天），默认 7，范围 1-30"),
     }),
 
     execute: async ({ days = 7 }) => {
       return safeExecute("getRecentCheckins", async (): Promise<CheckinsListData> => {
-        const limit = Math.min(days ?? 7, 30);
-        console.log(`[getRecentCheckins] 查询用户 ${userId} 最近 ${limit} 天`);
+        // 原先是 Math.min(days ?? 7, 30)：只封上界，传 0 或负数会让 since 落到未来，
+        // 静默返回空列表。现在由 schema 的 .min/.max 从源头挡住。
+        console.log(`[getRecentCheckins] 查询用户 ${userId} 最近 ${days} 天`);
 
-        const since = new Date();
-        since.setDate(since.getDate() - limit);
+        // 含今天在内的 days 个自然日。用 subDays(days - 1) 而不是 subDays(days)，
+        // 后者会多算一天的头。
+        const since = startOfDay(subDays(new Date(), days - 1));
 
-        const checkins = await prisma.checkin.findMany({
+        // 多取一条用于判断是否被截断——「完成任务」那类记录一天可以有很多条
+        const rows = await prisma.checkin.findMany({
           where: { userId, checkinDate: { gte: since } },
           orderBy: { checkinDate: "desc" },
+          take: MAX_CHECKIN_ROWS + 1,
           include: { plan: { select: { name: true } } },
         });
+
+        const truncated = rows.length > MAX_CHECKIN_ROWS;
+        const checkins = truncated ? rows.slice(0, MAX_CHECKIN_ROWS) : rows;
 
         if (checkins.length === 0) {
           return { success: true, count: 0, checkins: [] };
@@ -171,15 +200,21 @@ export function createStudyTools(
 
         const checkinList: CheckinInfo[] = checkins.map((c) => ({
           content: c.content,
+          subject: c.subject,
           planName: c.plan?.name ?? null,
-          date: c.checkinDate.toISOString(),
+          // 给**本地**日期，不给原始 ISO：ISO 是 UTC，模型得自己推时区，而它推不对
+          // ——会把凌晨的记录说成前一天。
+          date: localDayKey(c.checkinDate),
         }));
 
-        console.log(`[getRecentCheckins] ✅ ${checkinList.length} 条记录`);
+        console.log(
+          `[getRecentCheckins] ✅ ${checkinList.length} 条记录${truncated ? "（已截断）" : ""}`
+        );
         return {
           success: true,
           count: checkinList.length,
           checkins: checkinList,
+          ...(truncated ? { truncated: true } : {}),
         };
       });
     },
@@ -233,7 +268,9 @@ export function createStudyTools(
   // ============================================================
   const getStudyStats = tool({
     description:
-      "获取用户学习统计（打卡天数、连续打卡、计划进度、任务完成）。制定计划/分析学情前先调用。",
+      "获取用户学习统计（打卡天数与次数、连续打卡、计划进度、任务完成）。制定计划/分析学情前先调用。" +
+      "注意 totalCheckins 是打卡记录**条数**，activeDays 才是**天数**——" +
+      "完成任务会自动多写几条记录，所以条数通常大于天数。",
 
     inputSchema: z.object({}),
 
@@ -241,7 +278,7 @@ export function createStudyTools(
       return safeExecute("getStudyStats", async () => {
         const stats = await getStudyStatsData(userId);
         console.log(
-          `[getStudyStats] ✅ 连续${stats.streak}天 | 打卡${stats.totalCheckins}次 | ${stats.activePlans.length}个计划`
+          `[getStudyStats] ✅ 连续${stats.streak}天 | 打卡${stats.activeDays}天/${stats.totalCheckins}条 | ${stats.activePlans.length}个计划`
         );
         return { success: true, stats };
       });

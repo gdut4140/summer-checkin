@@ -23,6 +23,14 @@ const eslintConfig = defineConfig([
     // 本地工具目录：`.claude/worktrees/` 下有历史 git worktree 的完整副本
     // （246 个源文件，比主 src 还多）。不排除的话全量 lint 会把副本整个扫一遍。
     ".claude/**",
+    // 本地临时目录（已在 .gitignore）。里面那份 tmp/pdfs/chrome-profile/ 是某次
+    // PDF 工具留下的 Chrome profile，带着一个浏览器扩展的打包产物。
+    // 关键在于它**只坑本地**：tmp/ 没被 git 跟踪，CI 的干净检出根本看不到，
+    // 所以 CI 一直是绿的，只有本地 `npm run lint` 是红的 —— 极易被误判成
+    // 自己刚写的代码出了问题。ESLint 不读 .gitignore，只能在这里显式排除。
+    // 同机实测：不排除 1866 problems（48 errors / 1818 warnings）19 秒；
+    //           排除后   38 problems（ 0 errors /   38 warnings）14 秒。
+    "tmp/**",
   ]),
   {
     /**

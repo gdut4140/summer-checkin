@@ -231,19 +231,18 @@ export function createAgentTools(userId: string) {
   const updateTaskStatus = tool({
     description:
       "更新任务状态（pending/in_progress/done/skipped）。用户说完成/跳过/开始某任务时用；" +
-      "done 时自动打卡并可用 hours 记录学习时长。",
+      "done 时会自动记一条打卡。**不接收学习时长**——真实时长以番茄钟为准，不要自己估。",
 
     inputSchema: z.object({
       taskId: z.string().describe("任务ID"),
       status: z
         .enum(["pending", "in_progress", "done", "skipped"])
         .describe("新状态"),
-      hours: z.number().optional().describe("学习时长（小时），仅 status=done 时用"),
     }),
 
-    execute: async ({ taskId, status, hours }) => {
+    execute: async ({ taskId, status }) => {
       return safeExecute("updateTaskStatus", async () => {
-        console.log(`[updateTaskStatus] 任务 ${taskId} → ${status}${hours ? ` (${hours}h)` : ""}`);
+        console.log(`[updateTaskStatus] 任务 ${taskId} → ${status}`);
 
         // 验证任务属于当前用户
         const existing = await prisma.planTask.findFirst({
@@ -276,10 +275,8 @@ export function createAgentTools(userId: string) {
               await prisma.checkin.update({
                 where: { id: existingTaskCheckin.id },
                 data: {
-                  content: hours
-                    ? `完成任务：${existing.title}（${hours}小时）`
-                    : `完成任务：${existing.title}`,
-                  hours: hours ?? 0,
+                  content: `完成任务：${existing.title}`,
+                  // hours 不写：这一列现在是遗留列（见 schema 注释）
                   subject: existing.category,
                   checkinDate: new Date(),
                 },
@@ -290,10 +287,7 @@ export function createAgentTools(userId: string) {
                   userId,
                   sourceTaskId: existing.id,
                   planId: existing.planId,
-                  content: hours
-                    ? `完成任务：${existing.title}（${hours}小时）`
-                    : `完成任务：${existing.title}`,
-                  hours: hours ?? 0,
+                  content: `完成任务：${existing.title}`,
                   subject: existing.category,
                   checkinDate: new Date(),
                 },
@@ -336,7 +330,6 @@ export function createAgentTools(userId: string) {
         };
         if (checkinCreated) {
           result.checkinCreated = true;
-          result.checkinHours = hours ?? 0;
         }
         return result;
       });

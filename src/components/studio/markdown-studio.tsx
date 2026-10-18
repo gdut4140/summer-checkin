@@ -116,7 +116,7 @@ export interface MarkdownStudioProps {
   onExit?: () => Promise<void>;
   ai?: {
     context?: Record<string, string>;
-    fetchLatest?: () => Promise<string>;
+    fetchLatest?: () => Promise<string | null>;
   };
   /** 新建计划跳转（?focusAi=1）：进入后自动聚焦 AI 输入框并预填引导语 */
   autoFocusAi?: boolean;
@@ -426,7 +426,15 @@ export function MarkdownStudio({
     if (!ai?.fetchLatest) return;
     try {
       const latest = await ai.fetchLatest();
+      // null = 正文没变（上游条件请求命中 304）。这是多数轮次的情况：
+      // 直接返回，不碰内容、不存撤销快照、不闪、不触发重渲染。
+      if (latest === null) return;
       if (typeof latest !== "string" || latest.length === 0) return;
+      // 拿到 200 也要再比一次内容。ETag 用的是 updatedAt，而 PATCH 会无条件 bump 它：
+      // 写入的正文一字未变时（自动保存把同样的内容再写一遍、或只改了标题这类元数据）
+      // etag 照样变、服务端照样回 200，但屏幕上其实什么都没变。
+      // 少了这一比，「只是查了下知识库却弹 AI 已更新」会从这条路重新回来。
+      if (latest === contentRef.current) return;
       aiUndoContentRef.current = contentRef.current;
       contentRef.current = latest;
       setContent(latest);
@@ -856,7 +864,10 @@ export function MarkdownStudio({
                   aiExpanded={aiExpanded}
                   onToggleAiExpanded={() => setAiExpanded((v) => !v)}
                   autoFocus={autoFocusAi}
-                  starterPrompt={autoFocusAi ? "帮我制定一个学习计划，我的目标是：" : undefined}
+                  // 新建计划跳进来的引导语。措辞刻意不是「制定学习计划」——
+                  // 计划已经由 createBlankPlan 建好了，而且工作台场景不注册 createPlan
+                  // （见 lib/tools/router.ts），AI 该走 updatePlanInfo / updateDocument。
+                  starterPrompt={autoFocusAi ? "帮我把这份空计划填起来，我的目标是：" : undefined}
                 />
               </div>
             </div>

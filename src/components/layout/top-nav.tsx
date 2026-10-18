@@ -31,6 +31,7 @@ import {
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { AmbientSound } from "@/components/dashboard/ambient-sound";
 import { ChatRoom } from "@/components/chatroom/chat-room";
+import { BlogLink } from "@/components/layout/blog-link";
 import { GithubLink } from "@/components/layout/github-link";
 import { useSceneCopy } from "@/context/scene-context";
 import { useOnboarding } from "@/components/onboarding/onboarding-provider";
@@ -105,11 +106,13 @@ export function TopNav({ user }: TopNavProps) {
             </nav>
           </div>
 
-          {/* 右侧：通知 + 用户菜单（桌面） */}
+          {/* 右侧工具条：收起时只留「聊天室 + 头像 + GitHub」。
+              其余入口收在最右边一个组里，hover / focus 时整组滑开（规则见 globals.css）。
+              之所以把它们集中到一组而不是散在原位：宽度过渡要靠 overflow 裁切，
+              逐个裁会把环境音面板和博客 tooltip 也裁掉；集中一组才能让裁剪窗口
+              在动画结束后统一放开。 */}
           <div className="dashboard-nav__tools pointer-events-auto hidden items-center gap-1 rounded-full border border-white/12 bg-[var(--surface-nav-bg)] p-1.5 shadow-xl backdrop-blur-2xl lg:flex">
-            <AmbientSound />
             <ChatRoom />
-            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger aria-label="打开用户菜单" className="flex items-center gap-2 rounded-full bg-white/7 p-1 backdrop-blur-sm transition-all hover:bg-white/12">
                 <AppAvatar image={avatarId} name={user.name ?? "U"} size="sm" />
@@ -134,7 +137,12 @@ export function TopNav({ user }: TopNavProps) {
                 <LogoutButton />
               </DropdownMenuContent>
             </DropdownMenu>
-            <GithubLink className="ml-1 mr-0.5" />
+            <GithubLink />
+            <div className="nav-tools-extra">
+              <BlogLink />
+              <AmbientSound />
+              <NotificationBell />
+            </div>
           </div>
 
           {/* 移动端：汉堡菜单 */}

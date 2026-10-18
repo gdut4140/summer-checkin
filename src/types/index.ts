@@ -5,6 +5,8 @@
 // ③ Tool 专用类型    — PlanInfo / CheckinInfo / 各 Tool 返回体
 // ============================================================
 
+import type { ViewPart } from "@/lib/ai/parts";
+
 // ---- Tool 返回值类型 ----
 export interface ToolSuccess<T = unknown> {
   success: true;
@@ -42,7 +44,10 @@ export interface PlanInfo {
 
 export interface CheckinInfo {
   content: string;
+  /** 科目，来自 PlanTask.category；只有 AI 标记完成任务那类记录才有 */
+  subject: string | null;
   planName: string | null;
+  /** 本地时区的 YYYY-MM-DD */
   date: string;
 }
 
@@ -63,6 +68,8 @@ export interface CheckinsListData {
   success: true;
   count: number;
   checkins: CheckinInfo[];
+  /** 命中的记录超过上限、已被截断。不设这个标记就是「失败伪装成成功」。 */
+  truncated?: boolean;
 }
 
 // ---- 学习模式分析（原 coach-tools）----
@@ -99,28 +106,18 @@ export interface PlanWithProgress {
   progress: number;
 }
 
-export interface CheckinWithPlan {
-  id: string;
-  content: string;
-  hours: number;
-  subject: string | null;
-  mood: string | null;
-  checkinDate: Date;
-  planName?: string | null;
-}
-
-export interface DashboardStats {
-  streak: number;
-  todayHours: number;
-  weekCompletion: number;
-  recentCheckins: CheckinWithPlan[];
-  weeklyData: { date: string; hours: number }[];
-}
-
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  /**
+   * 结构化的消息片段（text / tool），用来渲染工具调用卡片。
+   *
+   * 可选，且**必须保持可选**：studio 面板仍走纯文本协议，只设 content；
+   * 2026-10 之前的存量对话也只有 content。两者都靠这个字段缺省回落到
+   * 「把 content 当一段 Markdown 渲染」。
+   */
+  parts?: ViewPart[];
   createdAt: Date;
 }
 

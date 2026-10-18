@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { formatMessageTime } from "@/lib/datetime";
 import { AppAvatar } from "@/components/ui/app-avatar";
 import { MarkdownRenderer } from "@/components/ai/markdown-renderer";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -64,12 +65,7 @@ function getWsUrl(): string {
   return `${protocol}//${window.location.host}/ws`;
 }
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("zh-CN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+// 时间戳统一走共用工具：当天只给时间，跨天给日期（见 lib/datetime.ts）
 
 // 找到光标前一个可展开的 @（无论它在句首、句中还是句尾），且到光标为止只允许空格
 function findActiveMention(value: string, caret: number): number | null {
@@ -1280,7 +1276,7 @@ export function MessageRow({
               </span>
             )}
             <span className="text-[10px] tabular-nums text-muted-foreground/60">
-              {formatTime(message.createdAt)}
+              {formatMessageTime(message.createdAt)}
             </span>
           </div>
         )}

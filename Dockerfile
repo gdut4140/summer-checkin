@@ -77,6 +77,14 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/node_modules/ws ./node_modules/ws
 
+# 复制运维脚本。两个地方依赖它，漏了这一行容器内就没有 /app/scripts：
+#   - 知识库上传 PDF/Word：route.ts 用 path.join(process.cwd(), "scripts", ...)
+#     拼路径调 python scripts/extract_{pdf,docx}.py
+#   - 维护脚本：重置密码、pgvector 校验/归一化等，靠 docker exec 跑
+# 整个 scripts/ 会一起进来（.dockerignore 的 deploy* 只匹配构建上下文根目录，
+# 拦不住 scripts/deploy.sh，已实测）
+COPY --from=builder /app/scripts ./scripts
+
 # 设置文件权限
 RUN chown -R nextjs:nodejs /app
 

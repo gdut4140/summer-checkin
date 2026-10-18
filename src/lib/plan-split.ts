@@ -101,10 +101,19 @@ export type SplitPlanResult = {
  * - 已在拆分中（2 分钟内）→ 直接返回 alreadyRunning，避免重复触发
  * - AI 判断大意没变 → 不拆，仅更新哈希
  * - 真正拆分：对账创建/更新/删除
+ *
+ * opts.force：跳过那道 AI 判断，直接重拆。手动点「刷新任务」走这条——判断是模型猜的
+ * （prompt 还刻意让它「倾向说不改」，实测 3 个真实计划全返回 needsUpdate=false），
+ * 不该由它拦住用户明确的手动操作。
+ *
+ * 不 force 时保留判断，供**自动**触发使用（studio-client 退出工作台时的后台拆分）：
+ * 那里用户没有表达意图，若无条件重拆，每次退出都会白花一次 LLM 调用，而且对账会删掉
+ * 「新清单里没有的非 done 任务」再按模型的新措辞重建——等于每退一次就洗一遍任务清单。
  */
 export async function splitPlanTasks(
   planId: string,
-  userId: string
+  userId: string,
+  opts?: { force?: boolean }
 ): Promise<SplitPlanResult> {
   const plan = await prisma.plan.findUnique({ where: { id: planId } });
   if (!plan || plan.userId !== userId) {
@@ -123,11 +132,16 @@ export async function splitPlanTasks(
 
   try {
     // 1. 先让 AI 判断文档改动是否实质影响任务：大意没变就不进入"刷新中"、不重新拆分
-    const existingForCheck = await prisma.planTask.findMany({
-      where: { planId },
-      select: { title: true },
-    });
-    const needsUpdate = await tasksNeedUpdate(source, existingForCheck, userId);
+    // force：用户明确要求重拆，跳过这道 AI 判断。跳过时也不查任务，省一次查询。
+    const existingForCheck = opts?.force
+      ? []
+      : await prisma.planTask.findMany({
+          where: { planId },
+          select: { title: true },
+        });
+    const needsUpdate = opts?.force
+      ? true
+      : await tasksNeedUpdate(source, existingForCheck, userId);
     if (!needsUpdate) {
       // 大意没变：不拆分任务，只把文档哈希更新为"已评估"，抽屉不再提示过期
       await prisma.plan.update({

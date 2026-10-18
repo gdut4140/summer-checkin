@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay, format, subDays } from "date-fns";
+import { computeStreak } from "@/lib/checkin-streak";
 import { CalendarCheck, ChartLineUp, Star, Lightning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { FocusDurationChart, type FocusDay } from "@/components/profile/focus-duration-chart";
@@ -80,12 +81,10 @@ export default async function ProfilePage() {
       if (t.status === "done" && t.completedAt) allActiveDates.add(format(t.completedAt, "yyyy-MM-dd"));
     }
   }
-  let streakDays = 0;
-  const sortedDates = [...allActiveDates].sort().reverse();
-  for (let i = 0; i < sortedDates.length; i++) {
-    if (sortedDates[i] === format(new Date(now.getTime() - i * 86400000), "yyyy-MM-dd")) streakDays++;
-    else break;
-  }
+  // 连续活跃：口径走共享实现（今天还没活动不算断）。
+  // 原先这里是「从今天往回逐个比对」，今天没活动就在 i=0 直接 break —— 于是每天
+  // 早上这个数字一律显示 0，哪怕昨天往前连着几十天。
+  const streakDays = computeStreak(allActiveDates, now);
 
   const overview = [
     { label: "加入天数", value: String(joinDays), unit: "天", icon: CalendarCheck },

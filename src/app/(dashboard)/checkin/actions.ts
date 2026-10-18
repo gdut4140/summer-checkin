@@ -13,7 +13,18 @@ import {
   type SceneType,
 } from "@/lib/scene-meta";
 
-export async function dailyCheckin(mood?: string, scene?: SceneType): Promise<ActionResult> {
+/**
+ * 今日签到。
+ *
+ * 只有「今天来过了」这一种失败（幂等由这里挡）。**没有 mood / 科目 / 时长入参**：
+ * 签到界面上根本没有对应输入，曾经留着的 mood 形参只会永远写 null，已删除。
+ * 需要记录学习时长/科目的路径是 AI 代报「完成任务」（见 lib/tools/agent-tools.ts）。
+ *
+ * ⚠️ 这里的「今天已签到」是 findFirst → create，非原子；库上没有
+ * (userId, 某一天的唯一约束)，并发请求理论上能插两条。见 remove-checkin-dead-columns.sql
+ * 同一批遗留问题——要根治得先让「一行 = 一天」重新成立（AI 代报那条路径会一天写多行）。
+ */
+export async function dailyCheckin(scene?: SceneType): Promise<ActionResult> {
   try {
     const user = await requireAuth();
     const now = new Date();
@@ -42,8 +53,7 @@ export async function dailyCheckin(mood?: string, scene?: SceneType): Promise<Ac
       data: {
         userId: user.id,
         content: visitRecordText,
-        hours: 0,
-        mood: mood ?? null,
+        // 不写 hours：签到不产生时长，那一列已经是遗留列（见 schema 注释）
         checkinDate: now,
       },
     });

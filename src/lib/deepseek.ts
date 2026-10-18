@@ -1,28 +1,15 @@
-import OpenAI from "openai";
 import type { PromptGroup } from "@/lib/tools/router";
-import {
-  completionsWithFallback,
-  createClientFor,
-  createModelFor,
-  pickModel,
-  type ModelTier,
-} from "@/lib/model-pool";
+import { completionsWithFallback } from "@/lib/model-pool";
 
 // ============================================================
 // 模型来源统一走模型池（src/lib/model-pool.ts）：
-// - getAIModel(tier)     → 取某档第一个可用模型的 AI SDK 模型（streamText 用）
-// - createAIClient(tier) → 取某档第一个可用模型的原始 OpenAI 客户端
-// - 原始 completions 建议直接用 completionsWithFallback 获得「额度耗尽自动降级」
+// - 非流式补全一律用 completionsWithFallback —— 才能拿到「额度耗尽自动降级」+ 统一记账
+// - 流式用 streamTextWithFallback（见 model-pool.ts）
 // 分档：HIGH = agent/文档/后台规划；LOW = 聊天室/标题/记忆/拆任务
+//
+// 注：这里原先还导出 getAIModel / createAIClient，把模型池的单个模型与原始 OpenAI
+// 客户端直接暴露出去。两者全仓零调用，而且绕开了降级与记账两条链路，已删除。
 // ============================================================
-
-/**
- * 获取语言模型实例（AI SDK，用于 streamText）
- * @param tier 档位：HIGH（默认，agent/文档）或 LOW（聊天室等轻量面）
- */
-export function getAIModel(tier: ModelTier = "high") {
-  return createModelFor(pickModel(tier));
-}
 
 /**
  * 获取深度思考 provider options。
@@ -31,14 +18,6 @@ export function getAIModel(tier: ModelTier = "high") {
  */
 export function getDeepThinkOptions(_deepThink: boolean) {
   return undefined;
-}
-
-/**
- * 创建原始 OpenAI SDK 客户端（用于 generateChatTitle 等非流式场景）
- * @param tier 档位，默认 HIGH
- */
-export function createAIClient(tier: ModelTier = "high"): OpenAI {
-  return createClientFor(pickModel(tier));
 }
 
 // ============================================================
@@ -106,7 +85,7 @@ const PROMPT_GROUPS: Record<PromptGroup, string> = {
 
 **第二步：分析差距**
 基于数据找出：当前计划的完成情况、任务积压情况、连续打卡状态。在回复中先简要总结你的分析（"你已连续打卡 X 天，计划「Y」进度 Z%..."），让用户看到你的建议是基于真实数据的。
-注意：打卡目前只是"小岛到访"计数，不包含科目、心情或学习时长（签到界面也没有对应输入），所以不要使用或编造"科目偏好 / 日均 X 小时"这类数据；如果确实需要了解用户的偏好或每天能投入多少时间，直接问用户。
+注意：打卡记录里**没有学习时长**——签到界面的「到访」只是一句到访文案，AI 帮忙标记完成任务时也只记下任务名和科目。所以不要使用或编造「日均 X 小时」这类数据；如果确实需要了解用户的偏好或每天能投入多少时间，直接问用户。
 
 **第三步：制定计划**
 调用 createPlan 创建计划，参数应基于前面的数据分析结果。只需给出：

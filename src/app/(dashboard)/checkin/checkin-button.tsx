@@ -14,7 +14,7 @@ export function CheckinButton() {
 
   async function handleCheckin() {
     setLoading(true);
-    const result = await dailyCheckin(undefined, scene);
+    const result = await dailyCheckin(scene);
     setLoading(false);
 
     if (result.success) {

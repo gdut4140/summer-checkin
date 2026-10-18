@@ -198,7 +198,6 @@ export const CheckinScalarFieldEnum = {
   hours: 'hours',
   subject: 'subject',
   mood: 'mood',
-  screenshot: 'screenshot',
   checkinDate: 'checkinDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -248,6 +247,7 @@ export const ConversationMessageScalarFieldEnum = {
   conversationId: 'conversationId',
   role: 'role',
   content: 'content',
+  parts: 'parts',
   createdAt: 'createdAt'
 } as const
 

@@ -1,0 +1,26 @@
+-- 清理打卡表的死列：screenshot
+--
+-- 背景：checkin 表曾经有一套「富签到」设计（内容 / 心情 / 时长 / 截图），后来签到
+-- 界面塌缩成了一键「到访」计数，但列没跟着收。
+--
+--   screenshot  从建表起**没有任何代码写过或读过**，库里也确实是 0 个非空值。
+--
+-- ⚠️ 同一批遗留里的 `mood` **本次不删**。原先以为它全是 NULL，实际库里有 6 行真实
+--    数据（2026-07 那批富签到留下的 happy/excited/neutral/tired，且那几行的 content
+--    是用户自己写的文字）。它同样没有任何代码读写，但这种「以后谁也看不到」的历史
+--    数据该不该丢，得由人拍板，不该由一次清理顺手决定。
+--    确认可丢之后，单独加一句：
+--      ALTER TABLE "checkin" DROP COLUMN IF EXISTS "mood";
+--
+-- subject 保留：「完成任务」那类记录会写入 PlanTask.category，getRecentCheckins
+-- 会把科目交给模型。
+--
+-- hours 也保留，但同样已经是遗留列：手动签到恒为 0，AI 标记完成任务那条路已在
+-- 2026-10 去掉——模型自己估时长的后果是「猜 → 入库 → 下一轮被当成事实引用」的闭环。
+-- 真实时长以番茄钟为准（StudyRecord.totalMinutes，那才是计时的）。库里 18 行历史值
+-- 来自 2026-07/08 的富签到表单。
+--
+-- 本地开发库由 `prisma db push` 同步，本文件供部署库执行（与
+-- remove-plan-target-hours.sql 同一套做法：幂等，可重复执行）。
+
+ALTER TABLE "checkin" DROP COLUMN IF EXISTS "screenshot";

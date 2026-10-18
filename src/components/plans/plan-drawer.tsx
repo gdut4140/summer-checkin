@@ -65,19 +65,28 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
   // 拆分/刷新：触发后台拆分，不阻塞等待完成——轮询 effect 会检测完成并加载新任务。
   // 用本地 refreshing 标记"刷新中"，避免 AI 判断阶段被服务端 splitting=false 覆盖导致进度条闪烁。
   // silent=true 用于打开抽屉时自动触发（不弹提示，任务出现即成功）。
-  const runSplit = async (silent = false) => {
+  // force=true   跳过服务端那道「AI 判断大意没变就不拆」的闸门，直接重拆——手动点按钮走这条。
+  const runSplit = async (silent = false, force = false) => {
     if (!plan || refreshing) return;
     setRefreshing(true);
     try {
-      const res = await fetch(`/api/plans/${plan.id}/split`, { method: "POST" });
-      const data = (await res.json().catch(() => null)) as { changed?: boolean; error?: string } | null;
+      const res = await fetch(
+        `/api/plans/${plan.id}/split${force ? "?force=1" : ""}`,
+        { method: "POST" }
+      );
+      const data = (await res.json().catch(() => null)) as
+        | { changed?: boolean; alreadyRunning?: boolean; error?: string }
+        | null;
       if (silent) return;
       if (!res.ok) {
         toast.error(data?.error || "拆分失败，请重试");
-      } else if (data?.changed === true) {
-        toast.success("任务已按文档更新");
-      } else if (data?.changed === false) {
-        toast.success("任务与文档一致，无需更新");
+      } else if (data?.alreadyRunning) {
+        // 2 分钟内已经有一次拆分在跑（splitPlanTasks 的幂等闸门），本次没执行
+        toast("正在刷新中，请稍候");
+      } else if (data?.changed) {
+        toast.success("已按文档重拆任务");
+      } else {
+        toast("任务与文档一致，无需更新");
       }
     } catch {
       if (!silent) toast.error("触发拆分失败，请重试");
@@ -111,7 +120,11 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
         // 任务为空 + 未在拆分 + 尚未自动触发过 → 打开抽屉即自动拆分，无需手动点「刷新任务」
         if (tasks.length === 0 && !splitting && !refreshing && !autoSplitRef.current) {
           autoSplitRef.current = plan.id;
-          void runSplit(true);
+          // 这里也走 force：任务是空的，服务端那道「AI 判断大意没变就不拆」必然回答
+          // 「要更新」（拿一份文档对一个空清单），跑它纯属白花一次 LLM 调用。
+          // 注意服务端默认仍保留那道判断——退出工作台时的自动拆分会用到它，
+          // 见 studio-client 的 handleExit：那里不能无条件重拆，否则每次退出都洗一遍任务。
+          void runSplit(true, true);
         }
       })
       .catch(() => { if (!cancelled) { setTasks([]); setStale(false); setSplitting(false); } })
@@ -329,7 +342,10 @@ export function PlanDrawer({ plan, onClose, onRefresh, onPlanNameChange }: Props
                   {/* 任务清单头部：始终提供刷新按钮（有改动或没改动都能手动刷新） */}
                   <div className="mb-1.5 flex items-center justify-between">
                     <span className="text-[11px] text-muted-foreground">任务清单</span>
-                    <button onClick={() => void runSplit()} disabled={splitting || refreshing || loading}
+                    {/* 显式点「刷新任务」= 用户就是要重拆，直接 force 跳过服务端那道
+                        「AI 判断大意没变就不拆」的闸门——判断是模型猜的，不该拦用户的手动操作。
+                        （自动触发的那条仍走智能判断，见 runSplit 的注释。） */}
+                    <button onClick={() => void runSplit(false, true)} disabled={splitting || refreshing || loading}
                       className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground disabled:opacity-50">
                       <ListChecks className="size-3.5" />
                       {splitting || refreshing ? "刷新中…" : "刷新任务"}

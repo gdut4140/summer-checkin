@@ -904,6 +904,44 @@
   right: 2rem;
 }
 
+/* 右侧工具条的收 / 展。
+   收起时只留「聊天室 + 头像 + GitHub」，hover 或键盘 focus 时其余入口从右侧滑开
+   —— 语义与中心 .atomic-nav 的胶囊一致。
+
+   为什么用 max-width 过渡，而不是原子胶囊那种固定 width：
+   这组工具条是右对齐的（absolute + right），宽度必须由内容决定；写死像素会在
+   通知红点、条目增减时错位。max-width 从 0 过渡到「足够大」，元素实际宽度在
+   max-width 追平内容宽度之前一直跟着它走，观感就是平滑展开。
+
+   为什么 overflow 要延迟放开：
+   环境音面板（.ambient-sound-shell>div）和博客 tooltip 都是组件内部的绝对定位、
+   不是 Portal。展开过程中必须裁掉它们，否则会在胶囊还没变宽时先溢出来；
+   动画结束后又必须放开，否则它们弹出时会被裁。overflow 是离散属性，靠
+   allow-discrete + transition-delay 做到「展开时延迟到动画结束、收起时立刻裁剪」。 */
+.dashboard-nav__tools .nav-tools-extra {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 与父级 gap-1 一致 */
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-width 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease,
+    overflow 0s linear 0s allow-discrete;
+}
+
+.dashboard-nav__tools:hover .nav-tools-extra,
+.dashboard-nav__tools:focus-within .nav-tools-extra {
+  max-width: 150px;
+  opacity: 1;
+  overflow: visible;
+  transition:
+    max-width 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 240ms ease 100ms,
+    overflow 0s linear 460ms allow-discrete;
+}
+
 .atomic-nav {
   position: absolute;
   left: 50%;
