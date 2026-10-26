@@ -12,6 +12,9 @@ export default defineConfig({
   },
   test: {
     include: ["tests/**/*.test.ts"],
+    // 集成测试需要真实 PostgreSQL，默认不跑；用 `npm run test:db` 单独执行
+    // （配置见 vitest.integration.config.mts）
+    exclude: ["tests/integration/**"],
     // 目前只测纯逻辑（分片 / 向量 / 工具兜底 / 校验 schema / 渲染管线），无需 DOM。
     // 日后要测组件再改 jsdom 或加 environmentMatchGlobs。
     environment: "node",

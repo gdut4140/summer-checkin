@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { MAX_FILE_BYTES, fileSizeError, textLengthError } from "@/lib/knowledge-upload-guard";
 
 // ---- 类型 ----
 
@@ -45,10 +46,10 @@ function canViewDoc(sourceType: string, sourceName: string) {
   return /\.(md|markdown)$/i.test(sourceName);
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+/** 文档列表里的 totalChars 是字符数，不是字节数，别用字节格式显示 */
+function formatChars(chars: number) {
+  if (chars < 10000) return `${chars} 字`;
+  return `${(chars / 10000).toFixed(1)} 万字`;
 }
 
 function timeAgo(iso: string) {
@@ -98,6 +99,13 @@ export function KnowledgeBase() {
   // 上传文件
   const uploadFile = useCallback(
     async (file: File) => {
+      // 前端先拦一道，避免把超限文件传完才报错
+      const sizeMessage = fileSizeError(file.size);
+      if (sizeMessage) {
+        toast.error(sizeMessage);
+        return;
+      }
+
       setUploading(true);
       try {
         const formData = new FormData();
@@ -108,7 +116,12 @@ export function KnowledgeBase() {
         });
         const result = await res.json();
         if (res.ok && result.success) {
-          toast.success(`已上传 "${file.name}" (${result.chunks} 个分片)`);
+          const replaced = result.replacedChunks ?? 0;
+          toast.success(
+            replaced > 0
+              ? `已更新 "${file.name}"（覆盖 ${replaced} 个旧分片，现有 ${result.chunks} 个）`
+              : `已上传 "${file.name}" (${result.chunks} 个分片)`
+          );
           await loadDocs();
         } else {
           toast.error(result.error ?? "上传失败");
@@ -128,6 +141,11 @@ export function KnowledgeBase() {
       toast.error("文本太短，至少 10 个字符");
       return;
     }
+    const lengthMessage = textLengthError(pasteText);
+    if (lengthMessage) {
+      toast.error(lengthMessage);
+      return;
+    }
     setUploading(true);
     try {
       const res = await fetch("/api/knowledge/documents", {
@@ -137,7 +155,13 @@ export function KnowledgeBase() {
       });
       const result = await res.json();
       if (res.ok && result.success) {
-        toast.success(`已保存 (${result.chunks} 个分片)`);
+        const replaced = result.replacedChunks ?? 0;
+        const label = pasteName.trim() || "手动输入";
+        toast.success(
+          replaced > 0
+            ? `已更新 "${label}"（覆盖 ${replaced} 个旧分片）`
+            : `已保存 (${result.chunks} 个分片)`
+        );
         setPasteText("");
         setPasteName("");
         setPasteOpen(false);
@@ -261,7 +285,7 @@ export function KnowledgeBase() {
                 </Button>
               </div>
               <p className="mt-2 text-[10px] text-white/25">
-                支持 .txt .md .pdf .docx
+                支持 .txt .md .pdf .docx，单文件 ≤ {MAX_FILE_BYTES / (1024 * 1024)} MB
               </p>
             </>
           )}
@@ -340,7 +364,7 @@ export function KnowledgeBase() {
                   </p>
                   <p className="mt-0.5 flex items-center gap-2 text-[10px] text-white/35">
                     <span>{typeLabel[doc.sourceType] ?? doc.sourceType}</span>
-                    <span>{formatBytes(doc.totalChars)}</span>
+                    <span>{formatChars(doc.totalChars)}</span>
                     <span>{timeAgo(doc.createdAt)}</span>
                   </p>
                 </div>

@@ -1,15 +1,18 @@
 // ============================================================
-// RAG 向量检索 — pgvector 版
+// RAG 向量检索 — 当前使用 pgvector
 //
-// 检索完全在数据库内完成：ORDER BY embedding <=> $query LIMIT k
-// 向量不再出库，只回传命中的行。
+// 当前实现：
+// - documentchunk.embedding 类型为 vector(1024)
+// - 使用 pgvector 的余弦距离操作符 <=>
+// - 在 PostgreSQL 内部完成排序和 LIMIT
+// - 使用 HNSW 索引加速检索
+// - 只返回命中的文档切片，不把全量向量拉回应用层
 //
-// 历史：embedding 列原为 jsonb（项目最初是 MySQL，无 vector 类型，
-// 迁到 PostgreSQL 时列类型直接平移，未启用 pgvector）。检索曾靠
-// 应用层全量拉回 + JS 余弦，且有 LIMIT 1000 静默截断——超出窗口的
-// 文档永远搜不到且不报错。迁移脚本见 prisma/migrate-to-pgvector.sql
+// 历史背景：
+// 早期 embedding 使用 jsonb 存储，检索依靠应用层拉取数据并用 JS
+// 计算余弦相似度，还存在 LIMIT 1000 的静默截断问题。
+// 迁移脚本见 prisma/migrate-to-pgvector.sql。
 // ============================================================
-
 import { prisma } from "@/lib/prisma";
 
 // ---- 类型 ----
@@ -96,7 +99,7 @@ export async function searchSimilarChunks(
 
   console.log(
     `[Retriever] pgvector 检索 → ${rows.length} 条` +
-      ` (top distance=${rows[0]?.distance?.toFixed(4) ?? "N/A"})`
+    ` (top distance=${rows[0]?.distance?.toFixed(4) ?? "N/A"})`
   );
 
   return rows.map((r) => ({

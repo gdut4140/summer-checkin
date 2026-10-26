@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
+  type UIEvent as ReactUIEvent,
 } from "react";
 import { CaretDown, CaretUp, ChatCircleText, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { Virtuoso, type ListRange, type VirtuosoHandle } from "react-virtuoso";
@@ -67,7 +68,25 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
     const readRef = useRef<HTMLDivElement>(null);
     const editRef = useRef<HTMLTextAreaElement>(null);
     const virtuosoRef = useRef<VirtuosoHandle>(null);
-    const scrollSyncingRef = useRef(false);
+    /**
+     * 程序化滚动后的静默窗口。
+     *
+     * 早先这里是一个 boolean，只维持一帧就复位。问题在于：给 textarea 赋
+     * scrollTop 产生的 scroll 事件是**异步派发**的，Virtuoso 按需测量块高后
+     * 也会再修正滚动位置；这些事件经常在锁复位之后才到，于是两侧互相拉扯，
+     * 表现就是滚动时一闪一闪的抽搐。
+     *
+     * 现在改成时间窗 + 只处理 `isTrusted` 的事件：脚本设置的 scrollTop 和
+     * 虚拟列表自己的位置修正都不是用户意图，直接忽略。
+     */
+    const suppressScrollSyncUntilRef = useRef(0);
+    const editSyncRafRef = useRef<number | null>(null);
+    /** Virtuoso 内部的滚动容器；编辑 → 阅读连续同步时直接设置它的 scrollTop */
+    const readScrollerRef = useRef<HTMLElement | null>(null);
+    // 稳定回调：内联箭头每次渲染都会换引用，Virtuoso 会反复 attach/detach
+    const setReadScroller = useCallback((ref: HTMLElement | Window | null) => {
+      readScrollerRef.current = ref instanceof HTMLElement ? ref : null;
+    }, []);
     const [selection, setSelection] = useState<SelectionState | null>(null);
     const activeSelectionRef = useRef<{ range: Range; text: string } | null>(null);
     const onSelectionActionRef = useRef(onSelectionAction);
@@ -86,6 +105,16 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
      */
     const deferredValue = useDeferredValue(value);
     const blocks = useMemo(() => splitMarkdownBlocks(deferredValue), [deferredValue]);
+
+    /**
+     * 源码总行数。
+     * 编辑区是等行高的 textarea，按「源码行号比例」同步比按「块序号比例」准得多：
+     * 块高度差异极大（标题 40px、代码块 800px），块序号比例会系统性偏移。
+     */
+    const totalSourceLines = useMemo(
+      () => Math.max(1, value.split("\n").length),
+      [value]
+    );
 
     /** 每个标题落在哪一块（目录跳转 / 滚动反查章节都用它） */
     const headingBlockIndex = useMemo(
@@ -312,31 +341,96 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
       [headings, headingBlockIndex]
     );
 
-    // 左右面板同步滚动：阅读侧按「首个可见块」定位，比 scrollHeight 比例稳
-    // （虚拟化后 scrollHeight 是估算值，会随测量浮动）。
+    // 左右面板同步滚动。
     //
-    // 只在**用户真正滚动阅读面板**时触发，不能挂在 rangeChanged 上：
-    // 改一个字符、块被重新测量都会让 rangeChanged 触发，那样打字时编辑面板
-    // 会被不断拽走。滚动事件才是用户意图的可靠信号。
+    // 三条约束（都是踩过的坑）：
+    //   1. 只处理用户滚动（event.isTrusted）。脚本赋值 scrollTop、Virtuoso
+    //      测量块高后修正位置也会触发 scroll；处理它们会让两侧互相拉扯，
+    //      表现就是滚动时一闪一闪的抽搐。
+    //   2. 程序同步后开一个 180ms 静默窗，兜住浏览器/虚拟列表的异步位置修正。
+    //   3. 阅读侧先换算成源码行号，再使用编辑器的实际行高定位。
+    const suppressScrollSync = useCallback(() => {
+      suppressScrollSyncUntilRef.current = performance.now() + 180;
+    }, []);
+
+    /** 阅读 → 编辑：找第一个与视口相交的已渲染块，按块内偏移换算成源码行 */
     const syncFromRead = useCallback(() => {
-      if (readOnly || mode !== "split" || scrollSyncingRef.current) return;
+      if (readOnly || mode !== "split") return;
+      if (performance.now() < suppressScrollSyncUntilRef.current) return;
       const edit = editRef.current;
-      const range = rangeRef.current;
-      if (!edit || !range || blocks.length <= 1) return;
-      scrollSyncingRef.current = true;
-      const ratio = range.startIndex / (blocks.length - 1);
-      edit.scrollTop = ratio * Math.max(0, edit.scrollHeight - edit.clientHeight);
-      requestAnimationFrame(() => {
-        scrollSyncingRef.current = false;
-      });
-    }, [blocks.length, mode, readOnly]);
+      const read = readRef.current;
+      if (!edit || !read || blocks.length <= 1) return;
+
+      const viewportTop = read.getBoundingClientRect().top;
+      let blockIndex = 0;
+      let intraRatio = 0;
+      for (const node of read.querySelectorAll<HTMLElement>("[data-block-index]")) {
+        const rect = node.getBoundingClientRect();
+        if (rect.bottom > viewportTop) {
+          blockIndex = Number(node.dataset.blockIndex);
+          // 视口顶部落在这一块的什么位置（0 = 块顶，1 = 块底）。
+          // 只用 startLine 会让编辑面板按块跳变，加上块内偏移才连续。
+          if (rect.height > 0) {
+            intraRatio = Math.min(
+              1,
+              Math.max(0, (viewportTop - rect.top) / rect.height)
+            );
+          }
+          break;
+        }
+      }
+
+      const startLine = blocks[blockIndex]?.startLine ?? 0;
+      const nextLine = blocks[blockIndex + 1]?.startLine ?? totalSourceLines;
+      const line = startLine + intraRatio * Math.max(0, nextLine - startLine);
+      const lineHeight = Number.parseFloat(getComputedStyle(edit).lineHeight) || 28;
+      suppressScrollSync();
+      edit.scrollTop = Math.min(
+        line * lineHeight,
+        Math.max(0, edit.scrollHeight - edit.clientHeight)
+      );
+    }, [blocks, mode, readOnly, suppressScrollSync, totalSourceLines]);
+
+    const scrollReadToSourceLine = useCallback(
+      (line: number, intraRatio: number) => {
+        const scroller = readScrollerRef.current;
+        if (!scroller) return;
+
+        const targetBlock = blockIndexForLine(blocks, Math.floor(line));
+        if (targetBlock < 0) return;
+
+        const alignBlock = () => {
+          const host = readRef.current?.querySelector<HTMLElement>(
+            `[data-block-index="${targetBlock}"]`
+          );
+          if (!host) return false;
+          const scrollerRect = scroller.getBoundingClientRect();
+          const blockTop =
+            host.getBoundingClientRect().top - scrollerRect.top + scroller.scrollTop;
+          suppressScrollSync();
+          scroller.scrollTop = blockTop + intraRatio * host.offsetHeight;
+          return true;
+        };
+
+        if (alignBlock()) return;
+
+        virtuosoRef.current?.scrollToIndex({
+          index: targetBlock,
+          align: "start",
+        });
+        requestAnimationFrame(() => requestAnimationFrame(alignBlock));
+      },
+      [blocks, suppressScrollSync]
+    );
 
     useEffect(() => {
       if (readOnly || mode !== "split") return;
       const read = readRef.current;
       if (!read) return;
       let raf: number | null = null;
-      const onScroll = () => {
+      const onScroll = (event: Event) => {
+        // 脚本滚动 / 虚拟列表自身修正位置的滚动不是用户意图
+        if (!event.isTrusted) return;
         if (raf !== null) return;
         raf = requestAnimationFrame(() => {
           raf = null;
@@ -351,19 +445,44 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
       };
     }, [mode, readOnly, syncFromRead]);
 
-    function syncFromEdit() {
-      if (scrollSyncingRef.current) return;
-      const edit = editRef.current;
-      if (!edit || blocks.length <= 1) return;
-      const maxEdit = edit.scrollHeight - edit.clientHeight;
-      const ratio = maxEdit > 0 ? edit.scrollTop / maxEdit : 0;
-      const targetBlock = Math.round(ratio * (blocks.length - 1));
-      scrollSyncingRef.current = true;
-      virtuosoRef.current?.scrollToIndex({ index: targetBlock, align: "start" });
-      requestAnimationFrame(() => {
-        scrollSyncingRef.current = false;
-      });
-    }
+    /** 编辑 → 阅读：按文本框顶部对应的源码行定位到阅读块 */
+    const syncFromEdit = useCallback(
+      (event: ReactUIEvent<HTMLTextAreaElement>) => {
+        if (!event.nativeEvent.isTrusted) return;
+        if (performance.now() < suppressScrollSyncUntilRef.current) return;
+        if (editSyncRafRef.current !== null) return;
+
+        editSyncRafRef.current = requestAnimationFrame(() => {
+          editSyncRafRef.current = null;
+          const edit = editRef.current;
+          if (!edit || blocks.length <= 1) return;
+
+          const lineHeight = Number.parseFloat(getComputedStyle(edit).lineHeight) || 28;
+          const line = Math.min(
+            Math.max(0, edit.scrollTop / lineHeight),
+            Math.max(0, totalSourceLines - 1)
+          );
+          const targetBlock = blockIndexForLine(blocks, Math.floor(line));
+          const startLine = blocks[targetBlock]?.startLine ?? 0;
+          const nextLine = blocks[targetBlock + 1]?.startLine ?? totalSourceLines;
+          const intraRatio =
+            nextLine > startLine
+              ? Math.min(1, Math.max(0, (line - startLine) / (nextLine - startLine)))
+              : 0;
+          scrollReadToSourceLine(line, intraRatio);
+        });
+      },
+      [blocks, scrollReadToSourceLine, totalSourceLines]
+    );
+
+    // 卸载时取消尚未执行的编辑区同步
+    useEffect(() => {
+      return () => {
+        if (editSyncRafRef.current !== null) {
+          cancelAnimationFrame(editSyncRafRef.current);
+        }
+      };
+    }, []);
 
     // 阅读面板选区 → 弹出「问 AI」；选区滚动时工具条跟随（selectionchange 在滚动时不触发）
     useEffect(() => {
@@ -480,6 +599,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, EditorPaneProps>(
           <div ref={readRef} className="studio-read h-full">
             <Virtuoso
               ref={virtuosoRef}
+              scrollerRef={setReadScroller}
               className="studio-scroll"
               style={{ height: "100%" }}
               data={blocks}

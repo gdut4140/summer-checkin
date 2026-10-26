@@ -4,6 +4,7 @@ import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import remarkBreaks from "remark-breaks";
 import remarkFootnotes from "remark-footnotes";
 import remarkDeflist from "remark-deflist";
 import rehypeRaw from "rehype-raw";
@@ -56,6 +57,9 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({ content }: Prop
           // remark-footnotes 内置了旧版 unified 类型，运行时兼容但类型定义不兼容。
           remarkFootnotes as Pluggable,
           remarkDeflist,
+          // 单个换行也渲染成 <br>：编辑器里按回车就是换行，
+          // 没有它时 CommonMark 会把段落内的换行折叠成空格（编辑区和预览对不上）。
+          remarkBreaks,
           remarkGfm,
         ]}
         // 顺序关键：rehype-raw 解析原生 HTML → 立刻过净化白名单 → 再交给 KaTeX / highlight 生成受信标记。

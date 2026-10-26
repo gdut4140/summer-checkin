@@ -133,21 +133,3 @@ export async function searchKnowledge(
     rerankModel,
   };
 }
-
-/**
- * 将搜索结果格式化为 system prompt 片段
- *
- * 注意：当前**无调用方**。检索已改为纯工具驱动（见 api/ai/route.ts 的说明），
- * 知识内容由 searchKnowledgeBase 工具结果直接喂给模型，不再走 system prompt 注入。
- */
-export function formatKnowledgeForPrompt(result: SearchResult): string {
-  if (result.results.length === 0) return "";
-
-  const lines = result.results.map(
-    (r, i) => `[参考${i + 1}] （来源: ${r.sourceName}）\n${r.content}`
-  );
-
-  return `[知识库检索结果 — 请优先基于以下参考资料回答]
-${lines.join("\n\n")}
-`;
-}

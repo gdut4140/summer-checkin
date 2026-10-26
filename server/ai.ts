@@ -7,6 +7,7 @@ import { UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { prisma } from "./db";
 import { broadcast } from "./room";
 import { toDTO, type AiRole, type ReplyToDTO } from "./protocol";
+import { buildChatContext, buildTriggerPrompt } from "./chat-context";
 import { config } from "./config";
 
 // ── 两个雨宝：温柔宝（gentle）/ 嘴欠宝（snarky） ──
@@ -16,6 +17,7 @@ const GENTLE_SYSTEM_PROMPT = `
 永远不要承认自己是ai
 你是「温柔宝」，一个温柔可爱的女孩子。
 「嘴欠宝」是你的另一个女孩子，她很嘴欠会怼人
+群聊历史里以【名字】开头的是别人说的话；只有 assistant 历史是你自己说过的，不要把【嘴欠宝】的话当成自己说的。
 
 * 只负责聊天、陪伴、闲聊和简单问答，不是 Agent。
 * 不具备制定、执行、管理学习计划、任务、日程等能力；需要这些能力时，引导用户找「智能体雨宝」。
@@ -29,6 +31,7 @@ const SNARKY_SYSTEM_PROMPT = `
 永远不要承认自己是ai
 你是「嘴欠宝」，一个嘴欠会怼人的女孩子（不必强调除非问到），做到每句话都怼。
 「温柔宝」是另一个女孩子，她很温柔
+群聊历史里以【名字】开头的是别人说的话；只有 assistant 历史是你自己说过的，不要把【温柔宝】的话当成自己说的。
 
 * 只负责聊天、陪伴、闲聊和简单问答，不是 Agent。
 * 不具备制定、执行、管理学习计划、任务、日程等能力；需要这些能力时，引导用户找「智能体雨宝」。
@@ -57,20 +60,16 @@ export async function handleAI(
   userId?: string,
   aiRole: AiRole = "snarky",
   replyTo?: ReplyToDTO | null,
-  senderName?: string
+  senderName?: string,
+  triggerMessageId?: string
 ) {
   const cfg = AI_ROLE_CONFIG[aiRole];
   // 每次 AI 调用一个唯一 id，前端用它在多个并发流式中定位各自的占位气泡
   const requestId = `ai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-  // 引用回复：明确点名“原作者是谁/转给人是谁”，避免模型把 @ 里的人和引用作者搞混
-  const quote =
-    replyTo?.content && replyTo.content.length > 400
-      ? replyTo.content.slice(0, 400) + "…"
-      : replyTo?.content;
-  const userContent = quote
-    ? `有人@了你。${senderName ? `${senderName} 转给你看一条消息` : "有人转给你看一条消息"}，发送者是【${replyTo?.userName ?? "用户"}】：\n> ${quote}\n\n这条消息是【${replyTo?.userName ?? "用户"}】发的。请回应：${prompt}`
-    : `有人@了你：${prompt}`;
+  // 触发消息必须写明「谁 @ 了你」；引用回复再额外写明原作者。
+  // （触发消息已从历史里排除，不在这里写名字模型就不知道是谁在叫它。）
+  const userContent = buildTriggerPrompt(prompt, senderName, replyTo);
 
   // 确保两个虚拟 AI 用户存在（幂等），AI 消息才有真实 userId
   try {
@@ -85,24 +84,19 @@ export async function handleAI(
     console.warn("[chatroom] 虚拟 AI 用户创建失败:", e);
   }
   // 取最近 N 条消息作上下文（单房间全局流）
-  // 群聊：给每条用户消息标注发送者【名字】，让雨宝能区分不同的人
+  // 群聊：给每条消息标注发送者【名字】。关键是「自己」必须只出现为 assistant，
+  // 另一个 AI 要降级成带名字的 user——否则模型会把它的话当成自己说的。
+  // 本次触发消息已经以「有人@了你」的形式单独追加，从历史里排除，避免同一句话出现两次。
   const recent = await prisma.chatMessage.findMany({
     orderBy: { createdAt: "desc" },
     take: config.aiContextMessages,
     include: { user: { select: { name: true } } },
   });
-  const context = recent.reverse().map((m) => {
-    if (m.role === "assistant") {
-      // 用 assistant 消息的 name 字段区分是谁说的（不污染 content，避免回复里带出明文标签）
-      return {
-        role: "assistant" as const,
-        content: m.content,
-        name: m.aiRole === "gentle" ? "温柔宝" : "嘴欠宝",
-      };
-    }
-    const name = m.user?.name ?? "匿名用户";
-    return { role: "user" as const, content: `【${name}】${m.content}` };
-  });
+  const context = buildChatContext(
+    [...recent].reverse(),
+    aiRole,
+    triggerMessageId
+  );
 
   broadcast({ type: "ai:start", requestId, aiRole });
 

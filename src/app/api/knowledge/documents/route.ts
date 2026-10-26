@@ -8,6 +8,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-utils";
 import { processKnowledgeText } from "@/lib/knowledge-upload";
 import { listKnowledgeDocs } from "@/lib/knowledge-docs";
+import {
+  KnowledgeLimitError,
+  PDF_PARSE_TIMEOUT_MS,
+  describeExtractionError,
+  fileSizeError,
+  requestSizeError,
+} from "@/lib/knowledge-upload-guard";
 
 // ---- GET: 列出用户文档 ----
 export async function GET() {
@@ -25,12 +32,33 @@ export async function POST(request: NextRequest) {
 
   const contentType = request.headers.get("content-type") ?? "";
 
+  // 解析 body 之前先按 content-length 拒绝明显超限的请求。
+  // chunked 传输没有 content-length，此时交给后面的 file.size 检查。
+  const declared = request.headers.get("content-length");
+  const requestSizeMessage = requestSizeError(
+    declared === null ? null : Number(declared)
+  );
+  if (requestSizeMessage) {
+    return NextResponse.json(
+      { success: false, error: requestSizeMessage },
+      { status: 413 }
+    );
+  }
+
   // ── 文件上传 ──
   if (contentType.includes("multipart/form-data")) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const sizeMessage = fileSizeError(file.size);
+    if (sizeMessage) {
+      return NextResponse.json(
+        { success: false, error: sizeMessage },
+        { status: 413 }
+      );
     }
 
     const fileName = file.name;
@@ -46,24 +74,30 @@ export async function POST(request: NextRequest) {
       text = await file.text();
       sourceType = "text";
     } else if (ext === "pdf") {
-      // PDF: 尝试用 Python 提取，失败则返回错误
+      // PDF: 尝试用 Python 提取，失败则返回可读原因
       try {
         text = await extractPdfFromFile(file);
         sourceType = "pdf";
       } catch (err) {
         return NextResponse.json(
-          { error: `PDF 文本提取失败: ${err instanceof Error ? err.message : String(err)}` },
+          {
+            success: false,
+            error: err instanceof Error ? err.message : "PDF 文本提取失败",
+          },
           { status: 400 }
         );
       }
     } else if (ext === "docx") {
-      // Word: 尝试用 Python 提取，失败则返回错误
+      // Word: 尝试用 Python 提取，失败则返回可读原因
       try {
         text = await extractDocxFromFile(file);
         sourceType = "docx";
       } catch (err) {
         return NextResponse.json(
-          { error: `Word 文本提取失败: ${err instanceof Error ? err.message : String(err)}` },
+          {
+            success: false,
+            error: err instanceof Error ? err.message : "Word 文本提取失败",
+          },
           { status: 400 }
         );
       }
@@ -81,14 +115,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await processKnowledgeText({
+    return runUpload({
       userId: user.id,
       text,
       sourceName: fileName,
       sourceType,
     });
-
-    return NextResponse.json(result, { status: 201 });
   }
 
   // ── 文本粘贴 ──
@@ -105,21 +137,54 @@ export async function POST(request: NextRequest) {
   }
 
   const sourceName = (body?.name?.trim() || "手动输入") + ".txt";
-  const result = await processKnowledgeText({
+  return runUpload({
     userId: user.id,
     text,
     sourceName,
     sourceType: "text",
   });
+}
 
-  return NextResponse.json(result, { status: 201 });
+// ---- 入库 ----
+// processKnowledgeText 失败时抛错（向量生成失败、事务回滚等），
+// 之前这里没有 catch，Next.js 会返回一个空 body 的 500，
+// 前端只能显示「上传失败，请重试」，用户看不到真正原因。
+async function runUpload(opts: Parameters<typeof processKnowledgeText>[0]) {
+  try {
+    const result = await processKnowledgeText(opts);
+    return NextResponse.json(result, { status: 201 });
+  } catch (err) {
+    // 超限是可预期的输入问题，不是服务故障：返回 400，不打 500 日志
+    if (err instanceof KnowledgeLimitError) {
+      return NextResponse.json(
+        {
+          success: false,
+          chunks: 0,
+          replacedChunks: 0,
+          error: err.message,
+        },
+        { status: err.status }
+      );
+    }
+
+    console.error("[Knowledge] 上传失败:", err);
+    return NextResponse.json(
+      {
+        success: false,
+        chunks: 0,
+        replacedChunks: 0,
+        error: `文档处理失败：${err instanceof Error ? err.message : String(err)}`,
+      },
+      { status: 500 }
+    );
+  }
 }
 
 // ---- PDF / Word 提取（Python 脚本）----
 async function extractViaPython(
   file: File,
   scriptName: string,
-  ext: string
+  ext: "pdf" | "docx"
 ): Promise<string> {
   const { exec } = await import("child_process");
   const { writeFile, unlink, readFile } = await import("fs/promises");
@@ -140,11 +205,30 @@ async function extractViaPython(
     await new Promise<void>((resolve, reject) => {
       exec(
         `python "${scriptPath}" "${inputPath}" "${txtPath}"`,
-        { timeout: 30000 },
+        { timeout: PDF_PARSE_TIMEOUT_MS },
         (error, _stdout, stderr) => {
           if (error) {
+            const execError = error as NodeJS.ErrnoException & {
+              killed?: boolean;
+              signal?: string;
+            };
+            // exec 超时会 SIGTERM 掉子进程；个别平台只设置 killed
+            const timedOut =
+              execError.killed === true || execError.signal === "SIGTERM";
+
+            // 完整 stderr 只写服务端日志，不回给客户端（含服务器路径）
+            console.error(
+              `[Knowledge] ${ext} 解析失败:`,
+              stderr || execError.message
+            );
+
             reject(
-              new Error(stderr || error.message || "text extraction failed")
+              new Error(
+                describeExtractionError(ext, stderr ?? "", {
+                  timedOut,
+                  fallback: execError.message || "text extraction failed",
+                })
+              )
             );
             return;
           }

@@ -190,7 +190,14 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
 
   // @AI 触发（传 userId，聊天室按用户记账 + 每日限额）；一条消息可同时 @温柔宝 + @嘴欠宝，各自流式
   for (const ai of extractAIPrompts(content)) {
-    void handleAI(ai.prompt, conn.userId ?? undefined, ai.aiRole, replyTo, userName);
+    void handleAI(
+      ai.prompt,
+      conn.userId ?? undefined,
+      ai.aiRole,
+      replyTo,
+      userName,
+      saved.id
+    );
   }
 }
 

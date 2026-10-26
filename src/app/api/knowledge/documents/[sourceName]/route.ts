@@ -67,18 +67,19 @@ export async function DELETE(
   const { sourceName } = await params;
   const decoded = decodeURIComponent(sourceName);
 
-  const result = await prisma.documentChunk.deleteMany({
-    where: { userId: user.id, sourceName: decoded },
-  });
+  // 分片与原文同进同退：删除中途失败不能留下「分片没了、原文还在」的半删除状态
+  const [result] = await prisma.$transaction([
+    prisma.documentChunk.deleteMany({
+      where: { userId: user.id, sourceName: decoded },
+    }),
+    prisma.knowledgeDoc.deleteMany({
+      where: { userId: user.id, sourceName: decoded },
+    }),
+  ]);
 
   if (result.count === 0) {
     return NextResponse.json({ error: "文档不存在" }, { status: 404 });
   }
-
-  // 同步删除上传时保存的原文
-  await prisma.knowledgeDoc.deleteMany({
-    where: { userId: user.id, sourceName: decoded },
-  });
 
   console.log(`[Knowledge] 用户 ${user.id} 删除文档 "${decoded}" (${result.count} chunks)`);
   return NextResponse.json({ success: true, deletedChunks: result.count });

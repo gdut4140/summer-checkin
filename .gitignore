@@ -109,3 +109,9 @@ txt文件/
 /tmp/pdfs/
 
 todo.md
+gpt带我背项目
+
+# RAG 评测：题目引用真实文档内容，只在本地保留
+/eval/rag/questions.local.jsonl
+/eval/rag/.cache/
+/eval/rag/results/

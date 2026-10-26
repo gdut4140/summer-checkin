@@ -316,9 +316,8 @@ export async function embeddingWithFallback(
       });
       const sorted = [...res.data].sort((a, b) => a.index - b.index);
 
-      // 维度守卫：维度不符的向量写进 vector(N) 列会整批失败；更隐蔽的是写进
-      // jsonb 时静默失效（余弦因长度不等恒返回 0，永远检索不到）。
-      // 宁可在这里响亮地失败，也不要让一批查不到的向量悄悄入库。
+      // 维度必须与数据库 vector(1024) 契约一致；在写入前显式校验，
+      // 避免模型配置漂移导致整批入库失败或产生不可检索的数据。
       const mismatched = sorted.find(
         (item) => item.embedding.length !== EMBEDDING_DIMENSION
       );

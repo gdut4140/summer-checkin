@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:db": "vitest run --config vitest.integration.config.mts",
     "check": "npm run typecheck && npm run lint && npm run test",
+    "eval:rag": "tsx scripts/eval-rag.ts",
     "ws:dev": "tsx server/index.ts"
   },
   "dependencies": {
