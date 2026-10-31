@@ -20,7 +20,7 @@ import { getAuthUser } from "@/lib/auth-utils";
 import { runLearningAgent, agentRunGoal } from "@/lib/agent";
 import { createWeeklyReportNotification } from "@/lib/agent/weekly";
 import { cleanupOldNotifications } from "@/lib/notification";
-import { cleanupColdMemories } from "@/lib/memory";
+import { runMemoryMaintenance } from "@/lib/memory/lifecycle";
 
 /** 通知保留天数：超过就清掉，已读未读都删 */
 const NOTIFICATION_RETENTION_DAYS = 7;
@@ -122,15 +122,23 @@ export async function POST() {
       console.error("[DailyRun] 分析失败:", error);
     }
 
-    // ---- 清理旧通知（已读未读都删）+ 淘汰冷记忆 ----
+    // ---- 清理旧通知（已读未读都删）+ 记忆维护 ----
     const notificationsCleaned = await cleanupOldNotifications(
       user.id,
       NOTIFICATION_RETENTION_DAYS
     ).catch(() => 0);
 
-    const memoriesCleaned = await cleanupColdMemories(user.id)
-      .then((r) => r.deleted)
-      .catch(() => 0);
+    // 候选重试 / 补向量 / 过期 / 归档 / 清理软删，全部在一个入口里串行执行
+    const memory = await runMemoryMaintenance(user.id).catch((error) => {
+      console.error("[DailyRun] 记忆维护失败:", error);
+      return {
+        candidates: { examined: 0, processed: 0, failed: 0 },
+        reembedded: 0,
+        expired: 0,
+        archived: 0,
+        purged: 0,
+      };
+    });
 
     return NextResponse.json({
       success: true,
@@ -141,7 +149,7 @@ export async function POST() {
         actions,
         reportGenerated,
         notificationsCleaned,
-        memoriesCleaned,
+        memory,
       },
     });
   } catch (error) {

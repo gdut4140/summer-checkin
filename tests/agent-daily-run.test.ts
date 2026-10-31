@@ -20,7 +20,9 @@ vi.mock("@/lib/agent/weekly", () => ({
   createWeeklyReportNotification: vi.fn(),
 }));
 vi.mock("@/lib/notification", () => ({ cleanupOldNotifications: vi.fn() }));
-vi.mock("@/lib/memory", () => ({ cleanupColdMemories: vi.fn() }));
+vi.mock("@/lib/memory/lifecycle", () => ({
+  runMemoryMaintenance: vi.fn(),
+}));
 
 import { POST } from "@/app/api/agent/daily-run/route";
 import { getAuthUser } from "@/lib/auth-utils";
@@ -28,7 +30,7 @@ import { prisma } from "@/lib/prisma";
 import { runLearningAgent } from "@/lib/agent";
 import { createWeeklyReportNotification } from "@/lib/agent/weekly";
 import { cleanupOldNotifications } from "@/lib/notification";
-import { cleanupColdMemories } from "@/lib/memory";
+import { runMemoryMaintenance } from "@/lib/memory/lifecycle";
 
 const mockAuth = vi.mocked(getAuthUser);
 const mockCreate = vi.mocked(prisma.agentRun.create);
@@ -36,7 +38,7 @@ const mockDeleteMany = vi.mocked(prisma.agentRun.deleteMany);
 const mockRun = vi.mocked(runLearningAgent);
 const mockWeekly = vi.mocked(createWeeklyReportNotification);
 const mockCleanupNotifs = vi.mocked(cleanupOldNotifications);
-const mockCleanupMemories = vi.mocked(cleanupColdMemories);
+const mockMemoryMaintenance = vi.mocked(runMemoryMaintenance);
 
 /** Prisma 唯一约束冲突的形状（见 route 里的 isUniqueViolation，按 code 判定） */
 function uniqueViolation() {
@@ -55,10 +57,12 @@ describe("POST /api/agent/daily-run", () => {
       executedActions: [],
     } as never);
     mockCleanupNotifs.mockResolvedValue(0);
-    mockCleanupMemories.mockResolvedValue({
-      deleted: 0,
-      kept: 0,
-      examined: 0,
+    mockMemoryMaintenance.mockResolvedValue({
+      candidates: { examined: 0, processed: 0, failed: 0 },
+      reembedded: 0,
+      expired: 0,
+      archived: 0,
+      purged: 0,
     });
   });
 
@@ -114,7 +118,7 @@ describe("POST /api/agent/daily-run", () => {
     const res = await POST();
     expect(res.status).toBe(200);
     expect(mockCleanupNotifs).toHaveBeenCalledWith("u1", 7);
-    expect(mockCleanupMemories).toHaveBeenCalledWith("u1");
+    expect(mockMemoryMaintenance).toHaveBeenCalledWith("u1");
     expect(mockDeleteMany).not.toHaveBeenCalled();
   });
 

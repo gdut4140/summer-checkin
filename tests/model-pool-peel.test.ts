@@ -271,6 +271,16 @@ describe("isRateLimitError 对 Agnes 429 的识别", () => {
     expect(isRateLimitError(err)).toBe(true);
   });
 
+  it("中文速率限制文案（无 statusCode）也能识别", () => {
+    // 真实故障：Agnes 的 429 文案是「您已达到免费用户的 API 速率限制」，
+    // message 里既没有 429 也没有 rate limit。旧实现会漏判。
+    const err = new Error(
+      "您已达到免费用户的 API 速率限制。升级 Token Plan 即可解锁更高限额"
+    );
+    expect(isQuotaError(err)).toBe(true);
+    expect(isRateLimitError(err)).toBe(true);
+  });
+
   it("403 额度耗尽不算限流（应标记永久耗尽）", () => {
     const err = Object.assign(new Error("Free quota exhausted"), {
       statusCode: 403,

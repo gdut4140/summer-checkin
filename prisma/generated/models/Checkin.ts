@@ -910,12 +910,17 @@ export type $CheckinPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     content: string
     /**
      * *
-     *    * 学习时长。手动签到恒为 0；AI 代报「完成任务」时才会写入真实值。
-     *    * 目前只有打卡页的小岛总时长在读它。
+     *    * ⚠️ 遗留列，**已经没有任何代码写入**。
+     *    *
+     *    * 手动签到恒为 0；AI 标记完成任务那条路也在 2026-10 去掉了——当时 `updateTaskStatus`
+     *    * 带一个 hours 参数，由模型自己填，等于「模型猜 → 入库 → 下一轮被当成事实引用」的
+     *    * 闭环。真实学习时长一律以番茄钟为准（StudyRecord.totalMinutes，那才是计时的）。
+     *    *
+     *    * 现在只有打卡页的小岛在 `_sum` 它，读到的都是历史值（2026-07/08 富签到表单留下的）。
      */
     hours: number
     /**
-     * * 科目，取自 PlanTask.category。同上，只有「完成任务」那类记录才有值。
+     * * 科目，取自 PlanTask.category。只有「完成任务」那类记录才有值。
      */
     subject: string | null
     /**

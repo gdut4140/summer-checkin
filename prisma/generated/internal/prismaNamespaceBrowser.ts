@@ -65,6 +65,9 @@ export const ModelName = {
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
   UserMemory: 'UserMemory',
+  Memory: 'Memory',
+  MemoryEvent: 'MemoryEvent',
+  MemoryCandidate: 'MemoryCandidate',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
   KnowledgeDoc: 'KnowledgeDoc',
@@ -305,6 +308,71 @@ export const UserMemoryScalarFieldEnum = {
 } as const
 
 export type UserMemoryScalarFieldEnum = (typeof UserMemoryScalarFieldEnum)[keyof typeof UserMemoryScalarFieldEnum]
+
+
+export const MemoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  legacyId: 'legacyId',
+  kind: 'kind',
+  content: 'content',
+  normalizedKey: 'normalizedKey',
+  status: 'status',
+  importance: 'importance',
+  confidence: 'confidence',
+  validFrom: 'validFrom',
+  validTo: 'validTo',
+  lastConfirmedAt: 'lastConfirmedAt',
+  lastRetrievedAt: 'lastRetrievedAt',
+  lastInjectedAt: 'lastInjectedAt',
+  injectedCount: 'injectedCount',
+  toolReadCount: 'toolReadCount',
+  supersedesId: 'supersedesId',
+  sourceType: 'sourceType',
+  sourceConversationId: 'sourceConversationId',
+  sourceMessageId: 'sourceMessageId',
+  embeddingModel: 'embeddingModel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type MemoryScalarFieldEnum = (typeof MemoryScalarFieldEnum)[keyof typeof MemoryScalarFieldEnum]
+
+
+export const MemoryEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  memoryId: 'memoryId',
+  action: 'action',
+  actor: 'actor',
+  before: 'before',
+  after: 'after',
+  evidence: 'evidence',
+  sourceConversationId: 'sourceConversationId',
+  sourceMessageId: 'sourceMessageId',
+  createdAt: 'createdAt'
+} as const
+
+export type MemoryEventScalarFieldEnum = (typeof MemoryEventScalarFieldEnum)[keyof typeof MemoryEventScalarFieldEnum]
+
+
+export const MemoryCandidateScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  conversationId: 'conversationId',
+  messageId: 'messageId',
+  status: 'status',
+  attempts: 'attempts',
+  model: 'model',
+  rawOutput: 'rawOutput',
+  operations: 'operations',
+  error: 'error',
+  createdAt: 'createdAt',
+  processedAt: 'processedAt'
+} as const
+
+export type MemoryCandidateScalarFieldEnum = (typeof MemoryCandidateScalarFieldEnum)[keyof typeof MemoryCandidateScalarFieldEnum]
 
 
 export const DocumentScalarFieldEnum = {

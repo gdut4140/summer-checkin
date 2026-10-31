@@ -398,6 +398,9 @@ export const ModelName = {
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
   UserMemory: 'UserMemory',
+  Memory: 'Memory',
+  MemoryEvent: 'MemoryEvent',
+  MemoryCandidate: 'MemoryCandidate',
   Document: 'Document',
   DocumentChunk: 'DocumentChunk',
   KnowledgeDoc: 'KnowledgeDoc',
@@ -422,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "userMemory" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "userMemory" | "memory" | "memoryEvent" | "memoryCandidate" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1462,6 +1465,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Memory: {
+      payload: Prisma.$MemoryPayload<ExtArgs>
+      fields: Prisma.MemoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        findFirst: {
+          args: Prisma.MemoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        findMany: {
+          args: Prisma.MemoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>[]
+        }
+        create: {
+          args: Prisma.MemoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        createMany: {
+          args: Prisma.MemoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>[]
+        }
+        delete: {
+          args: Prisma.MemoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        update: {
+          args: Prisma.MemoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        aggregate: {
+          args: Prisma.MemoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemory>
+        }
+        groupBy: {
+          args: Prisma.MemoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    MemoryEvent: {
+      payload: Prisma.$MemoryEventPayload<ExtArgs>
+      fields: Prisma.MemoryEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemoryEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemoryEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>
+        }
+        findFirst: {
+          args: Prisma.MemoryEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemoryEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>
+        }
+        findMany: {
+          args: Prisma.MemoryEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>[]
+        }
+        create: {
+          args: Prisma.MemoryEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>
+        }
+        createMany: {
+          args: Prisma.MemoryEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemoryEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>[]
+        }
+        delete: {
+          args: Prisma.MemoryEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>
+        }
+        update: {
+          args: Prisma.MemoryEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemoryEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemoryEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemoryEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemoryEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryEventPayload>
+        }
+        aggregate: {
+          args: Prisma.MemoryEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemoryEvent>
+        }
+        groupBy: {
+          args: Prisma.MemoryEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemoryEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    MemoryCandidate: {
+      payload: Prisma.$MemoryCandidatePayload<ExtArgs>
+      fields: Prisma.MemoryCandidateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemoryCandidateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemoryCandidateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>
+        }
+        findFirst: {
+          args: Prisma.MemoryCandidateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemoryCandidateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>
+        }
+        findMany: {
+          args: Prisma.MemoryCandidateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>[]
+        }
+        create: {
+          args: Prisma.MemoryCandidateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>
+        }
+        createMany: {
+          args: Prisma.MemoryCandidateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemoryCandidateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>[]
+        }
+        delete: {
+          args: Prisma.MemoryCandidateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>
+        }
+        update: {
+          args: Prisma.MemoryCandidateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>
+        }
+        deleteMany: {
+          args: Prisma.MemoryCandidateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemoryCandidateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemoryCandidateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>[]
+        }
+        upsert: {
+          args: Prisma.MemoryCandidateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryCandidatePayload>
+        }
+        aggregate: {
+          args: Prisma.MemoryCandidateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemoryCandidate>
+        }
+        groupBy: {
+          args: Prisma.MemoryCandidateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryCandidateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemoryCandidateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryCandidateCountAggregateOutputType> | number
+        }
+      }
+    }
     Document: {
       payload: Prisma.$DocumentPayload<ExtArgs>
       fields: Prisma.DocumentFieldRefs
@@ -2366,6 +2591,71 @@ export const UserMemoryScalarFieldEnum = {
 export type UserMemoryScalarFieldEnum = (typeof UserMemoryScalarFieldEnum)[keyof typeof UserMemoryScalarFieldEnum]
 
 
+export const MemoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  legacyId: 'legacyId',
+  kind: 'kind',
+  content: 'content',
+  normalizedKey: 'normalizedKey',
+  status: 'status',
+  importance: 'importance',
+  confidence: 'confidence',
+  validFrom: 'validFrom',
+  validTo: 'validTo',
+  lastConfirmedAt: 'lastConfirmedAt',
+  lastRetrievedAt: 'lastRetrievedAt',
+  lastInjectedAt: 'lastInjectedAt',
+  injectedCount: 'injectedCount',
+  toolReadCount: 'toolReadCount',
+  supersedesId: 'supersedesId',
+  sourceType: 'sourceType',
+  sourceConversationId: 'sourceConversationId',
+  sourceMessageId: 'sourceMessageId',
+  embeddingModel: 'embeddingModel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type MemoryScalarFieldEnum = (typeof MemoryScalarFieldEnum)[keyof typeof MemoryScalarFieldEnum]
+
+
+export const MemoryEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  memoryId: 'memoryId',
+  action: 'action',
+  actor: 'actor',
+  before: 'before',
+  after: 'after',
+  evidence: 'evidence',
+  sourceConversationId: 'sourceConversationId',
+  sourceMessageId: 'sourceMessageId',
+  createdAt: 'createdAt'
+} as const
+
+export type MemoryEventScalarFieldEnum = (typeof MemoryEventScalarFieldEnum)[keyof typeof MemoryEventScalarFieldEnum]
+
+
+export const MemoryCandidateScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  conversationId: 'conversationId',
+  messageId: 'messageId',
+  status: 'status',
+  attempts: 'attempts',
+  model: 'model',
+  rawOutput: 'rawOutput',
+  operations: 'operations',
+  error: 'error',
+  createdAt: 'createdAt',
+  processedAt: 'processedAt'
+} as const
+
+export type MemoryCandidateScalarFieldEnum = (typeof MemoryCandidateScalarFieldEnum)[keyof typeof MemoryCandidateScalarFieldEnum]
+
+
 export const DocumentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2727,6 +3017,9 @@ export type GlobalOmitConfig = {
   agentRun?: Prisma.AgentRunOmit
   agentStep?: Prisma.AgentStepOmit
   userMemory?: Prisma.UserMemoryOmit
+  memory?: Prisma.MemoryOmit
+  memoryEvent?: Prisma.MemoryEventOmit
+  memoryCandidate?: Prisma.MemoryCandidateOmit
   document?: Prisma.DocumentOmit
   documentChunk?: Prisma.DocumentChunkOmit
   knowledgeDoc?: Prisma.KnowledgeDocOmit

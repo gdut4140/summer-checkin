@@ -217,7 +217,9 @@ export function isRateLimitError(err: unknown): boolean {
   // 进而 markModelExhausted —— 本进程永久跳过 Agnes，而不是冷却 60 秒。
   const matches = (e: unknown) =>
     statusOf(e) === 429 ||
-    /429|rate.?limit|too many requests|\brpm\b|\btpm\b/i.test(hay(e));
+    /429|rate.?limit|too many requests|\brpm\b|\btpm\b|速率限制|频率限制|请求过于频繁|免费用户.*限制/i.test(
+      hay(e)
+    );
 
   if (matches(err)) return true;
 
@@ -239,6 +241,7 @@ export function isQuotaError(err: unknown): boolean {
     /\bquota\b/i.test(msg) ||
     /\bbalance\b/i.test(msg) ||
     /rate.?limit/i.test(msg) ||
+    /速率限制|频率限制|请求过于频繁|免费用户.*限制/i.test(msg) ||
     msg.includes("429");
 
   const msg = err instanceof Error ? err.message : String(err);
@@ -764,6 +767,41 @@ export interface PooledStream {
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
+/**
+ * 记录一次模型失败，并返回是否属于可降级/可冷却的错误。
+ *
+ * 流式链路有两个入口：
+ *   ① 首个 chunk 之前失败 → peelFirstChunk 抛错，catch 里切换模型；
+ *   ② 流已经返回给客户端后，后续 step（特别是工具调用之后的下一次模型调用）
+ *      才 429/断网 → 只能通过 streamText 的 onError 回调观察到。
+ *
+ * ② 无法“重放”整轮对话（工具可能已经产生副作用），但至少要把该模型
+ * 标记为冷却/耗尽，否则下一次请求还会继续撞同一个模型的限流。
+ */
+function noteModelFailure(modelName: string, err: unknown): boolean {
+  if (isQuotaError(err)) {
+    if (isRateLimitError(err)) {
+      markModelRateLimited(modelName);
+      console.warn(`[model-pool] ${modelName} 触发限流，冷却 60s`);
+    } else {
+      markModelExhausted(modelName);
+      console.warn(`[model-pool] ${modelName} 免费额度耗尽，标记跳过`);
+    }
+    return true;
+  }
+  if (isModelUnavailableError(err)) {
+    markModelExhausted(modelName);
+    console.warn(`[model-pool] ${modelName} 不可用（模型不存在/未开通），标记跳过`);
+    return true;
+  }
+  if (isTransientNetworkError(err)) {
+    markModelRateLimited(modelName, 30_000);
+    console.warn(`[model-pool] ${modelName} 网络连接失败，冷却 30s`);
+    return true;
+  }
+  return false;
+}
+
 /** 流式（streamText）：剥取首个 chunk 以在返回给客户端前暴露 403，额度耗尽自动换下一个模型 */
 export async function streamTextWithFallback(
   tier: ModelTier,
@@ -808,33 +846,20 @@ export async function streamTextWithFallback(
           });
         };
       }
+      // 流已经返回客户端之后，后续 step 的失败只能通过 onError 看到。
+      // 这里只做健康标记（冷却/耗尽），不尝试重放整轮——工具可能已执行。
+      const originalOnError = options.onError;
+      options.onError = async (event) => {
+        noteModelFailure(entry.modelName, event.error);
+        await originalOnError?.(event);
+      };
+
       const result = streamText(options);
       const { stream } = await peelFirstChunk(result.stream);
       console.log(`[model-pool] stream 使用 model=${entry.modelName} tier=${tier}`);
       return { stream, model: entry.modelName };
     } catch (err) {
-      if (isQuotaError(err)) {
-        if (isRateLimitError(err)) {
-          markModelRateLimited(entry.modelName);
-          console.warn(`[model-pool] ${entry.modelName} 触发限流，冷却 60s 后重试`);
-        } else {
-          markModelExhausted(entry.modelName);
-          console.warn(`[model-pool] ${entry.modelName} 免费额度耗尽，降级`);
-        }
-        lastErr = err;
-        continue;
-      }
-      if (isModelUnavailableError(err)) {
-        // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
-        markModelExhausted(entry.modelName);
-        console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
-        lastErr = err;
-        continue;
-      }
-      if (isTransientNetworkError(err)) {
-        // 连接超时/重置/DNS 失败：短冷却后换下一个模型（通常也就是换 provider）
-        markModelRateLimited(entry.modelName, 30_000);
-        console.warn(`[model-pool] ${entry.modelName} 网络连接失败，冷却 30s 并降级`);
+      if (noteModelFailure(entry.modelName, err)) {
         lastErr = err;
         continue;
       }

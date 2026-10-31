@@ -28,7 +28,8 @@ import { prisma } from "@/lib/prisma";
 import { checkinDayKeys, computeStreak } from "@/lib/checkin-streak";
 import { completionsWithFallback, isQuotaError } from "@/lib/model-pool";
 import { AGENT_COACH_PROMPT } from "./prompts";
-import { getRelevantMemories, touchMemories } from "@/lib/memory";
+import { retrieveMemories } from "@/lib/memory/retrieval";
+import type { MemoryRecord } from "@/lib/memory/types";
 import { createNotification } from "@/lib/notification";
 import { generateDailyReport, formatReportAsMarkdown } from "./report";
 import { extractJsonText } from "@/lib/llm-json";
@@ -135,7 +136,6 @@ export async function observe(userId: string): Promise<LearningContext> {
     allCheckins,
     activePlans,
     pendingTasks,
-    goalMemories,
     todayFocusRecords,
   ] = await Promise.all([
     // 全部打卡
@@ -158,11 +158,6 @@ export async function observe(userId: string): Promise<LearningContext> {
       include: { plan: { select: { name: true } } },
       orderBy: [{ priority: "desc" }, { dayNumber: "asc" }],
       take: 20,
-    }),
-    // 目标类记忆
-    prisma.userMemory.findMany({
-      where: { userId, type: "goal" },
-      select: { content: true },
     }),
     // 今日专注记录（番茄钟）
     prisma.studyRecord.findMany({
@@ -212,7 +207,8 @@ export async function observe(userId: string): Promise<LearningContext> {
     userId,
     collectedAt: now.toISOString(),
     profile: {
-      goalMemories: goalMemories.map((m) => m.content),
+      // 由 runLearningAgent 用统一检索结果回填；observe 本身不再单独查记忆
+      goalMemories: [],
       activePlanCount: activePlans.length,
       activePlanNames: activePlans.map((p) => p.name),
     },
@@ -252,13 +248,16 @@ export interface AnalyzeResult {
 
 export async function analyze(
   context: LearningContext,
-  memories: { content: string; type: string }[],
+  memories: MemoryRecord[],
   userId: string
 ): Promise<AnalyzeResult> {
-  // 构建分析 prompt
-  const memoryText = memories.length > 0
-    ? memories.map((m) => `- [${m.type}] ${m.content}`).join("\n")
-    : "暂无长期记忆";
+  // 目标类记忆已经通过 profile.goalMemories 注入，这里只放其余类型，
+  // 避免同一条目标在 prompt 里出现两次。
+  const nonGoalMemories = memories.filter((m) => m.kind !== "goal");
+  const memoryText =
+    nonGoalMemories.length > 0
+      ? nonGoalMemories.map((m) => `- [${m.kind}] ${m.content}`).join("\n")
+      : "暂无其他长期记忆";
 
   // 精简输入，输出空间留给分析 JSON
   const planSummary = context.plans.map((p) => ({
@@ -686,11 +685,21 @@ export async function runLearningAgent(
     console.log("[Agent Runtime] Step 1/4: Observe");
     const context = await observe(userId);
 
-    // 获取长期记忆
-    const memories = await getRelevantMemories(userId, 20);
+    // 长期记忆：走与聊天一致的检索管线（稳定画像 + 查询相关 + 类型配额）
+    const memoryResult = await retrieveMemories({
+      userId,
+      surface: "agent",
+      task: "analysis",
+      query: agentRunGoal(mode),
+    });
+    const memories = memoryResult.memories;
 
-    // 标记记忆被检索使用（用于冷淘汰）
-    touchMemories(memories.map((m) => m.id)).catch(() => {});
+    // 目标类记忆只保留前 5 条，避免目标过多时把分析 prompt 撑大；
+    // analyze 里会把 goal 从通用 memories 中排除，保证只出现一次。
+    context.profile.goalMemories = memories
+      .filter((m) => m.kind === "goal")
+      .slice(0, 5)
+      .map((m) => m.content);
 
     // 更新 Step 1
     if (run) {

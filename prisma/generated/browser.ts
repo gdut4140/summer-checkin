@@ -88,6 +88,21 @@ export type AgentStep = Prisma.AgentStepModel
  */
 export type UserMemory = Prisma.UserMemoryModel
 /**
+ * Model Memory
+ * 
+ */
+export type Memory = Prisma.MemoryModel
+/**
+ * Model MemoryEvent
+ * 
+ */
+export type MemoryEvent = Prisma.MemoryEventModel
+/**
+ * Model MemoryCandidate
+ * 
+ */
+export type MemoryCandidate = Prisma.MemoryCandidateModel
+/**
  * Model Document
  * 
  */

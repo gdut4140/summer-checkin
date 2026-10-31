@@ -5,8 +5,8 @@
 // ③ tools             — streamText 的 tools 参数，让 LLM 调用项目功能
 //
 // Day 13 新增：长期记忆
-// ④ 注入记忆          — streamText 前查询 UserMemory 拼入 system prompt
-// ⑤ 提取记忆          — onEnd 中 fire-and-forget 用 AI 提取新记忆
+// ④ 注入记忆          — streamText 前构建 memory_context 拼入 system prompt
+// ⑤ 抽取记忆          — onEnd 中排入候选任务，异步抽取后由 Manager 写库
 //
 // Day 16 新增：RAG 知识库
 // ⑥ RAG 工具          — searchKnowledgeBase 搜索知识库文档
@@ -36,12 +36,9 @@ import { createStudyTools, createRAGTool, createAgentTools, createTodoTools } fr
 import { createStudioTools } from "@/lib/tools/studio-tools";
 import { pickTools, promptGroupsFor, surfaceOf } from "@/lib/tools/router";
 import { messageText, toViewParts, type ChatUIMessage, type ViewPart } from "@/lib/ai/parts";
-import {
-  getRelevantMemories,
-  formatMemoriesForPrompt,
-  extractAndSaveMemories,
-  touchMemories,
-} from "@/lib/memory";
+import { buildMemoryContext } from "@/lib/memory/context-builder";
+import { scheduleExtraction } from "@/lib/memory/extraction";
+import { readableAIError } from "@/lib/ai-error";
 
 /**
  * 传输协议。
@@ -178,13 +175,21 @@ export async function POST(request: NextRequest) {
     });
 
     // ============================================================
-    // Day 13 新增：注入长期记忆到 system prompt
+    // Day 13 / Memory v2：构建长期记忆上下文
+    //
+    // 两路召回：稳定画像（goal/preference）+ 与当前问题相关的记忆。
+    // 短消息/寒暄不会触发 query embedding；注入的 id 由 Context Builder
+    // 记录为 lastInjectedAt（不再用“注入 = 使用”的单一 lastUsed）。
     // ============================================================
-    const memories = await getRelevantMemories(user.id);
-    const memoryPrompt = formatMemoriesForPrompt(memories);
-
-    // 标记记忆被检索使用（用于冷淘汰：不用的记忆会被清理）
-    touchMemories(memories.map((m) => m.id)).catch(() => {});
+    const memoryTask =
+      surface === "plan" ? "planning" : surface === "doc" ? "doc_edit" : "chat";
+    const memoryContext = await buildMemoryContext({
+      userId: user.id,
+      surface,
+      task: memoryTask,
+      query: lastUserText,
+    });
+    const memoryPrompt = memoryContext.prompt;
 
     // 最近对话摘要：createPlan 后台生成计划文档时作为个性化上下文（截断，控制成本）
     const conversationHint = truncatedUiMessages
@@ -411,6 +416,21 @@ export async function POST(request: NextRequest) {
       stream: toUIMessageStream({
         stream,
         originalMessages: uiMessages,
+        // 不传 onError 时 AI SDK 会统一返回 "An error occurred."，真实原因
+        // （限流 / 模型调了不存在的工具 / 网络）全被吞掉。这里至少把它
+        // 变成一句能看懂的提示，并把原始错误留在服务端日志。
+        onError: (error) => {
+          console.error("[AI] stream error:", error);
+          const raw = error instanceof Error ? error.message : String(error);
+
+          if (isQuotaError(error)) {
+            return "模型暂时限流了，请稍后重试。";
+          }
+          if (/unavailable tool|NoSuchTool|tool.*not found/i.test(raw)) {
+            return "当前没有可用的记忆修改工具。请直接把要记住或修改的内容告诉我，系统会在回复后自动处理。";
+          }
+          return readableAIError(error, "AI 回复失败");
+        },
         onEnd: async ({ responseMessage, isAborted }) => {
           if (isAborted) {
             console.warn(
@@ -482,7 +502,7 @@ async function saveAssistantMessage({
   );
 
   try {
-    await prisma.conversationMessage.create({
+    const saved = await prisma.conversationMessage.create({
       data: {
         conversationId,
         role: "assistant",
@@ -490,6 +510,7 @@ async function saveAssistantMessage({
         // undefined = 不写这一列（保持 NULL），而不是写 JSON null
         parts: parts ?? undefined,
       },
+      select: { id: true },
     });
 
     await prisma.conversation.update({
@@ -500,11 +521,17 @@ async function saveAssistantMessage({
     console.log("[AI] onEnd: 保存成功 ✅");
 
     // ============================================================
-    // Day 13: fire-and-forget 提取长期记忆
+    // Memory v2：把抽取排成候选任务（messageId 唯一，天然幂等）
+    //
+    // 门控 + 入队是轻量的；真正的 LLM 抽取在 scheduleExtraction 内部
+    // fire-and-forget，失败/重启由每日任务继续处理。
     // ============================================================
-    extractAndSaveMemories(userId, userText, content).catch((err) =>
-      console.error("[Memory] 后台提取失败:", err)
-    );
+    void scheduleExtraction({
+      userId,
+      conversationId,
+      messageId: saved.id,
+      userMessage: userText,
+    }).catch((err) => console.error("[Memory] 排入抽取失败:", err));
   } catch (err) {
     console.error("[AI] onEnd: 数据库写入失败", err);
   }

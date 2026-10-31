@@ -33,11 +33,18 @@ vi.mock("@/lib/deepseek", () => ({
   buildSystemPrompt: () => "系统提示词",
   getDeepThinkOptions: () => undefined,
 }));
-vi.mock("@/lib/memory", () => ({
-  getRelevantMemories: vi.fn(async () => []),
-  formatMemoriesForPrompt: vi.fn(() => ""),
-  extractAndSaveMemories: vi.fn(async () => {}),
-  touchMemories: vi.fn(async () => {}),
+vi.mock("@/lib/memory/context-builder", () => ({
+  buildMemoryContext: vi.fn(async () => ({
+    prompt: "",
+    injectedIds: [],
+    stats: { candidates: 0, selected: 0, tokens: 0, droppedByBudget: 0 },
+  })),
+}));
+vi.mock("@/lib/memory/extraction", () => ({
+  scheduleExtraction: vi.fn(async () => ({
+    shouldExtract: false,
+    reason: "not_eligible",
+  })),
 }));
 
 import { POST } from "@/app/api/ai/route";

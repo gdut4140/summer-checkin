@@ -13,6 +13,10 @@
     "test:db": "vitest run --config vitest.integration.config.mts",
     "check": "npm run typecheck && npm run lint && npm run test",
     "eval:rag": "tsx scripts/eval-rag.ts",
+    "eval:memory": "tsx scripts/eval-memory.ts",
+    "verify:memory": "tsx scripts/verify-memory.ts",
+    "verify:memory:e2e": "tsx scripts/verify-memory-e2e.ts",
+    "memory:reprocess": "tsx scripts/reprocess-memory.ts",
     "ws:dev": "tsx server/index.ts"
   },
   "dependencies": {

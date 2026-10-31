@@ -36,6 +36,9 @@ model User {
   checkins      Checkin[]
   studyRecords  StudyRecord[]
   memories      UserMemory[]
+  memoryItems   Memory[]
+  memoryEvents  MemoryEvent[]
+  memoryCandidates MemoryCandidate[]
   conversations Conversation[]
   planTasks     PlanTask[]
   agentRuns     AgentRun[]
@@ -348,6 +351,118 @@ model UserMemory {
   @@index([userId, importance])
   @@index([userId, lastUsed])
   @@map("usermemory")
+}
+
+// ============================================================
+// Memory v2：长期记忆实体 + 不可变事件日志 + 候选/任务队列
+//
+// 与 UserMemory 的关系：
+//   · usermemory 是 v1 表，迁移完成后保留为只读回滚点，不再由应用写入；
+//   · memory 是 v2 的唯一 active 实体表，embedding 仍是 vector(1024)；
+//   · 额外的“同用户同 normalizedKey 只能有一条 active”部分唯一索引、
+//     以及 HNSW 向量索引，Prisma 表达不了，见 prisma/add-memory-v2.sql。
+//
+// 生命周期：active / superseded / expired / archived / deleted。
+// 任何变更都必须同时写一条 MemoryEvent，不允许无痕修改。
+// ============================================================
+
+model Memory {
+  id            String   @id @default(cuid())
+  userId        String
+  /// 迁移幂等键：v1 UserMemory.id；v2 新数据为 null
+  legacyId      String?  @unique
+
+  /// goal | skill | weakness | preference | habit | fact
+  kind          String
+  /// 单条记忆正文；服务端对 v2 新写入强制 <= 200 字符（存量数据保持原样）
+  content       String
+  /// 冲突/去重键，如 skill:react；可选
+  normalizedKey String?
+
+  /// active | superseded | expired | archived | deleted
+  status        String   @default("active")
+
+  importance    Float    @default(0.5)
+  confidence    Float    @default(0.5)
+
+  validFrom     DateTime?
+  validTo       DateTime?
+  lastConfirmedAt DateTime @default(now())
+
+  /// 三种“使用”信号刻意分开：进入候选池 / 真正注入上下文 / 工具主动读取
+  lastRetrievedAt DateTime?
+  lastInjectedAt  DateTime?
+  injectedCount   Int      @default(0)
+  toolReadCount   Int      @default(0)
+
+  /// 被哪条新记忆覆盖（指向 memory.id）
+  supersedesId  String?
+
+  /// user_statement | user_correction | consolidation | legacy | user_edit
+  sourceType    String
+  sourceConversationId String?
+  sourceMessageId      String?
+
+  embedding     Unsupported("vector(1024)")?
+  embeddingModel String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, kind])
+  @@index([userId, status, importance])
+  @@index([userId, status, updatedAt])
+  @@index([userId, normalizedKey])
+  @@map("memory")
+}
+
+model MemoryEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  memoryId  String?
+  /// add | update | supersede | merge | expire | archive | restore | delete | import | noop
+  action    String
+  /// extractor | user | system | consolidation | migration
+  actor     String
+  before    Json?
+  after     Json?
+  /// 用户原话摘录；正常抽取写入时强制存在
+  evidence  String?
+  sourceConversationId String?
+  sourceMessageId      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([memoryId, createdAt])
+  @@map("memoryevent")
+}
+
+model MemoryCandidate {
+  id             String   @id @default(cuid())
+  userId         String
+  conversationId String?
+  /// 本轮助手消息 id；唯一，保证同一条消息只抽取一次
+  messageId      String   @unique
+  /// pending | running | ready | done | noop | failed | skipped
+  status         String   @default("pending")
+  attempts       Int      @default(0)
+  model          String?
+  rawOutput      Json?
+  /// 经过服务端校验后的操作列表
+  operations     Json?
+  error          String?
+  createdAt      DateTime @default(now())
+  processedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@map("memorycandidate")
 }
 
 model Document {

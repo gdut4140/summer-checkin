@@ -187,29 +187,6 @@ export interface TodosListData {
   message?: string;
 }
 
-// ============================================================
-// Memory 类型
-// ============================================================
-
-/** 记忆类型 */
-export type MemoryType =
-  | "goal"
-  | "habit"
-  | "preference"
-  | "skill"
-  | "weakness"
-  | "fact";
-
-export interface MemoryInfo {
-  id: string;
-  content: string;
-  type: MemoryType;
-  importance: number;
-  confidence: number;
-  lastUsed: string | null;
-  createdAt: string;
-}
-
 /** Agent 决策类型 */
 export type DecisionType = "PLAN_ADJUST" | "REMINDER" | "ANALYSIS";
 export type DecisionStatus = "executed" | "pending" | "rejected" | "failed";

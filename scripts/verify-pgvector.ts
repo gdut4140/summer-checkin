@@ -7,7 +7,7 @@
  *   ① 写入路径   —— 插入一条 vector(1024) chunk，确认 ::vector 参数可用
  *   ② 检索路径   —— searchKnowledge 返回结果、按相似度降序
  *   ③ 数据隔离   —— 跨 userId 查不到别人的 chunk
- *   ④ 记忆检索   —— getRelevantMemories 的 pgvector 路径
+ *   ④ 记忆检索   —— retrieveMemories 的 pgvector 路径
  *   ⑤ 无截断     —— 检索不再受旧的 ORDER BY createdAt DESC LIMIT 1000 限制
  * ============================================================ */
 import { config as loadEnv } from "dotenv";
@@ -35,7 +35,7 @@ async function main() {
   // 动态 import：见 normalize-embeddings.ts 的说明（ESM import 提升会
   // 让 model-pool 在 loadEnv 之前初始化，拿到空 API key）
   const { searchKnowledge } = await import("../src/lib/rag");
-  const { getRelevantMemories } = await import("../src/lib/memory");
+  const { retrieveMemories } = await import("../src/lib/memory/retrieval");
   const { embedText } = await import("../src/lib/rag/client");
   const { toPgVector } = await import("../src/lib/rag/retriever");
 
@@ -107,15 +107,20 @@ async function main() {
     `B 返回 ${other.results.length} 条，均属 B`);
 
   // ============================================================
-  console.log("\n④ 长期记忆检索（getRelevantMemories）");
+  console.log("\n④ 长期记忆检索（retrieveMemories）");
   // ============================================================
   const memOwner = await prisma.$queryRawUnsafe<Array<{ userId: string; n: number }>>(
-    `SELECT "userId", COUNT(*)::int AS n FROM usermemory WHERE embedding IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 1`
+    `SELECT "userId", COUNT(*)::int AS n FROM memory WHERE status = 'active' AND embedding IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 1`
   );
   if (memOwner.length > 0) {
-    const mems = await getRelevantMemories(memOwner[0].userId, 5, "学习 React 前端");
-    check("向量路径返回了记忆", mems.length > 0, `${mems.length} 条`);
-    check("返回条数不超过 limit", mems.length <= 5);
+    const result = await retrieveMemories({
+      userId: memOwner[0].userId,
+      surface: "agent",
+      task: "chat",
+      query: "学习 React 前端",
+    });
+    check("向量路径返回了记忆", result.memories.length > 0, `${result.memories.length} 条`);
+    check("返回条数不超过 limit", result.memories.length <= 10);
   } else {
     console.log("  ⏭  本地库无带向量的记忆，跳过");
   }

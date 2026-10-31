@@ -17,10 +17,6 @@ vi.mock("@/lib/model-pool", () => ({
     /quota|balance|429/i.test(err instanceof Error ? err.message : String(err))
   ),
 }));
-vi.mock("@/lib/memory", () => ({
-  getRelevantMemories: vi.fn(),
-  touchMemories: vi.fn(),
-}));
 
 import {
   analyze,

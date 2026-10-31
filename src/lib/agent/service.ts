@@ -92,7 +92,7 @@ async function collectContext(userId: string): Promise<AgentContextSnapshot> {
       orderBy: { updatedAt: "desc" },
       take: 5,
     }),
-    prisma.userMemory.count({ where: { userId } }),
+    prisma.memory.count({ where: { userId, status: "active" } }),
   ]);
 
   return {
