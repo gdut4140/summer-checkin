@@ -308,6 +308,36 @@ export function isModelUnavailableError(err: unknown): boolean {
   return false;
 }
 
+/**
+ * 是否网络层暂时性错误：连接超时、连接重置、DNS 失败等。
+ *
+ * 这类错误没有 statusCode/responseBody，也不是额度问题；但换一个
+ * provider/模型完全可能成功。旧逻辑直接 throw，Agnes 一次连接超时
+ * 就会把整个 `/api/ai` 变成 500。
+ */
+export function isTransientNetworkError(err: unknown): boolean {
+  const hay = (e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    const name = e instanceof Error ? e.name : "";
+    const code = (e as { code?: unknown } | null | undefined)?.code;
+    return `${name} ${msg} ${typeof code === "string" ? code : ""}`;
+  };
+  const matches = (e: unknown) =>
+    /APIConnectionTimeoutError|APIConnectionError|UND_ERR_CONNECT_TIMEOUT|UND_ERR_SOCKET|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|socket hang up|Cannot connect to API|fetch failed|request timed out|timed out/i.test(
+      hay(e)
+    );
+
+  if (matches(err)) return true;
+
+  const wrapped = err as { cause?: unknown; lastError?: unknown; errors?: unknown[] };
+  if (wrapped.cause !== undefined && matches(wrapped.cause)) return true;
+  if (wrapped.lastError !== undefined && matches(wrapped.lastError)) return true;
+  if (Array.isArray(wrapped.errors) && wrapped.errors.some((sub) => matches(sub))) {
+    return true;
+  }
+  return false;
+}
+
 /** 取某档可用候选链（过滤已耗尽 / 未配置 key 的 provider） */
 export function getChain(tier: ModelTier): ModelEntry[] {
   const chain = tier === "high" ? HIGH_CHAIN : LOW_CHAIN;
@@ -423,6 +453,13 @@ export async function embeddingWithFallback(
         // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
         markModelExhausted(entry.modelName);
         console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
+        lastErr = err;
+        continue;
+      }
+      if (isTransientNetworkError(err)) {
+        // 连接超时/重置/DNS 失败：短冷却后换下一个模型（通常也就是换 provider）
+        markModelRateLimited(entry.modelName, 30_000);
+        console.warn(`[model-pool] ${entry.modelName} 网络连接失败，冷却 30s 并降级`);
         lastErr = err;
         continue;
       }
@@ -629,6 +666,13 @@ export async function rerankWithFallback(
         lastErr = err;
         continue;
       }
+      if (isTransientNetworkError(err)) {
+        // 连接超时/重置/DNS 失败：短冷却后换下一个模型（通常也就是换 provider）
+        markModelRateLimited(entry.modelName, 30_000);
+        console.warn(`[model-pool] ${entry.modelName} 网络连接失败，冷却 30s 并降级`);
+        lastErr = err;
+        continue;
+      }
       throw err;
     }
   }
@@ -688,6 +732,13 @@ export async function completionsWithFallback<T>(
         // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
         markModelExhausted(entry.modelName);
         console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
+        lastErr = err;
+        continue;
+      }
+      if (isTransientNetworkError(err)) {
+        // 连接超时/重置/DNS 失败：短冷却后换下一个模型（通常也就是换 provider）
+        markModelRateLimited(entry.modelName, 30_000);
+        console.warn(`[model-pool] ${entry.modelName} 网络连接失败，冷却 30s 并降级`);
         lastErr = err;
         continue;
       }
@@ -777,6 +828,13 @@ export async function streamTextWithFallback(
         // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
         markModelExhausted(entry.modelName);
         console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
+        lastErr = err;
+        continue;
+      }
+      if (isTransientNetworkError(err)) {
+        // 连接超时/重置/DNS 失败：短冷却后换下一个模型（通常也就是换 provider）
+        markModelRateLimited(entry.modelName, 30_000);
+        console.warn(`[model-pool] ${entry.modelName} 网络连接失败，冷却 30s 并降级`);
         lastErr = err;
         continue;
       }

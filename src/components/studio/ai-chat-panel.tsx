@@ -7,6 +7,7 @@ import { MessageBubble } from "@/components/ai/message-bubble";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { readableAIError } from "@/lib/ai-error";
 import type { ChatMessage } from "@/types";
 
 // ============================================================
@@ -264,7 +265,7 @@ export function AiChatPanel({
     } catch (error) {
       setMessages((current) => current.filter((m) => m.id !== assistantId));
       if ((error as Error).name !== "AbortError") {
-        toast.error(error instanceof Error ? error.message : "AI 回复失败");
+        toast.error(readableAIError(error));
       }
     } finally {
       abortRef.current = null;

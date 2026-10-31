@@ -30,7 +30,7 @@ import {
   toTextStream,
   toUIMessageStream,
 } from "ai";
-import { streamTextWithFallback, isQuotaError } from "@/lib/model-pool";
+import { streamTextWithFallback, isQuotaError, isTransientNetworkError } from "@/lib/model-pool";
 import { assertInteractiveUsageAllowed, UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { createStudyTools, createRAGTool, createAgentTools, createTodoTools } from "@/lib/tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
@@ -435,6 +435,13 @@ export async function POST(request: NextRequest) {
     // 用户会看到通用报错而不是这条文案。
     if (error instanceof UsageLimitError || isQuotaError(error)) {
       return limitStreamResponse(ENERGY_DOWN_MESSAGE, protocol);
+    }
+    // 所有模型都连不上时不要伪装成「没精力了」，也不要给空 body 的 500
+    if (isTransientNetworkError(error)) {
+      return NextResponse.json(
+        { error: "AI 服务暂时不可用，请稍后重试" },
+        { status: 503 }
+      );
     }
     console.error("AI API error:", error);
     return NextResponse.json(

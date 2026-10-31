@@ -21,6 +21,7 @@ import { MessageBubble } from "@/components/ai/message-bubble";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { readableAIError } from "@/lib/ai-error";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { KnowledgeBase } from "./knowledge-base";
 import { isViewParts, partsText, toViewParts, type ChatUIMessage } from "@/lib/ai/parts";
@@ -181,8 +182,9 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
   } = useChat<ChatUIMessage>({
     transport,
     onError: (error) => {
-      // 每日精力用完不是错误（服务端会正常流回一段文案）；能走到这里的都是真故障
-      toast.error(error.message || "AI 回复失败");
+      // 每日精力用完不是错误（服务端会正常流回一段文案）；能走到这里的都是真故障。
+      // 非 2xx 时 AI SDK 会把整个 JSON body 放进 error.message，这里取出可读字段。
+      toast.error(readableAIError(error));
     },
   });
 

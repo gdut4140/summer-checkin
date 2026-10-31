@@ -26,6 +26,7 @@ import {
   isQuotaError,
   isModelUnavailableError,
   isRateLimitError,
+  isTransientNetworkError,
 } from "@/lib/model-pool";
 
 type Part = { type: string; error?: unknown };
@@ -275,5 +276,40 @@ describe("isRateLimitError 对 Agnes 429 的识别", () => {
       statusCode: 403,
     });
     expect(isRateLimitError(err)).toBe(false);
+  });
+});
+
+describe("isTransientNetworkError", () => {
+  it("连接超时（含 cause.code）→ 应该换下一个模型", () => {
+    const cause = Object.assign(
+      new Error("Connect Timeout Error (attempted address: api.agnes-ai.cn:443)"),
+      { code: "UND_ERR_CONNECT_TIMEOUT" }
+    );
+    const err = Object.assign(new Error("Cannot connect to API: Connect Timeout Error"), {
+      cause,
+    });
+    expect(isTransientNetworkError(err)).toBe(true);
+  });
+
+  it("OpenAI SDK 的 APIConnectionTimeoutError 也能识别", () => {
+    // completionsWithFallback 走 OpenAI SDK 时，连接超时会被包装成这个形态：
+    // 没有 statusCode，也没有 UND_ERR_* code，名字才是唯一线索。
+    const err = Object.assign(new Error("Request timed out."), {
+      name: "APIConnectionTimeoutError",
+    });
+    expect(isTransientNetworkError(err)).toBe(true);
+  });
+
+  it("Model not exist / 403 额度耗尽不误判为网络错误", () => {
+    expect(
+      isTransientNetworkError(
+        Object.assign(new Error("Model not exist."), { statusCode: 400 })
+      )
+    ).toBe(false);
+    expect(
+      isTransientNetworkError(
+        Object.assign(new Error("Free quota exhausted"), { statusCode: 403 })
+      )
+    ).toBe(false);
   });
 });
