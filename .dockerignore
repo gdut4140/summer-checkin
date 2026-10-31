@@ -42,7 +42,23 @@ README.md
 
 # 个人简历（含联系方式，绝不上服务器 / 不进构建上下文）
 简历.html
+简历*.html
 简历-asu/
+
+# 本地私有笔记 / 评测数据 / 临时目录（绝不进构建上下文）
+gpt带我背项目/
+interview-prep/
+.claude/
+.trae/
+tmp/
+eval/
+阿里云*.txt
+
+# 本地构建产物与日志
+.next-codex*/
+.next-codex-qa*/
+*.log
+summer-checkin-app-*.tar
 
 # REST client test files
 *.http

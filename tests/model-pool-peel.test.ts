@@ -21,7 +21,12 @@ import { MockLanguageModelV3 } from "ai/test";
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
 
-import { peelFirstChunk } from "@/lib/model-pool";
+import {
+  peelFirstChunk,
+  isQuotaError,
+  isModelUnavailableError,
+  isRateLimitError,
+} from "@/lib/model-pool";
 
 type Part = { type: string; error?: unknown };
 
@@ -189,5 +194,86 @@ describe("peelFirstChunk × 真实 streamText（实证 SDK 行为）", () => {
     expect(types).toContain("finish");
     // start 与 start-step 都被剥过又重放，一个不少
     expect(types.slice(0, 2)).toEqual(["start", "start-step"]);
+  });
+});
+
+describe("isQuotaError 对 AI SDK APICallError 的识别", () => {
+  it("statusCode=429 即使 message 不含 429/quota 也算额度错误", () => {
+    // 真实故障：Agnes 返回「请登录platform进行实名认证以获取更高rpm」，
+    // 状态码是 429，但 message 里没有 quota/rate limit/429 字样。
+    const err = Object.assign(
+      new Error("请登录platform进行实名认证以获取更高rpm"),
+      { statusCode: 429 }
+    );
+    expect(isQuotaError(err)).toBe(true);
+  });
+
+  it("responseBody 命中额度关键字也算", () => {
+    const err = Object.assign(new Error("request failed"), {
+      statusCode: 400,
+      responseBody: '{"error":{"message":"InsufficientBalance"}}',
+    });
+    expect(isQuotaError(err)).toBe(true);
+  });
+
+  it("普通 400 / Model not exist 不算额度错误", () => {
+    const err = Object.assign(new Error("Model not exist."), {
+      statusCode: 400,
+    });
+    expect(isQuotaError(err)).toBe(false);
+  });
+});
+
+describe("isModelUnavailableError", () => {
+  it("Model not exist.（HTTP 400）→ 应该换下一个模型", () => {
+    // 真实故障：qwen3.6-max-preview 返回 Model not exist.，
+    // 旧逻辑直接 throw，整条降级链停在这个无效模型上。
+    const err = Object.assign(new Error("Model not exist."), {
+      statusCode: 400,
+    });
+    expect(isModelUnavailableError(err)).toBe(true);
+  });
+
+  it("404 / 未开通 / 嵌套 lastError 都能识别", () => {
+    expect(
+      isModelUnavailableError(
+        Object.assign(new Error("not found"), { statusCode: 404 })
+      )
+    ).toBe(true);
+    expect(isModelUnavailableError(new Error("模型未开通"))).toBe(true);
+    expect(
+      isModelUnavailableError({
+        lastError: Object.assign(new Error("Model not exist."), {
+          statusCode: 400,
+        }),
+      })
+    ).toBe(true);
+  });
+
+  it("普通 400 参数错误不误判", () => {
+    const err = Object.assign(new Error("invalid temperature"), {
+      statusCode: 400,
+    });
+    expect(isModelUnavailableError(err)).toBe(false);
+  });
+});
+
+describe("isRateLimitError 对 Agnes 429 的识别", () => {
+  it("statusCode=429 但 message 只写实名认证/rpm，也算限流", () => {
+    // 真实故障：message 里没有 "429"/"rate limit"，旧实现判成永久额度耗尽，
+    // 于是 Agnes 被 markModelExhausted 永久跳过，后续请求根本到不了它。
+    const err = Object.assign(
+      new Error("请登录platform进行实名认证以获取更高rpm"),
+      { statusCode: 429 }
+    );
+    expect(isQuotaError(err)).toBe(true);
+    expect(isRateLimitError(err)).toBe(true);
+  });
+
+  it("403 额度耗尽不算限流（应标记永久耗尽）", () => {
+    const err = Object.assign(new Error("Free quota exhausted"), {
+      statusCode: 403,
+    });
+    expect(isRateLimitError(err)).toBe(false);
   });
 });

@@ -106,6 +106,11 @@ const HIGH_CHAIN: ModelEntry[] = [
   { modelName: "qwen3.6-plus", displayName: "通义千问 3.6 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3.5-plus-2026-02-15", displayName: "通义千问 3.5 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
 
+  // 最后兜底：high 档 max/plus 全部额度耗尽时，用 low 档仍有额度的 flash 接住。
+  // 质量低于 max 系列，但比直接报「没精力了」或退化成规则兜底好。
+  // 2026-10-30 实测该模型 200；同名模型在 LOW_CHAIN 也在用，冷却/耗尽状态按模型名共享。
+  { modelName: "qwen-flash-2025-07-28", displayName: "通义千问 Flash（high 兜底）", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
+
   // 已用完（免费额度耗尽，403 后不再恢复；保留记录便于查账，exhausted=true 直接跳过）
   { modelName: "qwen3.7-max-2026-06-08", displayName: "通义千问 3.7 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
   { modelName: "deepseek-v4-pro-0813", displayName: "DeepSeek V4 Pro", provider: "aliyun", modelType: "general", thinking: true, tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
@@ -197,9 +202,31 @@ function isModelAvailable(name: string): boolean {
 }
 
 /** 是否临时限流错误（429 / rate limit）—— 冷却后恢复，不永久禁用 */
-function isRateLimitError(err: unknown): boolean {
-  const msg = err instanceof Error ? err.message : String(err);
-  return msg.includes("429") || /rate.?limit/i.test(msg);
+export function isRateLimitError(err: unknown): boolean {
+  const statusOf = (e: unknown) =>
+    (e as { statusCode?: unknown } | null | undefined)?.statusCode;
+  const bodyOf = (e: unknown) =>
+    (e as { responseBody?: unknown } | null | undefined)?.responseBody;
+  const hay = (e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    const body = bodyOf(e);
+    return `${msg} ${typeof body === "string" ? body : ""}`;
+  };
+  // 必须读 statusCode：Agnes 的 429 文案是「请登录platform进行实名认证以获取更高rpm」，
+  // message 里既没有 429 也没有 rate limit。只看 message 会把它判成「额度耗尽」，
+  // 进而 markModelExhausted —— 本进程永久跳过 Agnes，而不是冷却 60 秒。
+  const matches = (e: unknown) =>
+    statusOf(e) === 429 ||
+    /429|rate.?limit|too many requests|\brpm\b|\btpm\b/i.test(hay(e));
+
+  if (matches(err)) return true;
+
+  const wrapped = err as { lastError?: unknown; errors?: unknown[] };
+  if (wrapped.lastError !== undefined && matches(wrapped.lastError)) return true;
+  if (Array.isArray(wrapped.errors) && wrapped.errors.some((sub) => matches(sub))) {
+    return true;
+  }
+  return false;
 }
 
 /** 是否余额/免费额度不足类错误（阿里百炼 AllocationQuota.FreeTierOnly、各家的 quota/balance/rate limit/429） */
@@ -217,10 +244,24 @@ export function isQuotaError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);
   if (match(msg)) return true;
 
+  // AI SDK 的 APICallError 把状态码和响应体放在字段上，message 里不一定有 "429"。
+  // 例：Agnes 返回 "请登录platform进行实名认证以获取更高rpm"，statusCode 却是 429。
+  // 不看字段就会把它当成普通 500：既不切换下一个模型，聊天室 sidecar 还会
+  // 因未捕获异常直接退出。
+  const statusOf = (e: unknown) =>
+    (e as { statusCode?: unknown } | null | undefined)?.statusCode;
+  const bodyOf = (e: unknown) =>
+    (e as { responseBody?: unknown } | null | undefined)?.responseBody;
+
+  if (statusOf(err) === 429) return true;
+  const body = bodyOf(err);
+  if (typeof body === "string" && match(body)) return true;
+
   // AI SDK 会把原始错误包成 AI_RetryError（内部重试 N 次后才抛）：
   // 顶层 message 可能不含关键字，需深入 lastError / errors 检查
   const wrapped = err as { lastError?: unknown; errors?: unknown[] };
   if (wrapped.lastError !== undefined) {
+    if (statusOf(wrapped.lastError) === 429) return true;
     const nested = wrapped.lastError instanceof Error ? wrapped.lastError.message : String(wrapped.lastError);
     if (match(nested)) return true;
   }
@@ -229,6 +270,40 @@ export function isQuotaError(err: unknown): boolean {
       const nested = sub instanceof Error ? sub.message : String(sub);
       if (match(nested)) return true;
     }
+  }
+  return false;
+}
+
+/**
+ * 是否「模型不存在 / 未开通」类错误。
+ *
+ * 这类错误不是额度问题，但也不该按普通 500 直接抛出：
+ * 链上换一个模型完全可能成功。实测 qwen3.6-max-preview 返回
+ * `Model not exist.`（HTTP 400），旧逻辑直接 throw，导致整条降级链
+ * 停在这个无效模型上，/api/ai 返回 500。
+ */
+export function isModelUnavailableError(err: unknown): boolean {
+  const statusOf = (e: unknown) =>
+    (e as { statusCode?: unknown } | null | undefined)?.statusCode;
+  const bodyOf = (e: unknown) =>
+    (e as { responseBody?: unknown } | null | undefined)?.responseBody;
+  const hay = (e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    const body = bodyOf(e);
+    return `${msg} ${typeof body === "string" ? body : ""}`;
+  };
+  const matches = (e: unknown) =>
+    statusOf(e) === 404 ||
+    /model not exist|model_not_found|invalid model|does not exist|模型不存在|模型未开通/i.test(
+      hay(e)
+    );
+
+  if (matches(err)) return true;
+
+  const wrapped = err as { lastError?: unknown; errors?: unknown[] };
+  if (wrapped.lastError !== undefined && matches(wrapped.lastError)) return true;
+  if (Array.isArray(wrapped.errors) && wrapped.errors.some((sub) => matches(sub))) {
+    return true;
   }
   return false;
 }
@@ -341,6 +416,13 @@ export async function embeddingWithFallback(
           markModelExhausted(entry.modelName);
           console.warn(`[model-pool] ${entry.modelName} 免费额度耗尽，降级`);
         }
+        lastErr = err;
+        continue;
+      }
+      if (isModelUnavailableError(err)) {
+        // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
+        markModelExhausted(entry.modelName);
+        console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
         lastErr = err;
         continue;
       }
@@ -540,6 +622,13 @@ export async function rerankWithFallback(
         lastErr = err;
         continue;
       }
+      if (isModelUnavailableError(err)) {
+        // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
+        markModelExhausted(entry.modelName);
+        console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
+        lastErr = err;
+        continue;
+      }
       throw err;
     }
   }
@@ -592,6 +681,13 @@ export async function completionsWithFallback<T>(
           markModelExhausted(entry.modelName);
           console.warn(`[model-pool] ${entry.modelName} 免费额度耗尽，降级`);
         }
+        lastErr = err;
+        continue;
+      }
+      if (isModelUnavailableError(err)) {
+        // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
+        markModelExhausted(entry.modelName);
+        console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
         lastErr = err;
         continue;
       }
@@ -674,6 +770,13 @@ export async function streamTextWithFallback(
           markModelExhausted(entry.modelName);
           console.warn(`[model-pool] ${entry.modelName} 免费额度耗尽，降级`);
         }
+        lastErr = err;
+        continue;
+      }
+      if (isModelUnavailableError(err)) {
+        // 模型名不存在/未开通：换下一个模型，不把整条链卡死在这里
+        markModelExhausted(entry.modelName);
+        console.warn(`[model-pool] ${entry.modelName} 不可用（模型不存在/未开通），跳过`);
         lastErr = err;
         continue;
       }

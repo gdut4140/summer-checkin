@@ -49,7 +49,7 @@ function measure(render: () => ReactElement): Metric {
     const t0 = performance.now();
     const html = renderToStaticMarkup(render());
     const ms = performance.now() - t0;
-    if (!best || ms < best.ms) {
+    if (!best || ms < best.ms) {//取最小的ms
       best = { ms, htmlBytes: Buffer.byteLength(html, "utf8"), domNodes: countDomNodes(html) };
     }
   }

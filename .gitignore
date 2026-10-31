@@ -108,6 +108,10 @@ txt文件/
 /output/pdf/
 /tmp/pdfs/
 
+# Local build/verification artifacts
+/summer-checkin-app-*.tar.gz
+/tmp/
+
 todo.md
 gpt带我背项目
 

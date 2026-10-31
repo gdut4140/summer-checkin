@@ -197,7 +197,11 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
       replyTo,
       userName,
       saved.id
-    );
+    ).catch((err) => {
+      // 最后一道保险：handleAI 内部已兜底，但数据库/广播等意外异常也不能
+      // 变成未捕获 rejection —— Node 22 会直接终止整个 sidecar 进程。
+      console.error("[ws] AI 处理异常（已隔离，不影响其他连接）:", err);
+    });
   }
 }
 
@@ -254,7 +258,7 @@ function shutdown() {
   server.close(() => {
     void prisma.$disconnect().finally(() => process.exit(0));
   });
-  setTimeout(() => process.exit(1), 5000).unref();
+  setTimeout(() => process.exit(1), 5000).unref();//unref让这个定时器不要阻止Node.js进程退出
 }
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);

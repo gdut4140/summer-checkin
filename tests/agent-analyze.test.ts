@@ -10,7 +10,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // 「结构错误的合法 JSON → 必须走规则兜底」就是本次修复的核心断言。
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
-vi.mock("@/lib/model-pool", () => ({ completionsWithFallback: vi.fn() }));
+vi.mock("@/lib/model-pool", () => ({
+  completionsWithFallback: vi.fn(),
+  // analyze 只需要分类：真实实现已在 model-pool-peel.test.ts 覆盖
+  isQuotaError: vi.fn((err: unknown) =>
+    /quota|balance|429/i.test(err instanceof Error ? err.message : String(err))
+  ),
+}));
 vi.mock("@/lib/memory", () => ({
   getRelevantMemories: vi.fn(),
   touchMemories: vi.fn(),
@@ -135,6 +141,18 @@ describe("analyze", () => {
     const r = await analyze(emptyContext, [], "u1");
     expect(r.source).toBe("fallback");
     expect(r.reason).toBe("llm_error");
+    expect(r.analysis).toEqual(fallbackAnalysis(emptyContext));
+  });
+
+  it("模型额度耗尽（403 Free quota exhausted）→ 兜底，reason=quota", async () => {
+    // 额度问题要充值/换模型，和模型输出坏掉（json_parse/schema_invalid）
+    // 或普通调用失败不是一回事，落库的 reason 要能区分。
+    mockComplete.mockRejectedValue(
+      Object.assign(new Error("403 Free quota exhausted."), { statusCode: 403 })
+    );
+    const r = await analyze(emptyContext, [], "u1");
+    expect(r.source).toBe("fallback");
+    expect(r.reason).toBe("quota");
     expect(r.analysis).toEqual(fallbackAnalysis(emptyContext));
   });
 });

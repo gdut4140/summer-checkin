@@ -52,6 +52,35 @@ const AI_USERS: Record<AiRole, { id: string; name: string; email: string }> = {
   snarky: { id: "ai-snarky", name: "嘴欠宝", email: "ai-snarky@summer-checkin.local" },
 };
 
+/** 非额度类失败的兜底文案。不能和 ENERGY_DOWN_MESSAGE 混用，否则会把
+ *  「模型不存在/网络异常」误说成「用户没精力了」。 */
+const AI_ERROR_MESSAGE = "这边出了点问题，稍后再试";
+
+/**
+ * 聊天室 AI 失败的统一收尾：把兜底文案当普通回复发出去，并关闭前端占位气泡。
+ *
+ * 必须覆盖所有失败路径——前端收到 ai:start 后会插入一个占位消息，
+ * 只有 ai:done 才会替换它。失败时如果直接 throw，占位会一直转圈，
+ * 而且 fire-and-forget 的调用方会因未捕获 rejection 直接把 sidecar 进程带崩。
+ */
+async function finishWithFallback(
+  requestId: string,
+  aiRole: AiRole,
+  name: string,
+  message: string
+): Promise<void> {
+  broadcast({ type: "ai:delta", requestId, content: message });
+  const saved = await prisma.chatMessage.create({
+    data: {
+      role: "assistant",
+      content: message,
+      aiRole,
+      userId: AI_USERS[aiRole].id,
+    },
+  });
+  broadcast({ type: "ai:done", requestId, message: toDTO(saved, name) });
+}
+
 /**
  * 处理 @雨宝 触发：取最近全局消息作上下文 → 流式生成 → 落库 → 广播
  */
@@ -123,34 +152,48 @@ export async function handleAI(
   } catch (err) {
     if (err instanceof UsageLimitError || isQuotaError(err)) {
       // 精力用完 / 余额不足：把「我宕机了，呃啊」当普通回复广播出去
-      broadcast({ type: "ai:delta", requestId, content: ENERGY_DOWN_MESSAGE });
-      const saved = await prisma.chatMessage.create({
-        data: { role: "assistant", content: ENERGY_DOWN_MESSAGE, aiRole, userId: AI_USERS[aiRole].id },
-      });
-      broadcast({ type: "ai:done", requestId, message: toDTO(saved, cfg.name) });
+      await finishWithFallback(requestId, aiRole, cfg.name, ENERGY_DOWN_MESSAGE);
       return;
     }
-    throw err;
+    // 其他失败（模型不存在、网络等）不能说成「没精力了」
+    console.error("[chatroom] AI 请求失败:", err);
+    await finishWithFallback(requestId, aiRole, cfg.name, AI_ERROR_MESSAGE);
+    return;
   }
 
   let full = "";
-  const reader = stream.getReader();
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (value) {
-      full += value;
-      broadcast({ type: "ai:delta", requestId, content: value });
+  let streamError: unknown;
+  try {
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        full += value;
+        broadcast({ type: "ai:delta", requestId, content: value });
+      }
     }
+  } catch (err) {
+    // 流中途失败（限流/断流）：保留已收到的部分；完全没内容时走兜底文案。
+    streamError = err;
+    console.error("[chatroom] AI 流式回复中断:", err);
   }
 
-  if (full.trim()) {
-    console.log(
-      `[ws][消息] ${new Date().toLocaleTimeString("zh-CN", { hour12: false })} ${cfg.name}: ${full.length > 200 ? full.slice(0, 200) + "…" : full}`
-    );
-    const saved = await prisma.chatMessage.create({
-      data: { role: "assistant", content: full, aiRole, userId: AI_USERS[aiRole].id },
-    });
-    broadcast({ type: "ai:done", requestId, message: toDTO(saved, cfg.name) });
+  if (!full.trim()) {
+    const message =
+      streamError &&
+      (streamError instanceof UsageLimitError || isQuotaError(streamError))
+        ? ENERGY_DOWN_MESSAGE
+        : AI_ERROR_MESSAGE;
+    await finishWithFallback(requestId, aiRole, cfg.name, message);
+    return;
   }
+
+  console.log(
+    `[ws][消息] ${new Date().toLocaleTimeString("zh-CN", { hour12: false })} ${cfg.name}: ${full.length > 200 ? full.slice(0, 200) + "…" : full}`
+  );
+  const saved = await prisma.chatMessage.create({
+    data: { role: "assistant", content: full, aiRole, userId: AI_USERS[aiRole].id },
+  });
+  broadcast({ type: "ai:done", requestId, message: toDTO(saved, cfg.name) });
 }

@@ -26,7 +26,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { checkinDayKeys, computeStreak } from "@/lib/checkin-streak";
-import { completionsWithFallback } from "@/lib/model-pool";
+import { completionsWithFallback, isQuotaError } from "@/lib/model-pool";
 import { AGENT_COACH_PROMPT } from "./prompts";
 import { getRelevantMemories, touchMemories } from "@/lib/memory";
 import { createNotification } from "@/lib/notification";
@@ -247,7 +247,7 @@ export interface AnalyzeResult {
   /** model = 模型返回了合法结构；fallback = 走了规则兜底 */
   source: "model" | "fallback";
   /** 仅 source=fallback 时有值，用于区分「模型胡说」和「模型没响应」 */
-  reason?: "empty_text" | "json_parse" | "schema_invalid" | "llm_error";
+  reason?: "empty_text" | "json_parse" | "schema_invalid" | "llm_error" | "quota";
 }
 
 export async function analyze(
@@ -355,8 +355,16 @@ export async function analyze(
       return { analysis: parsed.data, source: "model" };
     }
   } catch (error) {
-    console.warn("[Agent Runtime] LLM 调用失败，使用规则兜底:", error);
-    reason = "llm_error";
+    // 额度耗尽和「模型/JSON 坏了」是两类问题：前者要充值/换额度，后者要修代码。
+    // 分开记录后，AgentStep 里 GROUP BY reason 能直接看出是哪一类。
+    const quota = isQuotaError(error);
+    console.warn(
+      quota
+        ? "[Agent Runtime] 模型额度耗尽，使用规则兜底:"
+        : "[Agent Runtime] LLM 调用失败，使用规则兜底:",
+      error
+    );
+    reason = quota ? "quota" : "llm_error";
   }
 
   console.warn(`[Agent Runtime] ⚠️ 分析走规则兜底 (reason=${reason})`);
