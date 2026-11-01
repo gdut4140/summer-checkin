@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/model-pool", () => ({
   rerankWithFallback: vi.fn(),
   isQuotaError: vi.fn(() => false),
+  isTransientNetworkError: vi.fn(() => false),
 }));
 
 import { rerankWithFallback, isQuotaError } from "@/lib/model-pool";

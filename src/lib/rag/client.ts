@@ -10,7 +10,7 @@
 // 余弦再算一遍"——同一模型、同一公式、同一候选集，确定性函数重复应用
 // 不可能改变排序，属于纯粹的数学空转，每次搜索白烧 3 批 embedding
 // 调用。已移除。真正的重排已于 2026-09-23 接入，见 rag/rerank.ts 与
-// model-pool 的 rerankWithFallback——用的是 cross-encoder（qwen3-rerank），
+// model-pool 的 rerankWithFallback——用的是 cross-encoder（qwen3.7-text-rerank / qwen3-rerank），
 // query 与 document 联合编码，而不是各自 embedding 后算余弦。
 // （注意别写成 gte-rerank：官方公告它 2026-05-30 已停服。）
 // ============================================================

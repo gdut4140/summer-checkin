@@ -13,7 +13,12 @@
 // 本模块只负责编排：裁剪、排序、以及失败时如何降级。
 // ============================================================
 
-import { rerankWithFallback, isQuotaError, type RerankScore } from "@/lib/model-pool";
+import {
+  rerankWithFallback,
+  isQuotaError,
+  isTransientNetworkError,
+  type RerankScore,
+} from "@/lib/model-pool";
 import type { DocChunk } from "./retriever";
 
 /**
@@ -39,6 +44,11 @@ let rerankDisabled = false;
 /** 仅测试用：复位熔断标志 */
 export function __resetRerankDisabled(): void {
   rerankDisabled = false;
+}
+
+/** 仅测试用：读取熔断状态 */
+export function __isRerankDisabled(): boolean {
+  return rerankDisabled;
 }
 
 /**
@@ -143,12 +153,22 @@ export async function rerankChunks(
 
     return { ordered: orderByRerank(candidates, data), model, scoreById };
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/rerank 档暂无可用模型|rerank 档无可用的模型/.test(message)) {
+      // 所有重排模型都在冷却/耗尽：暂时降级，不熔断；冷却后下一次请求自动恢复
+      console.warn("[rerank] 暂无可用重排模型，本次退化为向量序");
+      return null;
+    }
     if (isQuotaError(err)) {
       // 额度/限流：暂时性，逐次重试即可，不熔断
       console.warn("[rerank] 额度或限流问题，本次退化为向量序:", err);
     } else if (isTimeoutError(err)) {
       // 超时：单次网络抖动，不熔断
       console.warn("[rerank] 请求超时，本次退化为向量序:", err);
+    } else if (isTransientNetworkError(err)) {
+      // 5xx / 连接重置 / DNS 失败：model-pool 已按暂时性处理（冷却后重试），
+      // 这里必须保持一致——此前只认超时，导致一次 502 就把本进程的重排永久关掉。
+      console.warn("[rerank] 上游暂时性故障，本次退化为向量序:", err);
     } else {
       // 形状/协议/参数类错误会稳定复现，熔断以免每次搜索都白付一次往返
       rerankDisabled = true;

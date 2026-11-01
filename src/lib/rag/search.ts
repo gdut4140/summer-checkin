@@ -12,7 +12,7 @@
 //     同公式、同候选集，确定性函数不可能改变排序——纯数学空转，每次搜索还白烧
 //     一批 embedding 调用；而且回传的 score 取值下标错位（scores[indices[i]]），
 //     喂给 AI 的相关性分数是错的。
-//   · 现在的这个：真 cross-encoder（qwen3-rerank）。query 与 document **联合编码**，
+//   · 现在的这个：真 cross-encoder（qwen3.7-text-rerank / qwen3-rerank）。query 与 document **联合编码**，
 //     打分不是两个 embedding 的函数，无法由余弦序推导出来。见 rag/rerank.ts。
 //
 // 重排失败会自动降级回向量序（scoreSource 会如实标成 "vector"），不影响搜索可用性。

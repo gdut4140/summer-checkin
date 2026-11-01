@@ -253,7 +253,7 @@ describe("rerankWithFallback 的降级与错误分类", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const res = await pool.rerankWithFallback(...ENTRY_ARGS);
-    expect(res.model).toBe("qwen3-rerank");
+    expect(res.model).toBe("qwen3.7-text-rerank");
     expect(res.data).toEqual([
       { index: 0, score: 0.9 },
       { index: 1, score: 0.2 },
@@ -281,7 +281,9 @@ describe("rerankWithFallback 的降级与错误分类", () => {
 
     // 第二次：两个都已被标记耗尽 → 链空，连 fetch 都不该再发
     fetchMock.mockClear();
-    await expect(fresh.rerankWithFallback(...ENTRY_ARGS)).rejects.toThrow(/无可用的模型/);
+    await expect(fresh.rerankWithFallback(...ENTRY_ARGS)).rejects.toThrow(
+      /暂无可用模型|无可用的模型/
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   }, 60_000);
 
@@ -289,7 +291,8 @@ describe("rerankWithFallback 的降级与错误分类", () => {
     const { pool: fresh } = await load();
     const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
       const model = JSON.parse(init.body as string).model;
-      if (model === "qwen3-rerank") {
+      // qwen3.7 是链首；让它 429，验证会切到兜底的 qwen3-rerank
+      if (model === "qwen3.7-text-rerank") {
         return jsonResponse({ code: "Throttling", message: "Requests rate limit exceeded" }, 429);
       }
       return jsonResponse(NATIVE_OK([0.7, 0.3]));
@@ -297,26 +300,58 @@ describe("rerankWithFallback 的降级与错误分类", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const res = await fresh.rerankWithFallback(...ENTRY_ARGS);
-    expect(res.model).toBe("qwen3.7-text-rerank");
+    expect(res.model).toBe("qwen3-rerank");
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
     // 与 403 的关键区别：限流是**暂时**的，模型没有被踢出链。
     // 所以第二次调用不会像 403 那样抛"无可用的模型"，而是照常返回结果。
-    // （qwen3-rerank 仍在默认 60s 冷却里，所以这次仍走兜底模型——这正是限流的语义，
+    // （qwen3.7 仍在默认 60s 冷却里，所以这次仍走兜底模型——这正是限流的语义，
     //   不是 bug，故此处不断言用的是哪一个。）
     fetchMock.mockClear();
     const again = await fresh.rerankWithFallback(...ENTRY_ARGS);
     expect(again.data.length).toBeGreaterThan(0);
   }, 60_000);
 
-  it("200 但响应形状非法 → 抛错，且不降级（形状错误会稳定复现）", async () => {
+  it("200 但响应形状非法 → 两个模型都会尝试，全部失败才抛", async () => {
     const fetchMock = vi.fn(async () => jsonResponse({}, 200));
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(pool.rerankWithFallback(...ENTRY_ARGS)).rejects.toThrow(/找不到 results 数组/);
-    // 形状类错误不是额度错误 → 立即上抛，不该把第二个模型也试一遍
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // 形状错误不一定两个模型都复现：第一个失败后要继续试下一个，全部失败才上抛
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("404 + 非标准 body → 靠 statusCode 识别为模型不可用，切下一个", async () => {
+    const { pool: fresh } = await load();
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const model = JSON.parse(init.body as string).model;
+      if (model === "qwen3.7-text-rerank") {
+        return jsonResponse({ message: "not found" }, 404);
+      }
+      return jsonResponse(NATIVE_OK([0.6, 0.4]));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await fresh.rerankWithFallback(...ENTRY_ARGS);
+    expect(res.model).toBe("qwen3-rerank");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  }, 60_000);
+
+  it("第一个模型 400 → 仍然尝试第二个模型", async () => {
+    const { pool: fresh } = await load();
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      const model = JSON.parse(init.body as string).model;
+      if (model === "qwen3.7-text-rerank") {
+        return jsonResponse({ message: "bad request" }, 400);
+      }
+      return jsonResponse(NATIVE_OK([0.2, 0.8]));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await fresh.rerankWithFallback(...ENTRY_ARGS);
+    expect(res.model).toBe("qwen3-rerank");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  }, 60_000);
 
   it("空文档列表直接返回空，不发请求", async () => {
     const fetchMock = vi.fn();
@@ -330,25 +365,28 @@ describe("rerankWithFallback 的降级与错误分类", () => {
 // ============================================================
 describe("rerankChunks 的降级行为", () => {
   it("重排失败时返回 null（调用方据此降级为向量序）", async () => {
+    // 500 会让两个模型各进入 30s 冷却，必须用干净实例，避免污染后续用例
+    const { rerank: fresh } = await load();
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => jsonResponse({ code: "boom" }, 500))
     );
-    const out = await rerank.rerankChunks("查询", [chunk("a", "A"), chunk("b", "B")]);
+    const out = await fresh.rerankChunks("查询", [chunk("a", "A"), chunk("b", "B")]);
     expect(out).toBeNull();
   });
 
   it("成功后同时返回排序结果与 id→分数映射", async () => {
+    const { rerank: fresh } = await load();
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => jsonResponse(NATIVE_OK([0.1, 0.9])))
     );
-    const out = await rerank.rerankChunks("查询", [chunk("a", "A"), chunk("b", "B")]);
+    const out = await fresh.rerankChunks("查询", [chunk("a", "A"), chunk("b", "B")]);
     expect(out).not.toBeNull();
     expect(out!.ordered.map((c) => c.id)).toEqual(["b", "a"]);
     expect(out!.scoreById.get("a")).toBe(0.1);
     expect(out!.scoreById.get("b")).toBe(0.9);
-    expect(out!.model).toBe("qwen3-rerank");
+    expect(out!.model).toBe("qwen3.7-text-rerank");
   });
 
   it("空候选直接返回 null", async () => {
@@ -358,16 +396,42 @@ describe("rerankChunks 的降级行为", () => {
   // 熔断的意义：形状/协议类错误会稳定复现，不关掉的话此后每次搜索
   // 都白付一次注定失败的往返。
   it("非暂时性错误 → 熔断，后续调用直接返回 null 且不再发请求", async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ nope: 1 }, 500));
+    const { rerank: fresh } = await load();
+    // 400 是真正的非暂时性错误（503/网络失败属于暂时性，走冷却分支）。
+    // 两个模型都会各试一次，全部失败后上层才熔断。
+    const fetchMock = vi.fn(async () => jsonResponse({ nope: 1 }, 400));
     vi.stubGlobal("fetch", fetchMock);
     const cs = [chunk("a", "A"), chunk("b", "B")];
 
-    expect(await rerank.rerankChunks("查询", cs)).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(await fresh.rerankChunks("查询", cs)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
 
     fetchMock.mockClear();
-    expect(await rerank.rerankChunks("查询", cs)).toBeNull();
+    expect(await fresh.rerankChunks("查询", cs)).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled(); // 已熔断，短路
+  });
+
+  it("两个模型都 5xx → 本次降级，但不永久熔断（P0）", async () => {
+    const { rerank: fresh } = await load();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse({ message: "upstream down" }, 503))
+    );
+    const cs = [chunk("a", "A"), chunk("b", "B")];
+
+    expect(await fresh.rerankChunks("查询", cs)).toBeNull();
+    // 关键：暂时性故障不能落到"永久关闭重排"分支
+    expect(error.mock.calls.flat().join(" ")).not.toMatch(/本进程内关闭重排/);
+    expect(fresh.__isRerankDisabled()).toBe(false);
+
+    // 冷却期内再查一次仍然只是本次降级，熔断标志不能被置位
+    expect(await fresh.rerankChunks("查询", cs)).toBeNull();
+    expect(fresh.__isRerankDisabled()).toBe(false);
+
+    warn.mockRestore();
+    error.mockRestore();
   });
 
   // 额度错误走的是"本次降级"分支，不是熔断分支。

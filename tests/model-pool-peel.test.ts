@@ -310,6 +310,22 @@ describe("isTransientNetworkError", () => {
     expect(isTransientNetworkError(err)).toBe(true);
   });
 
+  it("AbortSignal.timeout 的 TimeoutError 也能识别（rerank 裸 fetch 走这条）", () => {
+    const err = Object.assign(
+      new Error("The operation was aborted due to timeout"),
+      { name: "TimeoutError" }
+    );
+    expect(isTransientNetworkError(err)).toBe(true);
+  });
+
+  it("HTTP 5xx 视为暂时性错误，应该切下一个模型", () => {
+    expect(
+      isTransientNetworkError(
+        new Error("[model-pool] rerank qwen3-rerank HTTP 503: upstream unavailable")
+      )
+    ).toBe(true);
+  });
+
   it("Model not exist / 403 额度耗尽不误判为网络错误", () => {
     expect(
       isTransientNetworkError(

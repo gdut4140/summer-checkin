@@ -106,19 +106,19 @@ const HIGH_CHAIN: ModelEntry[] = [
   { modelName: "qwen3.6-plus", displayName: "通义千问 3.6 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3.5-plus-2026-02-15", displayName: "通义千问 3.5 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
 
+  // 2026-11 新进模型：每个快照同样有独立免费额度，排在老模型之后作替补。
+  // 到期日未知，暂不写 freeQuotaEnd（该字段只做元信息，不参与降级判断）。
+  { modelName: "qwen3.8-max-0902", displayName: "通义千问 3.8 Max (09-02)", provider: "aliyun", modelType: "general", tier: "high" },
+  { modelName: "qwen3.8-2.4t-a95b", displayName: "通义千问 3.8 2.4T-A95B", provider: "aliyun", modelType: "general", tier: "high" },
+  { modelName: "kimi-k3", displayName: "Kimi K3", provider: "aliyun", modelType: "general", tier: "high" },
+  { modelName: "glm-5.3", displayName: "GLM-5.3", provider: "aliyun", modelType: "general", tier: "high" },
+  { modelName: "qwen3.8-27b", displayName: "通义千问 3.8 27B", provider: "aliyun", modelType: "general", tier: "high" },
+  { modelName: "qwen3.5-122b-a10b", displayName: "通义千问 3.5 122B-A10B", provider: "aliyun", modelType: "general", tier: "high" },
+
   // 最后兜底：high 档 max/plus 全部额度耗尽时，用 low 档仍有额度的 flash 接住。
   // 质量低于 max 系列，但比直接报「没精力了」或退化成规则兜底好。
   // 2026-10-30 实测该模型 200；同名模型在 LOW_CHAIN 也在用，冷却/耗尽状态按模型名共享。
   { modelName: "qwen-flash-2025-07-28", displayName: "通义千问 Flash（high 兜底）", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07" },
-
-  // 已用完（免费额度耗尽，403 后不再恢复；保留记录便于查账，exhausted=true 直接跳过）
-  { modelName: "qwen3.7-max-2026-06-08", displayName: "通义千问 3.7 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
-  { modelName: "deepseek-v4-pro-0813", displayName: "DeepSeek V4 Pro", provider: "aliyun", modelType: "general", thinking: true, tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
-  { modelName: "qwen3-max-2026-01-23", displayName: "通义千问 3 Max", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
-  { modelName: "qwen3.7-plus-2026-05-26", displayName: "通义千问 3.7 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
-  { modelName: "deepseek-v3.2", displayName: "DeepSeek V3.2", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
-  { modelName: "qwen3.5-plus-2026-04-20", displayName: "通义千问 3.5 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
-  { modelName: "qwen-plus-2025-12-01", displayName: "通义千问 Plus", provider: "aliyun", modelType: "general", tier: "high", freeQuotaEnd: "2026-11-07", exhausted: true },
 ];
 
 // ── LOW 档（聊天室/标题/记忆/拆任务）：agnes 免费优先，额度用完降级阿里云 flash ──
@@ -127,6 +127,13 @@ const LOW_CHAIN: ModelEntry[] = [
   { modelName: "qwen-flash-2025-07-28", displayName: "通义千问 Flash", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3.7-flash-2026-07-15", displayName: "通义千问 3.7 Flash", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
   { modelName: "qwen3.6-flash", displayName: "通义千问 3.6 Flash", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
+
+  // 2026-11 新进模型：免费额度独立，排在老 flash 之后作替补；qwen-turbo 留作最后兜底。
+  // 到期日未知，暂不写 freeQuotaEnd。
+  { modelName: "qwen3.8-flash", displayName: "通义千问 3.8 Flash", provider: "aliyun", modelType: "general", tier: "low" },
+  { modelName: "deepseek-v4.1-flash", displayName: "DeepSeek V4.1 Flash", provider: "aliyun", modelType: "general", tier: "low" },
+  { modelName: "deepseek-v4.1-flash-1017", displayName: "DeepSeek V4.1 Flash (10-17)", provider: "aliyun", modelType: "general", tier: "low" },
+
   { modelName: "qwen-turbo", displayName: "通义千问 Turbo", provider: "aliyun", modelType: "general", tier: "low", freeQuotaEnd: "2026-11-07" },
 ];
 
@@ -170,8 +177,10 @@ const EMBEDDING_CHAIN: ModelEntry[] = [
 // 限制（官方文档）：单请求最多 500 篇文档，单篇最长 4000 token（qwen3.7 为 30000），
 // 单请求总量上限 120000 token，公式 = 查询token × 文档数 + 文档token总和。
 const RERANK_CHAIN: ModelEntry[] = [
-  { modelName: "qwen3-rerank", displayName: "通义千问3 重排", provider: "aliyun", modelType: "rerank", tier: "low", freeQuotaEnd: "2026-11-07" },
+  // 顺序即降级优先级：qwen3.7 区分度更好（见上），且免费额度到 11-30；
+  // qwen3-rerank 的免费额度 11-07 就到期，放第二位兜底。
   { modelName: "qwen3.7-text-rerank", displayName: "通义千问3.7 文本重排", provider: "aliyun", modelType: "rerank", tier: "low", freeQuotaEnd: "2026-11-30" },
+  { modelName: "qwen3-rerank", displayName: "通义千问3 重排", provider: "aliyun", modelType: "rerank", tier: "low", freeQuotaEnd: "2026-11-07" },
 ];
 
 /** 已耗尽模型（进程内记忆：403 后加入，本进程不再重试） */
@@ -319,16 +328,23 @@ export function isModelUnavailableError(err: unknown): boolean {
  * 就会把整个 `/api/ai` 变成 500。
  */
 export function isTransientNetworkError(err: unknown): boolean {
+  const statusOf = (e: unknown) =>
+    (e as { statusCode?: unknown } | null | undefined)?.statusCode;
   const hay = (e: unknown) => {
     const msg = e instanceof Error ? e.message : String(e);
     const name = e instanceof Error ? e.name : "";
     const code = (e as { code?: unknown } | null | undefined)?.code;
     return `${name} ${msg} ${typeof code === "string" ? code : ""}`;
   };
-  const matches = (e: unknown) =>
-    /APIConnectionTimeoutError|APIConnectionError|UND_ERR_CONNECT_TIMEOUT|UND_ERR_SOCKET|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|socket hang up|Cannot connect to API|fetch failed|request timed out|timed out/i.test(
+  const matches = (e: unknown) => {
+    // 有状态码时先看字段：5xx 一律视为暂时性。message 里不一定带 "HTTP 500"，
+    // 例如网关返回的纯 HTML 错误页被 SDK 包成普通 Error。
+    const status = statusOf(e);
+    if (typeof status === "number" && status >= 500) return true;
+    return /APIConnectionTimeoutError|APIConnectionError|TimeoutError|UND_ERR_CONNECT_TIMEOUT|UND_ERR_SOCKET|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|socket hang up|Cannot connect to API|fetch failed|request timed out|timed out|timeout|HTTP 5\d\d/i.test(
       hay(e)
     );
+  };
 
   if (matches(err)) return true;
 
@@ -612,8 +628,14 @@ export async function rerankOnce(
   // 一个死模型，且零报错零日志。
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(
-      `[model-pool] rerank ${entry.modelName} HTTP ${res.status}: ${body.slice(0, 500)}`
+    // 状态码与响应体必须挂到 error 上：分类函数（isQuotaError / isModelUnavailableError /
+    // isRateLimitError）优先读字段，否则一个 body 不含关键字的 404 会被当成
+    // "非暂时性错误"，整条链停在这一个模型上。
+    throw Object.assign(
+      new Error(
+        `[model-pool] rerank ${entry.modelName} HTTP ${res.status}: ${body.slice(0, 500)}`
+      ),
+      { statusCode: res.status, responseBody: body }
     );
   }
 
@@ -636,7 +658,15 @@ export async function rerankWithFallback(
   if (documents.length === 0) return { data: [], model: "none" };
 
   const chain = getRerankChain();
-  if (chain.length === 0) throw new Error(`[model-pool] rerank 档无可用的模型`);
+  if (chain.length === 0) {
+    // 所有重排模型都在冷却/耗尽：这是暂时状态，不能让它触发 rerankChunks 的永久熔断。
+    // 用 429 标记，让上游按“额度/限流”处理（本次退化为向量序，冷却后自动恢复）。
+    const err = new Error(
+      `[model-pool] rerank 档暂无可用模型（可能都在冷却或额度耗尽）`
+    );
+    (err as { statusCode?: number }).statusCode = 429;
+    throw err;
+  }
 
   // top_n 默认传满：服务端会按它截断，传小值就只能拿到部分分数，
   // 无法区分"完整重排"和"部分重排"。计费与传多少无关。
@@ -676,7 +706,12 @@ export async function rerankWithFallback(
         lastErr = err;
         continue;
       }
-      throw err;
+      // 未归类的错误（400 参数、响应形状、JSON 解析失败等）不一定是所有模型都复现：
+      // 不标记模型状态，但继续试下一个；全部失败后再抛给上层决定是否熔断。
+      // 之前这里直接 throw，导致"第一个模型 400 → 第二个模型根本没被尝试"。
+      console.warn(`[model-pool] ${entry.modelName} 重排失败（未分类），尝试下一个模型:`, err);
+      lastErr = err;
+      continue;
     }
   }
   throw lastErr ?? new Error(`[model-pool] rerank 档所有模型请求失败`);
