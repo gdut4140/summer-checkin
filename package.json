@@ -16,6 +16,7 @@
     "eval:memory": "tsx scripts/eval-memory.ts",
     "verify:memory": "tsx scripts/verify-memory.ts",
     "verify:memory:e2e": "tsx scripts/verify-memory-e2e.ts",
+    "verify:context": "tsx scripts/verify-context.ts",
     "memory:reprocess": "tsx scripts/reprocess-memory.ts",
     "ws:dev": "tsx server/index.ts"
   },

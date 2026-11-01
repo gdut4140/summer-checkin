@@ -66,8 +66,30 @@ export const TOOL_UI: Record<string, ToolUiSpec> = {
   getPlanTasks: { label: "查看计划任务", kind: "read" },
   getTodayTasks: { label: "查看今日任务", kind: "read" },
   getMyTodos: { label: "查看今日待办", kind: "read" },
+  searchConversationHistory: {
+    label: "检索历史对话",
+    kind: "read",
+    summarize: (input) => str(field(input, "query")),
+  },
 
   // ---------- 写工具：展开成卡片 ----------
+  updateAgentState: {
+    label: "更新会话状态",
+    kind: "write",
+    summarize: (input) => {
+      const working = Array.isArray(field(input, "workingMemory"))
+        ? (field(input, "workingMemory") as unknown[]).length
+        : 0;
+      const todos = Array.isArray(field(input, "todoList"))
+        ? (field(input, "todoList") as unknown[]).length
+        : 0;
+      const parts = [
+        working > 0 ? `${working} 条任务信息` : "",
+        todos > 0 ? `${todos} 条进度` : "",
+      ].filter(Boolean);
+      return parts.length > 0 ? parts.join("，") : undefined;
+    },
+  },
   createPlan: {
     label: "创建学习计划",
     kind: "write",

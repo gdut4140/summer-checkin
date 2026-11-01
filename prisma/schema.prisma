@@ -247,6 +247,7 @@ model Conversation {
 
   user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages ConversationMessage[]
+  agentState AgentState?
 
   @@index([userId, updatedAt])
   // 对话的访问路径：userId + surface(+refId) 过滤后按 updatedAt 倒序
@@ -275,12 +276,47 @@ model ConversationMessage {
    * 的整篇文档（zod 上限 10 万字符）会被复制进每一条消息行。
    */
   parts          Json?
+  /**
+   * AI SDK 的原始 parts（text / tool-*），用于后续轮次重建 tool-call/tool-result
+   * 配对。parts 是展示摘要，不能拿来还原工具调用；rawParts 会按单条限制裁剪
+   * 超大 input/output，避免 updateDocument 的整篇文档反复入库。
+   */
+  rawParts       Json?
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
   @@map("conversationmessage")
+}
+
+/**
+ * 会话级短期记忆。
+ *
+ * 与 Conversation 一对一：
+ *   summary                    较早对话的滚动摘要（替换式）
+ *   workingMemory              当前任务的重要信息
+ *   todoList                   当前任务进度
+ *   compressedThroughMessageId 已压缩到的最后一条原始消息
+ *   version                    乐观锁，避免并发压缩互相覆盖
+ *
+ * 原始 ConversationMessage 永远保留；这里只存压缩结果和会话状态。
+ */
+model AgentState {
+  id                         String   @id @default(cuid())
+  conversationId             String   @unique
+  summary                    String   @default("")
+  workingMemory              Json     @default("[]")
+  todoList                   Json     @default("[]")
+  compressedThroughMessageId String?
+  version                    Int      @default(0)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("agentstate")
 }
 
 model AgentRun {

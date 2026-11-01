@@ -14,7 +14,7 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/auth-utils", () => ({ getAuthUser: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    conversation: { create: vi.fn(), update: vi.fn() },
+    conversation: { create: vi.fn(), update: vi.fn(), findFirst: vi.fn() },
     conversationMessage: { create: vi.fn() },
     plan: { findFirst: vi.fn() },
     document: { findFirst: vi.fn() },
@@ -39,6 +39,22 @@ vi.mock("@/lib/memory/context-builder", () => ({
     injectedIds: [],
     stats: { candidates: 0, selected: 0, tokens: 0, droppedByBudget: 0 },
   })),
+}));
+vi.mock("@/lib/context/builder", () => ({
+  buildConversationContext: vi.fn(async () => ({
+    system: "系统提示词",
+    messages: [{ role: "user", content: "测试消息" }],
+    summary: "",
+    statusBar: "",
+    conversationHint: "",
+    recentCount: 0,
+    surface: "agent",
+    memoryPrompt: "",
+    memoryTask: "chat",
+  })),
+}));
+vi.mock("@/lib/tools/context-tools", () => ({
+  createContextTools: vi.fn(() => ({})),
 }));
 vi.mock("@/lib/memory/extraction", () => ({
   scheduleExtraction: vi.fn(async () => ({
@@ -154,7 +170,17 @@ function stubStream(parts: Part[], stepTexts: string[]) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.mockResolvedValue({ id: "u1", name: null } as never);
-  mockMessageCreate.mockResolvedValue({} as never);
+  mockMessageCreate.mockResolvedValue({ id: "m-user" } as never);
+  vi.mocked(prisma.conversation.findFirst).mockResolvedValue({
+    id: "c1",
+    surface: "agent",
+    refId: null,
+  } as never);
+  vi.mocked(prisma.conversation.create).mockResolvedValue({
+    id: "c1",
+    surface: "agent",
+    refId: null,
+  } as never);
   vi.mocked(prisma.conversation.update).mockResolvedValue({} as never);
   stubStream(TOOL_CALL_PARTS, ["我先看一下你的任务。", "今天有 3 个任务。"]);
 });

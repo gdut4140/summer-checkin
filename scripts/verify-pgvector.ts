@@ -118,9 +118,10 @@ async function main() {
       surface: "agent",
       task: "chat",
       query: "学习 React 前端",
+      limit: 5,
     });
     check("向量路径返回了记忆", result.memories.length > 0, `${result.memories.length} 条`);
-    check("返回条数不超过 limit", result.memories.length <= 10);
+    check("返回条数不超过 limit", result.memories.length <= 5);
   } else {
     console.log("  ⏭  本地库无带向量的记忆，跳过");
   }

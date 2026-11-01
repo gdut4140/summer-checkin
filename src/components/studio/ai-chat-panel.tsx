@@ -229,9 +229,8 @@ export function AiChatPanel({
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
         body: JSON.stringify({
-          messages: next
-            .slice(-8)
-            .map(({ role, content: text }) => ({ role, content: text })),
+          // 只发当前用户消息；历史、摘要、状态栏由服务端 Context Builder 组装
+          messages: [{ role: "user", content: userMessage.content }],
           conversationId: conversationIdRef.current ?? undefined,
           studioContext: context ? { ...context, document } : undefined,
         }),

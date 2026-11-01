@@ -122,3 +122,118 @@ export function isViewParts(value: unknown): value is ViewPart[] {
     })
   );
 }
+
+// ============================================================
+// rawParts：保存 AI SDK 的原始 parts，用于后续轮次重建 tool-call/tool-result
+//
+// 与 ViewPart 的区别：ViewPart 只留展示摘要；rawParts 保留 input/output，
+// 但单条超过上限时替换成截断占位对象，避免 updateDocument 的整篇文档反复入库。
+// ============================================================
+
+const RAW_TOOL_PAYLOAD_MAX_CHARS = 4_000;
+
+function capPayload(value: unknown): unknown {
+  if (value === undefined) return undefined;
+  try {
+    const text = JSON.stringify(value);
+    if (text.length <= RAW_TOOL_PAYLOAD_MAX_CHARS) return value;
+    return {
+      truncated: true,
+      chars: text.length,
+      preview: text.slice(0, 1_000),
+    };
+  } catch {
+    return { truncated: true, preview: "[unserializable]" };
+  }
+}
+
+/**
+ * 裁剪并规范化 AI SDK 的 parts，只保留 text 和 tool-*。
+ * 非法/未知 part 直接丢弃，避免把 step-start/reasoning 等无必要内容写库。
+ */
+export function sanitizeRawParts(parts: readonly unknown[]): unknown[] {
+  const out: unknown[] = [];
+  for (const part of parts) {
+    if (part === null || typeof part !== "object") continue;
+    const record = part as Record<string, unknown>;
+    const type = typeof record.type === "string" ? record.type : "";
+
+    if (type === "text") {
+      if (typeof record.text === "string" && record.text) {
+        out.push({ type: "text", text: record.text });
+      }
+      continue;
+    }
+
+    if (!type.startsWith("tool-")) continue;
+    out.push({
+      type,
+      toolCallId:
+        typeof record.toolCallId === "string" ? record.toolCallId : undefined,
+      state: typeof record.state === "string" ? record.state : "output-available",
+      input: capPayload(record.input),
+      output: capPayload(record.output),
+      ...(typeof record.errorText === "string"
+        ? { errorText: record.errorText }
+        : {}),
+    });
+  }
+  return out;
+}
+
+/**
+ * 文本协议（studio 面板）没有 UIMessage.parts，从 streamText 的 steps 还原
+ * 一份 rawParts，保证两个入口的历史都能保留工具调用配对。
+ */
+export function buildRawPartsFromSteps(steps: readonly unknown[]): unknown[] {
+  const out: unknown[] = [];
+  const byToolCallId = new Map<string, Record<string, unknown>>();
+
+  for (const step of steps) {
+    if (step === null || typeof step !== "object") continue;
+    const record = step as {
+      text?: unknown;
+      toolCalls?: Array<{
+        toolName?: unknown;
+        toolCallId?: unknown;
+        input?: unknown;
+      }>;
+      toolResults?: Array<{
+        toolName?: unknown;
+        toolCallId?: unknown;
+        output?: unknown;
+        isError?: unknown;
+      }>;
+    };
+
+    if (typeof record.text === "string" && record.text) {
+      out.push({ type: "text", text: record.text });
+    }
+
+    for (const call of record.toolCalls ?? []) {
+      const toolName =
+        typeof call.toolName === "string" ? call.toolName : "unknown";
+      const toolCallId =
+        typeof call.toolCallId === "string" ? call.toolCallId : undefined;
+      const part: Record<string, unknown> = {
+        type: `tool-${toolName}`,
+        toolCallId,
+        state: "input-available",
+        input: capPayload(call.input),
+      };
+      out.push(part);
+      if (toolCallId) byToolCallId.set(toolCallId, part);
+    }
+
+    for (const result of record.toolResults ?? []) {
+      const toolCallId =
+        typeof result.toolCallId === "string" ? result.toolCallId : undefined;
+      const part = toolCallId ? byToolCallId.get(toolCallId) : undefined;
+      if (!part) continue;
+      part.state = result.isError ? "output-error" : "output-available";
+      part.output = capPayload(result.output);
+    }
+  }
+
+  return sanitizeRawParts(out);
+}

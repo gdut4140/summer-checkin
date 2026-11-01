@@ -44,7 +44,8 @@ describe("TOOL_UI 登记完整性", () => {
 describe("读/写分类与 router 白名单一致", () => {
   it("纯读工具都是 read", () => {
     for (const name of SURFACE_POLICY.doc.tools) {
-      if (name === "updateDocument") continue; // 文档工作台唯一的写工具
+      // 工作台里两个会写状态/文档的工具
+      if (name === "updateDocument" || name === "updateAgentState") continue;
       expect(TOOL_UI[name]?.kind, `${name} 应为 read`).toBe("read");
     }
   });
@@ -59,6 +60,7 @@ describe("读/写分类与 router 白名单一致", () => {
       "deleteTodo",
       "updatePlanInfo",
       "updateDocument",
+      "updateAgentState",
     ];
     for (const name of writes) {
       expect(TOOL_UI[name]?.kind, `${name} 应为 write`).toBe("write");

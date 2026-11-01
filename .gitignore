@@ -119,3 +119,4 @@ gpt带我背项目
 /eval/rag/questions.local.jsonl
 /eval/rag/.cache/
 /eval/rag/results/
+/mcp-server/

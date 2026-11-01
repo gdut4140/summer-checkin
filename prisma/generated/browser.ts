@@ -73,6 +73,21 @@ export type Conversation = Prisma.ConversationModel
  */
 export type ConversationMessage = Prisma.ConversationMessageModel
 /**
+ * Model AgentState
+ * *
+ *  * 会话级短期记忆。
+ *  *
+ *  * 与 Conversation 一对一：
+ *  *   summary                    较早对话的滚动摘要（替换式）
+ *  *   workingMemory              当前任务的重要信息
+ *  *   todoList                   当前任务进度
+ *  *   compressedThroughMessageId 已压缩到的最后一条原始消息
+ *  *   version                    乐观锁，避免并发压缩互相覆盖
+ *  *
+ *  * 原始 ConversationMessage 永远保留；这里只存压缩结果和会话状态。
+ */
+export type AgentState = Prisma.AgentStateModel
+/**
  * Model AgentRun
  * 
  */

@@ -46,6 +46,7 @@ export type ConversationMessageCountAggregateOutputType = {
   role: number
   content: number
   parts: number
+  rawParts: number
   createdAt: number
   _all: number
 }
@@ -73,6 +74,7 @@ export type ConversationMessageCountAggregateInputType = {
   role?: true
   content?: true
   parts?: true
+  rawParts?: true
   createdAt?: true
   _all?: true
 }
@@ -155,6 +157,7 @@ export type ConversationMessageGroupByOutputType = {
   role: string
   content: string
   parts: runtime.JsonValue | null
+  rawParts: runtime.JsonValue | null
   createdAt: Date
   _count: ConversationMessageCountAggregateOutputType | null
   _min: ConversationMessageMinAggregateOutputType | null
@@ -185,6 +188,7 @@ export type ConversationMessageWhereInput = {
   role?: Prisma.StringFilter<"ConversationMessage"> | string
   content?: Prisma.StringFilter<"ConversationMessage"> | string
   parts?: Prisma.JsonNullableFilter<"ConversationMessage">
+  rawParts?: Prisma.JsonNullableFilter<"ConversationMessage">
   createdAt?: Prisma.DateTimeFilter<"ConversationMessage"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
 }
@@ -195,6 +199,7 @@ export type ConversationMessageOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
   parts?: Prisma.SortOrderInput | Prisma.SortOrder
+  rawParts?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
 }
@@ -208,6 +213,7 @@ export type ConversationMessageWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.StringFilter<"ConversationMessage"> | string
   content?: Prisma.StringFilter<"ConversationMessage"> | string
   parts?: Prisma.JsonNullableFilter<"ConversationMessage">
+  rawParts?: Prisma.JsonNullableFilter<"ConversationMessage">
   createdAt?: Prisma.DateTimeFilter<"ConversationMessage"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
 }, "id">
@@ -218,6 +224,7 @@ export type ConversationMessageOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
   parts?: Prisma.SortOrderInput | Prisma.SortOrder
+  rawParts?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ConversationMessageCountOrderByAggregateInput
   _max?: Prisma.ConversationMessageMaxOrderByAggregateInput
@@ -233,6 +240,7 @@ export type ConversationMessageScalarWhereWithAggregatesInput = {
   role?: Prisma.StringWithAggregatesFilter<"ConversationMessage"> | string
   content?: Prisma.StringWithAggregatesFilter<"ConversationMessage"> | string
   parts?: Prisma.JsonNullableWithAggregatesFilter<"ConversationMessage">
+  rawParts?: Prisma.JsonNullableWithAggregatesFilter<"ConversationMessage">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConversationMessage"> | Date | string
 }
 
@@ -241,6 +249,7 @@ export type ConversationMessageCreateInput = {
   role: string
   content: string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
 }
@@ -251,6 +260,7 @@ export type ConversationMessageUncheckedCreateInput = {
   role: string
   content: string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -259,6 +269,7 @@ export type ConversationMessageUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
 }
@@ -269,6 +280,7 @@ export type ConversationMessageUncheckedUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -278,6 +290,7 @@ export type ConversationMessageCreateManyInput = {
   role: string
   content: string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -286,6 +299,7 @@ export type ConversationMessageUpdateManyMutationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -295,6 +309,7 @@ export type ConversationMessageUncheckedUpdateManyInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -314,6 +329,7 @@ export type ConversationMessageCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   content?: Prisma.SortOrder
   parts?: Prisma.SortOrder
+  rawParts?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -380,6 +396,7 @@ export type ConversationMessageCreateWithoutConversationInput = {
   role: string
   content: string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -388,6 +405,7 @@ export type ConversationMessageUncheckedCreateWithoutConversationInput = {
   role: string
   content: string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -426,6 +444,7 @@ export type ConversationMessageScalarWhereInput = {
   role?: Prisma.StringFilter<"ConversationMessage"> | string
   content?: Prisma.StringFilter<"ConversationMessage"> | string
   parts?: Prisma.JsonNullableFilter<"ConversationMessage">
+  rawParts?: Prisma.JsonNullableFilter<"ConversationMessage">
   createdAt?: Prisma.DateTimeFilter<"ConversationMessage"> | Date | string
 }
 
@@ -434,6 +453,7 @@ export type ConversationMessageCreateManyConversationInput = {
   role: string
   content: string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -442,6 +462,7 @@ export type ConversationMessageUpdateWithoutConversationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -450,6 +471,7 @@ export type ConversationMessageUncheckedUpdateWithoutConversationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -458,6 +480,7 @@ export type ConversationMessageUncheckedUpdateManyWithoutConversationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   parts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  rawParts?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -469,6 +492,7 @@ export type ConversationMessageSelect<ExtArgs extends runtime.Types.Extensions.I
   role?: boolean
   content?: boolean
   parts?: boolean
+  rawParts?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMessage"]>
@@ -479,6 +503,7 @@ export type ConversationMessageSelectCreateManyAndReturn<ExtArgs extends runtime
   role?: boolean
   content?: boolean
   parts?: boolean
+  rawParts?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMessage"]>
@@ -489,6 +514,7 @@ export type ConversationMessageSelectUpdateManyAndReturn<ExtArgs extends runtime
   role?: boolean
   content?: boolean
   parts?: boolean
+  rawParts?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversationMessage"]>
@@ -499,10 +525,11 @@ export type ConversationMessageSelectScalar = {
   role?: boolean
   content?: boolean
   parts?: boolean
+  rawParts?: boolean
   createdAt?: boolean
 }
 
-export type ConversationMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "role" | "content" | "parts" | "createdAt", ExtArgs["result"]["conversationMessage"]>
+export type ConversationMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "role" | "content" | "parts" | "rawParts" | "createdAt", ExtArgs["result"]["conversationMessage"]>
 export type ConversationMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }
@@ -541,6 +568,13 @@ export type $ConversationMessagePayload<ExtArgs extends runtime.Types.Extensions
      *    * 的整篇文档（zod 上限 10 万字符）会被复制进每一条消息行。
      */
     parts: runtime.JsonValue | null
+    /**
+     * *
+     *    * AI SDK 的原始 parts（text / tool-*），用于后续轮次重建 tool-call/tool-result
+     *    * 配对。parts 是展示摘要，不能拿来还原工具调用；rawParts 会按单条限制裁剪
+     *    * 超大 input/output，避免 updateDocument 的整篇文档反复入库。
+     */
+    rawParts: runtime.JsonValue | null
     createdAt: Date
   }, ExtArgs["result"]["conversationMessage"]>
   composites: {}
@@ -971,6 +1005,7 @@ export interface ConversationMessageFieldRefs {
   readonly role: Prisma.FieldRef<"ConversationMessage", 'String'>
   readonly content: Prisma.FieldRef<"ConversationMessage", 'String'>
   readonly parts: Prisma.FieldRef<"ConversationMessage", 'Json'>
+  readonly rawParts: Prisma.FieldRef<"ConversationMessage", 'Json'>
   readonly createdAt: Prisma.FieldRef<"ConversationMessage", 'DateTime'>
 }
     

@@ -625,14 +625,6 @@ export type AgentRunUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.AgentRunScalarWhereInput | Prisma.AgentRunScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type AgentRunCreateNestedOneWithoutStepsInput = {
   create?: Prisma.XOR<Prisma.AgentRunCreateWithoutStepsInput, Prisma.AgentRunUncheckedCreateWithoutStepsInput>
   connectOrCreate?: Prisma.AgentRunCreateOrConnectWithoutStepsInput

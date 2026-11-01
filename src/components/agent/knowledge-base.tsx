@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { MAX_FILE_BYTES, fileSizeError, textLengthError } from "@/lib/knowledge-upload-guard";
@@ -40,10 +41,10 @@ const typeLabel: Record<string, string> = {
   docx: "Word",
 };
 
-function canViewDoc(sourceType: string, sourceName: string) {
-  const normalized = sourceType.toLowerCase();
-  if (["markdown", "md"].includes(normalized)) return true;
-  return /\.(md|markdown)$/i.test(sourceName);
+function canViewDoc(_sourceType: string, sourceName: string) {
+  // 阅读页现在支持所有 sourceType（txt/docx/pdf 走只读原文），
+  // 不再只给 markdown 显示查看按钮。
+  return Boolean(sourceName);
 }
 
 /** 文档列表里的 totalChars 是字符数，不是字节数，别用字节格式显示 */
@@ -335,12 +336,32 @@ export function KnowledgeBase() {
           <p className="text-[11px] font-medium text-white/38">
             文档列表
           </p>
-          <span className="text-[10px] text-white/25">{docs.length} 个</span>
+          <span className="text-[10px] text-white/25">
+            {loading ? (
+              <Skeleton className="h-2.5 w-6 bg-white/8" aria-hidden="true" />
+            ) : (
+              `${docs.length} 个`
+            )}
+          </span>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Spinner className="size-5 animate-spin text-white/20" />
+          <div className="space-y-1 px-3 pb-4" aria-label="正在加载知识库">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-3 rounded-lg border border-white/6 bg-white/3 p-3"
+              >
+                <Skeleton className="size-8 shrink-0 rounded-md bg-white/8" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton
+                    className="h-3 bg-white/8"
+                    style={{ width: `${55 + ((index * 13) % 35)}%` }}
+                  />
+                  <Skeleton className="h-2.5 w-2/5 bg-white/5" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : docs.length === 0 ? (
           <p className="px-4 py-12 text-center text-xs text-white/32">

@@ -26,6 +26,7 @@ import { createRAGTool } from "@/lib/tools/rag-tools";
 import { createAgentTools } from "@/lib/tools/agent-tools";
 import { createTodoTools } from "@/lib/tools/todo-tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
+import { createContextTools } from "@/lib/tools/context-tools";
 import { buildSystemPrompt } from "@/lib/deepseek";
 
 /** 与 route.ts 同构地建出全部候选工具 */
@@ -35,6 +36,7 @@ function buildCandidates(kind: "plan" | "doc" | null) {
     ...createRAGTool("u1"),
     ...createAgentTools("u1"),
     ...createTodoTools("u1"),
+    ...createContextTools("u1", "c1"),
     ...(kind
       ? createStudioTools("u1", { kind, id: kind === "plan" ? "p1" : "d1" })
       : {}),
@@ -64,7 +66,11 @@ const READ_TOOLS = [
   "getPlanTasks",
   "getTodayTasks",
   "getMyTodos",
+  "searchConversationHistory",
 ];
+
+/** 会话状态工具：只写 AgentState，不碰业务数据，三个场景都有 */
+const CONTEXT_TOOLS = ["searchConversationHistory", "updateAgentState"];
 
 describe("surfaceOf", () => {
   it("按 studioContext.kind 判定，与建会话时的口径逐字一致", () => {
@@ -82,10 +88,18 @@ describe("工具白名单", () => {
     expect(Object.keys(SURFACE_POLICY).sort()).toEqual([...AI_SURFACES].sort());
   });
 
-  it("工具数量：智能体 15 / 计划工作台 11 / 文档工作台 10", () => {
-    expect(toolNamesFor("agent")).toHaveLength(15);
-    expect(toolNamesFor("plan")).toHaveLength(11);
-    expect(toolNamesFor("doc")).toHaveLength(10);
+  it("工具数量：智能体 17 / 计划工作台 13 / 文档工作台 12", () => {
+    expect(toolNamesFor("agent")).toHaveLength(17);
+    expect(toolNamesFor("plan")).toHaveLength(13);
+    expect(toolNamesFor("doc")).toHaveLength(12);
+  });
+
+  it("三个场景都有会话上下文工具", () => {
+    for (const surface of AI_SURFACES) {
+      for (const name of CONTEXT_TOOLS) {
+        expect(toolNamesFor(surface), `${surface} 缺 ${name}`).toContain(name);
+      }
+    }
   });
 
   it("⚠️ 工作台一个写工具都不给（这就是做 router 的理由）", () => {

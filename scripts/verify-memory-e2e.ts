@@ -186,8 +186,12 @@ async function main() {
       context.prompt.replace(/\n/g, " ")
     );
     check(
-      "上下文不包含被覆盖的 Vue 旧状态",
-      !/主要使用 Vue/.test(context.prompt)
+      "上下文不包含被覆盖的旧记忆（按 id 判断）",
+      superseded2.every((m) => !context.injectedIds.includes(m.id))
+    );
+    check(
+      "上下文不包含旧记录原文",
+      superseded2.every((m) => !context.prompt.includes(m.content))
     );
     check("记录了 injectedIds", context.injectedIds.length > 0);
     check(

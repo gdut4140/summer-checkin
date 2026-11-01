@@ -62,6 +62,7 @@ export const ModelName = {
   AvatarChange: 'AvatarChange',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
+  AgentState: 'AgentState',
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
   UserMemory: 'UserMemory',
@@ -251,10 +252,26 @@ export const ConversationMessageScalarFieldEnum = {
   role: 'role',
   content: 'content',
   parts: 'parts',
+  rawParts: 'rawParts',
   createdAt: 'createdAt'
 } as const
 
 export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
+
+
+export const AgentStateScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  summary: 'summary',
+  workingMemory: 'workingMemory',
+  todoList: 'todoList',
+  compressedThroughMessageId: 'compressedThroughMessageId',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentStateScalarFieldEnum = (typeof AgentStateScalarFieldEnum)[keyof typeof AgentStateScalarFieldEnum]
 
 
 export const AgentRunScalarFieldEnum = {
@@ -503,6 +520,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

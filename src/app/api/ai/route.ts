@@ -18,14 +18,14 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma-generated/client";
 import { getAuthUser } from "@/lib/auth-utils";
-import { getDeepThinkOptions, generateChatTitle, buildSystemPrompt } from "@/lib/deepseek";
+import { getDeepThinkOptions, generateChatTitle } from "@/lib/deepseek";
 import { prisma } from "@/lib/prisma";
 import {
   createTextStreamResponse,
   createUIMessageStream,
   createUIMessageStreamResponse,
-  convertToModelMessages,
   isStepCount,
   toTextStream,
   toUIMessageStream,
@@ -34,9 +34,17 @@ import { streamTextWithFallback, isQuotaError, isTransientNetworkError } from "@
 import { assertInteractiveUsageAllowed, UsageLimitError, ENERGY_DOWN_MESSAGE } from "@/lib/usage";
 import { createStudyTools, createRAGTool, createAgentTools, createTodoTools } from "@/lib/tools";
 import { createStudioTools } from "@/lib/tools/studio-tools";
-import { pickTools, promptGroupsFor, surfaceOf } from "@/lib/tools/router";
-import { messageText, toViewParts, type ChatUIMessage, type ViewPart } from "@/lib/ai/parts";
-import { buildMemoryContext } from "@/lib/memory/context-builder";
+import { pickTools, surfaceOf, AI_SURFACES, type AiSurface } from "@/lib/tools/router";
+import {
+  messageText,
+  toViewParts,
+  sanitizeRawParts,
+  buildRawPartsFromSteps,
+  type ChatUIMessage,
+  type ViewPart,
+} from "@/lib/ai/parts";
+import { buildConversationContext } from "@/lib/context/builder";
+import { createContextTools } from "@/lib/tools/context-tools";
 import { scheduleExtraction } from "@/lib/memory/extraction";
 import { readableAIError } from "@/lib/ai-error";
 
@@ -111,91 +119,80 @@ export async function POST(request: NextRequest) {
               parts: [{ type: "text" as const, text: m.content }],
             }));
 
-    // 来源界面 + 归属对象：智能体页 / 文档工作台 / 计划工作台三者严格分开。
-    // studioContext.kind 本身就是 "doc" | "plan"，与 surface 取值一一对应；
-    // refId 钉住具体文档或计划，工作台据此取回自己的历史（不再依赖 localStorage）。
-    //
-    // ⚠️ 必须在「新建会话」分支之外求值：工具集与系统提示词都要按它裁剪，
-    // 而老会话的后续消息不带 conversationId 分支、也要拿到同一个 surface。
-    const surface = surfaceOf(studioContext);
-
     // 最后一条消息 = 本次要处理的用户消息。两种协议都从 parts 里取纯文本，
     // 于是标题、落库、记忆提取三处都只有这一种读法。
     const lastUserMsg = uiMessages[uiMessages.length - 1];
     const lastUserText = messageText(lastUserMsg);
 
-    // 如果没有 conversationId，自动创建一个新对话
-    let activeConversationId = conversationId;
-    if (!activeConversationId) {
+    // 会话归属：已有会话必须属于当前用户；新会话按 studioContext 创建。
+    // 历史由服务端从 DB 加载，客户端只负责发当前这一条。
+    let activeConversation: {
+      id: string;
+      surface: string;
+      refId: string | null;
+    };
+    if (conversationId) {
+      const existing = await prisma.conversation.findFirst({
+        where: { id: conversationId, userId: user.id },
+        select: { id: true, surface: true, refId: true },
+      });
+      if (!existing) {
+        return NextResponse.json(
+          { error: "Conversation not found" },
+          { status: 404 }
+        );
+      }
+      activeConversation = existing;
+    } else {
       const title = await generateChatTitle(lastUserText, user.id);
-
-      const conversation = await prisma.conversation.create({
+      activeConversation = await prisma.conversation.create({
         data: {
           userId: user.id,
           title,
-          surface,
+          surface: surfaceOf(studioContext),
           refId: studioContext?.refId ?? null,
         },
+        select: { id: true, surface: true, refId: true },
       });
-      activeConversationId = conversation.id;
     }
 
-    // 保存用户消息
-    await prisma.conversationMessage.create({
+    const activeConversationId = activeConversation.id;
+    const surface: AiSurface = (AI_SURFACES as readonly string[]).includes(
+      activeConversation.surface
+    )
+      ? (activeConversation.surface as AiSurface)
+      : "agent";
+
+    // 保存当前用户消息（只保存最后一条；历史由服务端从 DB 加载）
+    const savedUser = await prisma.conversationMessage.create({
       data: {
         conversationId: activeConversationId,
         role: "user",
         content: lastUserText,
       },
+      select: { id: true },
     });
 
-    // ============================================================
-    // Day 12 新增：短期记忆 — 后端兜底截断
-    // 只取最近 20 轮（40 条消息），超出部分被省略
-    // （前端已做截断，后端再做一层保险）
-    // ============================================================
-    const MAX_CONTEXT_ROUNDS = 20;
-    const MAX_CONTEXT_MESSAGES = MAX_CONTEXT_ROUNDS * 2;
-    const truncatedUiMessages =
-      uiMessages.length > MAX_CONTEXT_MESSAGES
-        ? uiMessages.slice(-MAX_CONTEXT_MESSAGES)
-        : uiMessages;
-
-    if (uiMessages.length > MAX_CONTEXT_MESSAGES) {
-      console.log(
-        `[AI] 后端截断: ${uiMessages.length} → ${MAX_CONTEXT_MESSAGES} 条消息`
-      );
-    }
-
-    // UIMessage → 模型消息。
-    // ignoreIncompleteToolCalls：被中断的一轮里可能只有 tool-call 没有 tool-result，
-    // 那是非法消息，忽略掉而不是让整轮请求失败。
-    const modelMessages = await convertToModelMessages(truncatedUiMessages, {
-      ignoreIncompleteToolCalls: true,
-    });
-
-    // ============================================================
-    // Day 13 / Memory v2：构建长期记忆上下文
-    //
-    // 两路召回：稳定画像（goal/preference）+ 与当前问题相关的记忆。
-    // 短消息/寒暄不会触发 query embedding；注入的 id 由 Context Builder
-    // 记录为 lastInjectedAt（不再用“注入 = 使用”的单一 lastUsed）。
-    // ============================================================
-    const memoryTask =
-      surface === "plan" ? "planning" : surface === "doc" ? "doc_edit" : "chat";
-    const memoryContext = await buildMemoryContext({
+    // 统一 Context Builder：
+    //   滚动摘要 → 最近原始消息 → 当前用户消息 → 状态栏
+    //   System Prompt + Scene Context + UserMemory
+    const context = await buildConversationContext({
       userId: user.id,
-      surface,
-      task: memoryTask,
-      query: lastUserText,
+      conversation: {
+        id: activeConversationId,
+        surface,
+        refId: activeConversation.refId,
+      },
+      currentUserMessageId: savedUser.id,
+      currentUserText: lastUserText,
+      userName: user.name,
+      clientDocument: studioContext?.document ?? null,
     });
-    const memoryPrompt = memoryContext.prompt;
 
-    // 最近对话摘要：createPlan 后台生成计划文档时作为个性化上下文（截断，控制成本）
-    const conversationHint = truncatedUiMessages
-      .slice(-6)
-      .map((m) => `${m.role === "user" ? "用户" : "雨宝"}: ${messageText(m).slice(0, 200)}`)
-      .join("\n");
+    const modelMessages = context.messages;
+    const fullSystem = context.system;
+    const conversationHint = context.conversationHint;
+    const memoryPrompt = context.memoryPrompt;
 
     // ============================================================
     // Day 16 知识库检索：不再主动注入
@@ -204,77 +201,17 @@ export async function POST(request: NextRequest) {
     // ============================================================
 
     // ============================================================
-    // Phase 3/4 文档工作室：注入当前文档上下文 + 文档修改工具
+    // 工作台工具：只依赖当前会话的 surface + refId。
+    // 文档正文由 Context Builder 的 Scene Context 从数据库加载，不再信任
+    // 客户端传来的整篇文档。
     // ============================================================
-    let studioPrompt = "";
     let studioTools = {};
-    const studioKind = studioContext?.kind;
-    const studioRefId = studioContext?.refId;
-    if (
-      (studioKind === "plan" || studioKind === "doc") &&
-      studioRefId &&
-      typeof studioContext?.document === "string"
-    ) {
-      if (studioKind === "plan") {
-        const plan = await prisma.plan.findFirst({
-          where: { id: studioRefId, userId: user.id },
-          select: { id: true, name: true },
-        });
-        if (plan) {
-          studioTools = createStudioTools(user.id, {
-            kind: "plan",
-            id: plan.id,
-          });
-          studioPrompt = [
-            `用户正在文档工作室里编辑学习计划「${plan.name}」的 Markdown 文档，完整内容如下：`,
-            "",
-            studioContext.document,
-            "",
-            "你可以调用工具直接修改它：调整计划信息用 updatePlanInfo；修改文档内容用 updateDocument（必须传完整的修改后文档）。",
-            "涉及任务时，请同步修改文档中「## 任务安排」段落的任务行。",
-          ].join("\n");
-        }
-      } else {
-        const doc = await prisma.document.findFirst({
-          where: { id: studioRefId, userId: user.id },
-          select: { id: true, title: true },
-        });
-        if (doc) {
-          studioTools = createStudioTools(user.id, { kind: "doc", id: doc.id });
-          studioPrompt = [
-            `用户正在文档工作室里编辑文档「${doc.title}」的 Markdown 内容，完整内容如下：`,
-            "",
-            studioContext.document,
-            "",
-            "你可以用 updateDocument 工具直接修改这份文档（必须传完整的修改后文档）。",
-          ].join("\n");
-        }
-      }
+    if ((surface === "plan" || surface === "doc") && activeConversation.refId) {
+      studioTools = createStudioTools(user.id, {
+        kind: surface,
+        id: activeConversation.refId,
+      });
     }
-
-    // ============================================================
-    // 用户个人资料名字注入
-    // 聊天系统提示词带上用户设置的名字，设置页改名立即生效；
-    // 用户在当前对话里明确要求换称呼时，以用户最新说的为准。
-    // ============================================================
-    const userNamePrompt = user.name
-      ? [
-          `## 用户名字`,
-          `用户设置里的名字是「${user.name}」，称呼用户时优先用这个名字。`,
-          `如果用户在这段对话中明确说要换别的称呼，以用户最新说的为准。`,
-        ].join("\n")
-      : "";
-
-    // 系统提示词同样按场景拼：只注入「该场景真的注册了对应工具」的段落。
-    // 提示词与工具白名单必须一起裁——只裁工具会让模型反复去调不存在的工具。
-    const fullSystem = [
-      buildSystemPrompt(promptGroupsFor(surface)),
-      userNamePrompt,
-      studioPrompt,
-      memoryPrompt,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
 
     // ============================================================
     // Day 3 核心：streamText 替代 getAIResponse
@@ -295,6 +232,9 @@ export async function POST(request: NextRequest) {
     const { stream } = await streamTextWithFallback("high", (_entry, model) => ({
       model,
       system: fullSystem,
+      // 摘要与状态栏是独立的 system 消息，不是用户输入；需要显式允许
+      // messages 中出现 system role。
+      allowSystemInMessages: true,
       providerOptions: getDeepThinkOptions(deepThink ?? false),
       messages: modelMessages,
       // Day 7: 学习工具 + Day 16: RAG 知识库工具 + Day 22: Agent Workflow 工具
@@ -311,6 +251,7 @@ export async function POST(request: NextRequest) {
             memories: memoryPrompt,
           }),
           ...createRAGTool(user.id),
+          ...createContextTools(user.id, activeConversationId),
           ...createAgentTools(user.id),
           ...createTodoTools(user.id),
           ...studioTools,
@@ -370,6 +311,7 @@ export async function POST(request: NextRequest) {
           conversationId: activeConversationId,
           content: finalText,
           parts: null,
+          rawParts: buildRawPartsFromSteps(steps ?? []),
           userText: lastUserText,
           userId: user.id,
         });
@@ -378,7 +320,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       // 记账口径：文档与计划合并为 studio（与 conversation.surface 的三值口径不同，
       // 那边要区分到具体文档/计划，这边只需按界面统计；历史数据也按这个口径落库）
-      surface: studioContext ? "studio" : "agent",
+      surface: surface === "agent" ? "agent" : "studio",
       enforce: true,
     });
 
@@ -442,6 +384,7 @@ export async function POST(request: NextRequest) {
             conversationId: activeConversationId,
             content: messageText(responseMessage),
             parts: toViewParts(responseMessage.parts),
+            rawParts: sanitizeRawParts(responseMessage.parts),
             userText: lastUserText,
             userId: user.id,
           });
@@ -482,6 +425,7 @@ async function saveAssistantMessage({
   conversationId,
   content,
   parts,
+  rawParts,
   userText,
   userId,
 }: {
@@ -489,16 +433,18 @@ async function saveAssistantMessage({
   content: string;
   /** null = 文本协议，没有结构化片段可存 */
   parts: ViewPart[] | null;
+  /** AI SDK 原始 parts，用于后续轮次重建 tool-call/tool-result */
+  rawParts: unknown[] | null;
   userText: string;
   userId: string;
 }) {
-  if (!content && !parts?.length) {
+  if (!content && !parts?.length && !rawParts?.length) {
     console.warn("[AI] onEnd: 没有可保存的内容，跳过");
     return;
   }
 
   console.log(
-    `[AI] onEnd: 保存 AI 回复 (${content.length} 字符, ${parts?.length ?? 0} parts) → conversation:${conversationId}`
+    `[AI] onEnd: 保存 AI 回复 (${content.length} 字符, ${parts?.length ?? 0} parts, ${rawParts?.length ?? 0} rawParts) → conversation:${conversationId}`
   );
 
   try {
@@ -509,6 +455,9 @@ async function saveAssistantMessage({
         content,
         // undefined = 不写这一列（保持 NULL），而不是写 JSON null
         parts: parts ?? undefined,
+        rawParts: rawParts
+          ? (rawParts as unknown as Prisma.InputJsonValue)
+          : undefined,
       },
       select: { id: true },
     });

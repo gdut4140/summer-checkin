@@ -68,6 +68,18 @@ const STUDIO_READ_TOOLS = [
 ] as const;
 
 /**
+ * 会话上下文工具（三个入口都需要）：
+ *   searchConversationHistory 找回被摘要压缩的原文
+ *   updateAgentState          维护当前会话的 workingMemory / todoList
+ *
+ * updateAgentState 只写 AgentState，不碰业务数据，因此可以给工作台。
+ */
+const CONTEXT_TOOLS = [
+  "searchConversationHistory",
+  "updateAgentState",
+] as const;
+
+/**
  * 工作台拿到的提示词段落。
  *
  * 只给 knowledge + conduct：知识库那段末尾的「列举要用 listKnowledgeDocs、不要用
@@ -95,6 +107,7 @@ export const SURFACE_POLICY: Record<AiSurface, SurfacePolicy> = {
     tools: [
       "createPlan",
       ...STUDIO_READ_TOOLS,
+      ...CONTEXT_TOOLS,
       ...WRITE_TOOLS_OUTSIDE_STUDIO,
     ],
     promptGroups: ALL_PROMPT_GROUPS,
@@ -104,14 +117,14 @@ export const SURFACE_POLICY: Record<AiSurface, SurfacePolicy> = {
   // 但勾选是 updateDocument 改「## 任务安排」段 + plan-sync 回写，不是 updateTaskStatus。
   // 任务进度的交互式勾选框在 /plans 抽屉里，走自己的 PATCH 路由，与 AI 工具无关。
   plan: {
-    tools: [...STUDIO_READ_TOOLS, "updatePlanInfo", "updateDocument"],
+    tools: [...STUDIO_READ_TOOLS, ...CONTEXT_TOOLS, "updatePlanInfo", "updateDocument"],
     promptGroups: STUDIO_PROMPT_GROUPS,
   },
 
   // 文档工作台：只有当前文档可写。计划相关的写工具一律不给——
   // 用户在这块屏幕上要改的是正文，不该顺手动别的实体。
   doc: {
-    tools: [...STUDIO_READ_TOOLS, "updateDocument"],
+    tools: [...STUDIO_READ_TOOLS, ...CONTEXT_TOOLS, "updateDocument"],
     promptGroups: STUDIO_PROMPT_GROUPS,
   },
 };

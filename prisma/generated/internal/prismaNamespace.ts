@@ -395,6 +395,7 @@ export const ModelName = {
   AvatarChange: 'AvatarChange',
   Conversation: 'Conversation',
   ConversationMessage: 'ConversationMessage',
+  AgentState: 'AgentState',
   AgentRun: 'AgentRun',
   AgentStep: 'AgentStep',
   UserMemory: 'UserMemory',
@@ -425,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentRun" | "agentStep" | "userMemory" | "memory" | "memoryEvent" | "memoryCandidate" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
+    modelProps: "user" | "session" | "account" | "plan" | "planTask" | "todo" | "checkin" | "studyRecord" | "avatarChange" | "conversation" | "conversationMessage" | "agentState" | "agentRun" | "agentStep" | "userMemory" | "memory" | "memoryEvent" | "memoryCandidate" | "document" | "documentChunk" | "knowledgeDoc" | "notification" | "chatMessage" | "planTemplate" | "documentTemplate" | "tokenUsage" | "announcement"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1240,6 +1241,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ConversationMessageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ConversationMessageCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentState: {
+      payload: Prisma.$AgentStatePayload<ExtArgs>
+      fields: Prisma.AgentStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>
+        }
+        findFirst: {
+          args: Prisma.AgentStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>
+        }
+        findMany: {
+          args: Prisma.AgentStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>[]
+        }
+        create: {
+          args: Prisma.AgentStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>
+        }
+        createMany: {
+          args: Prisma.AgentStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AgentStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>[]
+        }
+        delete: {
+          args: Prisma.AgentStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>
+        }
+        update: {
+          args: Prisma.AgentStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AgentStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.AgentStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentStatePayload>
+        }
+        aggregate: {
+          args: Prisma.AgentStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentState>
+        }
+        groupBy: {
+          args: Prisma.AgentStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentStateCountAggregateOutputType> | number
         }
       }
     }
@@ -2532,10 +2607,26 @@ export const ConversationMessageScalarFieldEnum = {
   role: 'role',
   content: 'content',
   parts: 'parts',
+  rawParts: 'rawParts',
   createdAt: 'createdAt'
 } as const
 
 export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
+
+
+export const AgentStateScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  summary: 'summary',
+  workingMemory: 'workingMemory',
+  todoList: 'todoList',
+  compressedThroughMessageId: 'compressedThroughMessageId',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentStateScalarFieldEnum = (typeof AgentStateScalarFieldEnum)[keyof typeof AgentStateScalarFieldEnum]
 
 
 export const AgentRunScalarFieldEnum = {
@@ -2786,6 +2877,13 @@ export const NullableJsonNullValueInput = {
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -3014,6 +3112,7 @@ export type GlobalOmitConfig = {
   avatarChange?: Prisma.AvatarChangeOmit
   conversation?: Prisma.ConversationOmit
   conversationMessage?: Prisma.ConversationMessageOmit
+  agentState?: Prisma.AgentStateOmit
   agentRun?: Prisma.AgentRunOmit
   agentStep?: Prisma.AgentStepOmit
   userMemory?: Prisma.UserMemoryOmit

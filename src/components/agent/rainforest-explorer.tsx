@@ -20,6 +20,7 @@ import { useChat } from "@ai-sdk/react";
 import { MessageBubble } from "@/components/ai/message-bubble";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { readableAIError } from "@/lib/ai-error";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -61,44 +62,28 @@ function dtoToChatMessage(dto: MessageDTO, createdAt: Date): ChatMessage {
   };
 }
 
-/** 历史消息回传模型时的最小形状——只要文本，不带 parts */
-interface HistoryPayload {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
-/** 随每次请求递进 transport 的额外字段（见 sendMessage 的 options.body） */
+/** 随每次请求递进 transport 的额外字段（历史由服务端从 DB 加载） */
 interface ChatRequestBody {
   conversationId?: string;
   deepThink?: boolean;
-  history?: HistoryPayload[];
 }
 
 /**
- * 回传给模型的形状：**只保留纯文本**。
+ * 只发送当前用户消息。
  *
- * 工具调用的入参可能大得离谱（updateDocument 就是整篇文档），而且今天的实现
- * 本来也不把它们回传给模型。剥成纯文本既保持了原有的 token 画像，又顺带避开了
- * 「有 tool-call 没有 tool-result」这类非法消息（被中断的一轮会留下这种残骸）。
- * 想改成让模型看见自己刚做过什么，只动这一个函数即可。
+ * 历史、滚动摘要、状态栏、长期记忆统一由服务端 Context Builder 组装；
+ * 客户端不再截断历史，也不再决定 tool parts 是否回传。
  */
-function toModelMessages(
-  history: readonly HistoryPayload[],
-  live: readonly ChatUIMessage[]
-): ChatUIMessage[] {
-  const merged = [
-    ...history.map((m) => ({ id: m.id, role: m.role, text: m.content })),
-    ...live.map((m) => ({ id: m.id, role: m.role, text: partsText(m.parts) })),
-  ];
-  return merged
-    .filter((m) => m.text.trim() !== "")
-    .slice(-40)
-    .map((m) => ({
-      id: m.id,
-      role: m.role,
-      parts: [{ type: "text" as const, text: m.text }],
-    }));
+function currentUserMessage(
+  messages: readonly ChatUIMessage[]
+): ChatUIMessage | null {
+  const current = messages.at(-1);
+  if (!current || current.role !== "user") return null;
+  return {
+    id: current.id,
+    role: "user",
+    parts: [{ type: "text", text: partsText(current.parts) }],
+  };
 }
 
 // 计划生成直接在对话框里和 AI 说，右侧只保留知识库
@@ -116,10 +101,68 @@ function timeAgo(value: string) {
   return `${Math.floor(minutes / 1440)} 天前`;
 }
 
+/** 左侧「最近对话」加载骨架 */
+function ConversationListSkeleton() {
+  return (
+    <div className="space-y-1" aria-hidden="true">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="flex items-center rounded-md px-2.5 py-2">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton
+              className="h-3 bg-white/8"
+              style={{ width: `${58 + ((index * 17) % 34)}%` }}
+            />
+            <Skeleton className="h-2.5 w-1/4 bg-white/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** 对话内容加载骨架：左右交替的消息气泡 */
+function MessageListSkeleton() {
+  const rows = [
+    { align: "end", width: "w-2/5", lines: 2 },
+    { align: "start", width: "w-4/5", lines: 3 },
+    { align: "end", width: "w-1/3", lines: 1 },
+    { align: "start", width: "w-3/5", lines: 2 },
+  ] as const;
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-5" aria-label="正在加载对话">
+      {rows.map((row, index) => (
+        <div
+          key={index}
+          className={cn("flex", row.align === "end" ? "justify-end" : "justify-start")}
+        >
+          <div
+            className={cn(
+              "space-y-2.5 rounded-lg border border-white/6 bg-white/4 p-4",
+              row.width
+            )}
+          >
+            {Array.from({ length: row.lines }).map((_, line) => (
+              <Skeleton
+                key={line}
+                className={cn(
+                  "h-3 bg-white/7",
+                  line === row.lines - 1 ? "w-3/5" : "w-full"
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?: boolean }) {
   const router = useRouter();
   const { explorerTitle, explorerSubtitle } = useSceneCopy();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   /**
    * 历史消息（来自数据库）。
    *
@@ -130,6 +173,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
    * 分开放之后，切换对话时清空直播列表就够了。
    */
   const [history, setHistory] = useState<ChatMessage[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   // 从「新建计划」跳转（/agent?new=1 → initialPlanner）时预填目标提示
   const [input, setInput] = useState(initialPlanner ? "为我制定一个 7 天学习计划，目标是：" : "");
@@ -161,12 +205,14 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
         // 不在这里读组件 state——transport 只会被创建一次，闭包读 state 会永远拿到初值。
         prepareSendMessagesRequest: ({ messages: live, body }) => {
           const extra = (body ?? {}) as ChatRequestBody;
+          const current = currentUserMessage(live);
           return {
             body: {
               protocol: "ui",
               conversationId: extra.conversationId,
               deepThink: extra.deepThink,
-              messages: toModelMessages(extra.history ?? [], live),
+              // 只发当前这一条；历史由服务端从 DB 加载
+              messages: current ? [current] : [],
             },
           };
         },
@@ -277,32 +323,48 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
   }, [activeId, messages.length]);
 
   const loadConversation = useCallback(async (id: string) => {
-    // 离开旧对话前更新标题
-    await updateTitleIfNeeded();
+    setHistoryLoading(true);
+    try {
+      // 离开旧对话前更新标题
+      await updateTitleIfNeeded();
 
-    const response = await fetch(`/api/conversations/${id}`);
-    if (!response.ok) return;
-    const data = await response.json();
-    setHistory(
-      (data.messages as MessageDTO[]).map((message) =>
-        dtoToChatMessage(message, new Date(message.createdAt))
-      )
-    );
-    // 换对话 = 丢弃上一轮的直播消息，否则两段对话会拼在一起
-    setLiveMessages([]);
-    setActiveId(id);
-    initialMsgCountRef.current = data.messages.length;
-    setMobilePanel("chat");
+      const response = await fetch(`/api/conversations/${id}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      setHistory(
+        (data.messages as MessageDTO[]).map((message) =>
+          dtoToChatMessage(message, new Date(message.createdAt))
+        )
+      );
+      // 换对话 = 丢弃上一轮的直播消息，否则两段对话会拼在一起
+      setLiveMessages([]);
+      setActiveId(id);
+      initialMsgCountRef.current = data.messages.length;
+      setMobilePanel("chat");
+    } catch (error) {
+      console.error("[Conversation] 加载失败:", error);
+      toast.error("加载对话失败，请稍后重试");
+    } finally {
+      setHistoryLoading(false);
+    }
   }, [updateTitleIfNeeded, setLiveMessages]);
 
   const refreshConversations = useCallback(async (selectLatest = false) => {
-    // 显式只取智能体页的对话：工作台（文档/计划）的对话也在同一张表里
-    const response = await fetch("/api/conversations?surface=agent");
-    if (!response.ok) return;
-    const data = await response.json();
-    const list = (data.conversations ?? []) as Conversation[];
-    setConversations(list);
-    if (selectLatest && list[0]) await loadConversation(list[0].id);
+    // 只有首次进入（selectLatest）显示骨架屏；每轮对话后的后台刷新不闪骨架
+    if (selectLatest) setConversationsLoading(true);
+    try {
+      // 显式只取智能体页的对话：工作台（文档/计划）的对话也在同一张表里
+      const response = await fetch("/api/conversations?surface=agent");
+      if (!response.ok) return;
+      const data = await response.json();
+      const list = (data.conversations ?? []) as Conversation[];
+      setConversations(list);
+      if (selectLatest && list[0]) await loadConversation(list[0].id);
+    } catch (error) {
+      console.error("[Conversations] 加载失败:", error);
+    } finally {
+      setConversationsLoading(false);
+    }
   }, [loadConversation]);
 
   // 把最新的刷新回调交给下面那个只看 status 的 effect
@@ -327,6 +389,7 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
     updateTitleIfNeeded();
     setActiveId(null);
     setHistory([]);
+    setHistoryLoading(false);
     setLiveMessages([]);
     initialMsgCountRef.current = 0;
     setMobilePanel("chat");
@@ -361,11 +424,6 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
         body: {
           conversationId: activeId ?? undefined,
           deepThink,
-          history: history.map((m) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-          })),
         },
       }
     );
@@ -395,23 +453,29 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
                 </button>
               ))}
             </div>
-            <div className="mt-4 flex items-center justify-between px-5 pb-2"><p className="text-[11px] font-medium text-white/38">最近对话</p><span className="text-[10px] text-white/30">{conversations.length}</span></div>
+            <div className="mt-4 flex items-center justify-between px-5 pb-2"><p className="text-[11px] font-medium text-white/38">最近对话</p>{conversationsLoading ? <Skeleton className="h-3 w-5 bg-white/8" aria-hidden="true" /> : <span className="text-[10px] text-white/30">{conversations.length}</span>}</div>
             <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-3 pb-4">
-              {conversations.map((conversation) => (
-                <div key={conversation.id} className={cn("group flex items-center rounded-md", activeId === conversation.id ? "bg-white/10" : "hover:bg-white/6")}>
-                  <button onClick={() => loadConversation(conversation.id)} className="min-w-0 flex-1 px-2.5 py-2 text-left">
-                    <p className="truncate text-xs text-white/78">{conversation.title}</p><p className="mt-0.5 text-[10px] text-white/30">{timeAgo(conversation.updatedAt)}</p>
-                  </button>
-                  <Tooltip>
-                    <TooltipTrigger render={
-                      <button onClick={() => deleteConversation(conversation.id)} aria-label="删除对话" className="mr-1 hidden size-7 items-center justify-center rounded text-white/36 hover:bg-white/10 hover:text-red-300 group-hover:flex" />
-                    }>
-                      <Trash />
-                    </TooltipTrigger>
-                    <TooltipContent>删除对话</TooltipContent>
-                  </Tooltip>
-                </div>
-              ))}
+              {conversationsLoading ? (
+                <ConversationListSkeleton />
+              ) : conversations.length === 0 ? (
+                <p className="px-2.5 py-6 text-center text-[11px] text-white/30">还没有对话</p>
+              ) : (
+                conversations.map((conversation) => (
+                  <div key={conversation.id} className={cn("group flex items-center rounded-md", activeId === conversation.id ? "bg-white/10" : "hover:bg-white/6")}>
+                    <button onClick={() => loadConversation(conversation.id)} className="min-w-0 flex-1 px-2.5 py-2 text-left">
+                      <p className="truncate text-xs text-white/78">{conversation.title}</p><p className="mt-0.5 text-[10px] text-white/30">{timeAgo(conversation.updatedAt)}</p>
+                    </button>
+                    <Tooltip>
+                      <TooltipTrigger render={
+                        <button onClick={() => deleteConversation(conversation.id)} aria-label="删除对话" className="mr-1 hidden size-7 items-center justify-center rounded text-white/36 hover:bg-white/10 hover:text-red-300 group-hover:flex" />
+                      }>
+                        <Trash />
+                      </TooltipTrigger>
+                      <TooltipContent>删除对话</TooltipContent>
+                    </Tooltip>
+                  </div>
+                ))
+              )}
             </div>
           </aside>
 
@@ -430,7 +494,9 @@ export function RainforestExplorer({ initialPlanner = false }: { initialPlanner?
               </div>
             </header>
             <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-4 py-5 sm:px-7 [overflow-anchor:none]">
-              {messages.length === 0 ? (
+              {historyLoading ? (
+                <MessageListSkeleton />
+              ) : messages.length === 0 ? (
                 <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center text-center">
                   <div className="relative flex size-14 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary"><Sparkle className="size-6" weight="fill" /></div>
                   <h2 className="mt-5 text-xl font-semibold">今天想探索什么？</h2>
