@@ -120,3 +120,4 @@ gpt带我背项目
 /eval/rag/.cache/
 /eval/rag/results/
 /mcp-server/
+/src/app/api/mcp/
