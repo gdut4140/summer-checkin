@@ -13,6 +13,7 @@ build
 
 # Docker deployment tarball (~800MB，绝不能进构建上下文)
 app.tar.gz
+*.tar.gz
 
 # Database (SQLite dev only)
 *.db
@@ -53,6 +54,10 @@ interview-prep/
 tmp/
 eval/
 阿里云*.txt
+
+# MCP（独立进程 + 仅本机使用的路由，不进应用镜像）
+mcp-server
+src/app/api/mcp
 
 # 本地构建产物与日志
 .next-codex*/
