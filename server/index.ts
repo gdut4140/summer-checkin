@@ -15,6 +15,11 @@ import { toDTO, type AiRole, type ClientMessage, type ReplyToDTO } from "./proto
 import { handleAI } from "./ai";
 import { allowedOrigins, isAllowedUpgrade } from "./origin";
 import { UserRateLimiter } from "./rate-limit";
+import {
+  createMessageIdempotently,
+  findMessageByIdempotencyKey,
+  hasSameMessagePayload,
+} from "./message-idempotency";
 
 // ---- 握手白名单 ----
 // 启动时算一次并打印：这道校验是 fail-closed 的，BETTER_AUTH_URL 配错会让
@@ -79,7 +84,6 @@ function setupConnection(ws: WebSocket, user: NonNullable<AuthUser>) {
     userName: user.name ?? "匿名",
     image: user.image ?? null,
     isAlive: true,
-    seenClientIds: new Set(),
   };
   addConnection(conn);
   // 通知所有在线连接：在线人数变化
@@ -139,22 +143,28 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
     sendError(conn, "too_long", "消息过长");
     return;
   }
+  if (typeof msg.clientId !== "string" || msg.clientId.length === 0 || msg.clientId.length > 128) {
+    sendError(conn, "invalid_idempotency_key", "消息标识无效");
+    return;
+  }
+
+  const replyToId = msg.replyToId ?? null;
+  const existing = await findMessageByIdempotencyKey(conn.userId, msg.clientId);
+  if (existing) {
+    handleDuplicateMessage(conn, existing, { content, replyToId });
+    return;
+  }
+
   if (!rateLimiter.allow(conn.userId)) {
     sendError(conn, "rate_limited", "发送太频繁，稍后再试");
     return;
   }
-  // 幂等去重
-  if (conn.seenClientIds.has(msg.clientId)) return;
-  conn.seenClientIds.add(msg.clientId);
-  if (conn.seenClientIds.size > 200) {
-    conn.seenClientIds.delete(conn.seenClientIds.values().next().value!);
-  }
 
   // 引用回复：解析被引用消息快照（消息不存在则拒绝）
   let replyTo: ReplyToDTO | null = null;
-  if (msg.replyToId) {
+  if (replyToId) {
     const target = await prisma.chatMessage.findUnique({
-      where: { id: msg.replyToId },
+      where: { id: replyToId },
       include: { user: { select: { name: true } } },
     });
     if (!target) {
@@ -169,16 +179,21 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
     };
   }
 
-  const saved = await prisma.chatMessage.create({
-    data: { userId: conn.userId, role: "user", content, replyToId: msg.replyToId ?? null },
+  const result = await createMessageIdempotently({
+    userId: conn.userId,
+    clientId: msg.clientId,
+    content,
+    replyToId,
   });
-  // 用数据库里的最新昵称/头像（用户可能中途换了头像，conn 里是连接时的旧值）
-  const sender = await prisma.user.findUnique({
-    where: { id: conn.userId },
-    select: { name: true, image: true },
-  });
-  const userName = sender?.name ?? conn.userName;
-  const image = sender?.image ?? conn.image;
+  if (result.status === "duplicate") {
+    handleDuplicateMessage(conn, result.message, { content, replyToId });
+    return;
+  }
+
+  const saved = result.message;
+  // create 的 include 会读取数据库里的最新昵称/头像。
+  const userName = saved.user?.name ?? conn.userName;
+  const image = saved.user?.image ?? conn.image;
   conn.userName = userName;
   conn.image = image;
 
@@ -203,6 +218,38 @@ async function handleUserMessage(conn: Connection, msg: { clientId: string; cont
       console.error("[ws] AI 处理异常（已隔离，不影响其他连接）:", err);
     });
   }
+}
+
+function handleDuplicateMessage(
+  conn: Connection,
+  message: NonNullable<Awaited<ReturnType<typeof findMessageByIdempotencyKey>>>,
+  input: { content: string; replyToId: string | null }
+) {
+  if (!hasSameMessagePayload(message, input)) {
+    sendError(conn, "idempotency_conflict", "同一消息标识不能用于不同内容");
+    return;
+  }
+
+  const replyTo = message.replyTo
+    ? {
+        id: message.replyTo.id,
+        userId: message.replyTo.userId,
+        userName: message.replyTo.user?.name ?? "用户",
+        content: message.replyTo.content,
+      }
+    : null;
+  // 只给重试方回执；不能再次全局广播或触发 AI。
+  conn.ws.send(
+    JSON.stringify({
+      type: "message",
+      message: toDTO(
+        message,
+        message.user?.name ?? conn.userName,
+        message.user?.image ?? conn.image,
+        replyTo
+      ),
+    })
+  );
 }
 
 function sendError(conn: Connection, code: string, reason: string) {

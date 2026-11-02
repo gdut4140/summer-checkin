@@ -9,8 +9,6 @@ export interface Connection {
   userName: string;
   image: string | null;
   isAlive: boolean;
-  // 幂等去重（记录最近处理过的 clientId）
-  seenClientIds: Set<string>;
 }
 
 const connections = new Set<Connection>();

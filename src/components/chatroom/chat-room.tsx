@@ -194,6 +194,8 @@ export function ChatRoom() {
   }, [atTail]);
 
   const wsRef = useRef<WebSocket | null>(null);
+  // 数据库消息 id 集合：幂等重试的回执可能与历史快照或首次广播重合。
+  const knownMessageIdsRef = useRef(new Set<string>());
   // 拉取历史期间通过 WebSocket 实时到达的消息，整体替换后补回，避免被冲掉
   const liveWindow = useRef<ChatMessage[] | null>(null);
   const openRef = useRef(false);
@@ -242,6 +244,7 @@ export function ChatRoom() {
         const list: ChatMessage[] = ((d.messages ?? []) as ChatMessageDTO[]).map(
           mapServerMessage
         );
+        for (const message of list) knownMessageIdsRef.current.add(message.id);
         cursorRef.current = (d.nextCursor as string | null) ?? null;
         setHasMore(Boolean(d.hasMore));
         setAll((prev) => {
@@ -337,6 +340,7 @@ export function ChatRoom() {
         nextCursor?: string | null;
       };
       const older = (d.messages ?? []).map(mapServerMessage);
+      for (const message of older) knownMessageIdsRef.current.add(message.id);
       cursorRef.current = d.nextCursor ?? null;
       setHasMore(Boolean(d.hasMore));
       lastFailAtRef.current = 0; // 成功即解除失败节流
@@ -408,10 +412,18 @@ export function ChatRoom() {
         break;
       case "message": {
         const m = msg.message;
+        const isNew = !knownMessageIdsRef.current.has(m.id);
+        knownMessageIdsRef.current.add(m.id);
         // 拉取历史期间到达的实时消息：先缓存，等 loadHistory 整体替换时补回
-        if (liveWindow.current) liveWindow.current.push(m);
+        if (isNew && liveWindow.current) liveWindow.current.push(m);
         if (openRef.current) {
-          setAll((prev) => [...prev, m]);
+          // 幂等重试会把数据库中的既有消息只回送给发送方；按服务端消息 id
+          // 合并，避免重连后历史快照与该回执在界面上出现两份。
+          setAll((prev) => {
+            if (prev.some((item) => item.id === m.id)) return prev;
+            return [...prev, m];
+          });
+          if (!isNew) break;
           // 贴底时窗口跟着末尾一起前移，让新消息立刻挂上；
           // 正在上滑看历史时窗口不动（新消息留在内存里，不计入挂载），只累计未读
           if (atBottomRef.current) setWinStart((s) => s + 1);

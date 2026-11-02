@@ -2801,6 +2801,7 @@ export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[k
 export const ChatMessageScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  clientId: 'clientId',
   role: 'role',
   content: 'content',
   aiRole: 'aiRole',

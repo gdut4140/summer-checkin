@@ -567,6 +567,9 @@ model Notification {
 model ChatMessage {
   id        String   @id @default(cuid())
   userId    String?
+  /// WebSocket 消息级幂等键，由客户端为一次发送生成；重试必须复用同一个值。
+  /// AI 消息为空，不参与用户消息幂等约束。
+  clientId  String?
   role      String   @default("user")
   content   String
   /** 聊天室 AI 角色（温柔宝/嘴欠宝）；AI 消息用于区分，让上下文标注不串风格 */
@@ -581,6 +584,7 @@ model ChatMessage {
 
   @@index([createdAt])
   @@index([replyToId])
+  @@unique([userId, clientId])
   @@map("chatmessage")
 }
 
